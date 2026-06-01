@@ -1,8 +1,8 @@
 /* ── ASSET PLACEHOLDERS ── swap these paths with your actual files */
 :root {
-  --logo-official:  url("OFFICIAL_LOGO_HERE");
-  --logo-secondary: url("SECONDARY_LOGO_HERE");
-  --bg-pattern:     url("BACKGROUND_HERE");
+  --logo-official:  url("logo.png");
+  --logo-secondary: url("logo2.png");
+  --bg-pattern:     url("background.png");
 
   --navy:        #032C7C;
   --core-blue:   #0464DD;
