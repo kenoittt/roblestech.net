@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Robles Technologies Corp.</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* Contact page specific */
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start; }
+.contact-form-card {
+  background:var(--white); border-radius:20px; padding:40px;
+  border:1.5px solid rgba(3,44,124,.07);
+  box-shadow:0 8px 32px rgba(3,44,124,.07);
+}
+.contact-form-card h2 { font-size:1.4rem; font-weight:800; color:var(--navy); letter-spacing:-.02em; margin-bottom:6px; }
+.contact-form-card > p { font-size:var(--fs-xs); color:var(--muted); line-height:var(--lh); margin-bottom:28px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.form-group label { font-size:var(--fs-xs); font-weight:700; color:var(--navy); }
+.form-group input, .form-group select, .form-group textarea {
+  padding:11px 14px; border-radius:8px;
+  border:1.5px solid rgba(3,44,124,.12);
+  font-family:'Montserrat',sans-serif; font-size:var(--fs-xs);
+  color:var(--navy); background:var(--off-white);
+  outline:none; transition:border-color .2s;
+  width:100%;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color:var(--core-blue);
+  background:var(--white);
+}
+.form-group textarea { resize:vertical; min-height:110px; }
+.form-submit {
+  width:100%; padding:14px; border-radius:8px;
+  background:var(--core-blue); color:var(--white);
+  font-family:'Montserrat',sans-serif; font-size:var(--fs-sm); font-weight:700;
+  border:none; cursor:pointer; transition:all .25s; margin-top:8px;
+}
+.form-submit:hover { background:var(--navy); transform:translateY(-1px); box-shadow:0 6px 18px rgba(4,100,221,.28); }
+.form-note { font-size:.65rem; color:var(--muted); text-align:center; margin-top:10px; }
+
+.contact-info { display:flex; flex-direction:column; gap:18px; }
+.contact-info-head { margin-bottom:8px; }
+.contact-detail {
+  background:var(--white); border-radius:14px; padding:22px 24px;
+  border:1.5px solid rgba(3,44,124,.07); display:flex; gap:16px; align-items:flex-start;
+  transition:all .3s;
+}
+.contact-detail:hover { border-color:rgba(4,100,221,.15); box-shadow:0 8px 22px rgba(3,44,124,.07); }
+.cd-icon { font-size:1.5rem; flex-shrink:0; }
+.cd-label { font-size:var(--fs-xs); font-weight:700; color:var(--navy); margin-bottom:3px; }
+.cd-val { font-size:var(--fs-xs); color:var(--muted); line-height:1.6; }
+.cd-val a { color:var(--core-blue); text-decoration:none; }
+.cd-val a:hover { text-decoration:underline; }
+.contact-promise {
+  background:var(--navy); border-radius:14px; padding:24px;
+  position:relative; overflow:hidden;
+}
+.contact-promise::after { content:''; position:absolute; inset:0; background-image:var(--bg-pattern); background-size:180px auto; background-repeat:repeat; opacity:.04; }
+.contact-promise h4 { font-size:var(--fs-sm); font-weight:800; color:var(--white); margin-bottom:8px; position:relative; z-index:1; }
+.contact-promise ul { list-style:none; display:flex; flex-direction:column; gap:7px; position:relative; z-index:1; }
+.contact-promise ul li { font-size:var(--fs-xs); color:rgba(255,255,255,.65); display:flex; gap:8px; line-height:1.55; }
+.contact-promise ul li::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; }
+@media(max-width:980px){ .contact-grid,.form-row{ grid-template-columns:1fr; gap:28px; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo-img"><img src="OFFICIAL_LOGO_HERE" alt="RTC" onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+    <span class="nav-name">Robles <span>Tech</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="services.html">Services</a></li>
+    <li><a href="work.html">Work</a></li>
+    <li><a href="services.html#process">Process</a></li>
+    <li><a href="services.html#packages">Packages</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html" class="nav-cta" style="background:var(--navy)!important;">Discuss Your Project</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-pat"></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span>Contact</div>
+  <span class="sec-tag">Get In Touch</span>
+  <h1 class="sec-h">Let's discuss<br>your project</h1>
+  <p class="sec-p">Every engagement starts with a free discovery call. Tell us what you're working on — we'll scope it, recommend the right solution, and send a fixed-price proposal within 48 hours.</p>
+</div>
+
+<!-- CONTACT SECTION -->
+<section class="sec" style="background:var(--off-white);">
+  <div class="contact-grid">
+
+    <!-- FORM -->
+    <div class="contact-form-card rv">
+      <h2>Send us a message</h2>
+      <p>Fill out the form and we'll get back to you within 1 business day. Or email us directly at <a href="mailto:contact@roblestech.net" style="color:var(--core-blue)">contact@roblestech.net</a>.</p>
+      <form action="mailto:contact@roblestech.net" method="GET">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="Kenneth" required></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="Robles" required></div>
+        </div>
+        <div class="form-group"><label>Work Email</label><input type="email" placeholder="you@company.com" required></div>
+        <div class="form-group"><label>Company</label><input type="text" placeholder="Your Company Name"></div>
+        <div class="form-group">
+          <label>What are you interested in?</label>
+          <select>
+            <option value="">Select a service area...</option>
+            <option>Smartsheet Consulting</option>
+            <option>Automations &amp; Integrations</option>
+            <option>Web &amp; App Development</option>
+            <option>AI Workflow Automation</option>
+            <option>Custom AI Assistant</option>
+            <option>AI Strategy &amp; Enablement</option>
+            <option>Multiple Services</option>
+            <option>Not sure yet — need guidance</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tell us about your project</label><textarea placeholder="Describe the challenge you're trying to solve, what you've tried, and any timelines or constraints we should know about..."></textarea></div>
+        <button type="submit" class="form-submit">Send Message →</button>
+        <p class="form-note">We respond within 1 business day. No spam, ever.</p>
+      </form>
+    </div>
+
+    <!-- INFO -->
+    <div class="contact-info rv d1">
+      <div class="contact-info-head">
+        <span class="sec-tag">Contact Details</span>
+        <h2 class="sec-h">We're easy<br>to reach</h2>
+        <p class="sec-p">Prefer to skip the form? Reach us directly — we're responsive and easy to work with from day one.</p>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon">📧</div>
+        <div>
+          <div class="cd-label">Email</div>
+          <div class="cd-val"><a href="mailto:contact@roblestech.net">contact@roblestech.net</a><br>We respond within 1 business day</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon">📋</div>
+        <div>
+          <div class="cd-label">Smartsheet Consulting</div>
+          <div class="cd-val">Launchpad from $3,500 · Momentum from $9,500 · Enterprise from $22,000<br><a href="services.html#smartsheet-pricing">View full pricing →</a></div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon">🕐</div>
+        <div>
+          <div class="cd-label">Proposal Turnaround</div>
+          <div class="cd-val">Fixed-price proposals delivered within <strong>48 hours</strong> of your discovery call — scoped to your exact needs.</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon">🌏</div>
+        <div>
+          <div class="cd-label">Based In</div>
+          <div class="cd-val">Philippines · Global delivery<br>We work across time zones without friction</div>
+        </div>
+      </div>
+      <div class="contact-promise">
+        <h4>What happens after you reach out</h4>
+        <ul>
+          <li>We review your message and confirm receipt same day</li>
+          <li>We schedule a free 30-minute discovery call</li>
+          <li>We scope your project and send a fixed-price proposal within 48 hours</li>
+          <li>You review, ask questions, approve — and we get to work</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-pat"></div>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="index.html" class="ft-logo">
+          <div class="ft-logo-img"><img src="OFFICIAL_LOGO_HERE" alt="RTC" onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+          <span>Robles Technologies Corp.</span>
+        </a>
+        <p>Bridging world-class IT talent with global opportunity. High-standard execution. AI-powered. Zero offshore friction.</p>
+      </div>
+      <div class="ft-col"><h4>Services</h4><ul><li><a href="services.html#smartsheet">Smartsheet Consulting</a></li><li><a href="services.html#automations">Automations &amp; Integrations</a></li><li><a href="services.html#webdev">Web &amp; App Development</a></li><li><a href="services.html#ai">AI Services</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a href="about.html">About RTC</a></li><li><a href="work.html">Featured Work</a></li><li><a href="services.html#process">Our Process</a></li><li><a href="services.html#packages">Packages</a></li></ul></div>
+      <div class="ft-col"><h4>Get Started</h4><ul><li><a href="mailto:contact@roblestech.net">Book a Discovery Call</a></li><li><a href="mailto:contact@roblestech.net">Discuss Your Project</a></li><li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li></ul></div>
+    </div>
+    <div class="ft-bottom"><p>© 2026 Robles Technologies Corp. All rights reserved.</p><div class="ft-tagline">Redesign. Reinvent. Refocus.</div></div>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+const obs = new IntersectionObserver(e => e.forEach(x => x.isIntersecting && x.target.classList.add('on')), { threshold: .10 });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
