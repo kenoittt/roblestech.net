@@ -59,7 +59,7 @@ nav.scrolled { box-shadow:0 4px 22px rgba(3,44,124,0.09); }
 .nav-links { display:flex; align-items:center; gap:42px; list-style:none; }
 .nav-links a { font-size:1.13rem; font-weight:600; color:var(--navy); text-decoration:none; letter-spacing:.05em; text-transform:uppercase; transition:color .2s; }
 .nav-links a:hover { color:var(--core-blue); }
-.nav-cta { background:var(--core-blue)!important; color:var(--white)!important; transition:background .2s!important; }
+.nav-cta { background:var(--core-blue)!important; color:var(--white)!important; padding:14px 30px; border-radius:6px; transition:background .2s!important; }
 .nav-cta:hover { background:var(--navy)!important; }
 
 /* ══════════════════════════════════
