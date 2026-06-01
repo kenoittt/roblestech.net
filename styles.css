@@ -667,7 +667,6 @@ footer { background:var(--navy); padding:56px 5% 26px; color:rgba(255,255,255,.5
   .ft-top{ grid-template-columns:1fr 1fr; }
   .nav-links{ display:none; }
 }
-</style>
 
 /* ══════════════════════════════════
    PAGE-SPECIFIC — SERVICES PAGE
