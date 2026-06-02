@@ -211,6 +211,7 @@
 
 <script>
 const nav = document.getElementById('nav');
+nav.classList.add('nav-inner');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
 const obs = new IntersectionObserver(e => e.forEach(x => x.isIntersecting && x.target.classList.add('on')), { threshold: .10 });
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
