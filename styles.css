@@ -37,7 +37,7 @@ body {
 nav {
   position:fixed; top:0; left:0; right:0; z-index:100;
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 8%; height:58px;
+  padding:0 8%; height:90px;
   background:rgba(245,246,250,0.55);
   backdrop-filter:blur(24px) saturate(180%);
   -webkit-backdrop-filter:blur(24px) saturate(180%);
@@ -118,7 +118,7 @@ nav.nav-inner { background:rgba(245,246,250,0.97); box-shadow:0 2px 20px rgba(3,
 .hero {
   min-height:100vh;
   display:grid; grid-template-columns:1fr 1fr;
-  align-items:center; padding:96px 8% 60px;
+  align-items:center; padding:130px 8% 60px;
   position:relative; overflow:hidden; background:var(--off-white);
 }
 .hero-pattern {
@@ -737,7 +737,7 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 ══════════════════════════════════ */
 .page-hero {
   background: var(--navy);
-  padding: 160px 8% 80px;
+  padding: 190px 8% 80px;
   position: relative;
   overflow: hidden;
 }
