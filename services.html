@@ -6,6 +6,8 @@
 <title>Services — Robles Technologies Corp.</title>
 <link rel="icon" type="image/png" href="logo_white.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -17,12 +19,11 @@
     <span class="nav-name">Robles <span>Tech</span></span>
   </a>
   <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Our Team</a></li>
+    <li><a href="philosophy.html">Our Philosophy</a></li>
     <li><a href="services.html" style="color:var(--core-blue)">Services</a></li>
-    <li><a href="work.html">Work</a></li>
-    <li><a href="services.html#process">Process</a></li>
-    <li><a href="#packages">Packages</a></li>
-    <li><a href="about.html">About</a></li>
-    <li><a href="contact.html" class="nav-cta">Discuss Your Project</a></li>
+    <li><a href="contact.html" class="nav-cta">Contact Us</a></li>
   </ul>
 </nav>
 
@@ -31,115 +32,34 @@
   <div class="page-hero-pat"></div>
   <div class="breadcrumb"><a href="index.html">Home</a><span>/</span>Services</div>
   <span class="sec-tag">What We Do</span>
-  <h1 class="sec-h">Solutions built around<br>your outcomes</h1>
-  <p class="sec-p">Every service is tied to a business result. From Smartsheet consulting to AI-powered automation — we build what moves your business forward.</p>
+  <h1 class="sec-h">Three service lines.<br>One trusted team.</h1>
+  <p class="sec-p">Every service is tied to a business result. Choose the tier that fits where you are — and we'll scope it, price it, and deliver it with precision.</p>
+  <div style="margin-top:28px;">
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Free Discovery Call →</a>
+  </div>
 </div>
 
-<!-- CORE SERVICES -->
-<section class="services sec" id="core">
-  <div class="svc-label" style="margin-top:0">Core Services</div>
-  <div class="svc-grid">
-    <div class="svc-card flagship rv" id="smartsheet">
-      <img src="logo2.png" alt="" class="flagship-wm" onerror="this.style.display='none'">
-      <div class="svc-icon">📋</div>
-      <div class="svc-title">Smartsheet Consulting</div>
-      <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on what grows the business.</p>
-      <span class="svc-tag">Core Service</span>
+<!-- ══════════════════════════════════
+     SERVICE LINE 1 — SMARTSHEET
+══════════════════════════════════ -->
+<section class="svc-category-section" id="smartsheet">
+  <div class="svc-category-head rv">
+    <div>
+      <div class="svc-category-icon">📋</div>
+      <span class="sec-tag">Service Line 01</span>
+      <h2 class="sec-h">Smartsheet Development<br>Services</h2>
+      <p class="sec-p">Our flagship practice. We redesign your Smartsheet environment from the ground up — building the workflows, automations, dashboards, and integrations that your team actually needs.</p>
     </div>
-    <div class="svc-card rv d1" id="automations">
-      <div class="svc-icon">⚙️</div>
-      <div class="svc-title">Automations &amp; Integrations</div>
-      <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
-      <span class="svc-tag">High Impact</span>
-    </div>
-    <div class="svc-card rv d2" id="webdev">
-      <div class="svc-icon">🌐</div>
-      <div class="svc-title">Web &amp; App Development</div>
-      <p class="svc-desc">Custom web and mobile solutions built for real users — client portals, internal tools, or customer-facing products built to grow with your business.</p>
-      <span class="svc-tag">Full Stack</span>
-    </div>
-    <div class="svc-card rv">
-      <div class="svc-icon">📊</div>
-      <div class="svc-title">Dashboards &amp; Reporting</div>
-      <p class="svc-desc">Give leadership the visibility to make faster decisions. Real-time dashboards built around the metrics that actually drive your operations.</p>
-      <span class="svc-tag">Analytics</span>
-    </div>
-    <div class="svc-card rv d1">
-      <div class="svc-icon">🔁</div>
-      <div class="svc-title">Data Migration &amp; Onboarding</div>
-      <p class="svc-desc">Move off spreadsheets and legacy tools without losing momentum. We migrate cleanly and build onboarding systems your team will actually use from day one.</p>
-      <span class="svc-tag">Transition</span>
-    </div>
-    <div class="svc-card rv d2" style="border-color:rgba(174,227,123,.22);background:rgba(174,227,123,.025);">
-      <div class="svc-icon">🔮</div>
-      <div class="svc-title">Expanding Soon</div>
-      <p class="svc-desc">Dedicated Salesforce and ServiceNow practice areas are on the roadmap. More capabilities coming as our teams grow.</p>
-      <span class="svc-tag" style="color:var(--green-dark);background:rgba(174,227,123,.15);">Roadmap</span>
+    <div>
+      <div class="ss-pricing-note" style="margin:0;">
+        <strong>Note on Smartsheet subscriptions:</strong> Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your environment.
+      </div>
     </div>
   </div>
 
-  <!-- AI SERVICES -->
-  <div class="svc-label ai-lbl rv" id="ai">🤖 &nbsp;AI-Powered Services — For Teams &amp; Enterprises</div>
-  <div class="svc-grid rv">
-    <div class="svc-card ai">
-      <div class="svc-icon">🧠</div>
-      <div class="svc-title">AI Workflow Automation</div>
-      <p class="svc-desc">Replace repetitive manual work with intelligent automation. We build AI-driven workflows that cut hours from your team's daily operations across every department.</p>
-      <span class="svc-tag">AI Core</span>
-    </div>
-    <div class="svc-card ai rv d1">
-      <div class="svc-icon">💬</div>
-      <div class="svc-title">Custom AI Assistants</div>
-      <p class="svc-desc">Branded AI chatbots trained on your business data — for customer support, internal helpdesks, onboarding, or sales enablement. Deploy on your website, app, or internal tools.</p>
-      <span class="svc-tag">AI Product</span>
-    </div>
-    <div class="svc-card ai rv d2">
-      <div class="svc-icon">📄</div>
-      <div class="svc-title">Document &amp; Data Intelligence</div>
-      <p class="svc-desc">Turn unstructured documents, reports, and data into actionable insights. AI-powered extraction, classification, and summarization — integrated directly into your workflows.</p>
-      <span class="svc-tag">AI Analytics</span>
-    </div>
-    <div class="svc-card ai rv">
-      <div class="svc-icon">🔗</div>
-      <div class="svc-title">AI + Smartsheet Integration</div>
-      <p class="svc-desc">Supercharge your Smartsheet environment with AI. Predictive risk flags, auto-populated fields, intelligent summaries, and AI-generated project updates — inside your existing setup.</p>
-      <span class="svc-tag">AI + Smartsheet</span>
-    </div>
-    <div class="svc-card ai rv d1">
-      <div class="svc-icon">🚀</div>
-      <div class="svc-title">AI Strategy &amp; Enablement</div>
-      <p class="svc-desc">We assess your operations, identify the highest-value AI opportunities, and build a practical roadmap your team can actually execute — regardless of where you're starting from.</p>
-      <span class="svc-tag">Consulting</span>
-    </div>
-    <div class="svc-card ai rv d2">
-      <div class="svc-icon">🏗️</div>
-      <div class="svc-title">AI-Augmented Development</div>
-      <p class="svc-desc">We build software with AI features baked in from the ground up — recommendation engines, smart search, predictive features, and automated QA pipelines.</p>
-      <span class="svc-tag">AI Dev</span>
-    </div>
-  </div>
-</section>
+  <div class="svc-tiers-grid">
 
-<!-- MID CTA -->
-<div class="strip">
-  <div>
-    <h3>Not sure which service fits your needs?</h3>
-    <p>Book a short discovery call — we'll map the right solution for where you are now.</p>
-  </div>
-  <a href="mailto:contact@roblestech.net" class="btn btn-white">Book a Discovery Call →</a>
-</div>
-
-<!-- SMARTSHEET PRICING -->
-<section class="ss-pricing sec" id="smartsheet-pricing">
-  <span class="sec-tag" style="display:block;text-align:center;">Smartsheet Consulting Pricing</span>
-  <h2 class="sec-h">Three-tier service packages</h2>
-  <p class="sec-p">Fixed starting prices, scoped per engagement. Every project begins with a free discovery call — your final proposal is personalized and delivered within 48 hours.</p>
-  <div class="ss-pricing-note rv">
-    <strong>Note on Smartsheet subscriptions:</strong> Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through Robles Technologies. Our fees cover the consulting, build, and support work we perform within your environment. During discovery, we advise on the right plan for your needs at no extra charge.
-  </div>
-
-  <div class="ss-tiers">
-    <!-- STARTER -->
+    <!-- LAUNCHPAD -->
     <div class="ss-tier rv">
       <div class="ss-tier-head">
         <div class="ss-tier-label">Starter</div>
@@ -169,7 +89,7 @@
           <li>Multi-workspace / cross-dept rollout</li>
           <li>Adoption sprint or training program</li>
         </ul>
-        <a href="mailto:contact@roblestech.net" class="ss-tier-cta">Book a Discovery Call</a>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
       </div>
     </div>
 
@@ -204,7 +124,7 @@
           <li>Control Center / PMO portfolio setup</li>
           <li>Multi-system API architecture</li>
         </ul>
-        <a href="mailto:contact@roblestech.net" class="ss-tier-cta">Book a Discovery Call</a>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
       </div>
     </div>
 
@@ -231,16 +151,17 @@
           <li>Dynamic Views and WorkApps for role-based or external access</li>
           <li>Dedicated project manager throughout delivery</li>
           <li>Up to 3 training sessions — role-specific, up to 20 stakeholders</li>
-          <li>90-day adoption guarantee — we track usage and extend free if thresholds aren't met</li>
+          <li>90-day adoption guarantee</li>
           <li>Delivery within 8–16 weeks depending on scope</li>
         </ul>
-        <a href="mailto:contact@roblestech.net" class="ss-tier-cta">Book a Discovery Call</a>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
       </div>
     </div>
+
   </div>
 
   <!-- ADD-ONS -->
-  <div class="ss-addons rv">
+  <div class="ss-addons rv" style="margin-top:32px;">
     <h3>Enhancements &amp; Add-ons</h3>
     <p>Available across all tiers. Add what you need, when you need it.</p>
     <div class="ss-addon-grid">
@@ -252,23 +173,245 @@
       <div class="ss-addon-item"><div class="ss-addon-name">Smartsheet AI Enablement</div><div class="ss-addon-price">From $4,500 per engagement</div></div>
     </div>
   </div>
+</section>
 
-  <!-- PRICING NOTE BOX -->
-  <div class="ss-note-box rv">
+<!-- MID CTA STRIP -->
+<div class="strip">
+  <div>
+    <h3>Not sure which tier fits your project?</h3>
+    <p>Book a free 30-minute call — we'll scope it and send a fixed-price proposal within 48 hours.</p>
+  </div>
+  <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+</div>
+
+<!-- ══════════════════════════════════
+     SERVICE LINE 2 — TECHNICAL CONSULTING
+══════════════════════════════════ -->
+<section class="svc-category-section" id="consulting">
+  <div class="svc-category-head rv">
     <div>
-      <h4>How our pricing works</h4>
-      <p>These are starting prices based on market benchmarks. Every engagement begins with a free discovery call. After scoping, we send a personalized fixed-price proposal within 48 hours — built around your exact team, environment, and goals. You never pay more than what's in the proposal.</p>
+      <div class="svc-category-icon">🧑‍💻</div>
+      <span class="sec-tag">Service Line 02</span>
+      <h2 class="sec-h">Technical Consulting<br>Services</h2>
+      <p class="sec-p">Expert technology guidance and hands-on execution — from architecture reviews and system integrations to web and app development. We embed with your team and build what you actually need.</p>
     </div>
     <div>
-      <h4>Ready to get a proposal?</h4>
-      <p>Book a free discovery call and we'll scope your project, recommend the right tier, and send a fixed-price proposal within 48 hours. No commitment required.</p>
-      <a href="mailto:contact@roblestech.net" class="btn btn-white" style="margin-top:16px;display:inline-flex;">Book a Discovery Call →</a>
+      <div class="ss-pricing-note" style="margin:0;">
+        <strong>Engagement flexibility:</strong> Technical consulting is available as one-time project engagements, hourly advisory sessions, or ongoing retainers. Every arrangement begins with a free discovery call to determine the right fit.
+      </div>
     </div>
+  </div>
+
+  <div class="svc-tiers-grid">
+
+    <!-- ADVISORY -->
+    <div class="ss-tier rv">
+      <div class="ss-tier-head">
+        <div class="ss-tier-label">Starter</div>
+        <div class="ss-tier-name">Advisory</div>
+        <p class="ss-tier-tagline">For teams that need expert guidance on a specific problem, architecture decision, or technical direction.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$200</span>
+          <span class="ss-price-unit">/ hr</span>
+        </div>
+        <div class="ss-price-note">Or $1,500 per strategy session · No retainer required</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>Technology strategy and architecture review</li>
+          <li>Platform and tooling evaluation</li>
+          <li>Technical roadmap guidance</li>
+          <li>Code and system audit with written findings</li>
+          <li>Vendor and proposal evaluation support</li>
+          <li>Written summary of recommendations post-session</li>
+        </ul>
+        <div class="ss-excl-label">Best For</div>
+        <ul class="ss-excl">
+          <li>One-off technical questions or decisions</li>
+          <li>Pre-project planning and scoping</li>
+          <li>Second opinions on existing technical plans</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Session</a>
+      </div>
+    </div>
+
+    <!-- RETAINER -->
+    <div class="ss-tier popular rv d1">
+      <div class="ss-tier-head">
+        <div class="ss-popular-badge">Most Popular</div>
+        <div class="ss-tier-label">Ongoing</div>
+        <div class="ss-tier-name">Retainer</div>
+        <p class="ss-tier-tagline">For growing businesses that need consistent technical support, oversight, and hands-on execution each month.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$3,500</span>
+          <span class="ss-price-unit">/ month</span>
+        </div>
+        <div class="ss-price-note">Starting from · Minimum 3-month commitment</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>Up to 20 hours of technical consulting per month</li>
+          <li>Architecture design and system planning</li>
+          <li>API integration builds and maintenance</li>
+          <li>Web or app feature development</li>
+          <li>Code review and quality oversight</li>
+          <li>Monthly strategy and priority alignment calls</li>
+          <li>Async support via dedicated communication channel</li>
+          <li>Written monthly progress and recommendation report</li>
+        </ul>
+        <div class="ss-excl-label">Not Included</div>
+        <ul class="ss-excl">
+          <li>Full dedicated development team (see Dedicated tier)</li>
+          <li>Hours beyond the monthly allocation (billed at $175/hr)</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+      </div>
+    </div>
+
+    <!-- DEDICATED -->
+    <div class="ss-tier rv d2">
+      <div class="ss-tier-head">
+        <div class="ss-tier-label">Scale</div>
+        <div class="ss-tier-name">Dedicated</div>
+        <p class="ss-tier-tagline">For organizations that need a fully embedded technical partner — acting as your internal CTO or engineering lead.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$8,000</span>
+          <span class="ss-price-unit">/ month</span>
+        </div>
+        <div class="ss-price-note">Starting from · Scoped per organization and engagement type</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>Dedicated technical lead — acts as your embedded CTO</li>
+          <li>Unlimited consulting hours within scope</li>
+          <li>Full architecture ownership and roadmap management</li>
+          <li>Cross-platform integration and API development</li>
+          <li>Dedicated web and app development support</li>
+          <li>Team management and technical hiring guidance</li>
+          <li>Weekly executive alignment meetings</li>
+          <li>Priority response SLA — same business day</li>
+          <li>Custom delivery terms and milestones</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MID CTA STRIP -->
+<div class="strip">
+  <div>
+    <h3>Need a custom consulting arrangement?</h3>
+    <p>We're flexible. Tell us what you need and we'll build the right engagement around it.</p>
+  </div>
+  <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+</div>
+
+<!-- ══════════════════════════════════
+     SERVICE LINE 3 — AI-POWERED SEO
+══════════════════════════════════ -->
+<section class="svc-category-section" id="seo">
+  <div class="svc-category-head rv">
+    <div>
+      <div class="svc-category-icon">🔍</div>
+      <span class="sec-tag">Service Line 03</span>
+      <h2 class="sec-h">AI-Powered SEO<br>Services</h2>
+      <p class="sec-p">We use AI tools and data-driven strategy to grow your organic search presence — building the content engine, on-page foundation, and conversion layer your brand needs to win on search.</p>
+    </div>
+    <div>
+      <div class="ss-pricing-note" style="margin:0;">
+        <strong>What you sell and what you charge:</strong> Each tier is designed for a specific growth stage. All tiers require a 3-month minimum commitment so results have time to compound. Client owns all assets — no lock-in beyond the commitment window.
+      </div>
+    </div>
+  </div>
+
+  <div class="svc-tiers-grid">
+
+    <!-- TIER 1 — STARTER -->
+    <div class="ss-tier rv">
+      <div class="ss-tier-head">
+        <div class="ss-tier-label">Tier 1</div>
+        <div class="ss-tier-name">Starter</div>
+        <p class="ss-tier-tagline">For brands posting nothing. Build the foundation.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$1,500</span>
+          <span class="ss-price-unit">/ mo</span>
+        </div>
+        <div class="ss-price-note">3-month minimum commitment</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>8 AI-optimized blog posts / month</li>
+          <li>Keyword + AI search topic research</li>
+          <li>Content calendar (Notion / Sheets)</li>
+          <li>Monthly performance report</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+      </div>
+    </div>
+
+    <!-- TIER 2 — SYSTEM -->
+    <div class="ss-tier popular rv d1">
+      <div class="ss-tier-head">
+        <div class="ss-popular-badge">Most Popular</div>
+        <div class="ss-tier-label">Tier 2</div>
+        <div class="ss-tier-name">System</div>
+        <p class="ss-tier-tagline">For brands with a site but invisible on search.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$2,000</span>
+          <span class="ss-price-unit">/ mo</span>
+        </div>
+        <div class="ss-price-note">3-month minimum commitment · Includes everything in Tier 1</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>Everything in Tier 1 — Starter, plus:</li>
+          <li>On-page SEO optimization (5 pages / mo)</li>
+          <li>FAQ + structured data for AI citation</li>
+          <li>Quarterly competitor content gap audit</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+      </div>
+    </div>
+
+    <!-- TIER 3 — CONVERT -->
+    <div class="ss-tier rv d2">
+      <div class="ss-tier-head">
+        <div class="ss-tier-label">Tier 3</div>
+        <div class="ss-tier-name">Convert</div>
+        <p class="ss-tier-tagline">For brands driving traffic that doesn't convert.</p>
+        <div class="ss-price">
+          <span class="ss-price-amt">$2,500</span>
+          <span class="ss-price-unit">/ mo</span>
+        </div>
+        <div class="ss-price-note">Includes everything in Tier 2 · Client owns all assets · No lock-in</div>
+      </div>
+      <div class="ss-tier-body">
+        <div class="ss-incl-label">What's Included</div>
+        <ul class="ss-feats">
+          <li>Everything in SEO Growth, plus:</li>
+          <li>Unlimited keyword targeting and topic coverage</li>
+          <li>Everything in Tier 2 — System, plus:</li>
+          <li>Conversion copy review on product pages</li>
+          <li>Monthly strategy call (45 min)</li>
+          <li>Brand voice guide + prompt library</li>
+          <li>Client owns all assets — no lock-in</li>
+        </ul>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+      </div>
+    </div>
+
   </div>
 </section>
 
 <!-- PROCESS -->
-<section class="process sec" id="process">
+<section class="process sec" id="process" style="background:var(--off-white);">
   <div class="proc-header rv">
     <span class="sec-tag">How We Work</span>
     <h2 class="sec-h">Structured delivery from day one</h2>
@@ -282,73 +425,21 @@
   </div>
 </section>
 
-<!-- PACKAGES -->
-<section class="packages sec" id="packages">
-  <div class="pkg-hd rv">
-    <span class="sec-tag">Engagement Models</span>
-    <h2 class="sec-h">A structured path to work with RTC</h2>
-    <p class="sec-p">Whether you're just getting started or scaling fast — there's a clear engagement model for where you are right now. All tiers include access to our AI services.</p>
-  </div>
-  <div class="pkg-grid">
-    <div class="pkg-card rv">
-      <div class="pkg-name">Foundation</div>
-      <p class="pkg-sub">For startups and small businesses needing focused development or AI support to get off the ground quickly.</p>
-      <div class="pkg-div"></div>
-      <ul class="pkg-feats">
-        <li>Single project scope</li>
-        <li>Smartsheet setup or web build</li>
-        <li>Basic automation &amp; reporting</li>
-        <li>AI assistant or workflow (1 use case)</li>
-        <li>Dedicated project lead</li>
-        <li>Documentation on delivery</li>
-      </ul>
-      <a href="mailto:contact@roblestech.net" class="pkg-cta">Start a Conversation</a>
-    </div>
-    <div class="pkg-card featured rv d1">
-      <div class="pkg-badge">Most Popular</div>
-      <div class="pkg-name">Growth</div>
-      <p class="pkg-sub">For scaling businesses that need ongoing development, AI integration, and operational support as they grow.</p>
-      <div class="pkg-div"></div>
-      <ul class="pkg-feats">
-        <li>Multi-project or retainer scope</li>
-        <li>Full-stack dev + Smartsheet</li>
-        <li>Advanced integrations &amp; API builds</li>
-        <li>AI automation across 3+ workflows</li>
-        <li>Custom AI assistant deployment</li>
-        <li>Custom dashboards &amp; reporting</li>
-        <li>Monthly strategy check-ins</li>
-      </ul>
-      <a href="mailto:contact@roblestech.net" class="pkg-cta">Discuss Your Project</a>
-    </div>
-    <div class="pkg-card rv d2">
-      <div class="pkg-name">Enterprise</div>
-      <p class="pkg-sub">For organizations needing large-scale collaboration, dedicated teams, or enterprise AI and custom system builds.</p>
-      <div class="pkg-div"></div>
-      <ul class="pkg-feats">
-        <li>Dedicated development team</li>
-        <li>Enterprise Smartsheet architecture</li>
-        <li>Complex cross-platform integrations</li>
-        <li>Full AI strategy &amp; implementation</li>
-        <li>AI-augmented product development</li>
-        <li>Salesforce &amp; ServiceNow (coming soon)</li>
-        <li>Custom SLA &amp; delivery terms</li>
-      </ul>
-      <a href="mailto:contact@roblestech.net" class="pkg-cta">Let's Talk</a>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
+<!-- FINAL CTA -->
 <section class="cta-final">
   <div class="cta-pat"></div>
   <div class="cta-glow"></div>
   <div class="cta-content">
     <span class="sec-tag" style="color:var(--green);">Start Building With RTC</span>
     <h2 class="sec-h" style="color:var(--white);margin-top:8px;">Ready to discuss your project?</h2>
-    <p class="sec-p" style="color:rgba(255,255,255,.6);margin:0 auto 32px;">Every engagement starts with a free discovery call. Let's scope your project, recommend the right solution, and get you a fixed-price proposal within 48 hours.</p>
+    <p class="sec-p" style="color:rgba(255,255,255,.6);margin:0 auto 32px;">Every engagement starts with a free discovery call. Let's scope your project and get you a fixed-price proposal within 48 hours — no commitment required.</p>
+    <div class="cta-logo-wrap">
+      <img src="logo2.png" alt="" class="cta-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="cta-logo-ph" style="display:none">Secondary Logo</div>
+    </div>
     <div class="cta-actions">
-      <a href="mailto:contact@roblestech.net" class="btn btn-white">Book a Discovery Call →</a>
-      <a href="work.html" class="btn btn-ghost">See Our Work</a>
+      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Discovery Call →</a>
+      <a href="contact.html" class="btn btn-ghost">Send a Message</a>
     </div>
     <p class="cta-hint" style="margin-top:16px;">Or reach us at <a href="mailto:contact@roblestech.net">contact@roblestech.net</a></p>
   </div>
@@ -366,11 +457,34 @@
         </a>
         <p>Bridging world-class IT talent with global opportunity. High-standard execution. AI-powered. Zero offshore friction.</p>
       </div>
-      <div class="ft-col"><h4>Services</h4><ul><li><a href="services.html#smartsheet">Smartsheet Consulting</a></li><li><a href="services.html#automations">Automations &amp; Integrations</a></li><li><a href="services.html#webdev">Web &amp; App Development</a></li><li><a href="services.html#ai">AI Services</a></li></ul></div>
-      <div class="ft-col"><h4>Company</h4><ul><li><a href="about.html">About RTC</a></li><li><a href="work.html">Featured Work</a></li><li><a href="services.html#process">Our Process</a></li><li><a href="#packages">Packages</a></li></ul></div>
-      <div class="ft-col"><h4>Get Started</h4><ul><li><a href="mailto:contact@roblestech.net">Book a Discovery Call</a></li><li><a href="mailto:contact@roblestech.net">Discuss Your Project</a></li><li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li></ul></div>
+      <div class="ft-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="team.html">Our Team</a></li>
+          <li><a href="philosophy.html">Our Philosophy</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#smartsheet">Smartsheet Development</a></li>
+          <li><a href="#consulting">Technical Consulting</a></li>
+          <li><a href="#seo">AI-Powered SEO</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Get Started</h4>
+        <ul>
+          <li><a href="contact.html#schedule">Schedule a Call</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="ft-bottom"><p>© 2026 Robles Technologies Corp. All rights reserved.</p><div class="ft-tagline">Redesign. Reinvent. Refocus.</div></div>
+    <div class="ft-bottom">
+      <p>© 2026 Robles Technologies Corp. All rights reserved.</p>
+      <div class="ft-tagline">Redesign. Reinvent. Refocus.</div>
+    </div>
   </div>
 </footer>
 
