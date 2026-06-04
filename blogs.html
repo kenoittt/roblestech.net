@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Robles Technologies Corp.</title>
+<meta name="description" content="Practical guides, tutorials, and insights on Smartsheet, automation, AI, and technical consulting from the Robles Technologies Corp. team.">
+<link rel="icon" type="image/png" href="logo_white.png">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-top: 48px;
+  }
+  .blog-card {
+    background: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1.5px solid rgba(3,44,124,0.06);
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+  .blog-card:hover {
+    box-shadow: 0 16px 48px rgba(3,44,124,0.12);
+    transform: translateY(-4px);
+    border-color: rgba(4,100,221,0.15);
+  }
+  .blog-card-top {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--steel) 100%);
+    padding: 28px 24px 20px;
+    min-height: 120px;
+    position: relative;
+    overflow: hidden;
+  }
+  .blog-card-top::after {
+    content: '';
+    position: absolute;
+    bottom: -24px; right: -24px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .blog-category {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    background: rgba(174,227,123,0.15);
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+  .blog-card-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    position: relative;
+    z-index: 1;
+  }
+  .blog-card-body {
+    padding: 20px 24px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .blog-excerpt {
+    font-size: 0.82rem;
+    color: var(--steel);
+    line-height: 1.7;
+    flex: 1;
+    margin-bottom: 16px;
+  }
+  .blog-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .blog-read-more {
+    color: var(--core-blue);
+    font-weight: 700;
+  }
+  @media (max-width: 900px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo-img"><img src="logo.png" alt="Robles Technologies Corp." onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+    <span class="nav-name">Robles <span>Tech</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li class="nav-learn">
+      <button class="nav-learn-btn">Learn <span class="nav-arrow">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="blogs.html" style="color:var(--core-blue)">Blog</a>
+        <a href="faqs.html">FAQs</a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="nav-cta">Contact Us</a></li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="blogs.html">Blog</a></li>
+    <li><a href="faqs.html">FAQs</a></li>
+    <li><a href="contact.html" class="mob-cta">Contact Us</a></li>
+  </ul>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero-pat"></div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span>Blog</div>
+  <span class="sec-tag">Insights &amp; Guides</span>
+  <h1 class="sec-h">The RTC Blog</h1>
+  <p class="sec-p">Practical guides on Smartsheet, automation, AI, and technical consulting — written by the people who build it every day.</p>
+</div>
+
+<!-- BLOG LISTING -->
+<section class="sec" style="background:var(--off-white);">
+  <div class="blog-grid">
+
+    <a href="smartsheet-vendor-data-without-sheet-access.html" class="blog-card rv">
+      <div class="blog-card-top">
+        <span class="blog-category">Smartsheet</span>
+        <div class="blog-card-title">How to Let Subcontractors &amp; Vendors Submit Data to Smartsheet Without Giving Them Sheet Access</div>
+      </div>
+      <div class="blog-card-body">
+        <p class="blog-excerpt">Need outside vendors or subcontractors to submit data into Smartsheet without seeing the whole sheet? Here's the exact Form + Dynamic View setup, step by step.</p>
+        <div class="blog-meta">
+          <span>Smartsheet · Forms · Dynamic View</span>
+          <span class="blog-read-more">Read →</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-pat"></div>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="index.html" class="ft-logo">
+          <div class="ft-logo-img"><img src="logo.png" alt="RTC" onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+          <span>Robles Technologies Corp.</span>
+        </a>
+        <p>Bridging world-class IT talent with global opportunity. High-standard execution. AI-powered. Zero offshore friction.</p>
+      </div>
+      <div class="ft-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="philosophy.html">Philosophy</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="services.html#smartsheet">Smartsheet Development</a></li>
+          <li><a href="services.html#consulting">Technical Consulting</a></li>
+          <li><a href="services.html#seo">AI-Powered SEO</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Get Started</h4>
+        <ul>
+          <li><a href="contact.html#schedule">Schedule a Call</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <p>© 2026 Robles Technologies Corp. All rights reserved.</p>
+      <div class="ft-tagline">Redesign. Reinvent. Refocus.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+nav.classList.add('nav-inner');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobile-menu');
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    burger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+document.querySelectorAll('.nav-learn').forEach(el => {
+  el.querySelector('.nav-learn-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    el.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-learn.open').forEach(el => el.classList.remove('open'));
+});
+const obs = new IntersectionObserver(e => e.forEach(x => x.isIntersecting && x.target.classList.add('on')), { threshold: .10 });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

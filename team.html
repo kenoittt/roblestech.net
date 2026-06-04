@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Team — Robles Technologies Corp.</title>
+<title>Team — Robles Technologies Corp.</title>
 <link rel="icon" type="image/png" href="logo_white.png">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
@@ -20,18 +20,39 @@
   </a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
-    <li><a href="team.html" style="color:var(--core-blue)">Our Team</a></li>
-    <li><a href="philosophy.html">Our Philosophy</a></li>
+    <li><a href="team.html" style="color:var(--core-blue)">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
     <li><a href="services.html">Services</a></li>
+    <li class="nav-learn">
+      <button class="nav-learn-btn">Learn <span class="nav-arrow">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="blogs.html">Blog</a>
+        <a href="faqs.html">FAQs</a>
+      </div>
+    </li>
     <li><a href="contact.html" class="nav-cta">Contact Us</a></li>
   </ul>
-
+  <button class="nav-burger" id="burger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="blogs.html">Blog</a></li>
+    <li><a href="faqs.html">FAQs</a></li>
+    <li><a href="contact.html" class="mob-cta">Contact Us</a></li>
+  </ul>
+</div>
 
 <!-- PAGE HERO -->
 <div class="page-hero">
   <div class="page-hero-pat"></div>
-  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span>Our Team</div>
+  <div class="breadcrumb"><a href="index.html">Home</a><span>/</span>Team</div>
   <span class="sec-tag">The People Behind RTC</span>
   <h1 class="sec-h">World-class specialists.<br>Built for your outcomes.</h1>
   <p class="sec-p">Our team is made up of dedicated IT professionals who bring deep expertise, strong communication, and a results-first mindset to every engagement.</p>
@@ -241,8 +262,8 @@
       <div class="ft-col">
         <h4>Company</h4>
         <ul>
-          <li><a href="team.html">Our Team</a></li>
-          <li><a href="philosophy.html">Our Philosophy</a></li>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="philosophy.html">Philosophy</a></li>
         </ul>
       </div>
       <div class="ft-col">
@@ -273,6 +294,29 @@
 const nav = document.getElementById('nav');
 nav.classList.add('nav-inner');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobile-menu');
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    burger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+document.querySelectorAll('.nav-learn').forEach(el => {
+  el.querySelector('.nav-learn-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    el.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-learn.open').forEach(el => el.classList.remove('open'));
+});
 const obs = new IntersectionObserver(e => e.forEach(x => x.isIntersecting && x.target.classList.add('on')), { threshold: .10 });
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 </script>

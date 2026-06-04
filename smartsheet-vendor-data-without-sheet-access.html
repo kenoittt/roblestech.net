@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let Vendors Submit Data to Smartsheet Without Sheet Access</title>
+<meta name="description" content="Need outside vendors or subcontractors to submit data into Smartsheet without seeing the whole sheet? Here's the exact form + Dynamic View setup, step by step.">
+<link rel="canonical" href="https://roblestech.net/smartsheet-vendor-data-without-sheet-access">
+<link rel="icon" type="image/png" href="logo_white.png">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .post-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .post-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--core-blue);
+    background: rgba(4,100,221,0.08);
+    padding: 5px 12px;
+    border-radius: 100px;
+  }
+  .post-date {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .post-h1 {
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--navy);
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+  .post-intro {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--steel);
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(3,44,124,0.08);
+  }
+  .post-body h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.025em;
+    margin: 48px 0 16px;
+  }
+  .post-body p {
+    font-size: 0.93rem;
+    line-height: 1.82;
+    color: var(--steel);
+    margin-bottom: 18px;
+  }
+  .post-body ul, .post-body ol {
+    margin: 0 0 20px 20px;
+  }
+  .post-body li {
+    font-size: 0.93rem;
+    line-height: 1.8;
+    color: var(--steel);
+    margin-bottom: 10px;
+  }
+  .post-body ol li {
+    padding-left: 8px;
+  }
+  .post-body strong {
+    color: var(--navy);
+    font-weight: 700;
+  }
+  .callout {
+    background: rgba(4,100,221,0.06);
+    border-left: 3px solid var(--core-blue);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 22px;
+    margin: 28px 0;
+  }
+  .callout p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .tip {
+    background: rgba(174,227,123,0.12);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 22px;
+    margin: 28px 0;
+  }
+  .tip p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .post-cta {
+    background: var(--navy);
+    border-radius: 16px;
+    padding: 36px 32px;
+    margin-top: 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .post-cta::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(57,146,255,0.12);
+  }
+  .post-cta h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .post-cta p {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.88rem;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--core-blue);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 40px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--navy); }
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Can people submit data to Smartsheet without a paid license?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Forms and Dynamic View let external users contribute without needing their own Smartsheet license or access to the source sheet."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I share a report without sharing the source sheet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dynamic View is the cleaner option for interactive submission and editing, because you control which fields are visible and which are editable per user."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can vendors see each other's submissions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. When the view is filtered by user, each person sees only the rows assigned to them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I make some fields read-only?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. In the Dynamic View setup, any field can be set to view-only, so submitters can update what they are meant to and nothing else."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo-img"><img src="logo.png" alt="Robles Technologies Corp." onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+    <span class="nav-name">Robles <span>Tech</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li class="nav-learn">
+      <button class="nav-learn-btn">Learn <span class="nav-arrow">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="blogs.html" style="color:var(--core-blue)">Blog</a>
+        <a href="faqs.html">FAQs</a>
+      </div>
+    </li>
+    <li><a href="contact.html" class="nav-cta">Contact Us</a></li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="team.html">Team</a></li>
+    <li><a href="philosophy.html">Philosophy</a></li>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="blogs.html">Blog</a></li>
+    <li><a href="faqs.html">FAQs</a></li>
+    <li><a href="contact.html" class="mob-cta">Contact Us</a></li>
+  </ul>
+</div>
+
+<!-- POST CONTENT -->
+<main style="padding-top:90px; background:var(--off-white); min-height:100vh;">
+  <div class="post-wrap">
+    <a href="blogs.html" class="back-link">← Back to Blog</a>
+
+    <div class="post-meta">
+      <span class="post-tag">Smartsheet</span>
+      <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Forms</span>
+      <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Dynamic View</span>
+      <span class="post-date">June 2026</span>
+    </div>
+
+    <h1 class="post-h1">How to Let Subcontractors &amp; Vendors Submit Data to Smartsheet Without Giving Them Sheet Access</h1>
+
+    <p class="post-intro">
+      You need people outside your team — vendors, subcontractors, field crews — to submit and update data in Smartsheet. But you can't just share the sheet: that would expose everyone else's rows, your pricing, your internal notes, and invite accidental edits to columns no one outside should touch.<br><br>
+      The fix is a two-part setup: a Form for intake, and a Dynamic View that shows each person only the rows assigned to them, only the columns they need, with the columns they shouldn't change locked as read-only. No sheet access required, and no one sees anyone else's data.<br><br>
+      Here's exactly how to do it.
+    </p>
+
+    <div class="post-body">
+
+      <h2>Why you shouldn't just share the whole sheet</h2>
+      <p>Sharing the underlying sheet feels like the quick option, but it creates three problems:</p>
+      <ul>
+        <li><strong>Everyone sees everything.</strong> One vendor can see every other vendor's rows, rates, and comments.</li>
+        <li><strong>Accidental edits.</strong> An outside user can overwrite formulas, statuses, or fields meant to stay fixed.</li>
+        <li><strong>License and access overhead.</strong> Managing dozens or hundreds of external collaborators directly on a sheet gets messy fast.</li>
+      </ul>
+      <p>You want outsiders to contribute to your data without touching the source of truth. That's a permissions problem, and Smartsheet has a purpose-built answer for it.</p>
+
+      <h2>The approach: Forms + Dynamic View</h2>
+      <ul>
+        <li><strong>Form</strong> — collects new submissions and drops them straight into your master sheet as new rows. The submitter never sees the sheet.</li>
+        <li><strong>Dynamic View</strong> — gives each user a personalized window into the sheet: filtered to only their rows, showing only the fields you choose, with selected fields set to read-only. They interact through the view, not the sheet.</li>
+      </ul>
+      <p>Together, the master sheet stays your single source of truth, while each outside user gets a clean, safe slice.</p>
+
+      <h2>How to set it up, step by step</h2>
+
+      <ol>
+        <li>
+          <strong>Build the master intake sheet.</strong> This is your single source of truth. Include a column that identifies who each row belongs to (e.g., Vendor Name or Assigned Contact) — you'll filter on this. Add any columns your vendors will need to fill in, plus any internal-only columns you want to keep hidden.
+        </li>
+        <li>
+          <strong>Create a Form connected to your master sheet.</strong> In Smartsheet, open your sheet and go to Forms → Create Form. Add only the fields you want vendors to submit. Exclude any internal columns. Set required fields and any dropdowns needed. Copy the shareable form link — this is what you'll send to vendors for new submissions.
+        </li>
+        <li>
+          <strong>Set up Dynamic View.</strong> From the Smartsheet navigation, open Dynamic View (available on Business/Enterprise plans). Click Create View, select your master sheet, and name the view.
+        </li>
+        <li>
+          <strong>Configure the filter.</strong> Under "Filter Data," choose to filter rows based on the contact column (e.g., Assigned Contact = Current User). This ensures each person sees only rows assigned to them when they log in.
+        </li>
+        <li>
+          <strong>Select visible columns.</strong> Only include columns the vendor needs to see or update. Leave out pricing columns, internal notes, or any fields they shouldn't know about.
+        </li>
+        <li>
+          <strong>Set field-level permissions.</strong> For each visible column, choose whether it's editable or read-only. Set status fields, formula columns, or system-generated values to read-only. Leave the fields vendors are responsible for updating as editable.
+        </li>
+        <li>
+          <strong>Share the Dynamic View.</strong> Under Sharing in Dynamic View, add your vendors by email. They'll receive an invite and can access the view without ever being added to the sheet itself. They log in, see only their rows, and update only the fields you've allowed.
+        </li>
+      </ol>
+
+      <div class="tip">
+        <p><strong>Tip:</strong> If your vendors don't have a Smartsheet account, they'll be prompted to create a free viewer account when they accept the Dynamic View invite. This does not consume a paid license on your plan.</p>
+      </div>
+
+      <h2>What this setup actually solves</h2>
+      <p>With this in place, your master sheet stays clean and controlled. New vendor submissions come in through the Form as new rows. Existing rows are updated by vendors through their Dynamic View. No one vendor can see another's data. Your internal columns remain invisible. Formulas and locked fields stay safe.</p>
+      <p>This is the same architecture we've built for Fortune 500 clients managing dozens of subcontractor data streams simultaneously — 8 API integrations, all feeding a single source of truth, with zero sheet-level access granted to any outside party.</p>
+
+      <div class="callout">
+        <p><strong>Heads up:</strong> Dynamic View requires a Smartsheet Business or Enterprise plan. If you're on Pro, the same goal can be partially achieved using Forms only (for new submissions) combined with Reports shared as viewer-only links, though row-level filtering per user is limited without Dynamic View.</p>
+      </div>
+
+      <h2>Common mistakes to avoid</h2>
+      <ul>
+        <li><strong>Forgetting to filter by current user.</strong> Without the "Current User" filter, all vendors will see all rows in the view.</li>
+        <li><strong>Leaving formula columns editable.</strong> Vendors can overwrite formula-driven values if you don't explicitly set those columns to read-only.</li>
+        <li><strong>Not testing as a vendor.</strong> Before sending the link, open an incognito window, log in as a test vendor account, and confirm they see exactly what you intended — nothing more.</li>
+      </ul>
+
+    </div>
+
+      <h2>How we built this for an enterprise client</h2>
+      <p>A client of ours needed 3 external subcontractors to submit updates for field works — without any of them seeing each other's information or the rest of the operation's sheet.</p>
+      <p>We built exactly the setup above: a form for intake, a Dynamic View filtered per vendor, hand-picked columns showing each vendor only their own line items, and locked read-only fields for everything they weren't meant to change. The result: data integrity, data security, and a much more streamlined process for updates and easy data submissions.</p>
+
+      <h2>Frequently asked questions</h2>
+
+      <p><strong>Can people submit data to Smartsheet without a paid license?</strong><br>
+      Yes. Forms and Dynamic View let external users contribute without needing their own Smartsheet license or access to the source sheet.</p>
+
+      <p><strong>Can I share a report without sharing the source sheet?</strong><br>
+      Dynamic View is the cleaner option for interactive submission and editing, because you control which fields are visible and which are editable per user.</p>
+
+      <p><strong>Can vendors see each other's submissions?</strong><br>
+      No — when the view is filtered by user, each person sees only the rows assigned to them.</p>
+
+      <p><strong>Can I make some fields read-only?</strong><br>
+      Yes. In the Dynamic View setup, any field can be set to view-only, so submitters can update what they're meant to and nothing else.</p>
+
+    <div class="post-cta">
+      <h3>Need this built for your team?</h3>
+      <p>We've implemented this exact setup — and more complex versions of it — for enterprise operations teams. Book a free call and we'll scope it for you.</p>
+      <a href="contact.html" class="btn btn-white" style="display:inline-flex;align-items:center;gap:8px;">Book a Free Discovery Call →</a>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-pat"></div>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="index.html" class="ft-logo">
+          <div class="ft-logo-img"><img src="logo.png" alt="RTC" onerror="this.style.display='none';this.parentElement.textContent='Logo'"></div>
+          <span>Robles Technologies Corp.</span>
+        </a>
+        <p>Bridging world-class IT talent with global opportunity. High-standard execution. AI-powered. Zero offshore friction.</p>
+      </div>
+      <div class="ft-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="team.html">Team</a></li>
+          <li><a href="philosophy.html">Philosophy</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="services.html#smartsheet">Smartsheet Development</a></li>
+          <li><a href="services.html#consulting">Technical Consulting</a></li>
+          <li><a href="services.html#seo">AI-Powered SEO</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Get Started</h4>
+        <ul>
+          <li><a href="contact.html#schedule">Schedule a Call</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <p>© 2026 Robles Technologies Corp. All rights reserved.</p>
+      <div class="ft-tagline">Redesign. Reinvent. Refocus.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+nav.classList.add('nav-inner');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobile-menu');
+burger.addEventListener('click', () => {
+  burger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    burger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+document.querySelectorAll('.nav-learn').forEach(el => {
+  el.querySelector('.nav-learn-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    el.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-learn.open').forEach(el => el.classList.remove('open'));
+});
+</script>
+</body>
+</html>
