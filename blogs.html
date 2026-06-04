@@ -94,8 +94,13 @@
     color: var(--core-blue);
     font-weight: 700;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 980px) {
     .blog-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .blog-card-top { min-height: 100px; padding: 20px 18px 16px; }
+    .blog-card-title { font-size: 0.88rem; }
+    .blog-card-body { padding: 16px 18px 20px; }
   }
 </style>
 </head>

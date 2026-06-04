@@ -1236,3 +1236,64 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
   .svc-tiers-grid { grid-template-columns:1fr; }
   .contact-two-col { grid-template-columns:1fr; }
 }
+
+/* ══════════════════════════════════
+   RESPONSIVE — SMALL PHONES (≤600px)
+══════════════════════════════════ */
+@media(max-width:600px) {
+  /* Nav */
+  nav { padding:0 5%; height:72px; }
+  .nav-logo-img { width:64px; height:64px; }
+  .nav-name { font-size:.95rem; }
+  .mobile-menu { top:72px; }
+
+  /* Page hero */
+  .page-hero { padding:140px 5% 56px; }
+  .page-hero .sec-h { font-size:clamp(1.5rem,7vw,2rem); }
+
+  /* Sections */
+  .sec { padding:60px 5%; }
+  .sec-h { font-size:clamp(1.5rem,6vw,2rem); }
+
+  /* Hero */
+  .hero { padding-left:5%; padding-right:5%; }
+  .hero-h1 { font-size:clamp(2.2rem,10vw,3.2rem); }
+  .hero-actions { flex-direction:column; align-items:flex-start; gap:10px; }
+  .hero-actions .btn { width:100%; text-align:center; justify-content:center; }
+
+  /* Stats */
+  .stats-bar { grid-template-columns:1fr 1fr; padding:20px 5%; gap:14px; }
+
+  /* Pain grid */
+  .pain-grid { grid-template-columns:1fr; }
+
+  /* Services */
+  .svc-header { gap:12px; }
+
+  /* Process */
+  .proc-steps { grid-template-columns:1fr; }
+
+  /* Strip */
+  .strip { flex-direction:column; text-align:center; padding:28px 5%; gap:16px; }
+  .strip .btn { width:100%; text-align:center; justify-content:center; }
+
+  /* CTA */
+  .cta-actions { flex-direction:column; align-items:center; gap:10px; }
+  .cta-actions .btn { width:100%; max-width:320px; justify-content:center; }
+
+  /* Team */
+  .team-grid { grid-template-columns:1fr; }
+
+  /* About grids */
+  .about-mission-grid { grid-template-columns:1fr; }
+  .about-stat-row { grid-template-columns:1fr 1fr; }
+  .values-full-grid { grid-template-columns:1fr; }
+  .mini-grid, .about-vals { grid-template-columns:1fr 1fr; }
+
+  /* Smartsheet add-ons */
+  .ss-addon-grid { grid-template-columns:1fr; }
+
+  /* Footer */
+  .ft-top { grid-template-columns:1fr; gap:32px; }
+  .ft-bottom { flex-direction:column; text-align:center; gap:8px; }
+}

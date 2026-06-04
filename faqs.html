@@ -178,11 +178,19 @@
     z-index: 1;
   }
 
-  @media (max-width: 860px) {
+  @media (max-width: 980px) {
     .faq-layout { grid-template-columns: 1fr; gap: 0; }
     .faq-sidebar { position: static; margin-bottom: 40px; }
     .faq-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; }
     .faq-nav a { padding: 7px 12px; }
+    .faq-cta-actions { flex-direction: column; align-items: center; gap: 10px; }
+    .faq-cta-actions .btn { width: 100%; max-width: 320px; justify-content: center; text-align: center; }
+  }
+  @media (max-width: 600px) {
+    .faq-section-title { font-size: 1rem; }
+    .faq-q { font-size: 0.84rem; }
+    .faq-cta { padding: 28px 20px; }
+    .faq-nav a { font-size: 0.72rem; padding: 6px 10px; }
   }
 </style>
 <script type="application/ld+json">
