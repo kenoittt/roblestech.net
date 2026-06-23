@@ -365,14 +365,14 @@
       <h3>Step 1: Build the master onboarding sheet</h3>
       <p>Create a new Smartsheet with columns for every onboarding task and data point: Employee Name, Start Date, Department, Assigned Owner, Task, Status, Due Date, Completion Date, and Notes. Keep internal-only fields (like payroll flags or system access notes) here — they'll never surface to outside viewers. This sheet is the source of truth. Nothing gets tracked anywhere else.</p>
       <figure style="margin:28px 0;">
-        <img src="blog2/sheet.jpeg" alt="Smartsheet master onboarding sheet titled 'New Hire Onboarding' showing columns for Hiring Manager, Coordinator, New Hire, Hiring Date, Drug Test, and Background Check — Drug Test results are color-coded green for Negative and red for Positive" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+        <img src="blog2/sheetv1.jpeg" alt="Smartsheet master onboarding sheet titled 'New Hire Onboarding' showing columns for Hiring Manager, Coordinator, New Hire, Hiring Date, Drug Test, and Background Check — Drug Test results are color-coded green for Negative and red for Positive" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
         <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The master onboarding sheet — one row per new hire with color-coded Drug Test status (green = Negative, red = Positive) and a Background Check checkbox column visible at a glance.</figcaption>
       </figure>
 
       <h3>Step 2: Create the intake Form</h3>
       <p>In your master sheet, go to <strong>Forms → Create Form</strong>. Include only the fields the submitter needs: new hire name, start date, department, and hiring manager. Leave any internal tracking columns off the form entirely. Set required fields and add any dropdowns you need (e.g., a Department dropdown reduces typos and keeps data clean). Copy the shareable form link — this is the only thing HR or managers need to kick off a new onboarding.</p>
       <figure style="margin:28px 0;">
-        <img src="blog2/form.jpeg" alt="Smartsheet New Hire intake form with four fields — New Hire, email address, Department, and Location — displayed on a branded Smartsheet form page with a navy left panel" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+        <img src="blog2/formv1.jpeg" alt="Smartsheet New Hire intake form with four fields — New Hire, email address, Department, and Location — displayed on a branded Smartsheet form page with a navy left panel" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
         <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The intake Form only exposes the fields HR needs. Internal tracking columns (Hiring Manager, Drug Test, Background Check, Notes) stay off the form entirely.</figcaption>
       </figure>
 
@@ -385,7 +385,7 @@
       </ol>
       <p>Smartsheet's automation uses a point-and-click workflow builder — no code required. For a full reference on trigger types and conditions, see <a href="https://help.smartsheet.com/articles/2476671-automate-workflows-in-smartsheet" target="_blank" rel="noopener">Smartsheet's official automation documentation</a>.</p>
       <figure style="margin:28px 0;">
-        <img src="blog2/autoamtion.jpeg" alt="Smartsheet Saved Automation Workflows panel showing the 'Assign Manager' rule — triggered when rows are added or changed, with actions to alert someone and assign people, sending notifications to contacts in the Hiring Manager column" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+        <img src="blog2/automation.jpeg" alt="Smartsheet Saved Automation Workflows panel showing the 'Assign Manager' rule — triggered when rows are added or changed, with actions to alert someone and assign people, sending notifications to contacts in the Hiring Manager column" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
         <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The "Assign Manager" automation rule: fires when a row is added or changed, alerts the owner, and assigns the contact in the Hiring Manager column automatically.</figcaption>
       </figure>
 
@@ -396,7 +396,7 @@
       <h3>Step 4: Build the Report for the HR or operations team</h3>
       <p>Go to <strong>Solution Center → Create → Report → Row Report</strong>. Select your master onboarding sheet as the source. Filter to show only rows where Status is not "Complete." Add columns: Employee Name, Task, Assigned Owner, Due Date, Status. Share this Report with your HR or operations team. They get a live, filtered task list — without access to the full sheet or anyone else's data outside this view.</p>
       <figure style="margin:28px 0;">
-        <img src="blog2/report.jpeg" alt="Smartsheet report titled 'New Hire - Ready for Deployment' with 2 active filters applied, showing a trimmed-down view with three columns — Primary, Hiring Date, Drug Test, and Background Check — displaying only the rows ready for the next stage" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+        <img src="blog2/reportv1.jpeg" alt="Smartsheet report titled 'New Hire - Ready for Deployment' with 2 active filters applied, showing a trimmed-down view with three columns — Primary, Hiring Date, Drug Test, and Background Check — displaying only the rows ready for the next stage" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
         <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The "New Hire - Ready for Deployment" report: 2 filters applied, showing only qualified hires with relevant columns. The team sees exactly what they need — nothing from the full master sheet leaks through.</figcaption>
       </figure>
 
