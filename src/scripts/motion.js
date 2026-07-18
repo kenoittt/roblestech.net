@@ -185,29 +185,6 @@ if (finePointer && !reduce) {
   });
 }
 
-/* ---------- Hero squiggle — draws/flows through the hero as you scroll ---------- */
-(function () {
-  const path = document.getElementById('hero-squiggle-path');
-  const hero = document.getElementById('home');
-  if (!path || !hero) return;
-  const len = path.getTotalLength();
-  path.style.strokeDasharray = String(len);
-  if (reduce) { path.style.strokeDashoffset = '0'; return; } // show it fully, no scroll motion
-  path.style.strokeDashoffset = String(len);
-  let ticking = false;
-  function draw() {
-    ticking = false;
-    // Start as just the dot at scroll 0, then expand as you scroll through the hero.
-    const h = hero.offsetHeight || window.innerHeight;
-    const p = Math.min(1, Math.max(0, window.scrollY / (h * 0.85)));
-    path.style.strokeDashoffset = String(len * (1 - p));
-  }
-  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(draw); } }
-  draw();
-  addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', onScroll);
-})();
-
 /* ---------- Card pointer tilt + follow-glow ---------- */
 if (finePointer && !reduce) {
   const MAX = 7; // max tilt degrees
