@@ -56,9 +56,19 @@ nav {
   box-shadow:0 1px 0 rgba(4,100,221,0.07), 0 4px 24px rgba(3,44,124,0.04);
   transition:box-shadow .3s, background .3s;
 }
-nav.scrolled { background:rgba(245,246,250,0.95); box-shadow:0 4px 32px rgba(3,44,124,0.10); }
-/* Inner pages have a dark hero — keep nav fully opaque from the start */
-nav.nav-inner { background:rgba(245,246,250,0.97); box-shadow:0 2px 20px rgba(3,44,124,0.08); }
+/* Stay glassy in every state — translucent + blur, never fully solid */
+nav.scrolled {
+  background:rgba(245,246,250,0.62);
+  backdrop-filter:blur(28px) saturate(190%);
+  -webkit-backdrop-filter:blur(28px) saturate(190%);
+  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 6px 34px rgba(3,44,124,0.12);
+  border-bottom:1px solid rgba(255,255,255,0.6);
+}
+nav.nav-inner {
+  background:rgba(245,246,250,0.60);
+  box-shadow:0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 24px rgba(3,44,124,0.08);
+  border-bottom:1px solid rgba(255,255,255,0.55);
+}
 
 .nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
 .nav-logo-img {
@@ -814,11 +824,11 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
   position:fixed;
   top:90px;
   left:0; right:0;
-  background:rgba(245,246,250,0.98);
-  backdrop-filter:blur(24px) saturate(180%);
-  -webkit-backdrop-filter:blur(24px) saturate(180%);
-  border-bottom:1px solid rgba(3,44,124,.10);
-  box-shadow:0 12px 40px rgba(3,44,124,.14);
+  background:rgba(245,246,250,0.80);
+  backdrop-filter:blur(28px) saturate(190%);
+  -webkit-backdrop-filter:blur(28px) saturate(190%);
+  border-bottom:1px solid rgba(255,255,255,0.55);
+  box-shadow:0 12px 40px rgba(3,44,124,.16);
   padding:20px 6% 28px;
   z-index:100;
   transform:translateY(-110%);
@@ -1570,3 +1580,12 @@ html.preloaded .loader{ display:none; }
 
 /* Force Montserrat across the services section + carousel */
 .services, .services * { font-family:'Montserrat', sans-serif; }
+
+/* Mobile nav: ensure the hamburger actually shows (beats the base
+   .nav-burger{display:none} that appears later in the source). */
+@media (max-width:980px){
+  nav .nav-links{ display:none; }
+  nav .nav-burger{ display:flex; }
+}
+/* Glass mobile menu offset matches the 90px nav height */
+.mobile-menu{ top:90px; }
