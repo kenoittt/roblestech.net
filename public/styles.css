@@ -1403,7 +1403,7 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 
 /* Headline line reveal — JS adds .anim (so no-JS keeps text visible), then .in */
 .reveal-lines { animation:none; }
-.reveal-lines .ln { display:block; overflow:hidden; }
+.reveal-lines .ln { display:block; overflow:hidden; padding-right:.16em; width:fit-content; }
 .reveal-lines .ln > span { display:inline-block; }
 .reveal-lines.anim .ln > span { transform:translateY(108%); transition:transform .9s cubic-bezier(.16,1,.3,1); }
 .reveal-lines.anim .ln:nth-child(2) > span { transition-delay:.08s; }
@@ -1577,7 +1577,7 @@ html.preloaded .loader{ display:none; }
   grid-template-columns:1.1fr .9fr; gap:clamp(32px,5vw,64px); align-items:center;
 }
 .hero.hero-motion .hero-left{ max-width:none; }
-.hero.hero-motion .hero-h1{ font-size:clamp(2.6rem,6.8vw,6rem); margin-bottom:0; }
+.hero.hero-motion .hero-h1{ font-size:clamp(2.4rem,6vw,5.3rem); margin-bottom:0; }
 .hero-aside{ max-width:460px; align-self:center; }
 .hero-aside .hero-sub1{ margin-bottom:14px; }
 .hero-aside .hero-p{ margin-bottom:30px; }
@@ -1675,12 +1675,10 @@ html.preloaded .loader{ display:none; }
 .reveal-lines.anim .ln > span{ transform:translateY(114%) rotateX(-50deg); filter:blur(5px); }
 .reveal-lines.anim.in .ln > span{ transform:none; filter:blur(0); }
 /* continuous sheen sweep + gentle float once revealed */
-.reveal-lines.in .ln > span{ animation:heroSheen 7s linear infinite, heroFloat 6s ease-in-out infinite; }
-.reveal-lines.in .ln:nth-child(2) > span{ animation-delay:0s,-2s; }
-.reveal-lines.in .ln:nth-child(3) > span{ animation-delay:0s,-4s; }
+/* Colour sheen only — no idle floating (keeps the periods from being clipped) */
+.reveal-lines.in .ln > span{ animation:heroSheen 7s linear infinite; }
 .hero-motion .hero-h1 .ln > span:hover{ scale:1.05; }
 @keyframes heroSheen{ from{ background-position:0% center; } to{ background-position:230% center; } }
-@keyframes heroFloat{ 0%,100%{ translate:0 0; } 50%{ translate:0 -8px; } }
 @media (prefers-reduced-motion:reduce){
   .reveal-lines.in .ln > span{ animation:none !important; }
 }
