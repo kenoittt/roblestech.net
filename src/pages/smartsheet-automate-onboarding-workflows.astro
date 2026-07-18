@@ -1,0 +1,428 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="How to Replace Manual Onboarding Spreadsheets with Automated Smartsheet Workflows" description="Still managing employee onboarding in Excel? Here's how to automate it in Smartsheet using Forms, automated workflows, and a real-time Dashboard — so nothing slips and leadership always has visibility." active="">
+  <Fragment slot="head">
+    <style>
+      .post-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 60px 24px 100px;
+      }
+      .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+      .post-tag {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--core-blue);
+        background: rgba(4,100,221,0.08);
+        padding: 5px 12px;
+        border-radius: 100px;
+      }
+      .post-date {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .post-h1 {
+        font-size: clamp(1.7rem, 4vw, 2.6rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--navy);
+        line-height: 1.1;
+        margin-bottom: 28px;
+      }
+      .post-intro {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--steel);
+        margin-bottom: 40px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid rgba(3,44,124,0.08);
+      }
+      .post-body h2 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.025em;
+        margin: 48px 0 16px;
+      }
+      .post-body h3 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.015em;
+        margin: 36px 0 12px;
+      }
+      .post-body p {
+        font-size: 0.93rem;
+        line-height: 1.82;
+        color: var(--steel);
+        margin-bottom: 18px;
+      }
+      .post-body ul, .post-body ol {
+        margin: 0 0 20px 20px;
+      }
+      .post-body li {
+        font-size: 0.93rem;
+        line-height: 1.8;
+        color: var(--steel);
+        margin-bottom: 10px;
+      }
+      .post-body ol li {
+        padding-left: 8px;
+      }
+      .post-body strong {
+        color: var(--navy);
+        font-weight: 700;
+      }
+      .post-body a {
+        color: var(--core-blue);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .post-body a:hover { color: var(--navy); }
+      .callout {
+        background: rgba(4,100,221,0.06);
+        border-left: 3px solid var(--core-blue);
+        border-radius: 0 10px 10px 0;
+        padding: 18px 22px;
+        margin: 28px 0;
+      }
+      .callout p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--navy);
+        font-weight: 500;
+      }
+      .tip {
+        background: rgba(174,227,123,0.12);
+        border-left: 3px solid var(--green);
+        border-radius: 0 10px 10px 0;
+        padding: 18px 22px;
+        margin: 28px 0;
+      }
+      .tip p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--navy);
+        font-weight: 500;
+      }
+      .post-cta {
+        background: var(--navy);
+        border-radius: 16px;
+        padding: 36px 32px;
+        margin-top: 64px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .post-cta::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(57,146,255,0.12);
+      }
+      .post-cta h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+      .post-cta p {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.88rem;
+        margin-bottom: 22px;
+        position: relative;
+        z-index: 1;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--core-blue);
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 40px;
+        transition: color 0.2s;
+      }
+      .back-link:hover { color: var(--navy); }
+      @media (max-width: 600px) {
+        .post-wrap { padding: 40px 18px 80px; }
+        .post-h1 { font-size: clamp(1.4rem, 7vw, 2rem); }
+        .post-intro { font-size: 0.93rem; }
+        .post-body h2 { font-size: 1.1rem; margin-top: 36px; }
+        .post-body h3 { font-size: 0.95rem; }
+        .post-cta { padding: 28px 20px; }
+        .post-cta h3 { font-size: 1rem; }
+        .post-cta .btn { width: 100%; text-align: center; justify-content: center; }
+        .post-meta { gap: 8px; }
+      }
+    </style>
+    <script type="application/ld+json" is:inline>
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Replace Manual Onboarding Spreadsheets with Automated Smartsheet Workflows",
+        "description": "Replace Excel-based onboarding with an automated Smartsheet system using Forms for intake, automation rules for task assignment and notifications, Reports for team tracking, and a Dashboard for real-time leadership visibility.",
+        "totalTime": "PT3H",
+        "tool": [
+          { "@type": "HowToTool", "name": "Smartsheet (Business or Enterprise plan)" }
+        ],
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Build the master onboarding sheet",
+            "text": "Create a new Smartsheet with columns for every onboarding task: employee name, start date, department, assigned owner, task status, due date, and completion date. Add a 'Notes' column for HR or manager comments. This sheet is the single source of truth — nothing gets tracked anywhere else."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Create the intake Form",
+            "text": "In your master sheet, go to Forms → Create Form. Include only fields the submitter needs to fill: new hire name, start date, department, and hiring manager. Leave internal tracking columns off the form. Copy the shareable link — this is what HR or managers will use to kick off onboarding for each new hire."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Set up automation rules",
+            "text": "Open Automations → Create Workflow. Build three rules: (1) When a new row is added via the Form, assign the onboarding owner and send them a notification. (2) When a task status changes to 'In Progress', notify the assigned owner. (3) When a due date is within 2 days and status is not 'Complete', send a reminder."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Build a Report for the HR or operations team",
+            "text": "Create a Sheet Summary Report filtered to show only open or overdue tasks across all onboarding records. Set columns to Employee Name, Task, Owner, Due Date, and Status. Share the Report — not the sheet — with the HR team so they have a live view of all active onboarding without access to the full data set."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 5,
+            "name": "Build the Dashboard for leadership visibility",
+            "text": "Create a new Dashboard and add widgets: a Chart widget showing onboarding tasks by status, a Metric widget showing total active onboardees, and a Report widget surfacing any overdue items. Share the Dashboard with leadership. It refreshes automatically — no one needs to compile a status update manually."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 6,
+            "name": "Test the full workflow end to end",
+            "text": "Submit a test entry through the Form using a dummy employee name. Confirm the row appears in the master sheet, the automation fires and sends the correct notification, the Report reflects the new row, and the Dashboard updates. Open an incognito window and verify that the Report and Dashboard links show only what you intended — nothing more."
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can I automate employee onboarding in Smartsheet without IT help?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The Forms, Automations, Reports, and Dashboards used in this setup require no code and no IT involvement. You build everything through Smartsheet's visual interface. The most technical step is configuring automation triggers and conditions, which uses a point-and-click workflow builder. A Smartsheet Business or Enterprise plan is required for full automation; the Pro plan has limited automation capabilities."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between a Smartsheet Report and a Dashboard?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A Report is a filtered, live view of rows from one or more sheets — it shows task-level data and is best for team members who need to act on specific items. A Dashboard is a higher-level summary view built from widgets (charts, metrics, report embeds) — it's best for leadership or stakeholders who need status at a glance without interacting with individual rows. Both update automatically and can be shared without sharing the underlying sheet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is this different from just sharing the onboarding spreadsheet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sharing the underlying sheet gives every recipient full visibility into every row and column — including other employees' data, internal notes, and fields they shouldn't edit. The Forms + Reports + Dashboard setup gives each person only the slice of data they need, with no risk of accidental edits to fields they shouldn't touch. It also adds automated notifications that push tasks to owners instead of requiring everyone to manually check for updates."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does this work for contractor onboarding, not just employees?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, and it's often a better fit for contractor onboarding because contractors typically shouldn't see internal employee data. The same architecture applies: a Form for intake, automation to assign tasks and send notifications, and a Report or Dynamic View filtered so each contractor sees only their own onboarding checklist."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I connect this Smartsheet onboarding setup to an HRIS like Workday or BambooHR?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Smartsheet integrates with HRIS platforms through its native integrations, Zapier, or direct API. The most common setup routes a trigger from the HRIS to automatically submit a row to your Smartsheet onboarding master sheet — eliminating the need for manual Form submissions entirely."
+            }
+          }
+        ]
+      }
+    ]
+    </script>
+  </Fragment>
+
+  <!-- POST CONTENT -->
+  <main style="padding-top:90px; background:var(--off-white); min-height:100vh;">
+    <div class="post-wrap">
+      <a href="/blogs" class="back-link">← Back to Blog</a>
+
+      <div class="post-meta">
+        <span class="post-tag">Smartsheet</span>
+        <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Automation</span>
+        <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Operations</span>
+        <span class="post-date">June 2026</span>
+      </div>
+
+      <h1 class="post-h1">How to Replace Manual Onboarding Spreadsheets with Automated Smartsheet Workflows</h1>
+
+      <p class="post-intro">
+        If your team manages employee onboarding in Excel, you already know the failure mode: a task gets updated in one cell, no one else is notified, something slips, and leadership asks for a status update that someone has to compile by hand.<br><br>
+        The fix is a Smartsheet workflow built on four components — a Form for intake, automation rules that assign tasks and fire notifications the moment something changes, a Report that gives the HR or operations team a live task view, and a Dashboard that shows leadership exactly where every onboardee stands without a single manual update.<br><br>
+        Here's exactly how to build it.
+      </p>
+
+      <div class="post-body">
+
+        <h2>Why Excel onboarding breaks down at scale</h2>
+        <p>A shared onboarding spreadsheet works fine for three hires. By the time you're running ten or twenty concurrent onboardings across multiple departments, the model falls apart in predictable ways.</p>
+        <p>First, there are no notifications. When an owner completes a task or a step is ready for the next person, nothing happens automatically — someone has to either check the sheet or send a Slack message. That manual handoff is where things fall through the cracks. Second, visibility is always a snapshot — any status report leadership receives is only as accurate as the last time someone manually updated their cells, which could have been three days ago. Third, there's no accountability trail — Excel doesn't log who changed what and when, which matters when onboarding touches payroll, system access, and compliance tasks.</p>
+        <p>The underlying issue is structural: Excel is a calculation tool being used as a workflow tool. It has no concept of triggers, owners, or notifications. Smartsheet does.</p>
+
+        <h2>The four-part architecture: Forms, Automation, Reports, and Dashboards</h2>
+        <p>Before jumping into setup, here's how the four components connect:</p>
+        <ul>
+          <li><strong>Form</strong> — HR or the hiring manager submits one form per new hire. The form drops a new row into the master sheet and triggers the entire onboarding chain. No one touches the sheet directly.</li>
+          <li><strong>Automation rules</strong> — Smartsheet watches the sheet and fires triggers: assign an owner when a row is created, notify them when their task is due, escalate if something is overdue. This is the piece Excel fundamentally cannot do.</li>
+          <li><strong>Report</strong> — A filtered, live view of open and overdue tasks shared with the HR or operations team. They see what needs action without accessing the full sheet.</li>
+          <li><strong>Dashboard</strong> — A summary view for leadership: total active onboardees, completion rates, overdue items. It refreshes automatically. No one compiles a status report by hand.</li>
+        </ul>
+        <p>The master sheet remains your single source of truth. Everything else reads from it — nothing writes to it except the Form and direct task updates from assigned owners.</p>
+
+        <h2>How to set it up, step by step</h2>
+
+        <h3>Step 1: Build the master onboarding sheet</h3>
+        <p>Create a new Smartsheet with columns for every onboarding task and data point: Employee Name, Start Date, Department, Assigned Owner, Task, Status, Due Date, Completion Date, and Notes. Keep internal-only fields (like payroll flags or system access notes) here — they'll never surface to outside viewers. This sheet is the source of truth. Nothing gets tracked anywhere else.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog2/sheetv1.jpeg" alt="Smartsheet master onboarding sheet titled 'New Hire Onboarding' showing columns for Hiring Manager, Coordinator, New Hire, Hiring Date, Drug Test, and Background Check — Drug Test results are color-coded green for Negative and red for Positive" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The master onboarding sheet — one row per new hire with color-coded Drug Test status (green = Negative, red = Positive) and a Background Check checkbox column visible at a glance.</figcaption>
+        </figure>
+
+        <h3>Step 2: Create the intake Form</h3>
+        <p>In your master sheet, go to <strong>Forms → Create Form</strong>. Include only the fields the submitter needs: new hire name, start date, department, and hiring manager. Leave any internal tracking columns off the form entirely. Set required fields and add any dropdowns you need (e.g., a Department dropdown reduces typos and keeps data clean). Copy the shareable form link — this is the only thing HR or managers need to kick off a new onboarding.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog2/formv1.jpeg" alt="Smartsheet New Hire intake form with four fields — New Hire, email address, Department, and Location — displayed on a branded Smartsheet form page with a navy left panel" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The intake Form only exposes the fields HR needs. Internal tracking columns (Hiring Manager, Drug Test, Background Check, Notes) stay off the form entirely.</figcaption>
+        </figure>
+
+        <h3>Step 3: Set up automation rules</h3>
+        <p>Open <strong>Automations → Create Workflow</strong>. Build three core rules to start:</p>
+        <ol>
+          <li><strong>New row trigger:</strong> When a row is added via the Form — assign the onboarding owner and send them a notification with the new hire's name and start date.</li>
+          <li><strong>Status change trigger:</strong> When the Status column changes to "In Progress" — notify the assigned owner.</li>
+          <li><strong>Due date reminder:</strong> When Due Date is within 2 days and Status is not "Complete" — send a reminder to the owner.</li>
+        </ol>
+        <p>Smartsheet's automation uses a point-and-click workflow builder — no code required. For a full reference on trigger types and conditions, see <a href="https://help.smartsheet.com/articles/2476671-automate-workflows-in-smartsheet" target="_blank" rel="noopener">Smartsheet's official automation documentation</a>.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog2/automation.jpeg" alt="Smartsheet Saved Automation Workflows panel showing the 'Assign Manager' rule — triggered when rows are added or changed, with actions to alert someone and assign people, sending notifications to contacts in the Hiring Manager column" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The "Assign Manager" automation rule: fires when a row is added or changed, alerts the owner, and assigns the contact in the Hiring Manager column automatically.</figcaption>
+        </figure>
+
+        <div class="tip">
+          <p><strong>Tip:</strong> Start with these three rules and add more as you identify gaps. Over-engineering automation on day one creates maintenance overhead — keep it simple and iterate.</p>
+        </div>
+
+        <h3>Step 4: Build the Report for the HR or operations team</h3>
+        <p>Go to <strong>Solution Center → Create → Report → Row Report</strong>. Select your master onboarding sheet as the source. Filter to show only rows where Status is not "Complete." Add columns: Employee Name, Task, Assigned Owner, Due Date, Status. Share this Report with your HR or operations team. They get a live, filtered task list — without access to the full sheet or anyone else's data outside this view.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog2/reportv1.jpeg" alt="Smartsheet report titled 'New Hire - Ready for Deployment' with 2 active filters applied, showing a trimmed-down view with three columns — Primary, Hiring Date, Drug Test, and Background Check — displaying only the rows ready for the next stage" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">The "New Hire - Ready for Deployment" report: 2 filters applied, showing only qualified hires with relevant columns. The team sees exactly what they need — nothing from the full master sheet leaks through.</figcaption>
+        </figure>
+
+        <h3>Step 5: Build the Dashboard for leadership visibility</h3>
+        <p>Create a new Dashboard from the Home menu. Add three widgets:</p>
+        <ul>
+          <li>A <strong>Chart widget</strong> — onboarding tasks by Status (a donut or bar chart works well here).</li>
+          <li>A <strong>Metric widget</strong> — total active onboardees pulled from a sheet summary formula.</li>
+          <li>A <strong>Report widget</strong> — embed the overdue items Report so leadership can see at-risk items without drilling into individual sheets.</li>
+        </ul>
+        <p>Share the Dashboard link with leadership. It refreshes automatically every time the underlying sheet changes. No one needs to compile or send a status update.</p>
+
+        <h3>Step 6: Test the full workflow end to end</h3>
+        <p>Submit a test entry through the Form using a dummy employee name. Confirm: the row appears in the master sheet, the automation fires and the correct owner receives a notification, the Report reflects the new row, and the Dashboard updates. Then open an incognito window and log in as a test team member — verify they see exactly what you intended and nothing more. This step catches permission mistakes before a real employee's data is involved.</p>
+
+        <h2>How we built this for an operations team</h2>
+        <p>One of our clients — an operations team — was managing all employee onboarding entirely in Excel. The sheet was slow to update, hard to track across departments, and completely invisible to leadership unless someone manually pulled a status report. There was no notification system, so task handoffs depended on people remembering to check the file.</p>
+        <p>We built the four-part setup above: a Form to capture new hire intake and eliminate direct sheet access, automation rules to assign tasks and fire notifications the moment a row was submitted or a status changed, a Report filtered to open and overdue items for the operations team, and a live Dashboard for leadership showing onboarding status across all active employees in real time.</p>
+        <p>The result: onboarding fully automated, real-time visibility enabled for leadership without any manual reporting, and manual effort reduced dramatically — the team went from chasing updates across a shared spreadsheet to having a system that pushed the right information to the right person at the right time.</p>
+
+        <h2>When this approach won't work</h2>
+        <ul>
+          <li><strong>Smartsheet Pro plan.</strong> Pro includes basic automations but caps the number of automation rules and lacks some advanced trigger options. A Business or Enterprise plan is required to fully implement what's described here.</li>
+          <li><strong>Complex conditional branching.</strong> If your onboarding has very different task paths depending on role, location, or employment type, a single-sheet setup can become unwieldy. At that point, Smartsheet WorkApps or a multi-sheet setup with cross-sheet formulas is the better architecture.</li>
+          <li><strong>HRIS-triggered automation.</strong> If you want Smartsheet to automatically receive a new hire record the moment it's created in Workday, BambooHR, or another HRIS, you'll need an API integration or middleware like Zapier. The Smartsheet structure described here stays the same — but the intake step changes from a manual Form submission to an automated row insertion.</li>
+        </ul>
+
+        <h2>Common mistakes to avoid</h2>
+        <ul>
+          <li><strong>Putting too many fields on the intake Form.</strong> The Form should only capture what's needed to create the row and trigger the workflow. Internal tracking fields, formula columns, and system-generated values should never appear on the Form.</li>
+          <li><strong>Not assigning owners at the row level.</strong> Automation notifications only work well when every task row has a named owner in a Contact column. If the Owner column is a plain text field instead of a Contact column, Smartsheet can't route notifications correctly.</li>
+          <li><strong>Sharing the sheet instead of the Report or Dashboard.</strong> The entire value of this setup is that HR and leadership never need to touch the master sheet. If you share the sheet directly, you've bypassed the access controls and reintroduced all the original problems.</li>
+          <li><strong>Skipping the end-to-end test.</strong> Always test as a recipient before going live. Submit a Form entry, follow the notification, and confirm the Report and Dashboard reflect the correct data — all in one pass, before real employee data enters the system.</li>
+        </ul>
+
+        <div class="callout">
+          <p><strong>Related:</strong> If you also need external contractors to submit data into your Smartsheet setup without sheet access, read our guide on <a href="/smartsheet-vendor-data-without-sheet-access">how to let vendors and subcontractors submit data without giving them sheet access</a>.</p>
+        </div>
+
+        <h2>Frequently asked questions</h2>
+
+        <p><strong>Can I automate employee onboarding in Smartsheet without IT help?</strong><br>
+        Yes. The Forms, Automations, Reports, and Dashboards used in this setup require no code and no IT involvement. You build everything through Smartsheet's visual interface. The most technical step is configuring automation triggers and conditions, which uses a point-and-click workflow builder — no scripting required. A Business or Enterprise plan is required for full automation.</p>
+
+        <p><strong>What is the difference between a Smartsheet Report and a Dashboard?</strong><br>
+        A Report is a filtered, live view of rows from one or more sheets — it shows task-level data and is best for team members who need to act on specific items. A Dashboard is a higher-level summary view built from widgets — it's designed for leadership or stakeholders who need status at a glance without interacting with individual rows. Both update automatically and can be shared without sharing the source sheet.</p>
+
+        <p><strong>How is this different from just sharing the onboarding spreadsheet?</strong><br>
+        Sharing the underlying sheet gives every recipient full visibility into every row and column — including other employees' data, internal HR notes, and fields they shouldn't edit. The Forms + Reports + Dashboard setup gives each person only the slice of data relevant to their role, with no risk of accidental edits. It also adds automated notifications that push tasks to owners instead of requiring everyone to manually check for updates.</p>
+
+        <p><strong>Does this work for contractor onboarding, not just employees?</strong><br>
+        Yes, and it's often a better fit for contractor onboarding precisely because contractors shouldn't see internal employee records. The same architecture applies: a Form for intake, automation to assign tasks and send notifications, and a Report or Dynamic View filtered so each contractor sees only their own checklist. We covered the Dynamic View approach in our <a href="/smartsheet-vendor-data-without-sheet-access">previous post on vendor data submission</a>.</p>
+
+        <p><strong>Can I connect this Smartsheet onboarding setup to an HRIS like Workday or BambooHR?</strong><br>
+        Yes. Smartsheet integrates with HRIS platforms through its native integrations, Zapier, or direct API. The most common setup routes a trigger from the HRIS to automatically insert a row into your onboarding master sheet — eliminating the manual Form submission entirely. If you need this connected to an existing HRIS, <a href="/contact">get in touch</a> and we can scope it.</p>
+
+      </div>
+
+      <div class="post-cta">
+        <h3>Need this built for your team?</h3>
+        <p>We've implemented this setup — and more complex, multi-sheet onboarding architectures — for operations teams managing dozens of concurrent hires. Book a free call and we'll scope it for you.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;">
+          <a href="/contact" class="btn btn-white" style="display:inline-flex;align-items:center;gap:8px;">Book a Free Discovery Call →</a>
+          <a href="/services" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:8px;">View Our Services</a>
+        </div>
+      </div>
+
+      <aside aria-label="About the author" style="display:flex;align-items:flex-start;gap:20px;margin-top:48px;padding:28px 28px;background:var(--white);border-radius:16px;border:1.5px solid rgba(3,44,124,0.07);">
+        <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(4,100,221,0.08);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:var(--core-blue);">K</div>
+        <div>
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--core-blue);margin-bottom:6px;">About the Author</div>
+          <p style="font-size:0.9rem;line-height:1.75;color:var(--steel);margin:0;"><strong style="color:var(--navy);">Kenneth Robles</strong> is a Smartsheet Expert and founder of Robles Technologies Corp., a consulting firm that builds Smartsheet solutions for enterprise operations teams. Kenneth has designed and deployed Smartsheet architectures for Fortune 500 clients, including multi-stream data intake systems, automated approval workflows, and real-time executive dashboards. <a href="/team" style="color:var(--core-blue);text-decoration:underline;text-underline-offset:3px;">Learn more about the team →</a></p>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+</BaseLayout>

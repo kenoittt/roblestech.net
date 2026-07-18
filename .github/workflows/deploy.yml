@@ -1,8 +1,9 @@
 name: Deploy Astro site to GitHub Pages
 
-# NOTE: This does not take effect until you switch the repo's Pages source to
-# "GitHub Actions" (Settings → Pages → Build and deployment → Source).
-# Until then, your current site (served from the branch root) is untouched.
+# On push to main this builds the Astro site and publishes dist/ to GitHub
+# Pages. The configure-pages step below attempts to switch the Pages source to
+# "GitHub Actions" automatically; if your org blocks that, set it once by hand
+# under Settings → Pages → Build and deployment → Source → GitHub Actions.
 on:
   push:
     branches: [main]
@@ -29,6 +30,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - name: Configure Pages (enable GitHub Actions as the source)
+        uses: actions/configure-pages@v4
+        with:
+          enablement: true
       - name: Install dependencies
         run: npm ci
       - name: Build with Astro

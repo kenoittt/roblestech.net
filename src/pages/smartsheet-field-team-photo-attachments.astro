@@ -1,0 +1,396 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="How Field Teams Can Submit Photos & Attachments to Smartsheet Without Sheet Access" description="A step-by-step guide to letting field crews submit photos and file attachments to Smartsheet from their phones, without giving them access to the source sheet. Uses Smartsheet Forms with a file-upload field." active="">
+  <Fragment slot="head">
+    <style>
+      .post-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 60px 24px 100px;
+      }
+      .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+      .post-tag {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--core-blue);
+        background: rgba(4,100,221,0.08);
+        padding: 5px 12px;
+        border-radius: 100px;
+      }
+      .post-date {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .post-h1 {
+        font-size: clamp(1.7rem, 4vw, 2.6rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--navy);
+        line-height: 1.1;
+        margin-bottom: 28px;
+      }
+      .post-intro {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--steel);
+        margin-bottom: 40px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid rgba(3,44,124,0.08);
+      }
+      .post-body h2 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.025em;
+        margin: 48px 0 16px;
+      }
+      .post-body h3 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.015em;
+        margin: 36px 0 12px;
+      }
+      .post-body p {
+        font-size: 0.93rem;
+        line-height: 1.82;
+        color: var(--steel);
+        margin-bottom: 18px;
+      }
+      .post-body ul, .post-body ol {
+        margin: 0 0 20px 20px;
+      }
+      .post-body li {
+        font-size: 0.93rem;
+        line-height: 1.8;
+        color: var(--steel);
+        margin-bottom: 10px;
+      }
+      .post-body ol li {
+        padding-left: 8px;
+      }
+      .post-body strong {
+        color: var(--navy);
+        font-weight: 700;
+      }
+      .post-body a {
+        color: var(--core-blue);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .post-body a:hover { color: var(--navy); }
+      .callout {
+        background: rgba(4,100,221,0.06);
+        border-left: 3px solid var(--core-blue);
+        border-radius: 0 10px 10px 0;
+        padding: 18px 22px;
+        margin: 28px 0;
+      }
+      .callout p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--navy);
+        font-weight: 500;
+      }
+      .tip {
+        background: rgba(174,227,123,0.12);
+        border-left: 3px solid var(--green);
+        border-radius: 0 10px 10px 0;
+        padding: 18px 22px;
+        margin: 28px 0;
+      }
+      .tip p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--navy);
+        font-weight: 500;
+      }
+      .post-cta {
+        background: var(--navy);
+        border-radius: 16px;
+        padding: 36px 32px;
+        margin-top: 64px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .post-cta::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(57,146,255,0.12);
+      }
+      .post-cta h3 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+      .post-cta p {
+        color: rgba(255,255,255,0.65);
+        font-size: 0.88rem;
+        margin-bottom: 22px;
+        position: relative;
+        z-index: 1;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--core-blue);
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 40px;
+        transition: color 0.2s;
+      }
+      .back-link:hover { color: var(--navy); }
+      @media (max-width: 600px) {
+        .post-wrap { padding: 40px 18px 80px; }
+        .post-h1 { font-size: clamp(1.4rem, 7vw, 2rem); }
+        .post-intro { font-size: 0.93rem; }
+        .post-body h2 { font-size: 1.1rem; margin-top: 36px; }
+        .post-body h3 { font-size: 0.95rem; }
+        .post-cta { padding: 28px 20px; }
+        .post-cta h3 { font-size: 1rem; }
+        .post-cta .btn { width: 100%; text-align: center; justify-content: center; }
+        .post-meta { gap: 8px; }
+      }
+    </style>
+    <script type="application/ld+json" is:inline>
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How Field Teams Can Submit Photos & Attachments to Smartsheet Without Sheet Access",
+    "description": "A step-by-step guide to letting field crews submit photos and file attachments to Smartsheet from their phones, without giving them access to the source sheet.",
+    "totalTime": "PT20M",
+    "tool": [
+      { "@type": "HowToTool", "name": "Smartsheet (Business plan or higher)" },
+      { "@type": "HowToTool", "name": "Smartphone with a camera" }
+    ],
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Build the destination sheet",
+        "text": "Create columns for every piece of context you want on every photo: a primary column for the site or job name, crew member name, date, a status dropdown, and any classification you need. File uploads will attach to the row each submission creates."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Create a form and add a File Upload field",
+        "text": "From the sheet, open Forms → Create Form. Add a File Upload field, set it to required, and map the remaining questions to your context columns so no photo arrives unlabelled. Hide any internal-only columns from the form."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Configure the form for mobile photo capture",
+        "text": "Keep the form short. Write plain-language labels, turn on a confirmation message, and consider enabling 'submit another' for jobs with multiple photos. On a phone, tapping the File Upload field offers Take Photo or Choose from Library automatically — no app required."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Share the form link, not the sheet",
+        "text": "Publish the form and copy its URL. Share only that link — by text, pinned chat, or as a printed QR code on the job-site board. Anyone who opens it can submit; nobody can reach the sheet behind it."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 5,
+        "name": "Review and manage submitted photos",
+        "text": "Every submission creates a new row with the photo in the row's attachments. Use the Status column to track what's been reviewed. Set up a notification automation so a photo from the field is seen in minutes, not at end of day."
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can someone submit a photo to Smartsheet without a Smartsheet account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. A Smartsheet Form can be filled out by anyone with the link, and a File Upload field on that form lets them attach a photo. The submitter does not need a Smartsheet account, a paid license, or any access to the sheet the form feeds."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do field teams need access to the sheet to upload photos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The form is a one-way intake: a submitter can add a new row with a photo, but they cannot view, edit, or download anything already in the sheet. Access to the underlying sheet stays limited to your internal team."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do field crews take photos directly from their phones?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Smartsheet forms are mobile-responsive. When a crew member taps the File Upload field, the phone offers the option to take a new photo with the camera or pick an existing one from the gallery. No app install is required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a file size or file type limit on form attachments?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Smartsheet enforces a maximum file size per upload, and the limit can differ by plan. Standard phone photos are usually well within range, but high-resolution images or video can hit the cap. Always confirm the current limit in Smartsheet's official documentation before rolling out."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this different from emailing photos to the office?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Email scatters photos across inboxes with no structure, no status, and no easy way to see what's missing. A form lands every photo as a labelled row in one sheet, tagged with the site, date, and any other context you require. You can sort, filter, report, and trigger automatic notifications — none of which is practical over email."
+        }
+      }
+    ]
+  }
+]
+    </script>
+  </Fragment>
+
+  <!-- POST CONTENT -->
+  <main style="padding-top:90px; background:var(--off-white); min-height:100vh;">
+    <div class="post-wrap">
+      <a href="/blogs" class="back-link">← Back to Blog</a>
+
+      <div class="post-meta">
+        <span class="post-tag">Smartsheet</span>
+        <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Forms</span>
+        <span class="post-tag" style="color:var(--steel);background:rgba(47,88,163,0.08);">Field Operations</span>
+        <span class="post-date">June 2026</span>
+      </div>
+
+      <h1 class="post-h1">How Field Teams Can Submit Photos &amp; Attachments to Smartsheet Without Sheet Access</h1>
+
+      <p class="post-intro">
+        Field crews need to submit completion photos, site images, and inspection attachments — but you can't hand them access to the master sheet. That would expose every other job, every internal note, and invite accidental edits no one in the field should be making.<br><br>
+        The fix is a Smartsheet Form with a File Upload field. Anyone with the link can take a photo and submit it directly from their phone. The photo lands as a labelled row in your sheet. The submitter never sees what's already inside.<br><br>
+        Here's exactly how to set it up in about 20 minutes.
+      </p>
+
+      <div class="post-body">
+
+        <h2>Why forms are the right tool for field photo collection</h2>
+        <p>A Smartsheet Form is a one-way intake door. Someone can walk a new row in — with a photo attached — but they can't see anything that's already inside. That single property solves the two problems field photo collection always runs into.</p>
+        <ul>
+          <li><strong>Privacy.</strong> The crew never touches the sheet. They see a form with a few fields and a "take photo" button, nothing else. Your data stays yours.</li>
+          <li><strong>Cost and scale.</strong> Form submitters don't need a Smartsheet license. Whether you have 3 field staff or 300, the cost of collection is the same, and onboarding a new person is just sharing a link.</li>
+        </ul>
+
+        <h2>The 5-step setup</h2>
+
+        <h3>Step 1: Build the destination sheet</h3>
+        <p>Start with the columns you'll want for every photo: a primary column for the site or job name, a column for the crew member's name, a date, a status dropdown (e.g., New → Reviewed → Filed), and any classification you need — photo type, trade, area. The file uploads will attach to whatever row each submission creates, so think of these columns as the label on each photo.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog%203/blog3sheet.jpeg" alt="Smartsheet destination sheet with labelled columns for site or job name, crew member name, date, status dropdown, and photo classification — one column per piece of context required on every photo submission" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">Step 1: the destination sheet, with one labelled column per piece of context you want on every photo.</figcaption>
+        </figure>
+
+        <h3>Step 2: Create a form and add a File Upload field</h3>
+        <p>From the sheet, open <strong>Forms → Create Form</strong>. Smartsheet auto-generates a question for each column. Add a <strong>File Upload</strong> field, set it to required, and map the remaining questions to your context columns so no photo ever arrives unlabelled. Delete or hide any internal-only columns you don't want crews filling in.</p>
+        <figure style="margin:28px 0;">
+          <img src="/blog%203/blog3form.jpeg" alt="Smartsheet form builder showing a required File Upload field for photo attachments mapped beneath the Site name and Crew Member name questions — internal tracking columns hidden from the form" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
+          <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">Step 2: the form builder, with a required Photo Upload field mapped beneath the Site and Crew Member questions.</figcaption>
+        </figure>
+
+        <div class="tip">
+          <p><strong>Tip:</strong> Map every visible form field to a column. A photo that arrives with no site name, no date, and no crew member attached is nearly as useless as no photo at all.</p>
+        </div>
+
+        <h3>Step 3: Configure the form for mobile photo capture</h3>
+        <p>Keep it short. Every extra field is a reason a tired crew skips the upload. Write plain-language labels ("Photo of the finished install"), turn on a confirmation message so people know the upload worked, and consider enabling "submit another" for jobs with multiple photos. On a phone, tapping the File Upload field offers <strong>Take Photo</strong> or <strong>Choose from Library</strong> automatically — no app required.</p>
+
+        <h3>Step 4: Share the form link, not the sheet</h3>
+        <p>Publish the form and copy its URL. Share <em>only</em> that link — by text, in a pinned chat message, or as a printed QR code on the job-site board. Anyone who opens it can submit; nobody can reach the sheet behind it. A QR code is the highest-adoption option: crews scan and submit without typing a URL or logging in.</p>
+
+        <div class="callout">
+          <p><strong>Heads up:</strong> File upload on forms requires a qualifying Smartsheet plan (Business or higher). On lower tiers the field may be unavailable — verify your plan supports it before designing the workflow around it.</p>
+        </div>
+
+        <h3>Step 5: Review and manage submitted photos</h3>
+        <p>Every submission creates a new row with the photo in the row's attachments. Open it from the attachment icon, then use the Status column to track what's been reviewed. Set up a <strong>notification automation</strong> ("when a new row is created, alert the office") so a photo from the field is seen in minutes, not at end of day. For deeper automation logic, see <a href="https://help.smartsheet.com/articles/2476671-automate-workflows-in-smartsheet" target="_blank" rel="noopener">Smartsheet's official automation documentation</a>.</p>
+
+        <h2>Important: check current limits</h2>
+        <p>For the exact, current file-size limits and the full list of supported attachment types, check Smartsheet's official help center:</p>
+        <ul>
+          <li><a href="https://help.smartsheet.com/articles/518408-uploading-attachments" target="_blank" rel="noopener">Uploading attachments</a></li>
+          <li><a href="https://help.smartsheet.com/articles/2482491-customize-form-appearance" target="_blank" rel="noopener">Smartsheet Forms</a></li>
+        </ul>
+        <p>Limits can change and vary by plan, so confirm against the source before you roll this out company-wide.</p>
+
+        <h2>When this approach won't work</h2>
+        <ul>
+          <li><strong>You need crews to edit existing rows, not just add new ones.</strong> A form only creates new rows. If a field user must update or correct a record that already exists, you'd need a licensed editor, a row-level Update Request, or a Dynamic View setup instead.</li>
+          <li><strong>Your photos or videos exceed the per-upload size limit.</strong> Forms enforce a maximum file size that varies by plan. Standard phone photos are usually fine, but video and large batches can be rejected. If you routinely need large files, plan for cloud-storage links instead.</li>
+          <li><strong>You're on a plan tier that restricts form file uploads.</strong> File upload on forms requires a qualifying plan. Verify yours supports it before building the workflow around it.</li>
+        </ul>
+
+        <h2>How we built this for a regional installation contractor</h2>
+        <p>A regional installation contractor we worked with had 40 installers texting completion photos to a single office coordinator. Photos arrived with no job number, no consistent naming, and no way to tell which jobs were still missing proof. The coordinator spent roughly an hour a day chasing and re-filing images.</p>
+        <p>We replaced it with one form: <em>Job number, Installer name, Photo</em> — shared as a QR code printed on every work order. Within a week, every completion photo was landing as a labelled row, auto-sorted by job, with a notification firing to the coordinator on each submission.</p>
+        <p>The daily chase disappeared, and for the first time the contractor could see — at a glance — which jobs were photo-complete and which weren't, without giving a single installer access to the master sheet.</p>
+
+        <h2>Frequently asked questions</h2>
+
+        <p><strong>Can someone submit a photo to Smartsheet without a Smartsheet account?</strong><br>
+        Yes. A Smartsheet Form can be filled out by anyone with the link, and a File Upload field on that form lets them attach a photo. The submitter does not need a Smartsheet account, a paid license, or any access to the sheet the form feeds. This is the core reason forms are the right tool for field crews, subcontractors, and other external users who only need to send data in, not see what is already there.</p>
+
+        <p><strong>Do field teams need access to the sheet to upload photos?</strong><br>
+        No, and that's the point. The form is a one-way intake: a submitter can add a new row with a photo, but they cannot view, edit, or download anything already in the sheet. Access to the underlying sheet stays limited to your internal team — protecting client data, pricing, and other rows while still letting an unlimited number of field staff contribute photos.</p>
+
+        <p><strong>How do field crews take photos directly from their phones?</strong><br>
+        Smartsheet forms are mobile-responsive, so the form opens cleanly in any phone browser. When a crew member taps the File Upload field, the phone offers the option to take a new photo with the camera or pick an existing one from the gallery. No app install is required, though the Smartsheet mobile app is an option if your team prefers it. Sharing the form as a QR code makes it a one-tap action on site.</p>
+
+        <p><strong>Is there a file size or file type limit on form attachments?</strong><br>
+        Yes. Smartsheet enforces a maximum file size per upload, and the limit can differ by plan — always confirm the current number in <a href="https://help.smartsheet.com/articles/518408-uploading-attachments" target="_blank" rel="noopener">Smartsheet's official documentation</a> before rolling out. Standard phone photos are well within range, but high-resolution images or short videos can hit the cap.</p>
+
+        <p><strong>How is this different from emailing photos to the office?</strong><br>
+        Email scatters photos across inboxes with no structure, no status, and no easy way to see what's missing. A form lands every photo as a labelled row in one sheet, tagged with the site, date, and any other context you require. You can sort, filter, report, and trigger automatic notifications — none of which is practical over email. It turns a pile of attachments into a searchable, trackable record.</p>
+
+        <div class="callout">
+          <p><strong>Related:</strong> If you also need vendors or subcontractors to submit structured data (not just photos) without sheet access, read our guide on <a href="/smartsheet-vendor-data-without-sheet-access">how to let vendors submit data to Smartsheet without giving them sheet access</a>.</p>
+        </div>
+
+      </div>
+
+      <div class="post-cta">
+        <h3>Need this built for your team?</h3>
+        <p>We've set up this exact workflow — and more complex field data collection systems — for contractors and operations teams across industries. Book a free call and we'll scope it for your process.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;">
+          <a href="/contact" class="btn btn-white" style="display:inline-flex;align-items:center;gap:8px;">Book a Free Discovery Call →</a>
+          <a href="/services" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:8px;">View Our Services</a>
+        </div>
+      </div>
+
+      <aside aria-label="About the author" style="display:flex;align-items:flex-start;gap:20px;margin-top:48px;padding:28px 28px;background:var(--white);border-radius:16px;border:1.5px solid rgba(3,44,124,0.07);">
+        <div style="flex-shrink:0;width:56px;height:56px;border-radius:50%;background:rgba(4,100,221,0.08);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:var(--core-blue);">K</div>
+        <div>
+          <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--core-blue);margin-bottom:6px;">About the Author</div>
+          <p style="font-size:0.9rem;line-height:1.75;color:var(--steel);margin:0;"><strong style="color:var(--navy);">Kenneth Robles</strong> is a Smartsheet Expert and founder of Robles Technologies Corp., a consulting firm that builds Smartsheet solutions for enterprise operations teams. Kenneth has designed and deployed Smartsheet architectures for Fortune 500 clients, including multi-stream data intake systems, automated approval workflows, and real-time executive dashboards. <a href="/team" style="color:var(--core-blue);text-decoration:underline;text-underline-offset:3px;">Learn more about the team →</a></p>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+</BaseLayout>

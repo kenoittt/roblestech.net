@@ -1,0 +1,434 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Frequently Asked Questions — Robles Technologies Corp."
+  description="Answers to common questions about RTC's Smartsheet development, technical consulting, AI-powered SEO services, pricing, and delivery process."
+  active=""
+>
+  <Fragment slot="head">
+    <style>
+      .faq-layout {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 60px;
+        max-width: 1080px;
+        margin: 0 auto;
+        align-items: start;
+      }
+
+      /* Sticky sidebar nav */
+      .faq-sidebar {
+        position: sticky;
+        top: 110px;
+      }
+      .faq-sidebar-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 14px;
+      }
+      .faq-nav {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .faq-nav a {
+        display: block;
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--steel);
+        text-decoration: none;
+        transition: background 0.15s, color 0.15s;
+      }
+      .faq-nav a:hover,
+      .faq-nav a.active { background: rgba(4,100,221,0.08); color: var(--core-blue); }
+
+      /* FAQ sections */
+      .faq-content { min-width: 0; }
+      .faq-section { margin-bottom: 72px; }
+      .faq-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--navy);
+        letter-spacing: -0.02em;
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+        border-bottom: 2px solid rgba(4,100,221,0.12);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .faq-section-title span {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--core-blue);
+        background: rgba(4,100,221,0.08);
+        padding: 4px 10px;
+        border-radius: 100px;
+      }
+
+      /* Accordion items */
+      .faq-item {
+        border-bottom: 1px solid rgba(3,44,124,0.07);
+      }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-q {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 18px 4px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--navy);
+        line-height: 1.5;
+        user-select: none;
+        transition: color 0.2s;
+      }
+      .faq-q:hover { color: var(--core-blue); }
+      .faq-chevron {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(4,100,221,0.08);
+        color: var(--core-blue);
+        font-size: 0.7rem;
+        transition: transform 0.25s, background 0.2s;
+        margin-top: 2px;
+      }
+      .faq-item.open .faq-chevron {
+        transform: rotate(180deg);
+        background: var(--core-blue);
+        color: var(--white);
+      }
+      .faq-item.open .faq-q { color: var(--core-blue); }
+      .faq-a {
+        display: none;
+        padding: 0 4px 20px;
+        font-size: 0.85rem;
+        line-height: 1.8;
+        color: var(--steel);
+      }
+      .faq-item.open .faq-a { display: block; }
+      .faq-a ul {
+        margin: 10px 0 10px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .faq-a li { font-size: 0.85rem; line-height: 1.75; color: var(--steel); }
+      .faq-a strong { color: var(--navy); font-weight: 700; }
+      .faq-a a { color: var(--core-blue); text-decoration: none; }
+      .faq-a a:hover { text-decoration: underline; }
+
+      .faq-cta {
+        background: var(--navy);
+        border-radius: 16px;
+        padding: 36px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-top: 16px;
+      }
+      .faq-cta::before {
+        content: '';
+        position: absolute;
+        top: -50px; right: -50px;
+        width: 180px; height: 180px;
+        border-radius: 50%;
+        background: rgba(57,146,255,0.12);
+      }
+      .faq-cta h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+      }
+      .faq-cta p {
+        color: rgba(255,255,255,0.62);
+        font-size: 0.85rem;
+        margin-bottom: 22px;
+        position: relative;
+        z-index: 1;
+      }
+      .faq-cta-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+      }
+
+      @media (max-width: 980px) {
+        .faq-layout { grid-template-columns: 1fr; gap: 0; }
+        .faq-sidebar { position: static; margin-bottom: 40px; }
+        .faq-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+        .faq-nav a { padding: 7px 12px; }
+        .faq-cta-actions { flex-direction: column; align-items: center; gap: 10px; }
+        .faq-cta-actions .btn { width: 100%; max-width: 320px; justify-content: center; text-align: center; }
+      }
+      @media (max-width: 600px) {
+        .faq-section-title { font-size: 1rem; }
+        .faq-q { font-size: 0.84rem; }
+        .faq-cta { padding: 28px 20px; }
+        .faq-nav a { font-size: 0.72rem; padding: 6px 10px; }
+      }
+    </style>
+    <script type="application/ld+json" is:inline>
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"What is Robles Technologies Corp. (RTC)?","acceptedAnswer":{"@type":"Answer","text":"RTC is a Filipino-founded IT services company that bridges world-class Filipino IT talent with global clients. We specialize in Smartsheet development, technical consulting, and AI-powered SEO — delivering high-standard execution with zero offshore communication friction."}},
+    {"@type":"Question","name":"Who do you typically work with?","acceptedAnswer":{"@type":"Answer","text":"We work with growing businesses and enterprises that need reliable tech support — from startups scaling their operations to Fortune 500 companies needing specialized Smartsheet or integration work. Our clients span various industries across the US and globally."}},
+    {"@type":"Question","name":"Do I need an existing Smartsheet subscription to work with RTC?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your Smartsheet environment."}},
+    {"@type":"Question","name":"Can you integrate Smartsheet with other tools we use?","acceptedAnswer":{"@type":"Answer","text":"Yes. We support integrations with tools like Jira, Salesforce, Slack, and more. Third-party integrations are included in the Momentum tier and above, or available as add-ons starting from $3,500 per system."}},
+    {"@type":"Question","name":"What is AI-Powered SEO and how is it different from traditional SEO?","acceptedAnswer":{"@type":"Answer","text":"We combine AI tools with human oversight to produce keyword research, content briefs, on-page optimization, and competitive analysis at scale — faster and more data-driven than traditional approaches. The result is content engineered to rank and convert, not just fill pages."}},
+    {"@type":"Question","name":"Are your prices fixed or do they change after scoping?","acceptedAnswer":{"@type":"Answer","text":"We send fixed-price proposals within 48 hours of your discovery call. For project work, what's quoted is what you pay — no hidden fees. Retainers have defined monthly inclusions with overages billed at transparent hourly rates."}}
+  ]
+}
+    </script>
+  </Fragment>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-pat"></div>
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>FAQs</div>
+    <span class="sec-tag">Got Questions?</span>
+    <h1 class="sec-h">Frequently Asked Questions</h1>
+    <p class="sec-p">Everything you need to know about working with RTC — from services and pricing to delivery and support.</p>
+  </div>
+
+  <!-- FAQ BODY -->
+  <section class="sec" style="background:var(--off-white);">
+    <div class="faq-layout">
+
+      <!-- Sidebar nav -->
+      <aside class="faq-sidebar">
+        <div class="faq-sidebar-label">Jump to section</div>
+        <ul class="faq-nav">
+          <li><a href="#general">General</a></li>
+          <li><a href="#smartsheet">Smartsheet</a></li>
+          <li><a href="#consulting">Consulting</a></li>
+          <li><a href="#seo">AI SEO</a></li>
+          <li><a href="#pricing">Pricing &amp; Process</a></li>
+        </ul>
+      </aside>
+
+      <!-- FAQ content -->
+      <div class="faq-content">
+
+        <!-- GENERAL -->
+        <div class="faq-section" id="general">
+          <div class="faq-section-title">General <span>About RTC</span></div>
+
+          <div class="faq-item">
+            <div class="faq-q">What is Robles Technologies Corp. (RTC)? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>RTC is a Filipino-founded IT services company that bridges world-class Filipino IT talent with global clients. We specialize in Smartsheet development, technical consulting, and AI-powered SEO — delivering high-standard execution with zero offshore communication friction.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Who do you typically work with? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>We work with growing businesses and enterprises that need reliable tech support — from startups scaling their operations to Fortune 500 companies needing specialized Smartsheet or integration work. Our clients span various industries across the US and globally.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Where is RTC based and how does remote delivery work? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Our team is based in the Philippines, operating with global delivery standards. We bridge the communication gap that typically comes with offshore vendors — you get world-class talent with clear, proactive communication and consistent quality throughout the engagement.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">How do I get started with RTC? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Every engagement starts with a free 30-minute discovery call. After that, we scope the project and send you a fixed-price proposal within 48 hours — no commitment required until you're ready to move forward.</p>
+            <p style="margin-top:12px;"><a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;font-size:0.78rem;">Book a Free Discovery Call →</a></p></div>
+          </div>
+        </div>
+
+        <!-- SMARTSHEET -->
+        <div class="faq-section" id="smartsheet">
+          <div class="faq-section-title">Smartsheet Development <span>Services</span></div>
+
+          <div class="faq-item">
+            <div class="faq-q">Do I need an existing Smartsheet subscription to work with RTC? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Yes. Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your Smartsheet environment.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What's the difference between the Launchpad, Momentum, and Enterprise tiers? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a">
+              <p>The tiers scale by complexity and team size:</p>
+              <ul>
+                <li><strong>Launchpad ($3,500)</strong> — Small teams, up to 5 sheets, basic automations, 1 dashboard. Best for getting started.</li>
+                <li><strong>Momentum ($9,500)</strong> — Up to 15 sheets, advanced automations, one third-party integration (e.g. Jira, Salesforce, Slack), and team training.</li>
+                <li><strong>Enterprise ($22,000+)</strong> — Unlimited sheets, Bridge workflows, multi-system API integrations, Control Center/PMO setup, and a 90-day adoption guarantee.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can you integrate Smartsheet with other tools we use? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Yes. We support integrations with tools like Jira, Salesforce, Slack, and more. Third-party integrations are included in the Momentum tier and above, or available as add-ons starting at $3,500 per system.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What happens after the project is delivered? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>All tiers include post-launch support — 14 days for Launchpad, 30 days for Momentum, and a full 90-day adoption guarantee for Enterprise. We also offer ongoing Managed Support Retainers starting at $1,500/month if you need continued help.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">How long does a Smartsheet project take? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Delivery timelines vary by tier: Launchpad takes 2–3 weeks, Momentum 4–6 weeks, and Enterprise 8–16 weeks depending on scope. We provide milestone updates throughout so you always know where things stand.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can you add more sheets, dashboards, or integrations after launch? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a">
+              <p>Yes. We offer enhancement add-ons at any point:</p>
+              <ul>
+                <li>Additional API integrations from <strong>$3,500 per system</strong></li>
+                <li>Dashboard expansions from <strong>$600</strong></li>
+                <li>Extra training sessions from <strong>$450</strong></li>
+                <li>Smartsheet AI enablement from <strong>$4,500</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONSULTING -->
+        <div class="faq-section" id="consulting">
+          <div class="faq-section-title">Technical Consulting <span>Services</span></div>
+
+          <div class="faq-item">
+            <div class="faq-q">What does Technical Consulting include? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Our technical consulting covers technology strategy, systems and API architecture, web and app development, code reviews, platform evaluations, and digital transformation roadmaps. We embed with your team and deliver outcomes, not just advice.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can I hire RTC for a one-time technical question or review? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Absolutely. Our Advisory tier is available at $200/hr or $1,500 per strategy session with no retainer required. It's ideal for architecture decisions, pre-project planning, code audits, or second opinions on existing technical plans.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What's included in the monthly Retainer? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>The Retainer ($3,500/month, minimum 3-month commitment) includes up to 20 hours of consulting, architecture design, API builds and maintenance, web/app feature development, code review, a monthly strategy call, and async support via a dedicated channel. Hours beyond 20/month are billed at $175/hr.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What does the Dedicated (Embedded CTO) tier look like? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>At $8,000/month, you get a dedicated technical lead acting as your embedded CTO — unlimited consulting hours within scope, full architecture ownership, cross-platform API development, team management guidance, weekly executive alignment meetings, and a same-business-day response SLA.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can you build custom web or mobile applications? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Yes. Full-stack web and mobile development is part of our Technical Consulting services. We build client portals, internal tools, and customer-facing products designed to scale with your business.</p></div>
+          </div>
+        </div>
+
+        <!-- SEO -->
+        <div class="faq-section" id="seo">
+          <div class="faq-section-title">AI-Powered SEO <span>Services</span></div>
+
+          <div class="faq-item">
+            <div class="faq-q">What is AI-Powered SEO and how is it different from traditional SEO? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>We combine AI tools with human oversight to produce keyword research, content briefs, on-page optimization, and competitive analysis at scale — faster and more data-driven than traditional approaches. The result is content engineered to rank and convert, not just fill pages.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What's included in the Starter SEO tier? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>The Starter tier ($1,500/month, 3-month minimum) includes 8 AI-optimized blog posts per month, keyword and AI search topic research, a content calendar (Notion or Sheets), and a monthly performance report.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">When should I consider the System or Convert tiers? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a">
+              <p>Choose <strong>System ($2,000/month)</strong> if you have a site but aren't ranking — it adds on-page SEO for 5 pages/month, FAQ and structured data markup, and quarterly competitor content gap audits.</p>
+              <p>Choose <strong>Convert ($2,500/month)</strong> if you're getting traffic that doesn't convert — it adds conversion copy review, a monthly strategy call, and a brand voice guide.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Do I own the content RTC produces? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Yes. Under the Convert tier, all assets are fully owned by the client with no lock-in. We recommend discussing asset ownership terms during your discovery call if you're on a lower tier.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">How soon can I expect to see SEO results? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>SEO is a long-term investment. Most clients begin seeing measurable movement in rankings and traffic within 3–6 months. The minimum 3-month commitment exists because meaningful SEO impact requires consistency and compounding effort.</p></div>
+          </div>
+        </div>
+
+        <!-- PRICING & PROCESS -->
+        <div class="faq-section" id="pricing">
+          <div class="faq-section-title">Pricing &amp; Process <span>How We Work</span></div>
+
+          <div class="faq-item">
+            <div class="faq-q">Are your prices fixed or do they change after scoping? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>We send fixed-price proposals within 48 hours of your discovery call. For project work, what's quoted is what you pay — no hidden fees. Retainers have defined monthly inclusions with overages billed at transparent hourly rates.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What does the delivery process look like end-to-end? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a">
+              <p>Every engagement follows four phases:</p>
+              <ul>
+                <li><strong>Discovery</strong> — We listen first, understanding your workflows, goals, and bottlenecks before proposing anything.</li>
+                <li><strong>Solution Design</strong> — We map the right technical approach, scoped, documented, and aligned to your business outcomes.</li>
+                <li><strong>Build &amp; Deliver</strong> — Consistent communication at every stage — no surprises at launch.</li>
+                <li><strong>Support &amp; Scale</strong> — Post-launch support and iteration to ensure solutions scale as you grow.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Can I start with a smaller engagement before committing to a larger one? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>Yes. The Advisory tier for Technical Consulting and the Launchpad tier for Smartsheet are both designed as low-commitment entry points. You can expand the engagement once you've seen how we work.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">What if my needs don't fit neatly into one of your tiers? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a"><p>We're flexible. Every engagement starts with a discovery call where we listen to your specific situation. If a standard tier doesn't fit, we'll scope a custom arrangement and price it accordingly.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">How do I contact RTC? <span class="faq-chevron">▾</span></div>
+            <div class="faq-a">
+              <ul>
+                <li><strong>Email:</strong> <a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li>
+                <li><strong>Contact form:</strong> <a href="/contact">roblestech.net/contact</a></li>
+                <li><strong>Discovery call:</strong> bookable directly from the website</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="faq-cta rv">
+          <h3>Still have questions?</h3>
+          <p>Book a free 30-minute discovery call — we'll answer everything and scope your project at no commitment.</p>
+          <div class="faq-cta-actions">
+            <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Free Call →</a>
+            <a href="/contact" class="btn btn-ghost">Send a Message</a>
+          </div>
+        </div>
+
+      </div><!-- /faq-content -->
+    </div><!-- /faq-layout -->
+  </section>
+</BaseLayout>
