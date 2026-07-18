@@ -1612,3 +1612,13 @@ html.preloaded .loader{ display:none; }
   .svc-card.tilt{ transform:none !important; transition:none; }
   .svc-card.tilt::after{ display:none; }
 }
+
+/* Partnership note on a service card */
+.svc-partner{
+  display:inline-flex; align-items:center; gap:6px; margin:10px 0 4px;
+  font-size:.66rem; font-weight:600; letter-spacing:.04em; color:var(--muted);
+}
+.svc-partner::before{ content:'⛓'; font-size:.8em; opacity:.7; }
+.svc-partner strong{ color:var(--core-blue); font-weight:800; }
+.svc-card.flagship .svc-partner{ color:rgba(255,255,255,.7); }
+.svc-card.flagship .svc-partner strong{ color:var(--green); }
