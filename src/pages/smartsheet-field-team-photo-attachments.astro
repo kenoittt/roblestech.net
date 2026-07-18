@@ -291,25 +291,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <div class="post-body">
 
-        <h2>Why forms are the right tool for field photo collection</h2>
+        <h2 class="rv">Why forms are the right tool for field photo collection</h2>
         <p>A Smartsheet Form is a one-way intake door. Someone can walk a new row in — with a photo attached — but they can't see anything that's already inside. That single property solves the two problems field photo collection always runs into.</p>
         <ul>
           <li><strong>Privacy.</strong> The crew never touches the sheet. They see a form with a few fields and a "take photo" button, nothing else. Your data stays yours.</li>
           <li><strong>Cost and scale.</strong> Form submitters don't need a Smartsheet license. Whether you have 3 field staff or 300, the cost of collection is the same, and onboarding a new person is just sharing a link.</li>
         </ul>
 
-        <h2>The 5-step setup</h2>
+        <h2 class="rv">The 5-step setup</h2>
 
         <h3>Step 1: Build the destination sheet</h3>
         <p>Start with the columns you'll want for every photo: a primary column for the site or job name, a column for the crew member's name, a date, a status dropdown (e.g., New → Reviewed → Filed), and any classification you need — photo type, trade, area. The file uploads will attach to whatever row each submission creates, so think of these columns as the label on each photo.</p>
-        <figure style="margin:28px 0;">
+        <figure class="rv" style="margin:28px 0;">
           <img src="/blog%203/blog3sheet.jpeg" alt="Smartsheet destination sheet with labelled columns for site or job name, crew member name, date, status dropdown, and photo classification — one column per piece of context required on every photo submission" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
           <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">Step 1: the destination sheet, with one labelled column per piece of context you want on every photo.</figcaption>
         </figure>
 
         <h3>Step 2: Create a form and add a File Upload field</h3>
         <p>From the sheet, open <strong>Forms → Create Form</strong>. Smartsheet auto-generates a question for each column. Add a <strong>File Upload</strong> field, set it to required, and map the remaining questions to your context columns so no photo ever arrives unlabelled. Delete or hide any internal-only columns you don't want crews filling in.</p>
-        <figure style="margin:28px 0;">
+        <figure class="rv" style="margin:28px 0;">
           <img src="/blog%203/blog3form.jpeg" alt="Smartsheet form builder showing a required File Upload field for photo attachments mapped beneath the Site name and Crew Member name questions — internal tracking columns hidden from the form" style="width:100%;border-radius:10px;border:1px solid rgba(3,44,124,0.10);" loading="lazy">
           <figcaption style="font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;">Step 2: the form builder, with a required Photo Upload field mapped beneath the Site and Crew Member questions.</figcaption>
         </figure>
@@ -331,7 +331,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h3>Step 5: Review and manage submitted photos</h3>
         <p>Every submission creates a new row with the photo in the row's attachments. Open it from the attachment icon, then use the Status column to track what's been reviewed. Set up a <strong>notification automation</strong> ("when a new row is created, alert the office") so a photo from the field is seen in minutes, not at end of day. For deeper automation logic, see <a href="https://help.smartsheet.com/articles/2476671-automate-workflows-in-smartsheet" target="_blank" rel="noopener">Smartsheet's official automation documentation</a>.</p>
 
-        <h2>Important: check current limits</h2>
+        <h2 class="rv">Important: check current limits</h2>
         <p>For the exact, current file-size limits and the full list of supported attachment types, check Smartsheet's official help center:</p>
         <ul>
           <li><a href="https://help.smartsheet.com/articles/518408-uploading-attachments" target="_blank" rel="noopener">Uploading attachments</a></li>
@@ -339,19 +339,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </ul>
         <p>Limits can change and vary by plan, so confirm against the source before you roll this out company-wide.</p>
 
-        <h2>When this approach won't work</h2>
+        <h2 class="rv">When this approach won't work</h2>
         <ul>
           <li><strong>You need crews to edit existing rows, not just add new ones.</strong> A form only creates new rows. If a field user must update or correct a record that already exists, you'd need a licensed editor, a row-level Update Request, or a Dynamic View setup instead.</li>
           <li><strong>Your photos or videos exceed the per-upload size limit.</strong> Forms enforce a maximum file size that varies by plan. Standard phone photos are usually fine, but video and large batches can be rejected. If you routinely need large files, plan for cloud-storage links instead.</li>
           <li><strong>You're on a plan tier that restricts form file uploads.</strong> File upload on forms requires a qualifying plan. Verify yours supports it before building the workflow around it.</li>
         </ul>
 
-        <h2>How we built this for a regional installation contractor</h2>
+        <h2 class="rv">How we built this for a regional installation contractor</h2>
         <p>A regional installation contractor we worked with had 40 installers texting completion photos to a single office coordinator. Photos arrived with no job number, no consistent naming, and no way to tell which jobs were still missing proof. The coordinator spent roughly an hour a day chasing and re-filing images.</p>
         <p>We replaced it with one form: <em>Job number, Installer name, Photo</em> — shared as a QR code printed on every work order. Within a week, every completion photo was landing as a labelled row, auto-sorted by job, with a notification firing to the coordinator on each submission.</p>
         <p>The daily chase disappeared, and for the first time the contractor could see — at a glance — which jobs were photo-complete and which weren't, without giving a single installer access to the master sheet.</p>
 
-        <h2>Frequently asked questions</h2>
+        <h2 class="rv">Frequently asked questions</h2>
 
         <p><strong>Can someone submit a photo to Smartsheet without a Smartsheet account?</strong><br>
         Yes. A Smartsheet Form can be filled out by anyone with the link, and a File Upload field on that form lets them attach a photo. The submitter does not need a Smartsheet account, a paid license, or any access to the sheet the form feeds. This is the core reason forms are the right tool for field crews, subcontractors, and other external users who only need to send data in, not see what is already there.</p>

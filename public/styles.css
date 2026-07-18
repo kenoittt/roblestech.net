@@ -1696,19 +1696,19 @@ html.preloaded .loader{ display:none; }
   display:flex; flex-direction:column;
 }
 .svc-flip .svc-back{ transform:rotateY(180deg); }
-.svc-flip .svc-flip-hint{
-  position:absolute; bottom:14px; right:16px; font-size:.58rem; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--muted); opacity:.65; display:inline-flex; align-items:center; gap:5px;
+/* Flipped side: dark brand-navy panel with light text */
+.svc-flip .svc-back{
+  background:linear-gradient(160deg,#0a2f86 0%, var(--navy) 100%) !important;
+  border-color:transparent !important;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
 }
-.svc-back .svc-back-title{ font-size:var(--fs-sm); font-weight:800; color:var(--navy); margin-bottom:12px; }
+.svc-flip .svc-back::before{ background:linear-gradient(90deg,var(--green),var(--azure)); }
+.svc-back .svc-back-title{ font-size:var(--fs-sm); font-weight:800; color:#fff; margin-bottom:12px; }
 .svc-back-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-.svc-back-list li{ font-size:var(--fs-xs); color:var(--muted); line-height:1.5; padding-left:18px; position:relative; }
-.svc-back-list li::before{ content:"→"; position:absolute; left:0; color:var(--core-blue); font-weight:800; }
-.svc-back-link{ margin-top:auto; font-size:.76rem; font-weight:800; letter-spacing:.03em; color:var(--core-blue); text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:gap .2s, color .2s; }
-.svc-back-link:hover{ color:var(--navy); gap:11px; }
-.svc-card.flagship .svc-back-title{ color:#fff; }
-.svc-card.flagship .svc-back-list li{ color:rgba(255,255,255,.82); }
-.svc-card.flagship .svc-back-link{ color:var(--green); }
+.svc-back-list li{ font-size:var(--fs-xs); color:rgba(255,255,255,.84); line-height:1.5; padding-left:18px; position:relative; }
+.svc-back-list li::before{ content:"→"; position:absolute; left:0; color:var(--green); font-weight:800; }
+.svc-back-link{ margin-top:auto; font-size:.76rem; font-weight:800; letter-spacing:.03em; color:var(--green); text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:gap .2s, color .2s; }
+.svc-back-link:hover{ color:#fff; gap:11px; }
 @media (prefers-reduced-motion:reduce){ .svc-flip-inner{ transition:none; } }
 
 /* ============================================================

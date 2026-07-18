@@ -224,7 +224,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <div class="post-body">
 
-        <h2>Why you shouldn't just share the whole sheet</h2>
+        <h2 class="rv">Why you shouldn't just share the whole sheet</h2>
         <p>Sharing the underlying sheet feels like the quick option, but it creates three problems:</p>
         <ul>
           <li><strong>Everyone sees everything.</strong> One vendor can see every other vendor's rows, rates, and comments.</li>
@@ -233,14 +233,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </ul>
         <p>You want outsiders to contribute to your data without touching the source of truth. That's a permissions problem, and Smartsheet has a purpose-built answer for it.</p>
 
-        <h2>The approach: Forms + Dynamic View</h2>
+        <h2 class="rv">The approach: Forms + Dynamic View</h2>
         <ul>
           <li><strong>Form</strong> — collects new submissions and drops them straight into your master sheet as new rows. The submitter never sees the sheet.</li>
           <li><strong>Dynamic View</strong> — gives each user a personalized window into the sheet: filtered to only their rows, showing only the fields you choose, with selected fields set to read-only. They interact through the view, not the sheet.</li>
         </ul>
         <p>Together, the master sheet stays your single source of truth, while each outside user gets a clean, safe slice.</p>
 
-        <h2>How to set it up, step by step</h2>
+        <h2 class="rv">How to set it up, step by step</h2>
 
         <ol>
           <li>
@@ -270,7 +270,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <p><strong>Tip:</strong> If your vendors don't have a Smartsheet account, they'll be prompted to create a free viewer account when they accept the Dynamic View invite. This does not consume a paid license on your plan.</p>
         </div>
 
-        <h2>What this setup actually solves</h2>
+        <h2 class="rv">What this setup actually solves</h2>
         <p>With this in place, your master sheet stays clean and controlled. New vendor submissions come in through the Form as new rows. Existing rows are updated by vendors through their Dynamic View. No one vendor can see another's data. Your internal columns remain invisible. Formulas and locked fields stay safe.</p>
         <p>This is the same architecture we've built for Fortune 500 clients managing dozens of subcontractor data streams simultaneously — 8 API integrations, all feeding a single source of truth, with zero sheet-level access granted to any outside party.</p>
 
@@ -278,7 +278,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <p><strong>Heads up:</strong> Dynamic View requires a Smartsheet Business or Enterprise plan. If you're on Pro, the same goal can be partially achieved using Forms only (for new submissions) combined with Reports shared as viewer-only links, though row-level filtering per user is limited without Dynamic View.</p>
         </div>
 
-        <h2>Common mistakes to avoid</h2>
+        <h2 class="rv">Common mistakes to avoid</h2>
         <ul>
           <li><strong>Forgetting to filter by current user.</strong> Without the "Current User" filter, all vendors will see all rows in the view.</li>
           <li><strong>Leaving formula columns editable.</strong> Vendors can overwrite formula-driven values if you don't explicitly set those columns to read-only.</li>
@@ -287,11 +287,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       </div>
 
-        <h2>How we built this for an enterprise client</h2>
+        <h2 class="rv">How we built this for an enterprise client</h2>
         <p>A client of ours needed 3 external subcontractors to submit updates for field works — without any of them seeing each other's information or the rest of the operation's sheet.</p>
         <p>We built exactly the setup above: a form for intake, a Dynamic View filtered per vendor, hand-picked columns showing each vendor only their own line items, and locked read-only fields for everything they weren't meant to change. The result: data integrity, data security, and a much more streamlined process for updates and easy data submissions.</p>
 
-        <h2>Frequently asked questions</h2>
+        <h2 class="rv">Frequently asked questions</h2>
 
         <p><strong>Can people submit data to Smartsheet without a paid license?</strong><br>
         Yes. Forms and Dynamic View let external users contribute without needing their own Smartsheet license or access to the source sheet.</p>
