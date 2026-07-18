@@ -5,7 +5,6 @@ import Footer from '../components/Footer.astro';
 // hand-written styles) + our glass + dark-theme layers built on top.
 import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 import '../styles/glass.css';
-import '../styles/theme.css';
 
 // Shared HTML shell for every page: <head>, fonts, Calendly, global CSS,
 // nav, footer, and the bundled interactivity script — all in one place.
@@ -54,13 +53,6 @@ const {
     <script is:inline>
       // Skip the loader after the first view of the session (no flash on nav).
       try { if (sessionStorage.getItem('rtc-loaded')) document.documentElement.classList.add('preloaded'); } catch (e) {}
-      // Apply the saved (or system) colour theme before first paint — no flash.
-      try {
-        var t = localStorage.getItem('rtc-theme');
-        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', t);
-        document.documentElement.setAttribute('data-bs-theme', t);
-      } catch (e) {}
     </script>
   </head>
   <body>

@@ -121,6 +121,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
     </div>
+    <svg class="hero-squiggle" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="squiggleGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#3992FF" stop-opacity="0"></stop>
+          <stop offset="0.2" stop-color="#3992FF"></stop>
+          <stop offset="0.5" stop-color="#0464DD"></stop>
+          <stop offset="0.8" stop-color="#AEE37B"></stop>
+          <stop offset="1" stop-color="#AEE37B" stop-opacity="0"></stop>
+        </linearGradient>
+      </defs>
+      <path id="hero-squiggle-path" d="M-20,100 C80,20 160,180 260,100 S440,20 540,100 S720,180 820,100 S1000,20 1100,100 S1260,150 1320,100"></path>
+    </svg>
   </section>
 
   <!-- STATS -->
@@ -170,46 +182,135 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="sec-p">Every service we offer is tied to a business result. From AI-search visibility to Web3 — we build what moves your business forward.</p>
     </div>
 
-    <!-- SERVICES GRID -->
+    <!-- SERVICES GRID (hover to flip for detail) -->
     <div class="svc-grid svc-grid-all">
-        <div class="svc-card glass-card tilt ai rv">
-          <div class="svc-icon"></div>
-          <div class="svc-title">GEO / SEO</div>
-          <p class="svc-desc">Get cited inside ChatGPT, Gemini &amp; Perplexity and rank on Google. Citation-optimized content, structured data, and technical SEO engineered for the AI-search era.</p>
-          <span class="svc-tag">Growth</span>
+      <div class="svc-flip rv" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card glass-card ai svc-front">
+            <div class="svc-icon"></div>
+            <div class="svc-title">GEO / SEO</div>
+            <p class="svc-desc">Get cited inside ChatGPT, Gemini &amp; Perplexity and rank on Google. Citation-optimized content, structured data, and technical SEO engineered for the AI-search era.</p>
+            <span class="svc-tag">Growth</span>
+            <span class="svc-flip-hint">Hover ↻</span>
+          </div>
+          <div class="svc-card glass-card ai svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>AI Visibility Gap Report across ChatGPT, Gemini &amp; Perplexity</li>
+              <li>GEO + SEO content built for E-E-A-T trust signals</li>
+              <li>Schema &amp; citation strategy so AI names your brand</li>
+            </ul>
+            <a href="/services#seo" class="svc-back-link">Explore GEO / SEO →</a>
+          </div>
         </div>
-        <div class="svc-card glass-card tilt rv d1">
-          <div class="svc-icon"></div>
-          <div class="svc-title">Automations &amp; AI</div>
-          <p class="svc-desc">AI agents and workflow automation that kill manual handoffs — your tools talk to each other and repetitive knowledge work runs itself.</p>
-          <span class="svc-tag">Efficiency</span>
+      </div>
+
+      <div class="svc-flip rv d1" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card glass-card svc-front">
+            <div class="svc-icon"></div>
+            <div class="svc-title">Automations &amp; AI</div>
+            <p class="svc-desc">AI agents and workflow automation that kill manual handoffs — your tools talk to each other and repetitive knowledge work runs itself.</p>
+            <span class="svc-tag">Efficiency</span>
+            <span class="svc-flip-hint">Hover ↻</span>
+          </div>
+          <div class="svc-card glass-card svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>Workflow automation across your existing tools</li>
+              <li>Custom AI agents that triage, draft &amp; act</li>
+              <li>Event-driven integration pipelines that stay in sync</li>
+            </ul>
+            <a href="/services#automation" class="svc-back-link">Explore Automations →</a>
+          </div>
         </div>
-        <div class="svc-card glass-card tilt rv d2">
-          <div class="svc-icon"></div>
-          <div class="svc-title">Web3 &amp; Blockchain</div>
-          <p class="svc-desc">Smart contracts, wallet integrations, and dApps — plus honest guidance on where blockchain actually adds value to your business, and where it doesn't.</p>
-          <span class="svc-partner">In partnership with <strong>Quecko</strong></span>
-          <span class="svc-tag">On-Chain</span>
+      </div>
+
+      <div class="svc-flip rv d2" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card glass-card svc-front">
+            <div class="svc-icon"></div>
+            <div class="svc-title">Web3 &amp; Blockchain</div>
+            <p class="svc-desc">Smart contracts, wallet integrations, and dApps — plus honest guidance on where blockchain actually adds value to your business, and where it doesn't.</p>
+            <span class="svc-partner">In partnership with <strong>Quecko</strong></span>
+            <span class="svc-tag">On-Chain</span>
+            <span class="svc-flip-hint">Hover ↻</span>
+          </div>
+          <div class="svc-card glass-card svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>Audit-ready smart contract development</li>
+              <li>dApp front-ends &amp; wallet-connect integration</li>
+              <li>Pragmatic Web3 strategy — built with Quecko</li>
+            </ul>
+            <a href="/services#web3" class="svc-back-link">Explore Web3 →</a>
+          </div>
         </div>
-        <div class="svc-card glass-card tilt rv">
-          <div class="svc-icon"></div>
-          <div class="svc-title">Digital Transformation &amp; Tech Consulting</div>
-          <p class="svc-desc">Architecture, platform strategy, and API integrations that modernize how your business runs — and connect your business-critical systems cleanly as you scale.</p>
-          <span class="svc-tag">Advisory</span>
+      </div>
+
+      <div class="svc-flip rv" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card glass-card svc-front">
+            <div class="svc-icon"></div>
+            <div class="svc-title">Digital Transformation &amp; Tech Consulting</div>
+            <p class="svc-desc">Architecture, platform strategy, and API integrations that modernize how your business runs — and connect your business-critical systems cleanly as you scale.</p>
+            <span class="svc-tag">Advisory</span>
+            <span class="svc-flip-hint">Hover ↻</span>
+          </div>
+          <div class="svc-card glass-card svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>Technology strategy &amp; platform decisions</li>
+              <li>Systems &amp; API architecture design</li>
+              <li>Migration and modernization roadmaps</li>
+            </ul>
+            <a href="/services#consulting" class="svc-back-link">Explore Consulting →</a>
+          </div>
         </div>
-        <div class="svc-card tilt flagship rv d1">
-          <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
-          <div class="svc-icon"></div>
-          <div class="svc-title">Smartsheet &amp; Project Management</div>
-          <p class="svc-desc">Our flagship practice. Redesigned workflows, dashboards, and native automations that turn Smartsheet into a real operations engine for your team.</p>
-          <span class="svc-tag">Flagship</span>
+      </div>
+
+      <div class="svc-flip rv d1" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card flagship svc-front">
+            <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
+            <div class="svc-icon"></div>
+            <div class="svc-title">Smartsheet &amp; Project Management</div>
+            <p class="svc-desc">Our flagship practice. Redesigned workflows, dashboards, and native automations that turn Smartsheet into a real operations engine for your team.</p>
+            <span class="svc-tag">Flagship</span>
+            <span class="svc-flip-hint" style="color:rgba(255,255,255,.65);">Hover ↻</span>
+          </div>
+          <div class="svc-card flagship svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>Workflow, approval &amp; reporting redesign</li>
+              <li>Native Smartsheet automations &amp; alerts</li>
+              <li>Live dashboards for real-time leadership visibility</li>
+            </ul>
+            <a href="/services#smartsheet" class="svc-back-link">Explore Smartsheet →</a>
+          </div>
         </div>
-        <div class="svc-card glass-card tilt rv d2">
-          <div class="svc-icon"></div>
-          <div class="svc-title">Web Development &amp; UI</div>
-          <p class="svc-desc">Fast, accessible, beautifully designed web and app front-ends — from marketing sites to internal tools, client portals, and customer-facing products.</p>
-          <span class="svc-tag">Product</span>
+      </div>
+
+      <div class="svc-flip rv d2" tabindex="0">
+        <div class="svc-flip-inner">
+          <div class="svc-card glass-card svc-front">
+            <div class="svc-icon"></div>
+            <div class="svc-title">Web Development &amp; UI</div>
+            <p class="svc-desc">Fast, accessible, beautifully designed web and app front-ends — from marketing sites to internal tools, client portals, and customer-facing products.</p>
+            <span class="svc-tag">Product</span>
+            <span class="svc-flip-hint">Hover ↻</span>
+          </div>
+          <div class="svc-card glass-card svc-back">
+            <div class="svc-back-title">What's inside</div>
+            <ul class="svc-back-list">
+              <li>Marketing sites &amp; landing pages that convert</li>
+              <li>Client portals &amp; internal tools</li>
+              <li>Accessible, responsive UI with real polish</li>
+            </ul>
+            <a href="/services" class="svc-back-link">Explore Web Dev →</a>
+          </div>
         </div>
+      </div>
     </div>
 
     <div style="text-align:center;margin-top:44px;">

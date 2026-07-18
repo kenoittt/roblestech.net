@@ -1,3 +1,10 @@
+/* Glass tokens */
+:root {
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,0.60), rgba(255,255,255,0.26) 55%, rgba(255,255,255,0.40));
+  --glass-border: rgba(255,255,255,0.60);
+  --glass-border-strong: rgba(255,255,255,0.90);
+}
+
 /* Glassmorphism for the nav islands, mobile menu, and service cards.
    Structural attributes (rounded-*, shadow-*, border) come from Bootstrap
    utility classes applied in the markup; this file adds the two things

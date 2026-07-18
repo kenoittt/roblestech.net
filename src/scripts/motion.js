@@ -185,6 +185,30 @@ if (finePointer && !reduce) {
   });
 }
 
+/* ---------- Hero squiggle — draws/flows through the hero as you scroll ---------- */
+(function () {
+  const path = document.getElementById('hero-squiggle-path');
+  const hero = document.getElementById('home');
+  if (!path || !hero) return;
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = String(len);
+  if (reduce) { path.style.strokeDashoffset = '0'; return; } // show it fully, no scroll motion
+  path.style.strokeDashoffset = String(len);
+  let ticking = false;
+  function draw() {
+    ticking = false;
+    const rect = hero.getBoundingClientRect();
+    const total = rect.height + window.innerHeight;
+    const p = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / total));
+    // Draw in over the first ~60% of the scroll-through, then hold.
+    path.style.strokeDashoffset = String(len * (1 - Math.min(1, p * 1.6)));
+  }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(draw); } }
+  draw();
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+})();
+
 /* ---------- Card pointer tilt + follow-glow ---------- */
 if (finePointer && !reduce) {
   const MAX = 7; // max tilt degrees
