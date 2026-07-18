@@ -907,7 +907,7 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    PAGE-SPECIFIC — SERVICES PAGE
 ══════════════════════════════════ */
 .page-hero {
-  background: var(--navy);
+  background: linear-gradient(180deg, #eaf0fb 0%, var(--off-white) 100%);
   padding: 190px 8% 80px;
   position: relative;
   overflow: hidden;
@@ -915,26 +915,32 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 .page-hero::before {
   content: ''; position: absolute; top: -120px; right: -100px;
   width: 560px; height: 560px;
-  background: radial-gradient(circle, rgba(57,146,255,.14) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(57,146,255,.16) 0%, transparent 68%);
+  pointer-events: none;
+}
+.page-hero::after {
+  content: ''; position: absolute; bottom: -80px; left: 12%;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(174,227,123,.10) 0%, transparent 68%);
   pointer-events: none;
 }
 .page-hero-pat {
   position: absolute; inset: 0;
   background-image: var(--bg-pattern); background-size: 270px auto;
-  background-repeat: repeat; opacity: .04; pointer-events: none;
+  background-repeat: repeat; opacity: .03; pointer-events: none;
 }
-.page-hero .sec-tag { color: var(--green); }
-.page-hero .sec-h { color: var(--white); max-width: 680px; }
-.page-hero .sec-p { color: rgba(255,255,255,.78); margin-top: 4px; max-width:600px; }
+.page-hero .sec-tag { color: var(--core-blue); }
+.page-hero .sec-h { color: var(--navy); max-width: 680px; }
+.page-hero .sec-p { color: var(--muted); margin-top: 4px; max-width:600px; }
 
 .breadcrumb {
   display: flex; align-items: center; gap: 8px;
-  font-size: var(--fs-xs); color: rgba(255,255,255,.80);
+  font-size: var(--fs-xs); color: var(--muted);
   margin-bottom: 20px;
 }
-.breadcrumb a { color: rgba(255,255,255,.70); text-decoration: none; transition: color .2s; }
-.breadcrumb a:hover { color: var(--azure); }
-.breadcrumb span { color: rgba(255,255,255,.3); }
+.breadcrumb a { color: var(--steel); text-decoration: none; transition: color .2s; }
+.breadcrumb a:hover { color: var(--core-blue); }
+.breadcrumb span { color: rgba(3,44,124,.28); }
 
 /* Smartsheet Pricing section */
 .ss-pricing { background: var(--off-white); }
