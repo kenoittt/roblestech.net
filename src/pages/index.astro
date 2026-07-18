@@ -121,7 +121,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
     </div>
-    <div class="hero-scroll" aria-hidden="true"><span class="hero-scroll-dot"></span>Scroll to explore</div>
   </section>
 
   <!-- STATS -->
@@ -131,14 +130,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="stat"><div class="stat-n"><span>Fortune 500</span></div><div class="stat-l">Clients Served</div></div>
     <div class="stat"><div class="stat-n"><span>Global</span></div><div class="stat-l">Delivery Footprint</div></div>
     <div class="stat"><div class="stat-n"><span>AI</span></div><div class="stat-l">Across All Services</div></div>
-  </div>
-
-  <!-- SCROLL-VELOCITY MARQUEE -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee-track">
-      <span>GEO</span><span>AI Search</span><span>Technical Consulting</span><span>Smartsheet</span><span>Automations</span><span>Web3</span>
-      <span>GEO</span><span>AI Search</span><span>Technical Consulting</span><span>Smartsheet</span><span>Automations</span><span>Web3</span>
-    </div>
   </div>
 
   <!-- PAIN POINTS -->
@@ -179,9 +170,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="sec-p">Every service we offer is tied to a business result. From AI-search visibility to Web3 — we build what moves your business forward.</p>
     </div>
 
-    <!-- SERVICES CAROUSEL -->
-    <div class="svc-carousel rv">
-      <div class="svc-track" id="svc-track" role="group" aria-label="Service lines carousel" tabindex="0">
+    <!-- SERVICES GRID -->
+    <div class="svc-grid svc-grid-all rv">
         <!-- GEO -->
         <div class="svc-card ai">
           <span class="svc-cat">GEO</span>
@@ -293,13 +283,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <p class="svc-desc">Pragmatic guidance on where blockchain actually adds value to your business — and where it doesn't.</p>
           <span class="svc-tag">Advisory</span>
         </div>
-      </div>
-
-      <div class="svc-controls">
-        <button class="svc-arrow" id="svc-prev" aria-label="Previous services" disabled>←</button>
-        <div class="svc-progress"><i id="svc-progress-bar"></i></div>
-        <button class="svc-arrow" id="svc-next" aria-label="More services">→</button>
-      </div>
     </div>
 
     <div style="text-align:center;margin-top:44px;">
