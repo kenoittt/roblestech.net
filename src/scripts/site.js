@@ -143,3 +143,20 @@ document.querySelectorAll('.rv').forEach((el) => revObs.observe(el));
 
   update();
 })();
+
+/* ---------- Dark / light theme toggle ---------- */
+(function () {
+  const root = document.documentElement;
+  function apply(theme) {
+    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-bs-theme', theme);
+    try { localStorage.setItem('rtc-theme', theme); } catch (e) {}
+  }
+  function toggle() {
+    apply(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  ['theme-toggle', 'theme-toggle-mob'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', toggle);
+  });
+})();

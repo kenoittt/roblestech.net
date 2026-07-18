@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 
 // Static site for GitHub Pages (custom domain roblestech.net via public/CNAME).
 // build.format: 'file' emits flat files (contact.html, faqs.html, ...) at the
@@ -10,8 +9,5 @@ export default defineConfig({
   site: 'https://roblestech.net',
   build: {
     format: 'file',
-  },
-  vite: {
-    plugins: [tailwindcss()],
   },
 });

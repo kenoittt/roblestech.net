@@ -1,0 +1,76 @@
+/* ============================================================
+   THEME TOKENS — light (default) and dark
+   Glass tokens are consumed by glass.css. The dark theme remaps the
+   site's core palette variables and re-pins the few surfaces that used
+   --navy as a *background* (since --navy becomes a light text colour).
+   ============================================================ */
+
+:root,
+:root[data-theme='light'] {
+  --glass-bg: linear-gradient(145deg, rgba(255,255,255,0.60), rgba(255,255,255,0.26) 55%, rgba(255,255,255,0.40));
+  --glass-border: rgba(255,255,255,0.60);
+  --glass-border-strong: rgba(255,255,255,0.90);
+}
+
+:root[data-theme='dark'] {
+  /* Glass — dark frosted */
+  --glass-bg: linear-gradient(145deg, rgba(41,54,92,0.55), rgba(20,28,52,0.40) 55%, rgba(30,40,72,0.48));
+  --glass-border: rgba(255,255,255,0.14);
+  --glass-border-strong: rgba(255,255,255,0.30);
+
+  /* Core palette remap. --white stays white (it's used as text-on-dark),
+     --navy becomes light (it's the primary text colour). */
+  --off-white: #0b1020;   /* page background */
+  --navy:      #e9edf6;   /* primary text */
+  --muted:     #9fb0d0;
+  --steel:     #a9c0f0;
+  --core-blue: #4d9bff;   /* brighter accents for dark grounds */
+  --azure:     #6fb0ff;
+
+  color-scheme: dark;
+}
+
+/* --- Dark surfaces: components that used background:var(--navy) --- */
+:root[data-theme='dark'] body { background: #0b1020; }
+:root[data-theme='dark'] .strip,
+:root[data-theme='dark'] .pain-cta-card,
+:root[data-theme='dark'] .svc-card.flagship,
+:root[data-theme='dark'] .pkg-card.featured,
+:root[data-theme='dark'] .stack-card,
+:root[data-theme='dark'] .why { background: #0e1530 !important; }
+:root[data-theme='dark'] footer { background: #080d1a !important; }
+:root[data-theme='dark'] .cs-top { background: linear-gradient(135deg, #0e1530 0%, #1a2748 100%) !important; }
+:root[data-theme='dark'] .cta-final { background: linear-gradient(135deg, #0b1226 0%, #123a8a 62%, #16305f 100%) !important; }
+
+/* Light-toned panels that read as white cards — soften onto the dark ground */
+:root[data-theme='dark'] .stat,
+:root[data-theme='dark'] .contact-detail,
+:root[data-theme='dark'] .embed-card,
+:root[data-theme='dark'] .calendly-cta-card,
+:root[data-theme='dark'] .contact-promise,
+:root[data-theme='dark'] .pain-card,
+:root[data-theme='dark'] .faq-item,
+:root[data-theme='dark'] .stats-bar { background: rgba(255,255,255,0.04) !important; }
+
+/* The WebGL hero fluid renders a light gradient — invert it for dark so it
+   sits on the dark ground instead of glowing as a light block. */
+:root[data-theme='dark'] #hero-fluid { filter: invert(0.92) hue-rotate(180deg) saturate(1.15) brightness(0.9); }
+
+/* Theme toggle button */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  background: rgba(4,100,221,0.08); border: 1.5px solid rgba(4,100,221,0.18);
+  color: var(--navy); font-size: 1rem; line-height: 1;
+  transition: background .2s, border-color .2s, color .2s, transform .2s;
+}
+.theme-toggle:hover { background: rgba(4,100,221,0.15); transform: translateY(-1px); }
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: inline; }
+:root[data-theme='dark'] .theme-toggle .icon-sun { display: inline; }
+:root[data-theme='dark'] .theme-toggle .icon-moon { display: none; }
+:root[data-theme='dark'] .theme-toggle { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+
+/* Mobile menu toggle row */
+.mob-theme { display: flex; align-items: center; gap: 12px; padding: 16px 4px; }
+.mob-theme .theme-toggle { width: 44px; height: 44px; }

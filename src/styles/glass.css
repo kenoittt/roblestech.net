@@ -1,0 +1,22 @@
+/* Glassmorphism for the nav islands, mobile menu, and service cards.
+   Structural attributes (rounded-*, shadow-*, border) come from Bootstrap
+   utility classes applied in the markup; this file adds the two things
+   Bootstrap has no utility for — the backdrop blur and the theme-aware
+   translucent fill/border — so the panels read as frosted glass in both
+   light and dark themes. */
+
+.glass-nav,
+.glass-menu,
+.glass-card {
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+}
+
+.glass-nav { -webkit-backdrop-filter: blur(26px) saturate(185%); backdrop-filter: blur(26px) saturate(185%); }
+.glass-menu { -webkit-backdrop-filter: blur(30px) saturate(185%); backdrop-filter: blur(30px) saturate(185%); }
+
+.glass-card:hover {
+  border-color: var(--glass-border-strong) !important;
+}

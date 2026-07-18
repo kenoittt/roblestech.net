@@ -13,7 +13,7 @@ const isActive = (name: string) =>
   active === name ? 'color:var(--core-blue)' : undefined;
 ---
 
-<nav id="nav" class:list={['glass-nav', { 'nav-inner': inner }]}>
+<nav id="nav" class:list={['glass-nav', 'rounded-4', 'shadow-lg', 'border', { 'nav-inner': inner }]}>
   <a href="/" class="nav-brand">
     <div class="nav-logo-img">
       <img src="/logo.png" alt="Robles Technologies Corp. logo" onerror="this.style.display='none';this.parentElement.textContent='Logo'" />
@@ -35,13 +35,18 @@ const isActive = (name: string) =>
     <li>
       <a href="/contact" class="nav-cta" style={contactSolid ? 'background:var(--navy)!important;' : undefined}>Contact Us</a>
     </li>
+    <li>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span class="icon-moon" aria-hidden="true">🌙</span><span class="icon-sun" aria-hidden="true">☀️</span>
+      </button>
+    </li>
   </ul>
   <button class="nav-burger" id="burger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
-<div class="mobile-menu glass-menu" id="mobile-menu">
+<div class="mobile-menu glass-menu rounded-4 shadow-lg border" id="mobile-menu">
   <ul>
     <li><a href="/">Home</a></li>
     <li><a href="/team">Team</a></li>
@@ -55,5 +60,11 @@ const isActive = (name: string) =>
       </ul>
     </li>
     <li><a href="/contact" class="mob-cta">Contact Us</a></li>
+    <li class="mob-theme">
+      <button class="theme-toggle" id="theme-toggle-mob" type="button" aria-label="Toggle dark mode">
+        <span class="icon-moon" aria-hidden="true">🌙</span><span class="icon-sun" aria-hidden="true">☀️</span>
+      </button>
+      <span>Dark / Light</span>
+    </li>
   </ul>
 </div>
