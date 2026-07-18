@@ -1550,3 +1550,23 @@ html.preloaded .loader{ display:none; }
 @keyframes heroBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
 @media (max-width:640px){ .hero-scroll{ display:none; } }
 @media (prefers-reduced-motion: reduce){ .hero-scroll-dot{ animation:none; } }
+
+/* Two-column motion hero: big headline left, copy + CTAs right */
+.hero.hero-motion{ align-items:stretch; }
+.hero-motion-grid{
+  position:relative; z-index:2; width:100%; display:grid;
+  grid-template-columns:1.1fr .9fr; gap:clamp(32px,5vw,64px); align-items:center;
+}
+.hero.hero-motion .hero-left{ max-width:none; }
+.hero.hero-motion .hero-h1{ font-size:clamp(2.6rem,6.8vw,6rem); margin-bottom:0; }
+.hero-aside{ max-width:460px; align-self:center; }
+.hero-aside .hero-sub1{ margin-bottom:14px; }
+.hero-aside .hero-p{ margin-bottom:30px; }
+@media (max-width:900px){
+  .hero-motion-grid{ grid-template-columns:1fr; gap:24px; }
+  .hero.hero-motion .hero-h1{ font-size:clamp(2.8rem,11vw,4.6rem); }
+  .hero-aside{ max-width:none; }
+}
+
+/* Force Montserrat across the services section + carousel */
+.services, .services * { font-family:'Montserrat', sans-serif; }
