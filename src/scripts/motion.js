@@ -6,6 +6,31 @@
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+/* ---------- Loading screen ---------- */
+(function () {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  let seen = false;
+  try { seen = !!sessionStorage.getItem('rtc-loaded'); } catch (e) {}
+  if (seen) {
+    loader.classList.add('gone'); // already shown this session
+    return;
+  }
+  const MIN = reduce ? 300 : 1400; // let the animation play at least this long
+  const started = performance.now();
+  function dismiss() {
+    const wait = Math.max(0, MIN - (performance.now() - started));
+    setTimeout(() => {
+      loader.classList.add('done');
+      try { sessionStorage.setItem('rtc-loaded', '1'); } catch (e) {}
+      loader.addEventListener('transitionend', () => loader.classList.add('gone'), { once: true });
+      setTimeout(() => loader.classList.add('gone'), 900); // fallback
+    }, wait);
+  }
+  if (document.readyState === 'complete') dismiss();
+  else addEventListener('load', dismiss);
+})();
+
 /* ---------- Headline line reveal ---------- */
 // .anim is added by JS so text stays visible without JS (crawlers/no-JS).
 document.querySelectorAll('.reveal-lines').forEach((el) => {

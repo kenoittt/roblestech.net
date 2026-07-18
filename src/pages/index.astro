@@ -191,114 +191,126 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <p class="sec-p">Every service we offer is tied to a business result. From AI-search visibility to Web3 — we build what moves your business forward.</p>
     </div>
 
-    <div class="svc-label ai-lbl rv">Generative Engine Optimization (GEO)</div>
-    <div class="svc-grid rv">
-      <div class="svc-card ai">
-        <div class="svc-icon"></div>
-        <div class="svc-title">AI Visibility Gap Report</div>
-        <p class="svc-desc">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity — screenshots of every place your brand goes invisible. Low-risk proof of the problem before you invest in fixing it.</p>
-        <span class="svc-tag">Door-Opener</span>
+    <!-- SERVICES CAROUSEL -->
+    <div class="svc-carousel rv">
+      <div class="svc-track" id="svc-track" role="group" aria-label="Service lines carousel" tabindex="0">
+        <!-- GEO -->
+        <div class="svc-card ai">
+          <span class="svc-cat">GEO</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">AI Visibility Gap Report</div>
+          <p class="svc-desc">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity — screenshots of every place your brand goes invisible. Low-risk proof of the problem before you invest in fixing it.</p>
+          <span class="svc-tag">Door-Opener</span>
+        </div>
+        <div class="svc-card ai">
+          <span class="svc-cat">GEO</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">GEO + SEO Content</div>
+          <p class="svc-desc">Citation-optimized posts built to rank on Google and appear inside AI answers. Structured for the E-E-A-T trust bar AI models require before naming a brand.</p>
+          <span class="svc-tag">Core Retainer</span>
+        </div>
+        <div class="svc-card ai">
+          <span class="svc-cat">GEO</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Schema &amp; Citation Strategy</div>
+          <p class="svc-desc">FAQ schema, GSC setup, and quarterly digital-PR pushes that get your brand cited inside AI answers — not just indexed. Own the AI shelf before competitors lock it in.</p>
+          <span class="svc-tag">Authority</span>
+        </div>
+        <!-- Technical Consulting -->
+        <div class="svc-card">
+          <span class="svc-cat">Technical Consulting</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Technology Strategy</div>
+          <p class="svc-desc">Expert guidance on architecture, platform decisions, and digital transformation roadmaps — designed around your actual constraints and goals.</p>
+          <span class="svc-tag">Advisory</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Technical Consulting</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Systems &amp; API Architecture</div>
+          <p class="svc-desc">We design and build the integrations that connect your business-critical systems — cleanly, reliably, and in a way that scales as you grow.</p>
+          <span class="svc-tag">Engineering</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Technical Consulting</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Web &amp; App Development</div>
+          <p class="svc-desc">Custom web and mobile solutions built for real users — client portals, internal tools, or customer-facing products built to grow with your business.</p>
+          <span class="svc-tag">Full Stack</span>
+        </div>
+        <!-- Smartsheet -->
+        <div class="svc-card flagship">
+          <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
+          <span class="svc-cat">Smartsheet</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Smartsheet Consulting</div>
+          <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on growth.</p>
+          <span class="svc-tag">Flagship</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Smartsheet</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Smartsheet Automations</div>
+          <p class="svc-desc">Approval flows, alerts, and update requests that run themselves — built natively in Smartsheet so your process keeps moving without chasing people.</p>
+          <span class="svc-tag">Native</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Smartsheet</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Dashboards &amp; Reporting</div>
+          <p class="svc-desc">Give leadership real-time visibility. Custom dashboards built around the metrics that actually drive your operations and decisions.</p>
+          <span class="svc-tag">Analytics</span>
+        </div>
+        <!-- Automations -->
+        <div class="svc-card">
+          <span class="svc-cat">Automations</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Workflow Automation</div>
+          <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
+          <span class="svc-tag">High Impact</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Automations</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">AI Agents &amp; Assistants</div>
+          <p class="svc-desc">Custom AI agents that triage, draft, and act inside the tools you already use — turning repetitive knowledge work into automated flows.</p>
+          <span class="svc-tag">AI</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Automations</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Integration Pipelines</div>
+          <p class="svc-desc">Scheduled syncs and event-driven pipelines that keep your systems in step — no more copy-paste between platforms.</p>
+          <span class="svc-tag">Reliability</span>
+        </div>
+        <!-- Web3 -->
+        <div class="svc-card">
+          <span class="svc-cat">Web3</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Smart Contract Development</div>
+          <p class="svc-desc">Design and build audit-ready smart contracts for tokens, NFTs, and on-chain business logic — shipped with tests, not surprises.</p>
+          <span class="svc-tag">On-Chain</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Web3</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">dApp &amp; Wallet Integration</div>
+          <p class="svc-desc">Wallet connect flows, token-gated experiences, and dApp front-ends that feel as smooth as web2.</p>
+          <span class="svc-tag">Product</span>
+        </div>
+        <div class="svc-card">
+          <span class="svc-cat">Web3</span>
+          <div class="svc-icon"></div>
+          <div class="svc-title">Web3 Strategy</div>
+          <p class="svc-desc">Pragmatic guidance on where blockchain actually adds value to your business — and where it doesn't.</p>
+          <span class="svc-tag">Advisory</span>
+        </div>
       </div>
-      <div class="svc-card ai rv d1">
-        <div class="svc-icon"></div>
-        <div class="svc-title">GEO + SEO Content</div>
-        <p class="svc-desc">Citation-optimized posts built to rank on Google and appear inside AI answers. Structured for the E-E-A-T trust bar AI models require before naming a brand.</p>
-        <span class="svc-tag">Core Retainer</span>
-      </div>
-      <div class="svc-card ai rv d2">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Schema &amp; Citation Strategy</div>
-        <p class="svc-desc">FAQ schema, GSC setup, and quarterly digital-PR pushes that get your brand cited inside AI answers — not just indexed. Own the AI shelf before competitors lock it in.</p>
-        <span class="svc-tag">Authority</span>
-      </div>
-    </div>
 
-    <div class="svc-label rv" style="margin-top:48px;">Technical Consulting Services</div>
-    <div class="svc-grid rv">
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Technology Strategy</div>
-        <p class="svc-desc">Expert guidance on architecture, platform decisions, and digital transformation roadmaps — designed around your actual constraints and goals.</p>
-        <span class="svc-tag">Advisory</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Systems &amp; API Architecture</div>
-        <p class="svc-desc">We design and build the integrations that connect your business-critical systems — cleanly, reliably, and in a way that scales as you grow.</p>
-        <span class="svc-tag">Engineering</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Web &amp; App Development</div>
-        <p class="svc-desc">Custom web and mobile solutions built for real users — client portals, internal tools, or customer-facing products built to grow with your business.</p>
-        <span class="svc-tag">Full Stack</span>
-      </div>
-    </div>
-
-    <div class="svc-label rv" style="margin-top:48px;">Smartsheet Development Services</div>
-    <div class="svc-grid rv">
-      <div class="svc-card flagship">
-        <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Smartsheet Consulting</div>
-        <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on growth.</p>
-        <span class="svc-tag">Flagship</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Smartsheet Automations</div>
-        <p class="svc-desc">Approval flows, alerts, and update requests that run themselves — built natively in Smartsheet so your process keeps moving without chasing people.</p>
-        <span class="svc-tag">Native</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Dashboards &amp; Reporting</div>
-        <p class="svc-desc">Give leadership real-time visibility. Custom dashboards built around the metrics that actually drive your operations and decisions.</p>
-        <span class="svc-tag">Analytics</span>
-      </div>
-    </div>
-
-    <div class="svc-label rv" style="margin-top:48px;">Automation Services</div>
-    <div class="svc-grid rv">
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Workflow Automation</div>
-        <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
-        <span class="svc-tag">High Impact</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">AI Agents &amp; Assistants</div>
-        <p class="svc-desc">Custom AI agents that triage, draft, and act inside the tools you already use — turning repetitive knowledge work into automated flows.</p>
-        <span class="svc-tag">AI</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Integration Pipelines</div>
-        <p class="svc-desc">Scheduled syncs and event-driven pipelines that keep your systems in step — no more copy-paste between platforms.</p>
-        <span class="svc-tag">Reliability</span>
-      </div>
-    </div>
-
-    <div class="svc-label rv" style="margin-top:48px;">Web3 Services</div>
-    <div class="svc-grid rv">
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Smart Contract Development</div>
-        <p class="svc-desc">Design and build audit-ready smart contracts for tokens, NFTs, and on-chain business logic — shipped with tests, not surprises.</p>
-        <span class="svc-tag">On-Chain</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">dApp &amp; Wallet Integration</div>
-        <p class="svc-desc">Wallet connect flows, token-gated experiences, and dApp front-ends that feel as smooth as web2.</p>
-        <span class="svc-tag">Product</span>
-      </div>
-      <div class="svc-card">
-        <div class="svc-icon"></div>
-        <div class="svc-title">Web3 Strategy</div>
-        <p class="svc-desc">Pragmatic guidance on where blockchain actually adds value to your business — and where it doesn't.</p>
-        <span class="svc-tag">Advisory</span>
+      <div class="svc-controls">
+        <button class="svc-arrow" id="svc-prev" aria-label="Previous services" disabled>←</button>
+        <div class="svc-progress"><i id="svc-progress-bar"></i></div>
+        <button class="svc-arrow" id="svc-next" aria-label="More services">→</button>
       </div>
     </div>
 

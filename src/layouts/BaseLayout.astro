@@ -46,8 +46,23 @@ const {
     <link rel="stylesheet" href="/styles.css" />
     <!-- Per-page <head> extras: JSON-LD schema, page-specific styles, form embeds -->
     <slot name="head" />
+    <script is:inline>
+      // Skip the loader after the first view of the session (no flash on nav).
+      try { if (sessionStorage.getItem('rtc-loaded')) document.documentElement.classList.add('preloaded'); } catch (e) {}
+    </script>
   </head>
   <body>
+    <div class="loader" id="loader" role="status" aria-label="Loading Robles Tech">
+      <div class="loader-inner">
+        <div class="loader-logo">
+          <img src="/logo.png" alt="Robles Technologies Corp." />
+          <span class="loader-shine" aria-hidden="true"></span>
+        </div>
+        <div class="loader-word" aria-hidden="true">ROBLES<span>TECH</span></div>
+        <div class="loader-bar" aria-hidden="true"><i></i></div>
+      </div>
+    </div>
+
     <Nav active={active} contactSolid={contactSolid} inner={navInner} />
 
     <slot />
