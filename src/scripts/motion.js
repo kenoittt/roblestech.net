@@ -197,11 +197,10 @@ if (finePointer && !reduce) {
   let ticking = false;
   function draw() {
     ticking = false;
-    const rect = hero.getBoundingClientRect();
-    const total = rect.height + window.innerHeight;
-    const p = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / total));
-    // Draw in over the first ~60% of the scroll-through, then hold.
-    path.style.strokeDashoffset = String(len * (1 - Math.min(1, p * 1.6)));
+    // Start as just the dot at scroll 0, then expand as you scroll through the hero.
+    const h = hero.offsetHeight || window.innerHeight;
+    const p = Math.min(1, Math.max(0, window.scrollY / (h * 0.85)));
+    path.style.strokeDashoffset = String(len * (1 - p));
   }
   function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(draw); } }
   draw();
