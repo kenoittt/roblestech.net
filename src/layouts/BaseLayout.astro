@@ -1,0 +1,61 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+// Shared HTML shell for every page: <head>, fonts, Calendly, global CSS,
+// nav, footer, and the bundled interactivity script — all in one place.
+interface Props {
+  title: string;
+  description?: string;
+  /** Which nav item to highlight: 'home' | 'team' | 'services' ... */
+  active?: string;
+  /** Contact page uses a solid (navy) CTA button. */
+  contactSolid?: boolean;
+  /** Footer "Schedule a Call" target (contact page overrides to '#schedule'). */
+  scheduleHref?: string;
+  /** Only the homepage carries the Google Search Console verification tag. */
+  verification?: boolean;
+  /** Inner pages carry the `nav-inner` class; the homepage does not. */
+  navInner?: boolean;
+}
+const {
+  title,
+  description,
+  active,
+  contactSolid,
+  scheduleHref,
+  verification = false,
+  navInner = true,
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {verification && (
+      <meta name="google-site-verification" content="IAqCYBEIwFClBSPYq3BlxvsIyPAS4jtAFq2v5rieEH8" />
+    )}
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/png" href="/logo_white.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
+    <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Per-page <head> extras: JSON-LD schema, page-specific styles, form embeds -->
+    <slot name="head" />
+  </head>
+  <body>
+    <Nav active={active} contactSolid={contactSolid} inner={navInner} />
+
+    <slot />
+
+    <Footer scheduleHref={scheduleHref} />
+
+    <script>
+      import '../scripts/site.js';
+    </script>
+  </body>
+</html>

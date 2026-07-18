@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Contact Us — Robles Technologies Corp."
+  description="Get in touch with Robles Technologies Corp. Send us a message or book a free 30-minute discovery call. Fixed-price proposals within 48 hours."
+  active="contact"
+  contactSolid={true}
+  scheduleHref="#schedule"
+>
+  <Fragment slot="head">
+    <!-- HubSpot form embed (working contact form) -->
+    <script src="https://js-na2.hsforms.net/forms/embed/246163196.js" defer></script>
+    <style>
+      /* HubSpot form overrides */
+      .hs-form-frame { width:100%; min-height:360px; }
+      .hs-form input, .hs-form select, .hs-form textarea {
+        font-family:'Montserrat',sans-serif !important;
+        font-size:0.82rem !important;
+        border-radius:8px !important;
+        border:1.5px solid rgba(3,44,124,.12) !important;
+        padding:10px 14px !important;
+        width:100% !important;
+        color:#032C7C !important;
+        background:#F5F6FA !important;
+        outline:none !important;
+      }
+      .hs-form input:focus, .hs-form textarea:focus { border-color:#0464DD !important; background:#fff !important; }
+      .hs-form .hs-button {
+        background:#0464DD !important; color:#fff !important;
+        font-family:'Montserrat',sans-serif !important; font-weight:700 !important;
+        border:none !important; border-radius:8px !important;
+        padding:13px 30px !important; cursor:pointer !important;
+        font-size:0.82rem !important; width:100% !important;
+        transition:background .25s !important;
+      }
+      .hs-form .hs-button:hover { background:#032C7C !important; }
+    </style>
+  </Fragment>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-pat"></div>
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Contact Us</div>
+    <span class="sec-tag">Get In Touch</span>
+    <h1 class="sec-h">Let's talk about<br>your project.</h1>
+    <p class="sec-p">Have questions or want to reach us without scheduling a call? Send us a message below. Ready to move forward? Book a time directly on our calendar.</p>
+  </div>
+
+  <!-- CONTACT INFO CARDS -->
+  <section class="sec" style="background:var(--off-white);padding-bottom:0;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;" class="rv">
+      <div class="contact-detail">
+        <div class="cd-icon"></div>
+        <div>
+          <div class="cd-label">Email</div>
+          <div class="cd-val"><a href="mailto:contact@roblestech.net">contact@roblestech.net</a><br>We respond within 1 business day</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon"></div>
+        <div>
+          <div class="cd-label">Proposal Turnaround</div>
+          <div class="cd-val">Fixed-price proposals delivered within <strong>48 hours</strong> of your discovery call</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon"></div>
+        <div>
+          <div class="cd-label">Based In</div>
+          <div class="cd-val">Philippines · Global delivery<br>We work across time zones seamlessly</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="cd-icon"></div>
+        <div>
+          <div class="cd-label">Smartsheet Pricing</div>
+          <div class="cd-val">Launchpad $3,500 · Momentum $9,500 · Enterprise $22,000<br><a href="/services#smartsheet">See all tiers →</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTACT SECTION -->
+  <section class="sec" style="background:var(--off-white);" id="contact-main">
+    <div class="contact-two-col">
+
+      <!-- HUBSPOT FORM -->
+      <div class="embed-card rv">
+        <h2>Send Us a Message</h2>
+        <p>For inquiries, questions, or if you'd like to reach us without scheduling a meeting — fill out the form below and we'll get back to you within 1 business day.</p>
+        <div class="hs-form-frame"
+          data-region="na2"
+          data-form-id="dbc14d5b-f429-4179-94fc-3e55e7544fbc"
+          data-portal-id="246163196">
+        </div>
+      </div>
+
+      <!-- SCHEDULE + INFO -->
+      <div class="contact-info-col rv d1" id="schedule">
+
+        <!-- CALENDLY CARD -->
+        <div class="calendly-cta-card">
+          <h3>Schedule a Call</h3>
+          <p>Book a free 30-minute discovery call directly on our calendar. No back-and-forth — just pick a time that works for you.</p>
+          <ul class="calendly-perks">
+            <li>Free 30-minute discovery call</li>
+            <li>Speak directly with Kenneth Robles</li>
+            <li>Walk away with a clear scope and next steps</li>
+            <li>Fixed-price proposal delivered within 48 hours</li>
+          </ul>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+        </div>
+
+        <!-- WHAT HAPPENS NEXT -->
+        <div class="contact-promise">
+          <h4>What happens after you reach out</h4>
+          <ul>
+            <li>We review your message and confirm receipt same day</li>
+            <li>We schedule a free 30-minute discovery call at your convenience</li>
+            <li>We scope your project and send a fixed-price proposal within 48 hours</li>
+            <li>You review, ask questions, approve — and we get to work</li>
+          </ul>
+        </div>
+
+        <!-- SERVICES QUICK LINKS -->
+        <div style="background:var(--white);border-radius:14px;padding:22px 24px;border:1.5px solid rgba(3,44,124,.07);">
+          <div class="cd-label" style="margin-bottom:14px;">Explore Our Service Lines</div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <a href="/services#smartsheet" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+              <span></span> Smartsheet Development Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
+            </a>
+            <a href="/services#consulting" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+              <span></span> Technical Consulting Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
+            </a>
+            <a href="/services#seo" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+              <span></span> AI-Powered SEO Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FOOTER STRIP -->
+  <div class="strip" style="margin-top:0;">
+    <div>
+      <h3>Prefer a quick chat over a form?</h3>
+      <p>Skip the inbox — book a 30-minute call and get answers immediately.</p>
+    </div>
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+  </div>
+</BaseLayout>

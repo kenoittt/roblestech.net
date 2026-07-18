@@ -1,0 +1,51 @@
+---
+// Site footer — shared across all pages.
+// `scheduleHref` differs per page: most link to /contact#schedule, but the
+// contact page itself links to the on-page #schedule anchor.
+interface Props {
+  scheduleHref?: string;
+}
+const { scheduleHref = '/contact#schedule' } = Astro.props;
+---
+
+<footer>
+  <div class="ft-pat"></div>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div class="ft-brand">
+        <a href="/" class="ft-logo">
+          <div class="ft-logo-img"><img src="/logo.png" alt="Robles Technologies Corp. logo" onerror="this.style.display='none';this.parentElement.textContent='Logo'" /></div>
+          <span>Robles Technologies Corp.</span>
+        </a>
+        <p>Bridging world-class IT talent with global opportunity. High-standard execution. AI-powered. Zero offshore friction.</p>
+      </div>
+      <div class="ft-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/team">Team</a></li>
+          <li><a href="/philosophy">Philosophy</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="/services#smartsheet">Smartsheet Development</a></li>
+          <li><a href="/services#consulting">Technical Consulting</a></li>
+          <li><a href="/services#seo">GEO — AI Visibility</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Get Started</h4>
+        <ul>
+          <li><a href={scheduleHref}>Schedule a Call</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="mailto:contact@roblestech.net">contact@roblestech.net</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <p>© 2026 Robles Technologies Corp. All rights reserved.</p>
+      <div class="ft-tagline">Redesign. Reinvent. Refocus.</div>
+    </div>
+  </div>
+</footer>

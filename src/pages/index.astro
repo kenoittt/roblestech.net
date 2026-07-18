@@ -1,0 +1,343 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Smartsheet Consulting & Generative Engine Optimization | Robles Tech"
+  description="Robles Technologies Corp. delivers Smartsheet consulting, technical consulting, and Generative Engine Optimization (GEO) services — helping growing businesses remove operational bottlenecks and gain visibility on Google and inside AI search."
+  active="home"
+  verification={true}
+  navInner={false}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://roblestech.net/#organization",
+        "name": "Robles Technologies Corp.",
+        "alternateName": ["RTC", "Robles Tech"],
+        "url": "https://roblestech.net",
+        "logo": { "@type": "ImageObject", "url": "https://roblestech.net/logo.png" },
+        "image": "https://roblestech.net/logo.png",
+        "description": "Robles Technologies Corp. delivers Smartsheet consulting, technical consulting, and Generative Engine Optimization (GEO) services — helping growing businesses remove operational bottlenecks and gain visibility on Google and inside AI search.",
+        "slogan": "Redesign. Reinvent. Refocus.",
+        "email": "contact@roblestech.net",
+        "address": { "@type": "PostalAddress", "addressCountry": "PH" },
+        "areaServed": "Worldwide",
+        "knowsAbout": [
+          "Smartsheet Consulting",
+          "Smartsheet Automation",
+          "Smartsheet API Integrations",
+          "Generative Engine Optimization",
+          "AI Search Optimization",
+          "Technical Consulting",
+          "Workflow Automation",
+          "Custom Web and App Development"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "contact@roblestech.net",
+          "contactType": "customer service",
+          "availableLanguage": ["English"]
+        }
+      },
+      {
+        "@type": "Service",
+        "@id": "https://roblestech.net/#service-smartsheet",
+        "name": "Smartsheet Consulting & Automation",
+        "provider": { "@id": "https://roblestech.net/#organization" },
+        "serviceType": "Smartsheet Consulting",
+        "description": "Smartsheet workflow redesign, automations and integrations, dashboards and reporting, and custom API integrations for project management, reporting, and approval processes.",
+        "url": "https://roblestech.net/services#smartsheet",
+        "areaServed": "Worldwide"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://roblestech.net/#service-technical-consulting",
+        "name": "Technical Consulting",
+        "provider": { "@id": "https://roblestech.net/#organization" },
+        "serviceType": "Technology Consulting",
+        "description": "Technology strategy, systems and API architecture design, and custom web and app development for growing businesses.",
+        "url": "https://roblestech.net/services#consulting",
+        "areaServed": "Worldwide"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://roblestech.net/#service-geo",
+        "name": "Generative Engine Optimization (GEO) & AI-Powered SEO",
+        "provider": { "@id": "https://roblestech.net/#organization" },
+        "serviceType": "Search Engine Optimization",
+        "description": "Done-for-you Generative Engine Optimization (GEO) and AI-powered SEO — content and structured data engineered to rank on Google and get cited inside AI search results from ChatGPT, Gemini, Perplexity, and Claude.",
+        "url": "https://roblestech.net/services#seo",
+        "areaServed": "Worldwide"
+      }
+    ]
+  })} />
+
+  <h1 class="vh">Smartsheet Consulting + Generative Engine Optimization for Growing Businesses</h1>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-pattern"></div>
+    <div class="hero-left">
+      <p class="hero-h1">Redesign.<br><span class="ac">Reinvent.</span><br>Refocus.</p>
+      <p class="hero-sub1">Build Faster. Scale Smarter.</p>
+      <p class="hero-sub2">Reliable Development &amp; AI-Powered Solutions for Growing Businesses</p>
+      <p class="hero-p">We connect growing businesses with world-class IT professionals — delivering Smartsheet, technical consulting, and AI-powered SEO solutions that remove bottlenecks and scale with you.</p>
+      <div class="hero-actions">
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call →</a>
+        <a href="/services" class="btn btn-dark">View Services</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-graphic">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="hero-logo-circle">
+          <img src="/logo.png" alt="Robles Technologies Corp. logo" onerror="this.outerHTML='<div class=\'hero-logo-ph\'>Official<br>Logo<br>Here</div>'">
+        </div>
+        <div class="fc fc1"><span class="fc-ic"></span>Smartsheet Expert</div>
+        <div class="fc fc2"><span class="fc-ic"></span>AI-Powered Services</div>
+        <div class="fc fc3"><span class="fc-ic"></span>Technical Consulting</div>
+        <div class="fc fc4"><span class="fc-ic"></span>Global Delivery</div>
+        <div class="od od1"></div>
+        <div class="od od2"></div>
+        <div class="od od3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stats-pat"></div>
+    <div class="stat"><div class="stat-n"><span>10+</span></div><div class="stat-l">Projects Delivered</div></div>
+    <div class="stat"><div class="stat-n"><span>Fortune 500</span></div><div class="stat-l">Clients Served</div></div>
+    <div class="stat"><div class="stat-n"><span>Global</span></div><div class="stat-l">Delivery Footprint</div></div>
+    <div class="stat"><div class="stat-n"><span>AI</span></div><div class="stat-l">Across All Services</div></div>
+  </div>
+
+  <!-- PAIN POINTS -->
+  <section class="pain sec" id="pain">
+    <div class="pain-inner">
+      <div class="rv">
+        <span class="sec-tag">Sound Familiar?</span>
+        <h2 class="sec-h">Operational bottlenecks slow businesses down</h2>
+        <p class="sec-p">Growing businesses hit the same walls — missed timelines, unreliable support, and disconnected systems. We built RTC to solve exactly that.</p>
+        <div class="pain-grid">
+          <div class="pain-card"><div class="pain-icon">⏳</div><div class="pain-title">Delayed timelines</div><p class="pain-desc">Projects stall because development resources can't keep up with business demand.</p></div>
+          <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Disconnected tools</div><p class="pain-desc">Your platforms don't talk to each other, creating manual work and costly data gaps.</p></div>
+          <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Unreliable offshore support</div><p class="pain-desc">Communication friction and inconsistent quality from offshore vendors hurt delivery.</p></div>
+          <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Scaling without capacity</div><p class="pain-desc">You're growing fast but lack the internal tech capacity to build and maintain what you need.</p></div>
+        </div>
+      </div>
+      <div class="pain-right rv d1">
+        <div class="pain-cta-card">
+          <h3>RTC is your extended tech team</h3>
+          <p>We embed with your operations, speak your language, and deliver outcomes — not just code. World-class IT excellence, zero offshore friction.</p>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Free Discovery Call →</a>
+        </div>
+        <div class="inline-cta">
+          <p>Already know what you need?</p>
+          <a href="/services" class="btn btn-blue" style="padding:9px 18px;font-size:.75rem;">View Services</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES PREVIEW -->
+  <section class="services sec" id="services">
+    <div class="svc-header rv">
+      <div>
+        <span class="sec-tag">What We Do</span>
+        <h2 class="sec-h">Three core service lines</h2>
+      </div>
+      <p class="sec-p">Every service we offer is tied to a business result. From Smartsheet development to AI-powered SEO — we build what moves your business forward.</p>
+    </div>
+
+    <div class="svc-label rv">Smartsheet Development Services</div>
+    <div class="svc-grid rv">
+      <div class="svc-card flagship">
+        <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Smartsheet Consulting</div>
+        <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on growth.</p>
+        <span class="svc-tag">Flagship</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Automations &amp; Integrations</div>
+        <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
+        <span class="svc-tag">High Impact</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Dashboards &amp; Reporting</div>
+        <p class="svc-desc">Give leadership real-time visibility. Custom dashboards built around the metrics that actually drive your operations and decisions.</p>
+        <span class="svc-tag">Analytics</span>
+      </div>
+    </div>
+
+    <div class="svc-label rv" style="margin-top:48px;">Technical Consulting Services</div>
+    <div class="svc-grid rv">
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Technology Strategy</div>
+        <p class="svc-desc">Expert guidance on architecture, platform decisions, and digital transformation roadmaps — designed around your actual constraints and goals.</p>
+        <span class="svc-tag">Advisory</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Systems &amp; API Architecture</div>
+        <p class="svc-desc">We design and build the integrations that connect your business-critical systems — cleanly, reliably, and in a way that scales as you grow.</p>
+        <span class="svc-tag">Engineering</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Web &amp; App Development</div>
+        <p class="svc-desc">Custom web and mobile solutions built for real users — client portals, internal tools, or customer-facing products built to grow with your business.</p>
+        <span class="svc-tag">Full Stack</span>
+      </div>
+    </div>
+
+    <div class="svc-label ai-lbl rv" style="margin-top:48px;">Generative Engine Optimization (GEO)</div>
+    <div class="svc-grid rv">
+      <div class="svc-card ai">
+        <div class="svc-icon"></div>
+        <div class="svc-title">AI Visibility Gap Report</div>
+        <p class="svc-desc">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity — screenshots of every place your brand goes invisible. Low-risk proof of the problem before you invest in fixing it.</p>
+        <span class="svc-tag">Door-Opener</span>
+      </div>
+      <div class="svc-card ai rv d1">
+        <div class="svc-icon"></div>
+        <div class="svc-title">GEO + SEO Content</div>
+        <p class="svc-desc">Citation-optimized posts built to rank on Google and appear inside AI answers. Structured for the E-E-A-T trust bar AI models require before naming a brand.</p>
+        <span class="svc-tag">Core Retainer</span>
+      </div>
+      <div class="svc-card ai rv d2">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Schema &amp; Citation Strategy</div>
+        <p class="svc-desc">FAQ schema, GSC setup, and quarterly digital-PR pushes that get your brand cited inside AI answers — not just indexed. Own the AI shelf before competitors lock it in.</p>
+        <span class="svc-tag">Authority</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:44px;">
+      <a href="/services" class="btn btn-blue">View All Services &amp; Pricing →</a>
+    </div>
+  </section>
+
+  <!-- MID CTA STRIP — BOOK A CALL -->
+  <div class="strip">
+    <div>
+      <h3>Not sure which service fits your needs?</h3>
+      <p>Book a free 30-minute discovery call — we'll map the right solution for where you are now.</p>
+    </div>
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+  </div>
+
+  <!-- CASE STUDIES PREVIEW -->
+  <section class="cs sec" id="work">
+    <div class="cs-header rv">
+      <div>
+        <span class="sec-tag">Featured Work</span>
+        <h2 class="sec-h">Real problems.<br>Measurable results.</h2>
+      </div>
+      <p class="sec-p" style="max-width:320px;">Outcomes we've delivered — from enterprise integrations to full operational overhauls.</p>
+    </div>
+    <div class="cs-grid">
+      <div class="cs-card rv">
+        <div class="cs-top">
+          <span class="cs-ind"> Fortune 500</span>
+          <div class="cs-title">Subcontractor Data Access Without Sheet Permissions</div>
+          <img src="/logo2.png" alt="RTC Logo" class="cs-wm" onerror="this.style.display='none'">
+        </div>
+        <div class="cs-body">
+          <p class="cs-desc">A large enterprise needed outside vendors to submit data updates without getting full access to internal sheets — causing reporting delays and data integrity risks.</p>
+          <div class="cs-tags"><span class="cs-tag">Smartsheet API</span><span class="cs-tag">Dashboards</span><span class="cs-tag">Automations</span></div>
+          <div class="cs-impact"><div class="cs-lbl">Result</div><div class="cs-txt">8 live API integrations. Real-time data accuracy restored. Reporting delays eliminated.</div></div>
+          <a href="/smartsheet-vendor-data-without-sheet-access" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:.75rem;font-weight:700;color:var(--core-blue);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='var(--navy)'" onmouseout="this.style.color='var(--core-blue)'">Want to see how we did it? →</a>
+        </div>
+      </div>
+      <div class="cs-card rv d1">
+        <div class="cs-top" style="background:linear-gradient(135deg,#0464DD 0%,#2F58A3 100%);">
+          <span class="cs-ind"> Operations</span>
+          <div class="cs-title">Manual Onboarding Replaced With Automated Workflows</div>
+          <img src="/logo2.png" alt="" class="cs-wm" onerror="this.style.display='none'">
+        </div>
+        <div class="cs-body">
+          <p class="cs-desc">An operations team managed onboarding entirely through Excel — slow to update, hard to track, and invisible to leadership monitoring progress.</p>
+          <div class="cs-tags"><span class="cs-tag">Forms</span><span class="cs-tag">Reports</span><span class="cs-tag">Dashboards</span></div>
+          <div class="cs-impact"><div class="cs-lbl">Result</div><div class="cs-txt">Onboarding fully automated. Real-time visibility enabled. Manual effort reduced dramatically.</div></div>
+          <a href="/smartsheet-automate-onboarding-workflows" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:.75rem;font-weight:700;color:var(--core-blue);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='var(--navy)'" onmouseout="this.style.color='var(--core-blue)'">Want to see how we did it? →</a>
+        </div>
+      </div>
+      <div class="cs-card rv d2">
+        <div class="cs-top" style="background:linear-gradient(135deg,#3992FF 0%,#032C7C 100%);">
+          <span class="cs-ind"> Field Operations</span>
+          <div class="cs-title">Photo Attachment Tracker for Field Teams Without Sheet Access</div>
+          <img src="/logo2.png" alt="RTC Logo" class="cs-wm" onerror="this.style.display='none'">
+        </div>
+        <div class="cs-body">
+          <p class="cs-desc">Field crews needed to submit photos tied to service requests but had no Smartsheet access — leaving attachments scattered and hard to retrieve.</p>
+          <div class="cs-tags"><span class="cs-tag">Data Shuttle</span><span class="cs-tag">Forms</span><span class="cs-tag">Dynamic Dropdowns</span></div>
+          <div class="cs-impact"><div class="cs-lbl">Result</div><div class="cs-txt">Secure field submission built. All attachments centralized. Scales with volume.</div></div>
+          <a href="/smartsheet-field-team-photo-attachments" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:.75rem;font-weight:700;color:var(--core-blue);text-decoration:none;letter-spacing:.03em;transition:color .2s;" onmouseover="this.style.color='var(--navy)'" onmouseout="this.style.color='var(--core-blue)'">Want to see how we did it? →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY RTC / 3Rs TEASER -->
+  <section class="why sec" id="why">
+    <div class="why-pat"></div>
+    <div class="why-inner">
+      <div>
+        <span class="sec-tag">Our Philosophy</span>
+        <h2 class="sec-h">Execution-first.<br>No offshore friction.</h2>
+        <p class="sec-p">We built RTC around one belief: great IT talent deserves global recognition — and your business deserves a tech partner that actually delivers.</p>
+        <div class="why-items">
+          <div class="why-item rv"><div class="why-num">01</div><div><div class="why-lbl">Redesign</div><p class="why-desc">We don't patch broken processes. We rebuild them from the ground up so friction disappears at the source — not just the surface.</p></div></div>
+          <div class="why-item rv d1"><div class="why-num">02</div><div><div class="why-lbl">Reinvent</div><p class="why-desc">We bring fresh technical thinking — including AI — to your stack, transforming how your teams operate, collaborate, and scale.</p></div></div>
+          <div class="why-item rv d2"><div class="why-num">03</div><div><div class="why-lbl">Refocus</div><p class="why-desc">Streamlined systems free your team to focus on high-value work instead of firefighting operational inefficiencies every day.</p></div></div>
+        </div>
+        <div style="margin-top:32px;">
+          <a href="/philosophy" class="btn btn-white">Read Our Full Philosophy →</a>
+        </div>
+      </div>
+      <div class="why-visual rv d1">
+        <div class="circ">
+          <div class="c-ring cr1"></div>
+          <div class="c-ring cr2"></div>
+          <div class="c-center">
+            <div class="c-logo"><img src="/logo2.png" alt="RTC Logo" onerror="this.outerHTML='<span style=\'font-size:.42rem;font-weight:700;color:rgba(255,255,255,.28);text-align:center;\'>RTC</span>'"></div>
+            <span class="c-lbl">RTC</span>
+          </div>
+          <div class="od od1"></div>
+          <div class="od od2"></div>
+          <div class="od od3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-final" id="contact">
+    <div class="cta-pat"></div>
+    <div class="cta-glow"></div>
+    <div class="cta-content">
+      <span class="sec-tag" style="color:var(--green);">Start Building With RTC</span>
+      <h2 class="sec-h" style="color:var(--white);margin-top:8px;">Your extended tech team,<br>ready to build.</h2>
+      <p class="sec-p" style="color:rgba(255,255,255,.82);margin:0 auto 28px;">Tell us what you're working on. Smartsheet build, technical consulting, AI SEO — we'll help you move faster.</p>
+      <div class="cta-logo-wrap">
+        <img src="/logo2.png" alt="RTC Logo" class="cta-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="cta-logo-ph" style="display:none">Secondary Logo</div>
+      </div>
+      <div class="cta-actions">
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Schedule a Call →</a>
+        <a href="/contact" class="btn btn-ghost">Send a Message</a>
+      </div>
+      <p class="cta-hint" style="margin-top:16px;">Or reach us directly at <a href="mailto:contact@roblestech.net">contact@roblestech.net</a></p>
+    </div>
+  </section>
+</BaseLayout>

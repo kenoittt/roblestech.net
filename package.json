@@ -1,0 +1,17 @@
+{
+  "name": "roblestech-net",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Robles Technologies Corp. marketing site — Astro static build.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "devDependencies": {
+    "astro": "^5.6.1"
+  }
+}

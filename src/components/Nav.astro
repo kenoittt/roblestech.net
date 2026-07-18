@@ -1,0 +1,59 @@
+---
+// Site navigation — shared across all pages.
+// `active` highlights the current page's link; `contactSolid` gives the
+// Contact page its darker CTA treatment (matches the old per-page override).
+interface Props {
+  active?: string;
+  contactSolid?: boolean;
+  /** Inner pages carry the `nav-inner` class (home does not). */
+  inner?: boolean;
+}
+const { active = '', contactSolid = false, inner = false } = Astro.props;
+const isActive = (name: string) =>
+  active === name ? 'color:var(--core-blue)' : undefined;
+---
+
+<nav id="nav" class={inner ? 'nav-inner' : undefined}>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo-img">
+      <img src="/logo.png" alt="Robles Technologies Corp. logo" onerror="this.style.display='none';this.parentElement.textContent='Logo'" />
+    </div>
+    <span class="nav-name">Robles <span>Tech</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/" style={isActive('home')}>Home</a></li>
+    <li><a href="/team" style={isActive('team')}>Team</a></li>
+    <li><a href="/philosophy" style={isActive('philosophy')}>Philosophy</a></li>
+    <li><a href="/services" style={isActive('services')}>Services</a></li>
+    <li class="nav-learn">
+      <button class="nav-learn-btn">Learn <span class="nav-arrow">▾</span></button>
+      <div class="nav-dropdown">
+        <a href="/blogs">Blog</a>
+        <a href="/faqs">FAQs</a>
+      </div>
+    </li>
+    <li>
+      <a href="/contact" class="nav-cta" style={contactSolid ? 'background:var(--navy)!important;' : undefined}>Contact Us</a>
+    </li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/team">Team</a></li>
+    <li><a href="/philosophy">Philosophy</a></li>
+    <li><a href="/services">Services</a></li>
+    <li class="mob-learn">
+      <button class="mob-learn-btn">Learn <span class="mob-arrow">▾</span></button>
+      <ul class="mob-submenu">
+        <li><a href="/blogs">Blog</a></li>
+        <li><a href="/faqs">FAQs</a></li>
+      </ul>
+    </li>
+    <li><a href="/contact" class="mob-cta">Contact Us</a></li>
+  </ul>
+</div>
