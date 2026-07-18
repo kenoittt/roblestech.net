@@ -185,6 +185,26 @@ if (finePointer && !reduce) {
   });
 }
 
+/* ---------- Card pointer tilt + follow-glow ---------- */
+if (finePointer && !reduce) {
+  const MAX = 7; // max tilt degrees
+  document.querySelectorAll('.svc-card.tilt').forEach((card) => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;   // 0..1
+      const py = (e.clientY - r.top) / r.height;   // 0..1
+      const rx = (0.5 - py) * MAX * 2;             // rotateX
+      const ry = (px - 0.5) * MAX * 2;             // rotateY
+      card.style.transform = `perspective(760px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateY(-4px)`;
+      card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+      card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+    });
+    card.addEventListener('pointerleave', () => {
+      card.style.transform = '';
+    });
+  });
+}
+
 /* ---------- Scroll-velocity marquee ---------- */
 // The strip drifts on its own; scrolling adds speed in the scroll direction.
 const track = document.querySelector('.marquee-track');
