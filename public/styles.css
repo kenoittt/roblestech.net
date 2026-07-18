@@ -45,29 +45,32 @@ body {
 /* ══════════════════════════════════
    NAV
 ══════════════════════════════════ */
+/* Floating "island" nav — detached from the top edge, centered, rounded */
 nav {
-  position:fixed; top:0; left:0; right:0; z-index:100;
+  position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:100;
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 4%; height:90px;
+  width:calc(100% - 32px); max-width:1180px;
+  padding:0 22px; height:68px; border-radius:18px;
   background:rgba(245,246,250,0.55);
   backdrop-filter:blur(24px) saturate(180%);
   -webkit-backdrop-filter:blur(24px) saturate(180%);
-  border-bottom:1px solid rgba(255,255,255,0.55);
-  box-shadow:0 1px 0 rgba(4,100,221,0.07), 0 4px 24px rgba(3,44,124,0.04);
-  transition:box-shadow .3s, background .3s;
+  border:1px solid rgba(255,255,255,0.6);
+  box-shadow:0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 34px rgba(3,44,124,0.10);
+  transition:box-shadow .3s, background .3s, top .3s, width .3s, border-radius .3s;
 }
 /* Stay glassy in every state — translucent + blur, never fully solid */
 nav.scrolled {
-  background:rgba(245,246,250,0.62);
-  backdrop-filter:blur(28px) saturate(190%);
-  -webkit-backdrop-filter:blur(28px) saturate(190%);
-  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset, 0 6px 34px rgba(3,44,124,0.12);
-  border-bottom:1px solid rgba(255,255,255,0.6);
+  top:10px; width:calc(100% - 24px);
+  background:rgba(245,246,250,0.66);
+  backdrop-filter:blur(30px) saturate(190%);
+  -webkit-backdrop-filter:blur(30px) saturate(190%);
+  box-shadow:0 1px 0 rgba(255,255,255,0.75) inset, 0 14px 40px rgba(3,44,124,0.16);
+  border:1px solid rgba(255,255,255,0.7);
 }
 nav.nav-inner {
-  background:rgba(245,246,250,0.60);
-  box-shadow:0 1px 0 rgba(255,255,255,0.55) inset, 0 4px 24px rgba(3,44,124,0.08);
-  border-bottom:1px solid rgba(255,255,255,0.55);
+  background:rgba(245,246,250,0.62);
+  box-shadow:0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 30px rgba(3,44,124,0.12);
+  border:1px solid rgba(255,255,255,0.65);
 }
 
 .nav-brand { display:flex; align-items:center; gap:12px; text-decoration:none; }
@@ -1622,3 +1625,13 @@ html.preloaded .loader{ display:none; }
 .svc-partner strong{ color:var(--core-blue); font-weight:800; }
 .svc-card.flagship .svc-partner{ color:rgba(255,255,255,.7); }
 .svc-card.flagship .svc-partner strong{ color:var(--green); }
+
+/* Floating nav → matching floating mobile-menu panel */
+.mobile-menu{
+  top:92px; left:50%; right:auto;
+  transform:translateX(-50%) translateY(-12px);
+  width:calc(100% - 32px); max-width:1180px;
+  border-radius:18px; border:1px solid rgba(255,255,255,0.6);
+  padding:16px 22px 22px;
+}
+.mobile-menu.open{ transform:translateX(-50%) translateY(0); }
