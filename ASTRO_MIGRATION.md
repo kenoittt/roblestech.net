@@ -30,6 +30,16 @@ Two pages fully migrated as proof the pattern holds end-to-end:
 | `src/pages/index.astro`   | Full homepage + per-page JSON-LD schema, shared layout/nav/footer |
 | `src/pages/contact.astro` | Working HubSpot contact form + page-specific `<head>` styles |
 
+### Motion layer
+
+`src/scripts/motion.js` adds the Lusion-inspired motion on the light brand
+palette: a WebGL fluid shader behind the homepage hero (mouse-reactive), a
+custom cursor with a trailing ring, magnetic `.btn` buttons, a staggered
+headline line-reveal, and a scroll-velocity marquee. All vanilla JS + one
+GLSL shader — no libraries. Everything is guarded for touch devices and
+`prefers-reduced-motion`, and the headline stays visible without JS so
+crawlers and no-JS visitors see full content.
+
 Shared building blocks:
 
 ```

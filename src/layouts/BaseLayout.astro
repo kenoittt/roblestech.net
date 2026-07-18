@@ -54,8 +54,13 @@ const {
 
     <Footer scheduleHref={scheduleHref} />
 
+    <!-- Custom cursor (activated by motion.js on fine pointers only) -->
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+
     <script>
       import '../scripts/site.js';
+      import '../scripts/motion.js';
     </script>
   </body>
 </html>

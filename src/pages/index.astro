@@ -26,13 +26,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         "address": { "@type": "PostalAddress", "addressCountry": "PH" },
         "areaServed": "Worldwide",
         "knowsAbout": [
-          "Smartsheet Consulting",
-          "Smartsheet Automation",
-          "Smartsheet API Integrations",
           "Generative Engine Optimization",
           "AI Search Optimization",
           "Technical Consulting",
+          "Smartsheet Consulting",
+          "Smartsheet Automation",
+          "Smartsheet API Integrations",
           "Workflow Automation",
+          "AI Agents and Automation",
+          "Web3 Development",
+          "Smart Contract Development",
           "Custom Web and App Development"
         ],
         "contactPoint": {
@@ -44,12 +47,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       },
       {
         "@type": "Service",
-        "@id": "https://roblestech.net/#service-smartsheet",
-        "name": "Smartsheet Consulting & Automation",
+        "@id": "https://roblestech.net/#service-geo",
+        "name": "Generative Engine Optimization (GEO) & AI-Powered SEO",
         "provider": { "@id": "https://roblestech.net/#organization" },
-        "serviceType": "Smartsheet Consulting",
-        "description": "Smartsheet workflow redesign, automations and integrations, dashboards and reporting, and custom API integrations for project management, reporting, and approval processes.",
-        "url": "https://roblestech.net/services#smartsheet",
+        "serviceType": "Search Engine Optimization",
+        "description": "Done-for-you Generative Engine Optimization (GEO) and AI-powered SEO — content and structured data engineered to rank on Google and get cited inside AI search results from ChatGPT, Gemini, Perplexity, and Claude.",
+        "url": "https://roblestech.net/services#seo",
         "areaServed": "Worldwide"
       },
       {
@@ -64,12 +67,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       },
       {
         "@type": "Service",
-        "@id": "https://roblestech.net/#service-geo",
-        "name": "Generative Engine Optimization (GEO) & AI-Powered SEO",
+        "@id": "https://roblestech.net/#service-smartsheet",
+        "name": "Smartsheet Consulting & Automation",
         "provider": { "@id": "https://roblestech.net/#organization" },
-        "serviceType": "Search Engine Optimization",
-        "description": "Done-for-you Generative Engine Optimization (GEO) and AI-powered SEO — content and structured data engineered to rank on Google and get cited inside AI search results from ChatGPT, Gemini, Perplexity, and Claude.",
-        "url": "https://roblestech.net/services#seo",
+        "serviceType": "Smartsheet Consulting",
+        "description": "Smartsheet workflow redesign, automations and integrations, dashboards and reporting, and custom API integrations for project management, reporting, and approval processes.",
+        "url": "https://roblestech.net/services#smartsheet",
+        "areaServed": "Worldwide"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://roblestech.net/#service-automation",
+        "name": "Automation & AI Integration Services",
+        "provider": { "@id": "https://roblestech.net/#organization" },
+        "serviceType": "Workflow Automation",
+        "description": "AI agents, workflow automation, and event-driven integration pipelines that eliminate manual handoffs between business systems.",
+        "url": "https://roblestech.net/services#automation",
+        "areaServed": "Worldwide"
+      },
+      {
+        "@type": "Service",
+        "@id": "https://roblestech.net/#service-web3",
+        "name": "Web3 Development Services",
+        "provider": { "@id": "https://roblestech.net/#organization" },
+        "serviceType": "Web3 Development",
+        "description": "Smart contract development, dApp and wallet integrations, and pragmatic Web3 strategy consulting for businesses building on-chain products.",
+        "url": "https://roblestech.net/services#web3",
         "areaServed": "Worldwide"
       }
     ]
@@ -79,12 +102,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <!-- HERO -->
   <section class="hero" id="home">
+    <canvas id="hero-fluid" aria-hidden="true"></canvas>
     <div class="hero-pattern"></div>
     <div class="hero-left">
-      <p class="hero-h1">Redesign.<br><span class="ac">Reinvent.</span><br>Refocus.</p>
+      <p class="hero-h1 reveal-lines">
+        <span class="ln"><span>REDESIGN.</span></span>
+        <span class="ln"><span class="ac">REINVENT.</span></span>
+        <span class="ln"><span>REFOCUS.</span></span>
+      </p>
       <p class="hero-sub1">Build Faster. Scale Smarter.</p>
       <p class="hero-sub2">Reliable Development &amp; AI-Powered Solutions for Growing Businesses</p>
-      <p class="hero-p">We connect growing businesses with world-class IT professionals — delivering Smartsheet, technical consulting, and AI-powered SEO solutions that remove bottlenecks and scale with you.</p>
+      <p class="hero-p">We connect growing businesses with world-class IT professionals — delivering GEO, technical consulting, Smartsheet, automation, and Web3 solutions that remove bottlenecks and scale with you.</p>
       <div class="hero-actions">
         <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call →</a>
         <a href="/services" class="btn btn-dark">View Services</a>
@@ -115,6 +143,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="stat"><div class="stat-n"><span>Fortune 500</span></div><div class="stat-l">Clients Served</div></div>
     <div class="stat"><div class="stat-n"><span>Global</span></div><div class="stat-l">Delivery Footprint</div></div>
     <div class="stat"><div class="stat-n"><span>AI</span></div><div class="stat-l">Across All Services</div></div>
+  </div>
+
+  <!-- SCROLL-VELOCITY MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>GEO</span><span>AI Search</span><span>Technical Consulting</span><span>Smartsheet</span><span>Automations</span><span>Web3</span>
+      <span>GEO</span><span>AI Search</span><span>Technical Consulting</span><span>Smartsheet</span><span>Automations</span><span>Web3</span>
+    </div>
   </div>
 
   <!-- PAIN POINTS -->
@@ -150,31 +186,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="svc-header rv">
       <div>
         <span class="sec-tag">What We Do</span>
-        <h2 class="sec-h">Three core service lines</h2>
+        <h2 class="sec-h">Five core service lines</h2>
       </div>
-      <p class="sec-p">Every service we offer is tied to a business result. From Smartsheet development to AI-powered SEO — we build what moves your business forward.</p>
+      <p class="sec-p">Every service we offer is tied to a business result. From AI-search visibility to Web3 — we build what moves your business forward.</p>
     </div>
 
-    <div class="svc-label rv">Smartsheet Development Services</div>
+    <div class="svc-label ai-lbl rv">Generative Engine Optimization (GEO)</div>
     <div class="svc-grid rv">
-      <div class="svc-card flagship">
-        <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
+      <div class="svc-card ai">
         <div class="svc-icon"></div>
-        <div class="svc-title">Smartsheet Consulting</div>
-        <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on growth.</p>
-        <span class="svc-tag">Flagship</span>
+        <div class="svc-title">AI Visibility Gap Report</div>
+        <p class="svc-desc">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity — screenshots of every place your brand goes invisible. Low-risk proof of the problem before you invest in fixing it.</p>
+        <span class="svc-tag">Door-Opener</span>
       </div>
-      <div class="svc-card">
+      <div class="svc-card ai rv d1">
         <div class="svc-icon"></div>
-        <div class="svc-title">Automations &amp; Integrations</div>
-        <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
-        <span class="svc-tag">High Impact</span>
+        <div class="svc-title">GEO + SEO Content</div>
+        <p class="svc-desc">Citation-optimized posts built to rank on Google and appear inside AI answers. Structured for the E-E-A-T trust bar AI models require before naming a brand.</p>
+        <span class="svc-tag">Core Retainer</span>
       </div>
-      <div class="svc-card">
+      <div class="svc-card ai rv d2">
         <div class="svc-icon"></div>
-        <div class="svc-title">Dashboards &amp; Reporting</div>
-        <p class="svc-desc">Give leadership real-time visibility. Custom dashboards built around the metrics that actually drive your operations and decisions.</p>
-        <span class="svc-tag">Analytics</span>
+        <div class="svc-title">Schema &amp; Citation Strategy</div>
+        <p class="svc-desc">FAQ schema, GSC setup, and quarterly digital-PR pushes that get your brand cited inside AI answers — not just indexed. Own the AI shelf before competitors lock it in.</p>
+        <span class="svc-tag">Authority</span>
       </div>
     </div>
 
@@ -200,25 +235,70 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </div>
 
-    <div class="svc-label ai-lbl rv" style="margin-top:48px;">Generative Engine Optimization (GEO)</div>
+    <div class="svc-label rv" style="margin-top:48px;">Smartsheet Development Services</div>
     <div class="svc-grid rv">
-      <div class="svc-card ai">
+      <div class="svc-card flagship">
+        <img src="/logo_white.png" alt="RTC Logo" class="flagship-wm" onerror="this.style.display='none'">
         <div class="svc-icon"></div>
-        <div class="svc-title">AI Visibility Gap Report</div>
-        <p class="svc-desc">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity — screenshots of every place your brand goes invisible. Low-risk proof of the problem before you invest in fixing it.</p>
-        <span class="svc-tag">Door-Opener</span>
+        <div class="svc-title">Smartsheet Consulting</div>
+        <p class="svc-desc">Our flagship practice. We redesign your project management, reporting, and approval workflows so your team spends less time on admin and more time on growth.</p>
+        <span class="svc-tag">Flagship</span>
       </div>
-      <div class="svc-card ai rv d1">
+      <div class="svc-card">
         <div class="svc-icon"></div>
-        <div class="svc-title">GEO + SEO Content</div>
-        <p class="svc-desc">Citation-optimized posts built to rank on Google and appear inside AI answers. Structured for the E-E-A-T trust bar AI models require before naming a brand.</p>
-        <span class="svc-tag">Core Retainer</span>
+        <div class="svc-title">Smartsheet Automations</div>
+        <p class="svc-desc">Approval flows, alerts, and update requests that run themselves — built natively in Smartsheet so your process keeps moving without chasing people.</p>
+        <span class="svc-tag">Native</span>
       </div>
-      <div class="svc-card ai rv d2">
+      <div class="svc-card">
         <div class="svc-icon"></div>
-        <div class="svc-title">Schema &amp; Citation Strategy</div>
-        <p class="svc-desc">FAQ schema, GSC setup, and quarterly digital-PR pushes that get your brand cited inside AI answers — not just indexed. Own the AI shelf before competitors lock it in.</p>
-        <span class="svc-tag">Authority</span>
+        <div class="svc-title">Dashboards &amp; Reporting</div>
+        <p class="svc-desc">Give leadership real-time visibility. Custom dashboards built around the metrics that actually drive your operations and decisions.</p>
+        <span class="svc-tag">Analytics</span>
+      </div>
+    </div>
+
+    <div class="svc-label rv" style="margin-top:48px;">Automation Services</div>
+    <div class="svc-grid rv">
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Workflow Automation</div>
+        <p class="svc-desc">Eliminate manual handoffs between your tools. We connect your platforms so data flows automatically, teams stay aligned, and nothing falls through the cracks.</p>
+        <span class="svc-tag">High Impact</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">AI Agents &amp; Assistants</div>
+        <p class="svc-desc">Custom AI agents that triage, draft, and act inside the tools you already use — turning repetitive knowledge work into automated flows.</p>
+        <span class="svc-tag">AI</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Integration Pipelines</div>
+        <p class="svc-desc">Scheduled syncs and event-driven pipelines that keep your systems in step — no more copy-paste between platforms.</p>
+        <span class="svc-tag">Reliability</span>
+      </div>
+    </div>
+
+    <div class="svc-label rv" style="margin-top:48px;">Web3 Services</div>
+    <div class="svc-grid rv">
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Smart Contract Development</div>
+        <p class="svc-desc">Design and build audit-ready smart contracts for tokens, NFTs, and on-chain business logic — shipped with tests, not surprises.</p>
+        <span class="svc-tag">On-Chain</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">dApp &amp; Wallet Integration</div>
+        <p class="svc-desc">Wallet connect flows, token-gated experiences, and dApp front-ends that feel as smooth as web2.</p>
+        <span class="svc-tag">Product</span>
+      </div>
+      <div class="svc-card">
+        <div class="svc-icon"></div>
+        <div class="svc-title">Web3 Strategy</div>
+        <p class="svc-desc">Pragmatic guidance on where blockchain actually adds value to your business — and where it doesn't.</p>
+        <span class="svc-tag">Advisory</span>
       </div>
     </div>
 

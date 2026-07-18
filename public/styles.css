@@ -1374,3 +1374,56 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
   .ft-top { grid-template-columns:1fr; gap:32px; }
   .ft-bottom { flex-direction:column; text-align:center; gap:8px; }
 }
+
+/* ============================================================
+   MOTION LAYER — fluid hero canvas, cursor, headline reveal
+   ============================================================ */
+
+/* WebGL fluid canvas inside .hero (sits above ::before glows, below content) */
+#hero-fluid { position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+/* Headline line reveal — JS adds .anim (so no-JS keeps text visible), then .in */
+.reveal-lines { animation:none; }
+.reveal-lines .ln { display:block; overflow:hidden; }
+.reveal-lines .ln > span { display:inline-block; }
+.reveal-lines.anim .ln > span { transform:translateY(108%); transition:transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal-lines.anim .ln:nth-child(2) > span { transition-delay:.08s; }
+.reveal-lines.anim .ln:nth-child(3) > span { transition-delay:.16s; }
+.reveal-lines.anim.in .ln > span { transform:none; }
+
+/* Custom cursor — hidden until JS confirms fine pointer + motion OK */
+.cursor-dot, .cursor-ring {
+  position:fixed; top:0; left:0; z-index:9999; pointer-events:none;
+  border-radius:50%; transform:translate(-50%,-50%); will-change:transform;
+  opacity:0; transition:opacity .3s;
+}
+.cursor-dot { width:7px; height:7px; background:var(--core-blue); }
+.cursor-ring {
+  width:38px; height:38px; border:1.5px solid rgba(4,100,221,.5);
+  transition:opacity .3s, width .25s ease, height .25s ease, background .25s ease, border-color .25s ease;
+}
+.cursor-ring.grow { width:62px; height:62px; background:rgba(4,100,221,.08); border-color:rgba(4,100,221,.85); }
+body.has-cursor .cursor-dot, body.has-cursor .cursor-ring { opacity:1; }
+body.has-cursor, body.has-cursor a, body.has-cursor button { cursor:none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-lines.anim .ln > span { transform:none !important; transition:none !important; }
+  .cursor-dot, .cursor-ring { display:none; }
+}
+
+/* Scroll-velocity marquee strip (between hero and content) */
+.marquee {
+  position:relative; z-index:2; overflow:hidden; padding:18px 0;
+  background:rgba(255,255,255,.72); backdrop-filter:blur(8px);
+  border-top:1px solid rgba(3,44,124,.08); border-bottom:1px solid rgba(3,44,124,.08);
+}
+.marquee-track { display:flex; gap:52px; white-space:nowrap; width:max-content; will-change:transform; }
+.marquee-track span {
+  font-size:clamp(1rem,2.2vw,1.5rem); font-weight:800; letter-spacing:-.02em;
+  color:transparent; -webkit-text-stroke:1px rgba(4,100,221,.5);
+  display:inline-flex; align-items:center; gap:52px;
+}
+.marquee-track span::after { content:"◆"; -webkit-text-stroke:0; color:var(--azure); font-size:.65em; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { transform:none !important; }
+}
