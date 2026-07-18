@@ -13,7 +13,7 @@ const isActive = (name: string) =>
   active === name ? 'color:var(--core-blue)' : undefined;
 ---
 
-<nav id="nav" class={inner ? 'nav-inner' : undefined}>
+<nav id="nav" class:list={['glass-nav', { 'nav-inner': inner }]}>
   <a href="/" class="nav-brand">
     <div class="nav-logo-img">
       <img src="/logo.png" alt="Robles Technologies Corp. logo" onerror="this.style.display='none';this.parentElement.textContent='Logo'" />
@@ -41,7 +41,7 @@ const isActive = (name: string) =>
   </button>
 </nav>
 
-<div class="mobile-menu" id="mobile-menu">
+<div class="mobile-menu glass-menu" id="mobile-menu">
   <ul>
     <li><a href="/">Home</a></li>
     <li><a href="/team">Team</a></li>
