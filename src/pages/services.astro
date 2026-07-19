@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Services — Robles Technologies Corp."
-  description="Three service lines, one trusted team. Smartsheet development, technical consulting, and Generative Engine Optimization (GEO) — scoped, priced, and delivered with precision."
+  description="Six service lines, one trusted team. GEO + SEO, project management optimization, automations & AI, Web3, web development, and technical consulting — scoped, priced, and delivered with precision."
   active="services"
 >
   <!-- PAGE HERO -->
@@ -12,7 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="page-hero-pat"></div>
     <div class="breadcrumb"><a href="/">Home</a><span>/</span>Services</div>
     <span class="sec-tag">What We Do</span>
-    <h1 class="sec-h">Three service lines.<br>One trusted team.</h1>
+    <h1 class="sec-h">Six service lines.<br>One trusted team.</h1>
     <p class="sec-p">Every service is tied to a business result. Choose the tier that fits where you are — and we'll scope it, price it, and deliver it with precision.</p>
     <div style="margin-top:28px;">
       <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Free Discovery Call →</a>
@@ -20,15 +20,145 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </div>
 
   <!-- ══════════════════════════════════
-       SERVICE LINE 1 — SMARTSHEET
+       SERVICE LINE 1 — GEO + SEO (flagship)
+  ══════════════════════════════════ -->
+  <section class="svc-category-section" id="seo">
+    <div class="svc-category-head rv">
+      <div>
+        <div class="svc-category-icon"></div>
+        <span class="sec-tag">Service Line 01 · Flagship</span>
+        <h2 class="sec-h">GEO + SEO</h2>
+        <p class="sec-p">Ranking on Google isn't enough anymore. When your customers ask ChatGPT, Gemini, or Perplexity which brand to buy — are you the answer they get? We make sure you are. Done-for-you GEO that gets your brand cited inside AI answers before competitors lock in the advantage.</p>
+      </div>
+      <div>
+        <div class="ss-pricing-note" style="margin:0;">
+          <strong>What is GEO?</strong> Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. A winner-takes-most dynamic means 3–5 brands get cited per answer — whoever establishes authority first is hard to displace. The window is open. It's closing.
+        </div>
+      </div>
+    </div>
+
+    <!-- DOOR-OPENER -->
+    <div class="rv" style="margin-bottom:40px;">
+      <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:16px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(57,146,255,0.1);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px;">Start Here · One-Time · $1,000</div>
+          <div style="font-size:1.18rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin-bottom:8px;">AI Visibility Gap Report</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.72);max-width:520px;margin:0;line-height:1.7;">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity with screenshots of every place your brand goes invisible. Low-risk proof of the problem — and a clear roadmap if you decide to fix it.</p>
+        </div>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">Get Your Gap Report →</a>
+      </div>
+    </div>
+
+    <div class="svc-tiers-grid">
+
+      <!-- FOUNDATION -->
+      <div class="ss-tier rv">
+        <div class="ss-tier-head">
+          <div class="ss-tier-label">Starter</div>
+          <div class="ss-tier-name">Foundation</div>
+          <p class="ss-tier-tagline">Build your AI visibility baseline — tracking, content, and schema locked in.</p>
+          <div class="ss-price">
+            <span class="ss-price-amt">$2,000</span>
+            <span class="ss-price-unit">/ mo</span>
+          </div>
+          <div class="ss-price-note">3-month minimum commitment</div>
+        </div>
+        <div class="ss-tier-body">
+          <div class="ss-incl-label">What's Included</div>
+          <ul class="ss-feats">
+            <li>AI-visibility tracking — ChatGPT, Gemini, Perplexity</li>
+            <li>2 GEO + SEO posts per month, structured for citation</li>
+            <li>FAQ schema implementation</li>
+            <li>Monthly scorecard — citation appearances &amp; ranking shifts</li>
+          </ul>
+          <div class="ss-excl-label">Best For</div>
+          <ul class="ss-excl">
+            <li>Brands just starting to build AI search presence</li>
+            <li>Businesses with minimal existing content</li>
+          </ul>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+        </div>
+      </div>
+
+      <!-- ENGINE -->
+      <div class="ss-tier popular rv d1">
+        <div class="ss-tier-head">
+          <div class="ss-tier-label">Recommended</div>
+          <div class="ss-tier-name">Engine</div>
+          <p class="ss-tier-tagline">Full GEO system — audit, content, schema, reporting, and async strategy.</p>
+          <div class="ss-price">
+            <span class="ss-price-amt">$3,500</span>
+            <span class="ss-price-unit">/ mo</span>
+          </div>
+          <div class="ss-price-note">3-month minimum commitment</div>
+        </div>
+        <div class="ss-tier-body">
+          <div class="ss-incl-label">What's Included</div>
+          <ul class="ss-feats">
+            <li>Full AI visibility baseline audit + content plan</li>
+            <li>4 GEO + SEO posts per month — citation-optimized</li>
+            <li>FAQ schema + Google Search Console setup</li>
+            <li>Monthly reporting — citations, traffic, AI appearance tracking</li>
+            <li>Async strategy review each month</li>
+          </ul>
+          <div class="ss-excl-label">Not Included</div>
+          <ul class="ss-excl">
+            <li>Conversion copy review (see Operator tier)</li>
+            <li>Digital-PR / citation outreach (see Operator tier)</li>
+          </ul>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+        </div>
+      </div>
+
+      <!-- OPERATOR -->
+      <div class="ss-tier rv d2">
+        <div class="ss-tier-head">
+          <div class="ss-tier-label">Scale</div>
+          <div class="ss-tier-name">Operator</div>
+          <p class="ss-tier-tagline">Maximum output — conversion copy, digital PR, and priority delivery.</p>
+          <div class="ss-price">
+            <span class="ss-price-amt">$6,000</span>
+            <span class="ss-price-unit">/ mo</span>
+          </div>
+          <div class="ss-price-note">3-month minimum · Everything in Engine, plus:</div>
+        </div>
+        <div class="ss-tier-body">
+          <div class="ss-incl-label">What's Included</div>
+          <ul class="ss-feats">
+            <li>Everything in Engine, plus:</li>
+            <li>6–8 GEO + SEO posts per month</li>
+            <li>Conversion-focused content — product pages &amp; landing copy</li>
+            <li>Quarterly citation / digital-PR push</li>
+            <li>Priority turnaround — faster delivery windows</li>
+            <li>Monthly strategy call (45 min)</li>
+          </ul>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MID CTA STRIP -->
+  <div class="strip">
+    <div>
+      <h3>Not sure where your brand stands in AI search?</h3>
+      <p>Start with a $1,000 Gap Report — proof of the problem before you invest in fixing it.</p>
+    </div>
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SERVICE LINE 2 — PROJECT MANAGEMENT OPTIMIZATION (Smartsheet)
   ══════════════════════════════════ -->
   <section class="svc-category-section" id="smartsheet">
     <div class="svc-category-head rv">
       <div>
         <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 01</span>
-        <h2 class="sec-h">Smartsheet Development<br>Services</h2>
-        <p class="sec-p">Our flagship practice. We redesign your Smartsheet environment from the ground up — building the workflows, automations, dashboards, and integrations that your team actually needs.</p>
+        <span class="sec-tag">Service Line 02</span>
+        <h2 class="sec-h">Project Management<br>Optimization</h2>
+        <p class="sec-p">Streamline how work actually gets done — powered by Smartsheet. We redesign your environment from the ground up, building the workflows, automations, dashboards, and integrations that turn your process into a real operations engine.</p>
       </div>
       <div>
         <div class="ss-pricing-note" style="margin:0;">
@@ -164,15 +294,96 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </div>
 
   <!-- ══════════════════════════════════
-       SERVICE LINE 2 — TECHNICAL CONSULTING
+       SERVICE LINE 3 — AUTOMATIONS & AI (packages being finalized)
+  ══════════════════════════════════ -->
+  <section class="svc-category-section" id="automation">
+    <div class="svc-category-head rv">
+      <div>
+        <div class="svc-category-icon"></div>
+        <span class="sec-tag">Service Line 03</span>
+        <h2 class="sec-h">Automations &amp; AI</h2>
+        <p class="sec-p">AI agents and workflow automation that eliminate manual handoffs — your tools talk to each other and repetitive knowledge work runs itself. Custom AI agents that triage, draft, and act, plus event-driven integration pipelines that keep every system in sync.</p>
+      </div>
+      <div>
+        <div class="ss-pricing-note" style="margin:0;">
+          <strong>Packages in progress:</strong> We're finalizing our Automations &amp; AI packages. In the meantime, book a call and we'll scope a tailored engagement around your stack and workflows.
+        </div>
+      </div>
+    </div>
+    <div class="svc-soon rv">
+      <span class="svc-soon-badge">Packaged pricing coming soon</span>
+      <p>Available now as a custom-scoped engagement — no fixed tiers yet.</p>
+      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call to Scope Automation →</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SERVICE LINE 4 — WEB3 & BLOCKCHAIN (with Quecko · details underway)
+  ══════════════════════════════════ -->
+  <section class="svc-category-section" id="web3">
+    <div class="svc-category-head rv">
+      <div>
+        <div class="svc-category-icon"></div>
+        <span class="sec-tag">Service Line 04</span>
+        <h2 class="sec-h">Web3 &amp; Blockchain</h2>
+        <p class="sec-p">Smart contracts, wallet integrations, and dApps — plus honest guidance on where blockchain actually adds value to your business, and where it doesn't. Audit-ready contract development and dApp front-ends that feel as smooth as web2.</p>
+      </div>
+      <div>
+        <div class="ss-pricing-note" style="margin:0;">
+          <strong>In partnership with Quecko.</strong> Our Web3 packages are being finalized with our delivery partner. Book a call and we'll scope your on-chain project directly.
+        </div>
+      </div>
+    </div>
+    <div class="svc-soon rv">
+      <span class="svc-soon-badge">Packaged pricing coming soon</span>
+      <p>Delivered in partnership with <strong>Quecko</strong> — custom-scoped per project.</p>
+      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call to Scope Web3 →</a>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SERVICE LINE 5 — WEB DEVELOPMENT & UI
+  ══════════════════════════════════ -->
+  <section class="svc-category-section" id="webdev">
+    <div class="svc-category-head rv">
+      <div>
+        <div class="svc-category-icon"></div>
+        <span class="sec-tag">Service Line 05</span>
+        <h2 class="sec-h">Web Development<br>&amp; UI</h2>
+        <p class="sec-p">Fast, accessible, beautifully designed web and app front-ends — from marketing sites to internal tools, client portals, and customer-facing products. Built for real users, engineered to grow with your business.</p>
+      </div>
+      <div>
+        <div class="ss-pricing-note" style="margin:0;">
+          <strong>Scoped per project:</strong> Web builds vary widely in scope, so we price each one after a short discovery call — from single-page sites to full product front-ends.
+        </div>
+      </div>
+    </div>
+    <div class="svc-soon rv">
+      <span class="svc-soon-badge">Custom-scoped per project</span>
+      <p>Marketing sites, client portals, internal tools, and customer-facing products.</p>
+      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call to Scope Your Build →</a>
+    </div>
+  </section>
+
+  <!-- MID CTA STRIP -->
+  <div class="strip">
+    <div>
+      <h3>Need a custom arrangement across service lines?</h3>
+      <p>We're flexible. Tell us what you need and we'll build the right engagement around it.</p>
+    </div>
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SERVICE LINE 6 — TECHNICAL CONSULTING (last)
   ══════════════════════════════════ -->
   <section class="svc-category-section" id="consulting">
     <div class="svc-category-head rv">
       <div>
         <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 02</span>
-        <h2 class="sec-h">Technical Consulting<br>Services</h2>
-        <p class="sec-p">Expert technology guidance and hands-on execution — from architecture reviews and system integrations to web and app development. We embed with your team and build what you actually need.</p>
+        <span class="sec-tag">Service Line 06</span>
+        <h2 class="sec-h">Digital Transformation<br>&amp; Tech Consulting</h2>
+        <p class="sec-p">Expert technology guidance and hands-on execution — from architecture reviews and system integrations to platform strategy. We embed with your team and build what you actually need.</p>
       </div>
       <div>
         <div class="ss-pricing-note" style="margin:0;">
@@ -272,136 +483,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <li>Weekly executive alignment meetings</li>
             <li>Priority response SLA — same business day</li>
             <li>Custom delivery terms and milestones</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- MID CTA STRIP -->
-  <div class="strip">
-    <div>
-      <h3>Need a custom consulting arrangement?</h3>
-      <p>We're flexible. Tell us what you need and we'll build the right engagement around it.</p>
-    </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
-  </div>
-
-  <!-- ══════════════════════════════════
-       SERVICE LINE 3 — GEO
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="seo">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 03</span>
-        <h2 class="sec-h">Generative Engine<br>Optimization (GEO)</h2>
-        <p class="sec-p">Ranking on Google isn't enough anymore. When your customers ask ChatGPT, Gemini, or Perplexity which brand to buy — are you the answer they get? We make sure you are. Done-for-you GEO that gets your brand cited inside AI answers before competitors lock in the advantage.</p>
-      </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>What is GEO?</strong> Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. A winner-takes-most dynamic means 3–5 brands get cited per answer — whoever establishes authority first is hard to displace. The window is open. It's closing.
-        </div>
-      </div>
-    </div>
-
-    <!-- DOOR-OPENER -->
-    <div class="rv" style="margin-bottom:40px;">
-      <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:16px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(57,146,255,0.1);pointer-events:none;"></div>
-        <div style="position:relative;z-index:1;">
-          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px;">Start Here · One-Time · $1,000</div>
-          <div style="font-size:1.18rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin-bottom:8px;">AI Visibility Gap Report</div>
-          <p style="font-size:.85rem;color:rgba(255,255,255,.72);max-width:520px;margin:0;line-height:1.7;">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity with screenshots of every place your brand goes invisible. Low-risk proof of the problem — and a clear roadmap if you decide to fix it.</p>
-        </div>
-        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">Get Your Gap Report →</a>
-      </div>
-    </div>
-
-    <div class="svc-tiers-grid">
-
-      <!-- FOUNDATION -->
-      <div class="ss-tier rv">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Starter</div>
-          <div class="ss-tier-name">Foundation</div>
-          <p class="ss-tier-tagline">Build your AI visibility baseline — tracking, content, and schema locked in.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$2,000</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum commitment</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>AI-visibility tracking — ChatGPT, Gemini, Perplexity</li>
-            <li>2 GEO + SEO posts per month, structured for citation</li>
-            <li>FAQ schema implementation</li>
-            <li>Monthly scorecard — citation appearances &amp; ranking shifts</li>
-          </ul>
-          <div class="ss-excl-label">Best For</div>
-          <ul class="ss-excl">
-            <li>Brands just starting to build AI search presence</li>
-            <li>Businesses with minimal existing content</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- ENGINE -->
-      <div class="ss-tier popular rv d1">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Recommended</div>
-          <div class="ss-tier-name">Engine</div>
-          <p class="ss-tier-tagline">Full GEO system — audit, content, schema, reporting, and async strategy.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$3,500</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum commitment</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Full AI visibility baseline audit + content plan</li>
-            <li>4 GEO + SEO posts per month — citation-optimized</li>
-            <li>FAQ schema + Google Search Console setup</li>
-            <li>Monthly reporting — citations, traffic, AI appearance tracking</li>
-            <li>Async strategy review each month</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Conversion copy review (see Operator tier)</li>
-            <li>Digital-PR / citation outreach (see Operator tier)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- OPERATOR -->
-      <div class="ss-tier rv d2">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Scale</div>
-          <div class="ss-tier-name">Operator</div>
-          <p class="ss-tier-tagline">Maximum output — conversion copy, digital PR, and priority delivery.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$6,000</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum · Everything in Engine, plus:</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Everything in Engine, plus:</li>
-            <li>6–8 GEO + SEO posts per month</li>
-            <li>Conversion-focused content — product pages &amp; landing copy</li>
-            <li>Quarterly citation / digital-PR push</li>
-            <li>Priority turnaround — faster delivery windows</li>
-            <li>Monthly strategy call (45 min)</li>
           </ul>
           <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
         </div>
