@@ -18,7 +18,7 @@ export function initGlobe(canvas, tipEls) {
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.set(0, 0, 9.5); // pulled back so the arcs never clip the frame
+  camera.position.set(0, 0, 8); // close enough to fill the column; still clears the arc apexes
 
   const R = 2;
   const globe = new THREE.Group();
@@ -150,6 +150,10 @@ export function initGlobe(canvas, tipEls) {
   };
   resize();
   window.addEventListener('resize', resize);
+  // The canvas can be laid out (or revealed) after init — keep the buffer and
+  // aspect locked to the real box so the globe never renders into a stale size.
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
 
   const clock = new THREE.Clock();
   let alive = true;
@@ -173,6 +177,7 @@ export function initGlobe(canvas, tipEls) {
     canvas.removeEventListener('pointerleave', onLeave);
     canvas.removeEventListener('pointermove', onMove);
     window.removeEventListener('resize', resize);
+    ro.disconnect();
     renderer.dispose();
   };
 }
