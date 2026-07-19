@@ -101,17 +101,17 @@ export function initMeshNetwork(canvas) {
   const loop = () => {
     if (!alive) return;
     const dt = Math.min(clock.getDelta(), 0.05);
-    group.rotation.y += dt * 0.06;
-    // Scroll adds an extra spin + a slight tilt as the section moves past.
+    group.rotation.y += dt * 0.03; // slow ambient spin
+    // Scroll adds a subtle extra spin + slight tilt as the section moves past (kept gentle).
     scrollTarget = scrollN;
-    scrollEased += (scrollTarget - scrollEased) * 0.06;
-    group.rotation.y += scrollEased * 0.6;
-    group.rotation.x = Math.sin(clock.elapsedTime * 0.15) * 0.06 + scrollEased * 0.12;
+    scrollEased += (scrollTarget - scrollEased) * 0.035;
+    group.rotation.y += scrollEased * 0.18;
+    group.rotation.x = Math.sin(clock.elapsedTime * 0.15) * 0.06 + scrollEased * 0.05;
     nodes.forEach(n => { n.mesh.position.y = n.base.y + Math.sin(clock.elapsedTime * 0.6 + n.phase) * 0.25; });
     camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.05;
     camera.position.y += (-pointer.y * 1.2 - camera.position.y) * 0.05;
     // Scroll gently pushes the camera in/out for a parallax depth cue.
-    camera.position.z += (13 - scrollEased * 1.6 - camera.position.z) * 0.05;
+    camera.position.z += (13 - scrollEased * 0.8 - camera.position.z) * 0.05;
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
