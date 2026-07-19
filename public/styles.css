@@ -494,7 +494,11 @@ nav.nav-inner {
    WHY RTC  (3Rs + visual)
 ══════════════════════════════════ */
 .why {
-  background:var(--navy); position:relative; overflow:hidden;
+  background:
+    radial-gradient(120% 120% at 100% 30%, #133984 0%, transparent 55%),
+    radial-gradient(120% 100% at 0% 100%, #032c7c 0%, transparent 60%),
+    #010b1f;
+  position:relative; overflow:hidden;
 }
 .why::before {
   content:''; position:absolute; top:-130px; right:-80px;
@@ -1729,10 +1733,22 @@ html.preloaded .loader{ display:none; }
 .svc-soon p{ color:var(--muted); font-size:var(--fs-sm); margin:0 0 20px; line-height:1.7; }
 .svc-soon strong{ color:var(--navy); }
 
-/* Philosophy section — WebGL mesh-network canvas (replaces the old ring graphic) */
+/* Philosophy section — interactive 3D globe (Manila → offshore hubs) */
 .why-visual{ display:block !important; height:auto !important; }
-.mesh-wrap{ position:relative; width:100%; height:520px; }
-#c-mesh{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+#globe-wrap{ position:relative; width:100%; height:620px; }
+#c-globe{ position:absolute; inset:0; width:100%; height:100%; display:block; cursor:grab; }
+#globe-tip{
+  position:absolute; left:0; top:0; transform:translate(-50%,-130%); pointer-events:none;
+  opacity:0; transition:opacity 140ms ease;
+  background:rgba(1,11,31,0.85); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,0.14); border-radius:10px; padding:8px 12px; white-space:nowrap; z-index:2;
+}
+#tip-name{ font-size:13px; font-weight:700; color:#fff; }
+#tip-region{ font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#aee37b; margin-top:2px; }
+.globe-caption{
+  position:absolute; left:0; bottom:6px; width:100%; text-align:center;
+  font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,0.4);
+}
 @media (max-width:900px){
-  .mesh-wrap{ height:360px; }
+  #globe-wrap{ height:460px; }
 }
