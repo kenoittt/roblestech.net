@@ -1733,3 +1733,11 @@ html.preloaded .loader{ display:none; }
 }
 .svc-soon p{ color:var(--muted); font-size:var(--fs-sm); margin:0 0 20px; line-height:1.7; }
 .svc-soon strong{ color:var(--navy); }
+
+/* Philosophy section — WebGL mesh-network canvas (replaces the old ring graphic) */
+.why-visual{ display:block !important; height:auto !important; }
+.mesh-wrap{ position:relative; width:100%; height:520px; }
+#c-mesh{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+@media (max-width:900px){
+  .mesh-wrap{ height:360px; }
+}
