@@ -28,13 +28,18 @@ body {
 a { color: inherit; }
 
 /* Nav */
+/* Floating "island" nav — detached, centered, rounded (dark-glass variant
+   of the main site's nav) */
 .p-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 32px;
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(10px);
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  width: calc(100% - 32px); max-width: 1180px;
+  padding: 0 22px; height: 64px; border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.10) inset, 0 10px 34px rgba(0, 0, 0, 0.38);
 }
 .p-brand { font-weight: 800; font-size: 1.15rem; text-decoration: none; letter-spacing: -0.01em; }
 .p-brand span { color: var(--sky); }
@@ -50,8 +55,8 @@ a { color: inherit; }
 }
 .p-logout button:hover { filter: brightness(1.05); }
 
-/* Layout */
-.p-main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 44px 32px; }
+/* Layout — top padding clears the fixed floating nav */
+.p-main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 108px 32px 44px; }
 .p-foot { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 24px; border-top: 1px solid var(--line); }
 
 .eyebrow {
@@ -121,21 +126,23 @@ textarea {
 
 @media (max-width: 820px) {
   .admin-grid { grid-template-columns: 1fr; }
-  .p-nav { padding: 16px 20px; }
-  .p-main { padding: 28px 18px; }
+  .p-main { padding: 100px 18px 28px; }
   h1 { font-size: 1.7rem; }
 }
 
 @media (max-width: 560px) {
-  .p-nav { flex-wrap: wrap; gap: 12px; row-gap: 10px; }
-  .p-brand { font-size: 1rem; }
-  .p-logo { height: 26px; }
-  .p-nav-links { gap: 14px; font-size: 0.9rem; }
-  .p-main { padding: 24px 16px; }
+  /* Island stays a single row — just tighten it, never wrap */
+  .p-nav { top: 10px; width: calc(100% - 20px); height: 58px; padding: 0 14px; }
+  .p-brand { font-size: 0.95rem; }
+  .p-brand em { display: none; } /* drop "Portal" word to save space */
+  .p-logo { height: 24px; }
+  .p-nav-links { gap: 12px; font-size: 0.82rem; }
+  .p-logout button { padding: 7px 12px; font-size: 0.8rem; }
+  .p-main { padding: 84px 16px 24px; }
   h1 { font-size: 1.5rem; }
   .card { padding: 18px 16px; }
   .form-grid { max-width: none; }
-  /* Stacked KPI/list rows read better on narrow screens */
+  /* Stacked list rows read better on narrow screens */
   .report-row { flex-direction: column; align-items: flex-start; gap: 8px; }
   .report-row .r-go { align-self: flex-end; }
   table { font-size: 12.5px; }
