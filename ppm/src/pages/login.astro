@@ -1,0 +1,30 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+const hasError = Astro.url.searchParams.has('error');
+const denied = Astro.url.searchParams.has('denied');
+---
+<AppLayout title="Sign in · Robles Tech PPM" showNav={false}>
+  <div class="login-wrap">
+    <img class="login-logo" src="/logo-white.png" alt="Robles Tech" />
+    <p class="eyebrow">Internal PPM</p>
+    <h1>Sign in</h1>
+    <p class="lede">Robles Tech project & task management.</p>
+    {hasError && <div class="alert alert-error">Incorrect email or password.</div>}
+    {denied && <div class="alert alert-error">This account doesn't have PPM access.</div>}
+    <form method="post" action="/api/login" class="card" style="display:flex;flex-direction:column;gap:14px;">
+      <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
+      <div>
+        <label for="password">Password</label>
+        <div style="position:relative;">
+          <input id="password" name="password" type="password" autocomplete="current-password" required style="padding-right:64px;" />
+          <button type="button" id="pw-toggle" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);font:600 12px inherit;cursor:pointer;">Show</button>
+        </div>
+      </div>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+    <script is:inline>
+      const pw = document.getElementById('password'), tg = document.getElementById('pw-toggle');
+      tg?.addEventListener('click', () => { const s = pw.type === 'password'; pw.type = s ? 'text' : 'password'; tg.textContent = s ? 'Hide' : 'Show'; });
+    </script>
+  </div>
+</AppLayout>

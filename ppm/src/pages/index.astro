@@ -1,0 +1,133 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+
+type Task = {
+  id: string; title: string; description: string | null; status: string; priority: string;
+  due_date: string | null; assignee_id: string | null; project_id: string | null; completed_at: string | null;
+};
+type Person = { id: string; full_name: string | null; role: string };
+type Project = { id: string; name: string; color: string };
+
+const [{ data: tasksData }, { data: peopleData }, { data: projData }] = await Promise.all([
+  supabase.from('ppm_tasks').select('id,title,description,status,priority,due_date,assignee_id,project_id,completed_at').order('created_at', { ascending: false }),
+  supabase.from('profiles').select('id,full_name,role').in('role', ['admin', 'staff']),
+  supabase.from('ppm_projects').select('id,name,color').eq('archived', false).order('name'),
+]);
+const tasks: Task[] = (tasksData as Task[]) ?? [];
+const people: Person[] = (peopleData as Person[]) ?? [];
+const projects: Project[] = (projData as Project[]) ?? [];
+const nameOf = (id: string | null) => people.find((p) => p.id === id)?.full_name || '—';
+
+// Analytics
+const todo = tasks.filter((t) => t.status === 'todo').length;
+const prog = tasks.filter((t) => t.status === 'in_progress').length;
+const done = tasks.filter((t) => t.status === 'done').length;
+// Week boundaries (Monday start), computed on the server.
+const now = new Date();
+const day = (now.getUTCDay() + 6) % 7;
+const monThis = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day));
+const monLast = new Date(monThis); monLast.setUTCDate(monThis.getUTCDate() - 7);
+const inRange = (iso: string | null, a: Date, b: Date) => iso ? (new Date(iso) >= a && new Date(iso) < b) : false;
+const doneThisWeek = tasks.filter((t) => inRange(t.completed_at, monThis, new Date(now.getTime() + 86400000))).length;
+const doneLastWeek = tasks.filter((t) => inRange(t.completed_at, monLast, monThis)).length;
+
+const cols = [
+  { key: 'todo', label: 'To do' },
+  { key: 'in_progress', label: 'In progress' },
+  { key: 'done', label: 'Done' },
+];
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+
+<AppLayout title="Board · Robles Tech PPM">
+  <p class="eyebrow">Project Management</p>
+  <h1>Task Board</h1>
+  <p class="lede">Track work across the team. Assignees are emailed when tasks are assigned, added, or change status.</p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <div class="stats">
+    <div class="stat todo"><div class="n">{todo}</div><div class="l">Not started</div></div>
+    <div class="stat prog"><div class="n">{prog}</div><div class="l">In progress</div></div>
+    <div class="stat done"><div class="n">{done}</div><div class="l">Done (all time)</div></div>
+    <div class="stat week"><div class="n">{doneThisWeek}</div><div class="l">Finished this week</div></div>
+    <div class="stat week"><div class="n">{doneLastWeek}</div><div class="l">Finished last week</div></div>
+  </div>
+
+  <!-- New task -->
+  <div class="card">
+    <form method="post" action="/api/task-create" class="row">
+      <div><label>New task</label><input name="title" required placeholder="What needs doing?" /></div>
+      <div><label>Assignee</label>
+        <select name="assignee_id">
+          <option value="">Unassigned</option>
+          {people.map((p) => <option value={p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+        </select>
+      </div>
+      <div><label>Priority</label>
+        <select name="priority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+      </div>
+      <div><label>Due</label><input type="date" name="due_date" /></div>
+    </form>
+    <div style="margin-top:12px;display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+      <div style="min-width:200px;">
+        <label>Project (optional)</label>
+        <select name="project_id" form="ignored" id="proj-select">
+          <option value="">No project</option>
+          {projects.map((p) => <option value={p.id}>{p.name}</option>)}
+        </select>
+      </div>
+      <button class="btn" form="ignored" type="button" id="add-btn">Add task</button>
+    </div>
+  </div>
+
+  <div class="board" style="margin-top:22px;">
+    {cols.map((c) => (
+      <div class="col">
+        <h3>{c.label}<span>{tasks.filter((t) => t.status === c.key).length}</span></h3>
+        {tasks.filter((t) => t.status === c.key).map((t) => (
+          <div class="task">
+            <div class="t">{t.title}</div>
+            <div class="m">
+              <span class={`pill ${t.priority}`}>{t.priority}</span>
+              <span>{nameOf(t.assignee_id)}</span>
+              {t.due_date && <span>· due {t.due_date}</span>}
+            </div>
+            <form method="post" action="/api/task-update" class="statusform">
+              <input type="hidden" name="id" value={t.id} />
+              <select name="status" class="js-auto">
+                <option value="todo" selected={t.status === 'todo'}>To do</option>
+                <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
+                <option value="done" selected={t.status === 'done'}>Done</option>
+              </select>
+              <select name="assignee_id" class="js-auto">
+                <option value="">Unassigned</option>
+                {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+              </select>
+            </form>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+
+  <script is:inline>
+    // Auto-submit status/assignee changes.
+    document.querySelectorAll('.js-auto').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
+    // The "Add task" button submits the new-task form with the chosen project.
+    const addBtn = document.getElementById('add-btn');
+    if (addBtn) addBtn.addEventListener('click', () => {
+      const form = document.querySelector('form[action="/api/task-create"]');
+      const proj = document.getElementById('proj-select');
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden'; hidden.name = 'project_id'; hidden.value = proj ? proj.value : '';
+      form.appendChild(hidden);
+      form.submit();
+    });
+  </script>
+</AppLayout>

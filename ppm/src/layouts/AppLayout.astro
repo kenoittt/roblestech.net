@@ -1,0 +1,37 @@
+---
+interface Props { title?: string; showNav?: boolean; }
+const { title = 'PPM · Robles Tech', showNav = true } = Astro.props;
+const profile = Astro.locals.profile;
+const isAdmin = profile?.role === 'admin';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=League+Spartan:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    {showNav && (
+      <header class="p-nav">
+        <a class="p-brand" href="/"><img class="p-logo" src="/logo-white.png" alt="Robles Tech" /> Robles <span>Tech</span> <em>PPM</em></a>
+        {Astro.locals.user && (
+          <nav class="p-nav-links">
+            <a href="/">Board</a>
+            {isAdmin && <a href="/admin">Team</a>}
+            <form method="post" action="/logout" class="p-logout"><button type="submit">Sign out</button></form>
+          </nav>
+        )}
+      </header>
+    )}
+    <main class="p-main"><slot /></main>
+    <footer class="p-foot">&copy; {new Date().getFullYear()} Robles Technologies Corp. · Internal</footer>
+  </body>
+</html>

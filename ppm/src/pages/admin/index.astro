@@ -1,0 +1,52 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+const { data: people } = await supabase.from('profiles').select('id, full_name, role').in('role', ['admin', 'staff']).order('role');
+const { data: projects } = await supabase.from('ppm_projects').select('id, name, color').eq('archived', false).order('name');
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+<AppLayout title="Team & Projects · PPM">
+  <p class="eyebrow">Admin</p>
+  <h1>Team &amp; Projects</h1>
+  <p class="lede">Create staff logins and projects.</p>
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <div class="section-h">Create a team member</div>
+  <form method="post" action="/api/create-staff" class="card" style="display:flex;flex-direction:column;gap:14px;max-width:520px;">
+    <div><label>Name</label><input name="full_name" placeholder="Team member" /></div>
+    <div><label>Email</label><input name="email" type="email" required placeholder="name@roblestech.net" /></div>
+    <div><label>Password</label><input name="password" type="text" required minlength="8" placeholder="8+ characters" /></div>
+    <div><label>Role</label><select name="role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+    <button class="btn" type="submit">Create login</button>
+  </form>
+
+  <div class="section-h">Projects</div>
+  <form method="post" action="/api/project-create" class="card" style="display:flex;gap:12px;align-items:end;max-width:520px;">
+    <div style="flex:1;"><label>New project</label><input name="name" required placeholder="Project name" /></div>
+    <div><label>Color</label><input name="color" type="color" value="#0464DD" style="height:44px;padding:4px;" /></div>
+    <button class="btn" type="submit">Add</button>
+  </form>
+  {projects && projects.length > 0 && (
+    <ul style="list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px;">
+      {projects.map((p: any) => (
+        <li style={`background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.85rem;`}>
+          <span style={`display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.color};margin-right:7px;`}></span>{p.name}
+        </li>
+      ))}
+    </ul>
+  )}
+
+  <div class="section-h">Members</div>
+  <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:520px;">
+    {(people ?? []).map((p: any) => (
+      <li class="card" style="padding:12px 16px;display:flex;justify-content:space-between;">
+        <span>{p.full_name || '(no name)'}</span>
+        <span class="hint" style="margin:0;text-transform:uppercase;letter-spacing:.1em;">{p.role}</span>
+      </li>
+    ))}
+  </ul>
+</AppLayout>
