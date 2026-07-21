@@ -2,7 +2,8 @@ import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServer } from './lib/supabase';
 
 // Routes reachable without a session.
-const PUBLIC_PATHS = new Set<string>(['/login', '/api/login', '/logout']);
+// The cron endpoint has no session; it authenticates with CRON_SECRET itself.
+const PUBLIC_PATHS = new Set<string>(['/login', '/api/login', '/logout', '/api/cron/refresh']);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url } = context;

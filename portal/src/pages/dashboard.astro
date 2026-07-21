@@ -2,31 +2,25 @@
 import PortalLayout from '../layouts/PortalLayout.astro';
 import { createSupabaseServer } from '../lib/supabase';
 
-const { user, profile } = Astro.locals;
+const { profile } = Astro.locals;
 const isAdmin = profile?.role === 'admin';
-
 const supabase = createSupabaseServer(Astro);
 
-// Client name for the greeting (RLS returns only the caller's own client).
-let clientName = '';
-if (!isAdmin && profile?.client_id) {
-  const { data: client } = await supabase.from('clients').select('name').eq('id', profile.client_id).single();
-  clientName = client?.name ?? '';
-}
-
-// Report history. RLS guarantees a client only ever gets their own rows.
-type ReportRow = { id: string; title: string; period: string };
-let reports: ReportRow[] = [];
+// Clients go straight to their living dashboard (served by /d, with a sign-out
+// link injected). Admins get the client list below.
 if (!isAdmin) {
-  const { data } = await supabase
-    .from('reports')
-    .select('id, title, period')
-    .order('period', { ascending: false });
-  reports = (data as ReportRow[]) ?? [];
+  if (profile?.client_id) {
+    const { data } = await supabase.from('clients').select('id').eq('id', profile.client_id).single();
+    if (data) return Astro.redirect('/d');
+  }
 }
 
-const fmt = (period: string) =>
-  new Date(period + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+type Client = { id: string; name: string; gsc_updated_at: string | null };
+let clients: Client[] = [];
+if (isAdmin) {
+  const { data } = await supabase.from('clients').select('id, name, gsc_updated_at').order('name');
+  clients = (data as Client[]) ?? [];
+}
 ---
 
 <PortalLayout title="Dashboard · Robles Tech Portal">
@@ -34,36 +28,34 @@ const fmt = (period: string) =>
     isAdmin ? (
       <>
         <p class="eyebrow">Admin</p>
-        <h1>Welcome back</h1>
-        <p class="lede">You're signed in as an RTC administrator.</p>
-        <div class="card">
-          <p style="margin:0 0 16px;">Create client accounts and upload monthly SEO reports from the admin panel.</p>
-          <a class="btn" href="/admin">Open admin panel →</a>
-        </div>
-      </>
-    ) : (
-      <>
-        <p class="eyebrow">Your SEO Reports</p>
-        <h1>{clientName || 'Dashboard'}</h1>
-        <p class="lede">Your monthly search performance reports, newest first. Click any month to open it.</p>
-
-        {reports.length === 0 ? (
-          <div class="empty">No reports yet. Your first report will appear here once it's published.</div>
+        <h1>Client dashboards</h1>
+        <p class="lede">Preview any client's live dashboard, or manage clients and content.</p>
+        <div style="margin-bottom:24px;"><a class="btn" href="/admin">Manage clients &amp; content →</a></div>
+        {clients.length === 0 ? (
+          <div class="empty">No clients yet. Add one in the admin panel.</div>
         ) : (
           <ul class="report-list">
-            {reports.map((r) => (
+            {clients.map((c) => (
               <li>
-                <a class="report-row" href={`/report/${r.id}`} target="_blank" rel="noopener">
+                <a class="report-row" href={`/d?client=${c.id}`} target="_blank" rel="noopener">
                   <span>
-                    <span class="r-title">{r.title}</span>
-                    <span class="r-period" style="display:block;">{fmt(r.period)}</span>
+                    <span class="r-title">{c.name}</span>
+                    <span class="r-period" style="display:block;">
+                      {c.gsc_updated_at ? `GSC updated ${new Date(c.gsc_updated_at).toLocaleString()}` : 'No GSC pull yet'}
+                    </span>
                   </span>
-                  <span class="r-go">View report →</span>
+                  <span class="r-go">Open dashboard →</span>
                 </a>
               </li>
             ))}
           </ul>
         )}
+      </>
+    ) : (
+      <>
+        <p class="eyebrow">Your Dashboard</p>
+        <h1>Dashboard</h1>
+        <div class="empty">Your dashboard isn't set up yet. Your Robles Tech account manager will enable it shortly.</div>
       </>
     )
   }

@@ -1,7 +1,7 @@
 // Env access that works both in local dev (import.meta.env from .env) and at
 // runtime on Vercel (process.env). PUBLIC_* are safe for the browser; the
 // service-role key must never leave the server.
-const pick = (key: string): string =>
+export const pick = (key: string): string =>
   (import.meta.env as Record<string, string | undefined>)[key] ??
   (typeof process !== 'undefined' ? process.env[key] : undefined) ??
   '';

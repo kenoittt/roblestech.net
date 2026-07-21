@@ -11,10 +11,14 @@ export const POST: APIRoute = async (context) => {
 
   const form = await context.request.formData();
   const name = String(form.get('name') ?? '').trim();
+  const gscProperty = String(form.get('gsc_property') ?? '').trim();
   if (!name) return context.redirect('/admin?err=' + encodeURIComponent('Client name is required.'));
 
   const admin = createSupabaseAdmin();
-  const { error } = await admin.from('clients').insert({ name });
+  const { error } = await admin.from('clients').insert({
+    name,
+    gsc_property: gscProperty || null,
+  });
   if (error) return context.redirect('/admin?err=' + encodeURIComponent(error.message));
 
   return context.redirect('/admin?ok=' + encodeURIComponent(`Client "${name}" created.`));

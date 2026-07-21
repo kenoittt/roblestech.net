@@ -4,30 +4,56 @@ import { createSupabaseServer } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
 
-// Admins can read all clients (RLS is_admin() branch).
-type Client = { id: string; name: string };
-const { data } = await supabase.from('clients').select('id, name').order('name');
+type Client = { id: string; name: string; gsc_property: string | null; config: unknown };
+const { data } = await supabase
+  .from('clients')
+  .select('id, name, gsc_property, config')
+  .order('name');
 const clients: Client[] = (data as Client[]) ?? [];
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
+
+const pretty = (c: unknown) => {
+  try {
+    const obj = c && Object.keys(c as object).length ? c : SAMPLE_CONFIG;
+    return JSON.stringify(obj, null, 2);
+  } catch {
+    return '{}';
+  }
+};
+// Shown when a client has no config yet — a minimal starting point.
+const SAMPLE_CONFIG = {
+  brand: { brand: '#53001C', 'brand-dark': '#3E0016', accent: '#34657F' },
+  hero: { eyebrow: 'Client Name · SEO + GEO', title: 'Post Performance & GEO Dashboard' },
+  baseline: {},
+  aiAudit: {},
+  pipeline: [],
+  sopSteps: [],
+  openItems: [],
+};
 ---
 
 <PortalLayout title="Admin · Robles Tech Portal">
   <p class="eyebrow">Admin Panel</p>
-  <h1>Manage clients &amp; reports</h1>
-  <p class="lede">Create client companies, issue logins, and publish monthly SEO reports.</p>
+  <h1>Manage clients &amp; dashboards</h1>
+  <p class="lede">Create clients and logins, set each client's Search Console property and branding, and edit their dashboard content.</p>
 
   {ok && <div class="alert alert-ok">{ok}</div>}
   {err && <div class="alert alert-error">{err}</div>}
 
   <div class="admin-grid">
     <div class="admin-col">
-      <h2>1 · Add a client company</h2>
+      <h2>1 · Add a client</h2>
       <form method="post" action="/api/create-client" class="form-grid card">
         <div>
           <label for="c-name">Company name</label>
-          <input id="c-name" name="name" type="text" required placeholder="Acme Supplements Co." />
+          <input id="c-name" name="name" type="text" required placeholder="Promix Nutrition" />
+        </div>
+        <div>
+          <label for="c-gsc">GSC property</label>
+          <input id="c-gsc" name="gsc_property" type="text" placeholder="https://promixnutrition.com/" />
+          <p class="hint">URL-prefix e.g. <code>https://site.com/</code> or domain e.g. <code>sc-domain:site.com</code>.</p>
         </div>
         <button class="btn" type="submit">Create client</button>
       </form>
@@ -49,12 +75,12 @@ const err = Astro.url.searchParams.get('err');
         </div>
         <div>
           <label for="l-email">Email</label>
-          <input id="l-email" name="email" type="email" required placeholder="jane@acme.com" />
+          <input id="l-email" name="email" type="email" required placeholder="jane@promix.com" />
         </div>
         <div>
           <label for="l-pass">Password</label>
           <input id="l-pass" name="password" type="text" required minlength="8" placeholder="At least 8 characters" />
-          <p class="hint">You'll share this with the client. They can use it as-is.</p>
+          <p class="hint">You'll share this with the client.</p>
         </div>
         <button class="btn" type="submit">Create login</button>
       </form>
@@ -62,41 +88,37 @@ const err = Astro.url.searchParams.get('err');
   </div>
 
   <div class="section-gap">
-    <h2>3 · Publish a monthly report</h2>
-    <form method="post" action="/api/upload-report" enctype="multipart/form-data" class="form-grid card" style="max-width:none;">
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
-        <div>
-          <label for="r-client">Client</label>
-          <select id="r-client" name="client_id" required>
-            <option value="" disabled selected>Select a client…</option>
-            {clients.map((c) => <option value={c.id}>{c.name}</option>)}
-          </select>
-        </div>
-        <div>
-          <label for="r-title">Report title</label>
-          <input id="r-title" name="title" type="text" required placeholder="SEO Report — March 2026" />
-        </div>
-        <div>
-          <label for="r-period">Month</label>
-          <input id="r-period" name="period" type="month" required />
-        </div>
-      </div>
-      <div>
-        <label for="r-file">Report HTML file</label>
-        <input id="r-file" name="file" type="file" accept=".html,text/html" />
-        <p class="hint">Upload the HTML file Claude generated — or paste its contents below instead.</p>
-      </div>
-      <div>
-        <label for="r-html">…or paste HTML</label>
-        <textarea id="r-html" name="html" placeholder="<!doctype html> …"></textarea>
-      </div>
-      <button class="btn" type="submit">Publish report</button>
-    </form>
-  </div>
+    <h2>3 · Dashboard content &amp; GSC (per client)</h2>
+    <p class="hint" style="margin-bottom:16px;">
+      The GSC numbers refresh automatically every day. Everything else — brand colors, hero text,
+      the frozen baseline, and the AI-visibility audit text — lives in each client's <b>config</b> below.
+      Paste the config JSON your Claude workflow produces, or edit it here to add custom audit text.
+    </p>
 
-  {
-    clients.length === 0 && (
-      <p class="hint" style="margin-top:24px;">No clients yet — start with step 1.</p>
-    )
-  }
+    {clients.length === 0 && <p class="hint">No clients yet — add one above.</p>}
+
+    {
+      clients.map((c) => (
+        <details class="card" style="margin-bottom:14px;">
+          <summary style="cursor:pointer;font-weight:700;font-size:1.05rem;">
+            {c.name}
+            <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" style="float:right;color:var(--lime);font-size:.85rem;">Preview dashboard →</a>
+          </summary>
+          <form method="post" action="/api/save-config" class="form-grid" style="max-width:none;margin-top:16px;">
+            <input type="hidden" name="client_id" value={c.id} />
+            <div>
+              <label>GSC property</label>
+              <input name="gsc_property" type="text" value={c.gsc_property ?? ''} placeholder="https://site.com/" />
+            </div>
+            <div>
+              <label>Config (JSON) — branding, hero, baseline, aiAudit, pipeline, openItems</label>
+              <textarea name="config" spellcheck="false">{pretty(c.config)}</textarea>
+              <p class="hint">To change the AI audit or any narrative, edit it here. Do not put GSC daily numbers here — those come from the automatic pull.</p>
+            </div>
+            <button class="btn" type="submit">Save content</button>
+          </form>
+        </details>
+      ))
+    }
+  </div>
 </PortalLayout>

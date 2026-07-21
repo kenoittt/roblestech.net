@@ -16,6 +16,16 @@ create table if not exists public.clients (
   created_at  timestamptz not null default now()
 );
 
+-- Living-dashboard fields (GSC-driven dashboard).
+--   gsc_property   : Search Console property, e.g. 'https://promixnutrition.com/'
+--   config         : per-client manual content (brand, hero, baseline, aiAudit,
+--                    pipeline, openItems) — edited in the admin panel
+--   gsc_data       : the GSC numbers, refreshed daily by the cron
+alter table public.clients add column if not exists gsc_property   text;
+alter table public.clients add column if not exists config         jsonb not null default '{}'::jsonb;
+alter table public.clients add column if not exists gsc_data       jsonb not null default '{}'::jsonb;
+alter table public.clients add column if not exists gsc_updated_at timestamptz;
+
 -- Links each auth user to a client and a role.
 --   role = 'admin'  -> RTC staff (see everything, use the admin page)
 --   role = 'client' -> a client login (sees only their own client's reports)

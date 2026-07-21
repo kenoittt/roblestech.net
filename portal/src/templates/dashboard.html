@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO &amp; GEO Dashboard</title>
+<!--
+  TEMPORARY FALLBACK TEMPLATE.
+  This renders the injected GSC data so the pipeline works end-to-end, but it is
+  NOT the final Promix design. Once the Promix HTML is re-uploaded, this file is
+  regenerated from it (data block wired to window.__DASH__) to restore the exact
+  look. Data contract: window.__DASH__ = { gsc:{dailyLog,byPage,siteTotal,pullDate,pullRange}, config:{brand,hero,baseline,...} }
+-->
+<style>
+:root{ --brand:#032c7c; --brand-dark:#021d54; --accent:#3992ff; --lime:#aee37b;
+  --ink:#1a2436; --muted:#6b7690; --line:#e6e9f0; --card:#fff; --bg:#f5f7fb; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;font-size:15px;line-height:1.5}
+.hero{background:linear-gradient(120deg,var(--brand-dark),var(--brand));color:#fff;padding:40px 32px 72px}
+.hero-inner{max-width:1100px;margin:0 auto}
+.eyebrow{color:var(--lime);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.hero .sub{color:rgba(255,255,255,.82);font-size:14px;margin-top:8px;max-width:760px}
+.kpis{max-width:1100px;margin:-44px auto 0;padding:0 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;z-index:2}
+.kpi{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:10px;padding:16px;box-shadow:0 4px 14px rgba(3,44,124,.08)}
+.kpi .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.kpi .v{font-size:25px;font-weight:800;line-height:1.1}
+.wrap{max-width:1100px;margin:22px auto 0;padding:0 32px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:16px}
+h2{font-size:16px;font-weight:800;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--brand-dark);color:#fff;text-align:left;padding:9px 12px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+td{padding:9px 12px;border-bottom:1px solid var(--line)}
+td.num,th.num{text-align:right}
+tr.total td{background:#eef2fb;color:var(--brand);font-weight:800}
+.scrolly{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.foot{max-width:1100px;margin:0 auto;padding:18px 32px 40px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line)}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hero-inner">
+  <div class="eyebrow" id="eyebrow">SEO + GEO</div>
+  <h1 id="title">Post Performance &amp; GEO Dashboard</h1>
+  <p class="sub" id="subtitle">Live Search Console visibility. Data lags ~2-3 days.</p>
+</div></div>
+
+<div class="kpis">
+  <div class="kpi"><div class="lbl">Clicks (28d)</div><div class="v" id="kClicks">0</div></div>
+  <div class="kpi"><div class="lbl">Impressions (28d)</div><div class="v" id="kImpr">0</div></div>
+  <div class="kpi"><div class="lbl">Days logged</div><div class="v" id="kDays">0</div></div>
+  <div class="kpi"><div class="lbl">Last pull</div><div class="v" id="kPull" style="font-size:16px">—</div></div>
+</div>
+
+<div class="wrap">
+  <div class="card"><h2>Performance by page (last 28 days)</h2>
+    <div class="scrolly"><table><thead><tr><th>Page</th><th class="num">Clicks</th><th class="num">Impr.</th></tr></thead><tbody id="pageBody"></tbody></table></div>
+  </div>
+  <div class="card"><h2>Daily log</h2>
+    <div class="scrolly"><table><thead><tr><th>Date</th><th class="num">Clicks</th><th class="num">Impr.</th></tr></thead><tbody id="dayBody"></tbody></table></div>
+  </div>
+</div>
+<div class="foot">Robles Technologies Corp. · Confidential client reporting</div>
+
+<script>
+var __DASH = (typeof window!=="undefined" && window.__DASH__) ? window.__DASH__ : {};
+var __G = __DASH.gsc || {}, __C = __DASH.config || {};
+var dailyLog = __G.dailyLog || [], byPage = __G.byPage || [];
+var siteTotal = __G.siteTotal || {clicks:0,impr:0};
+function fmt(n){ return Number(n||0).toLocaleString("en-US"); }
+
+(function(){
+  var b = __C.brand; if(b){ var r=document.documentElement.style; for(var k in b){ if(b[k]) r.setProperty("--"+k,b[k]); } }
+  var h = __C.hero||{};
+  if(h.eyebrow) document.getElementById("eyebrow").textContent=h.eyebrow;
+  if(h.title) document.getElementById("title").textContent=h.title;
+  if(h.docTitle) document.title=h.docTitle;
+
+  document.getElementById("kClicks").textContent=fmt(siteTotal.clicks);
+  document.getElementById("kImpr").textContent=fmt(siteTotal.impr);
+  document.getElementById("kDays").textContent=fmt(dailyLog.length);
+  document.getElementById("kPull").textContent=__G.pullDate || "—";
+
+  var pb=document.getElementById("pageBody");
+  if(!byPage.length){ pb.innerHTML='<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:16px">No GSC pull yet.</td></tr>'; }
+  else { byPage.forEach(function(r){ pb.insertAdjacentHTML("beforeend","<tr><td>"+r.page+"</td><td class=num>"+fmt(r.clicks)+"</td><td class=num>"+fmt(r.impr)+"</td></tr>"); });
+    pb.insertAdjacentHTML("beforeend","<tr class=total><td>Site total</td><td class=num>"+fmt(siteTotal.clicks)+"</td><td class=num>"+fmt(siteTotal.impr)+"</td></tr>"); }
+
+  var db=document.getElementById("dayBody");
+  if(!dailyLog.length){ db.innerHTML='<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:16px">No daily entries yet.</td></tr>'; }
+  else { dailyLog.slice().sort(function(a,b){return b.d.localeCompare(a.d)}).forEach(function(r){ db.insertAdjacentHTML("beforeend","<tr><td>"+r.d+"</td><td class=num>"+fmt(r.c)+"</td><td class=num>"+fmt(r.i)+"</td></tr>"); }); }
+})();
+</script>
+</body>
+</html>
