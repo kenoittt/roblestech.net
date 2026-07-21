@@ -20,6 +20,30 @@ export const GET: APIRoute = async (context) => {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  // Diagnostic: ?debug=1 shows (safely) which Google credentials are deployed,
+  // so we can spot a client/token mismatch behind unauthorized_client.
+  if (context.url.searchParams.get('debug') === '1') {
+    const cid = pick('GOOGLE_CLIENT_ID');
+    const sec = pick('GOOGLE_CLIENT_SECRET');
+    const rt = pick('GOOGLE_REFRESH_TOKEN');
+    return new Response(
+      JSON.stringify(
+        {
+          GOOGLE_CLIENT_ID: cid || '(NOT SET)', // client_id is not secret
+          GOOGLE_CLIENT_SECRET_set: !!sec,
+          secret_prefix: sec ? sec.slice(0, 9) : null,
+          secret_length: sec.length,
+          GOOGLE_REFRESH_TOKEN_set: !!rt,
+          refresh_prefix: rt ? rt.slice(0, 10) : null,
+          refresh_length: rt.length,
+        },
+        null,
+        2
+      ),
+      { headers: { 'content-type': 'application/json' } }
+    );
+  }
+
   const admin = createSupabaseAdmin();
   const { data: clients, error } = await admin
     .from('clients')
