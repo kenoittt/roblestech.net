@@ -37,7 +37,9 @@ export const GET: APIRoute = async (context) => {
   };
   // Escape "<" so the JSON string can't break out of the <script> tag.
   const json = JSON.stringify(payload).replace(/</g, '\\u003c');
-  const inject = `<script>window.__DASH__ = JSON.parse(${JSON.stringify(json)});</script>`;
+  const inject =
+    `<link rel="icon" type="image/png" href="/favicon.png">` +
+    `<script>window.__DASH__ = JSON.parse(${JSON.stringify(json)});</script>`;
 
   const signout =
     '<a href="/logout" style="position:fixed;top:10px;right:14px;z-index:99999;' +
