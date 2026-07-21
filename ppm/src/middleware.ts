@@ -6,6 +6,7 @@ const PUBLIC_PATHS = new Set<string>([
   '/api/login',
   '/logout',
   '/api/cron/due-reminders',
+  '/api/email-test',
 ]);
 
 export const onRequest = defineMiddleware(async (context, next) => {

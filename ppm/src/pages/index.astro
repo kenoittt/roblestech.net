@@ -86,6 +86,22 @@ const err = Astro.url.searchParams.get('err');
     </div>
   </div>
 
+  <!-- Bulk import -->
+  <details class="card" style="margin-top:16px;">
+    <summary style="cursor:pointer;font-weight:700;">Bulk import tasks (CSV)</summary>
+    <p class="hint" style="margin:12px 0;">
+      Download the template, fill it in, and upload. Columns: <code>title, description, assignee_email, priority, due_date, project</code>.
+      Emails must match a PPM member; unknown projects are created. (Bulk import doesn't send assignment emails.)
+    </p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <a class="btn" href="/api/task-template.csv" style="background:rgba(255,255,255,0.1);color:#fff;">↓ Download template</a>
+      <form method="post" action="/api/task-import" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="file" name="file" accept=".csv,text/csv" required />
+        <button class="btn" type="submit">Upload CSV</button>
+      </form>
+    </div>
+  </details>
+
   <div class="board" style="margin-top:22px;">
     {cols.map((c) => (
       <div class="col">
