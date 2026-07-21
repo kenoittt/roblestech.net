@@ -1,0 +1,102 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+
+// Admins can read all clients (RLS is_admin() branch).
+type Client = { id: string; name: string };
+const { data } = await supabase.from('clients').select('id, name').order('name');
+const clients: Client[] = (data as Client[]) ?? [];
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+
+<PortalLayout title="Admin · Robles Tech Portal">
+  <p class="eyebrow">Admin Panel</p>
+  <h1>Manage clients &amp; reports</h1>
+  <p class="lede">Create client companies, issue logins, and publish monthly SEO reports.</p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <div class="admin-grid">
+    <div class="admin-col">
+      <h2>1 · Add a client company</h2>
+      <form method="post" action="/api/create-client" class="form-grid card">
+        <div>
+          <label for="c-name">Company name</label>
+          <input id="c-name" name="name" type="text" required placeholder="Acme Supplements Co." />
+        </div>
+        <button class="btn" type="submit">Create client</button>
+      </form>
+    </div>
+
+    <div class="admin-col">
+      <h2>2 · Create a client login</h2>
+      <form method="post" action="/api/create-login" class="form-grid card">
+        <div>
+          <label for="l-client">Client</label>
+          <select id="l-client" name="client_id" required>
+            <option value="" disabled selected>Select a client…</option>
+            {clients.map((c) => <option value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="l-name">Contact name (optional)</label>
+          <input id="l-name" name="full_name" type="text" placeholder="Jane Doe" />
+        </div>
+        <div>
+          <label for="l-email">Email</label>
+          <input id="l-email" name="email" type="email" required placeholder="jane@acme.com" />
+        </div>
+        <div>
+          <label for="l-pass">Password</label>
+          <input id="l-pass" name="password" type="text" required minlength="8" placeholder="At least 8 characters" />
+          <p class="hint">You'll share this with the client. They can use it as-is.</p>
+        </div>
+        <button class="btn" type="submit">Create login</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="section-gap">
+    <h2>3 · Publish a monthly report</h2>
+    <form method="post" action="/api/upload-report" enctype="multipart/form-data" class="form-grid card" style="max-width:none;">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+        <div>
+          <label for="r-client">Client</label>
+          <select id="r-client" name="client_id" required>
+            <option value="" disabled selected>Select a client…</option>
+            {clients.map((c) => <option value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="r-title">Report title</label>
+          <input id="r-title" name="title" type="text" required placeholder="SEO Report — March 2026" />
+        </div>
+        <div>
+          <label for="r-period">Month</label>
+          <input id="r-period" name="period" type="month" required />
+        </div>
+      </div>
+      <div>
+        <label for="r-file">Report HTML file</label>
+        <input id="r-file" name="file" type="file" accept=".html,text/html" />
+        <p class="hint">Upload the HTML file Claude generated — or paste its contents below instead.</p>
+      </div>
+      <div>
+        <label for="r-html">…or paste HTML</label>
+        <textarea id="r-html" name="html" placeholder="<!doctype html> …"></textarea>
+      </div>
+      <button class="btn" type="submit">Publish report</button>
+    </form>
+  </div>
+
+  {
+    clients.length === 0 && (
+      <p class="hint" style="margin-top:24px;">No clients yet — start with step 1.</p>
+    )
+  }
+</PortalLayout>

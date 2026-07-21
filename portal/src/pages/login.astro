@@ -1,0 +1,29 @@
+---
+import PortalLayout from '../layouts/PortalLayout.astro';
+const hasError = Astro.url.searchParams.has('error');
+---
+
+<PortalLayout title="Sign in · Robles Tech Portal" showNav={false}>
+  <div class="login-wrap">
+    <p class="eyebrow">Client Portal</p>
+    <h1>Sign in</h1>
+    <p class="lede">Access your Robles Tech SEO reporting dashboard.</p>
+
+    {hasError && <div class="alert alert-error">Incorrect email or password. Please try again.</div>}
+
+    <form method="post" action="/api/login" class="form-grid">
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@company.com" />
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••" />
+      </div>
+      <button class="btn btn-block" type="submit">Sign in</button>
+    </form>
+    <p class="hint" style="margin-top:18px;">
+      Credentials are issued by Robles Technologies Corp. Need access? Contact your account manager.
+    </p>
+  </div>
+</PortalLayout>

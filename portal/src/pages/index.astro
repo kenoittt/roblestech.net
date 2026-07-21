@@ -1,0 +1,4 @@
+---
+// Entry point: send signed-in users to their dashboard, everyone else to login.
+return Astro.redirect(Astro.locals.user ? '/dashboard' : '/login');
+---
