@@ -88,6 +88,26 @@ const SAMPLE_CONFIG = {
   </div>
 
   <div class="section-gap">
+    <h2>Create an admin</h2>
+    <form method="post" action="/api/create-admin" class="form-grid card">
+      <p class="hint" style="margin-top:0;">Admins can access this panel and preview every client dashboard. Only create these for RTC staff.</p>
+      <div>
+        <label for="a-name">Name (optional)</label>
+        <input id="a-name" name="full_name" type="text" placeholder="Team member" />
+      </div>
+      <div>
+        <label for="a-email">Email</label>
+        <input id="a-email" name="email" type="email" required placeholder="teammate@roblestech.net" />
+      </div>
+      <div>
+        <label for="a-pass">Password</label>
+        <input id="a-pass" name="password" type="text" required minlength="8" placeholder="At least 8 characters" />
+      </div>
+      <button class="btn" type="submit">Create admin</button>
+    </form>
+  </div>
+
+  <div class="section-gap">
     <h2>3 · Dashboard content &amp; GSC (per client)</h2>
     <p class="hint" style="margin-bottom:16px;">
       The GSC numbers refresh automatically every day. Everything else — brand colors, hero text,
