@@ -1,0 +1,35 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+
+<PortalLayout title="Create an admin · Robles Tech Portal">
+  <div style="max-width:520px;">
+    <a href="/admin" class="hint" style="text-decoration:none; display:inline-block; margin-bottom:14px;">← Back to admin</a>
+    <p class="eyebrow">Team</p>
+    <h1>Create an admin</h1>
+    <p class="lede">Admins can access this panel and preview every client dashboard. Only create these for Robles Tech staff.</p>
+
+    {ok && <div class="alert alert-ok">{ok}</div>}
+    {err && <div class="alert alert-error">{err}</div>}
+
+    <form method="post" action="/api/create-admin" class="form-grid card">
+      <div>
+        <label for="a-name">Name (optional)</label>
+        <input id="a-name" name="full_name" type="text" placeholder="Team member" />
+      </div>
+      <div>
+        <label for="a-email">Email</label>
+        <input id="a-email" name="email" type="email" required placeholder="teammate@roblestech.net" />
+      </div>
+      <div>
+        <label for="a-pass">Password</label>
+        <input id="a-pass" name="password" type="text" required minlength="8" placeholder="At least 8 characters" />
+        <p class="hint">You'll share this with the new admin; they can change it later.</p>
+      </div>
+      <button class="btn" type="submit">Create admin</button>
+    </form>
+  </div>
+</PortalLayout>

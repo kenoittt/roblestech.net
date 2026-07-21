@@ -16,7 +16,7 @@ export const POST: APIRoute = async (context) => {
 
   if (!email || password.length < 8) {
     return context.redirect(
-      '/admin?err=' + encodeURIComponent('Email and a password of at least 8 characters are required.')
+      '/admin/create-admin?err=' + encodeURIComponent('Email and a password of at least 8 characters are required.')
     );
   }
 
@@ -27,7 +27,7 @@ export const POST: APIRoute = async (context) => {
     email_confirm: true,
   });
   if (createErr || !created.user) {
-    return context.redirect('/admin?err=' + encodeURIComponent(createErr?.message ?? 'Could not create user.'));
+    return context.redirect('/admin/create-admin?err=' + encodeURIComponent(createErr?.message ?? 'Could not create user.'));
   }
 
   const { error: profErr } = await admin.from('profiles').insert({
@@ -37,8 +37,8 @@ export const POST: APIRoute = async (context) => {
   });
   if (profErr) {
     await admin.auth.admin.deleteUser(created.user.id);
-    return context.redirect('/admin?err=' + encodeURIComponent(profErr.message));
+    return context.redirect('/admin/create-admin?err=' + encodeURIComponent(profErr.message));
   }
 
-  return context.redirect('/admin?ok=' + encodeURIComponent(`Admin login created for ${email}.`));
+  return context.redirect('/admin/create-admin?ok=' + encodeURIComponent(`Admin login created for ${email}.`));
 };
