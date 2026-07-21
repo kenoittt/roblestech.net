@@ -18,10 +18,24 @@ const hasError = Astro.url.searchParams.has('error');
       </div>
       <div>
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••" />
+        <div style="position:relative;">
+          <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••" style="padding-right:64px;" />
+          <button type="button" id="pw-toggle" aria-label="Show password"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--muted);font:600 12px inherit;cursor:pointer;padding:6px;">Show</button>
+        </div>
       </div>
       <button class="btn btn-block" type="submit">Sign in</button>
     </form>
+    <script>
+      const pw = document.getElementById('password');
+      const tog = document.getElementById('pw-toggle');
+      tog?.addEventListener('click', () => {
+        const show = pw.getAttribute('type') === 'password';
+        pw.setAttribute('type', show ? 'text' : 'password');
+        tog.textContent = show ? 'Hide' : 'Show';
+        tog.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+    </script>
     <p class="hint" style="margin-top:18px;">
       Credentials are issued by Robles Technologies Corp. Need access? Contact your account manager.
     </p>

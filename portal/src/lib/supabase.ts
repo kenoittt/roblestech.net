@@ -23,7 +23,17 @@ export function createSupabaseServer(context: APIContext | CookieContext) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          context.cookies.set(name, value, options);
+          context.cookies.set(name, value, {
+            ...options,
+            httpOnly: true, // not readable by JS — blocks token theft via XSS
+            secure: import.meta.env.PROD, // HTTPS-only in production
+            sameSite: 'lax', // blocks cross-site request forgery
+            path: '/',
+            // Session cookie: no maxAge/expires, so it is cleared when the
+            // browser/session ends — the user must sign in again next time.
+            maxAge: undefined,
+            expires: undefined,
+          });
         });
       },
     },

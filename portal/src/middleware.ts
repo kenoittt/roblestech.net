@@ -49,5 +49,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/dashboard');
   }
 
-  return next();
+  const response = await next();
+  applySecurityHeaders(response.headers);
+  return response;
 });
+
+/** Baseline hardening headers applied to every response. */
+function applySecurityHeaders(h: Headers) {
+  h.set('X-Content-Type-Options', 'nosniff');
+  h.set('X-Frame-Options', 'SAMEORIGIN'); // block clickjacking / external framing
+  h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  h.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  h.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains'); // force HTTPS
+  // Restrict where resources can load from. Dashboards are first-party and use
+  // inline scripts/styles (Chart.js, Google Fonts), so those are allowed; but
+  // no external script/connect origins, which blocks injected data exfiltration.
+  h.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data:",
+      "connect-src 'self'",
+      "frame-ancestors 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+  );
+}
