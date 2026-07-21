@@ -20,6 +20,8 @@ const tasks: Task[] = (tasksData as Task[]) ?? [];
 const people: Person[] = (peopleData as Person[]) ?? [];
 const projects: Project[] = (projData as Project[]) ?? [];
 const nameOf = (id: string | null) => people.find((p) => p.id === id)?.full_name || '—';
+const projOf = (id: string | null) => projects.find((p) => p.id === id) ?? null;
+const statusLabel: Record<string, string> = { todo: 'To do', in_progress: 'In progress', done: 'Done' };
 
 // Analytics
 const todo = tasks.filter((t) => t.status === 'todo').length;
@@ -102,7 +104,12 @@ const err = Astro.url.searchParams.get('err');
     </div>
   </details>
 
-  <div class="board" style="margin-top:22px;">
+  <div class="view-toggle" style="margin-top:24px;">
+    <button type="button" class="vbtn active" data-v="board">▦ Board</button>
+    <button type="button" class="vbtn" data-v="table">▤ Table</button>
+  </div>
+
+  <div id="view-board" class="board" style="margin-top:14px;">
     {cols.map((c) => (
       <div class="col">
         <h3>{c.label}<span>{tasks.filter((t) => t.status === c.key).length}</span></h3>
@@ -132,9 +139,62 @@ const err = Astro.url.searchParams.get('err');
     ))}
   </div>
 
+  <div id="view-table" class="ttable-wrap" hidden>
+    <table class="ttable">
+      <thead>
+        <tr>
+          <th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tasks.map((t) => {
+          const pr = projOf(t.project_id);
+          return (
+            <tr class={t.status === 'done' ? 'is-done' : ''}>
+              <td class="c-title">{t.title}</td>
+              <td>{pr ? (<span class="proj"><span class="dot" style={`background:${pr.color}`}></span>{pr.name}</span>) : <span class="muted">—</span>}</td>
+              <td>
+                <form method="post" action="/api/task-update">
+                  <input type="hidden" name="id" value={t.id} />
+                  <select name="assignee_id" class="js-auto cell-select">
+                    <option value="">Unassigned</option>
+                    {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+                  </select>
+                </form>
+              </td>
+              <td><span class={`pill ${t.priority}`}>{t.priority}</span></td>
+              <td>
+                <form method="post" action="/api/task-update">
+                  <input type="hidden" name="id" value={t.id} />
+                  <select name="status" class={`js-auto cell-select st-${t.status}`}>
+                    <option value="todo" selected={t.status === 'todo'}>To do</option>
+                    <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
+                    <option value="done" selected={t.status === 'done'}>Done</option>
+                  </select>
+                </form>
+              </td>
+              <td class={t.due_date ? 'c-due' : 'muted'}>{t.due_date ?? '—'}</td>
+            </tr>
+          );
+        })}
+        {tasks.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">No tasks yet.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+
   <script is:inline>
     // Auto-submit status/assignee changes.
     document.querySelectorAll('.js-auto').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
+
+    // Board / Table view toggle (remembers choice).
+    const setView = (v) => {
+      document.getElementById('view-board').hidden = v !== 'board';
+      document.getElementById('view-table').hidden = v !== 'table';
+      document.querySelectorAll('.vbtn').forEach((b) => b.classList.toggle('active', b.dataset.v === v));
+      try { localStorage.setItem('ppm-view', v); } catch (e) {}
+    };
+    document.querySelectorAll('.vbtn').forEach((b) => b.addEventListener('click', () => setView(b.dataset.v)));
+    try { const saved = localStorage.getItem('ppm-view'); if (saved) setView(saved); } catch (e) {}
     // The "Add task" button submits the new-task form with the chosen project.
     const addBtn = document.getElementById('add-btn');
     if (addBtn) addBtn.addEventListener('click', () => {
