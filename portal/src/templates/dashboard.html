@@ -419,6 +419,19 @@ var aiAudit = __C.aiAudit || {
     { channel:"Perplexity", june:"1 of 10", july:"0 of 10", note:"Lost Q6 (was 3rd)" },
     { channel:"Total",      june:"5 of 40 (12.5%)", july:"3 of 40 (7.5%)", note:"Net loss of 2, with 1 genuine gain. Like-for-like subset only; the full Round 2 audit is 3 of 80 (3.75%) across all 20 questions." }
   ],
+  /* Aggregate Visibility Scorecard: one column per audit round, full-audit
+     numbers per channel. Add a column each month as new audits land. */
+  aggregate: {
+    columns: ["June 2026 (Round 1 · 10 Qs)", "July 2026 (Round 2 · 20 Qs)"],
+    rows: [
+      { channel:"Google",     values:["1 of 10", "0 of 20"], note:"Lost Q6 page-1 ranking (was 6th)" },
+      { channel:"ChatGPT",    values:["2 of 10", "1 of 20"], note:"Lost Q4 (answer went brandless); Q3 held but demoted to passing mention" },
+      { channel:"Gemini",     values:["1 of 10", "2 of 20"], note:"Q3 top spot held; gained Q9, first electrolyte visibility" },
+      { channel:"Perplexity", values:["1 of 10", "0 of 20"], note:"Lost Q6 (was 3rd)" }
+    ],
+    total: { channel:"Total", values:["5 of 40 (12.5%)", "3 of 80 (3.75%)"], note:"Net loss of 2 on the like-for-like questions, with 1 genuine gain" },
+    note: "Each column is that month's full audit; question counts grow as the audit expands, so compare rates, not raw counts."
+  },
   wins: [
     "Q3 Gemini, top spot, held from June with richer detail. Promix's own phrase \"zero artificial anything\" survives inside Gemini's answer.",
     "Q3 ChatGPT, passing mention, held but demoted from a ranked 3rd pick to a mention.",
@@ -743,8 +756,27 @@ function renderAi(){
     host.appendChild(card);
   });
 
-  // June vs July
-  if(aiAudit.change && aiAudit.change.length){
+  // Aggregate Visibility Scorecard: one column per audit round (full-audit
+  // numbers). Falls back to the legacy June-vs-July table if no aggregate.
+  if(aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length){
+    var agg = aiAudit.aggregate;
+    var headCols = agg.columns.map(function(c){ return "<th>"+c+"</th>"; }).join("");
+    var aggRows = agg.rows.map(function(r){
+      return "<tr><td>"+r.channel+"</td>" + r.values.map(function(v){ return "<td>"+v+"</td>"; }).join("") +
+        "<td style='font-size:12.5px;color:var(--steel)'>"+(r.note||"")+"</td></tr>";
+    }).join("");
+    if(agg.total){
+      aggRows += "<tr class='total'><td>"+agg.total.channel+"</td>" + agg.total.values.map(function(v){ return "<td>"+v+"</td>"; }).join("") +
+        "<td style='font-size:12.5px'>"+(agg.total.note||"")+"</td></tr>";
+    }
+    var aggCard = document.createElement("div");
+    aggCard.className = "card";
+    aggCard.innerHTML = "<h2>Aggregate Visibility Scorecard</h2>" +
+      (agg.note ? '<div class="note" style="margin-top:0;margin-bottom:12px">'+agg.note+'</div>' : '') +
+      "<table><thead><tr><th>Channel</th>"+headCols+"<th>What changed</th></tr></thead><tbody>"+aggRows+"</tbody></table>" +
+      '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
+    host.appendChild(aggCard);
+  } else if(aiAudit.change && aiAudit.change.length){
   var chgRows = aiAudit.change.map(function(c){
     var cls = c.channel === "Total" ? " class='total'" : "";
     return "<tr"+cls+"><td>"+c.channel+"</td><td>"+c.june+"</td><td>"+c.july+"</td><td style='font-size:12.5px;color:var(--steel)'>"+c.note+"</td></tr>";
