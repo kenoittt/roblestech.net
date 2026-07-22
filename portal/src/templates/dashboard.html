@@ -484,8 +484,8 @@ var openItems = __C.openItems || [
   { pri:"LOW",  text:"First GSC baseline captured 2026-07-18. Verify the scheduled weekday refresh (7:04 AM) runs clean on Monday." },
   { pri:"LOW",  text:"Optional: self-host Promix's real typeface (mr-eaves-xl-sans) in the standalone HTML file. Not possible in the artifact sandbox." }
 ];
-var PULL_DATE = __G.pullDate || "2026-07-21";                   // set once a baseline is captured
-var PULL_RANGE = __G.pullRange || "Jun 22 - Jul 19, 2026 (last 28 days)";
+var PULL_DATE = __G.pullDate || "";                             // set by the daily GSC refresh; empty = no pull yet
+var PULL_RANGE = __G.pullRange || "";
 
 /* Frozen pre-service baseline. The "before" the engagement is measured against.
    Real Search Console data for the full month of June 2026 (service start: July 1, 2026),
@@ -867,6 +867,24 @@ function renderMeta(){
       ". Every figure is labeled with its source and date. Nothing here is estimated or invented; pending means pending.";
   } else if(__C.hero && __C.hero.subtitle){
     document.getElementById("subtitle").textContent = __C.hero.subtitle;
+  }
+  // Tech notes: driven by the live pull so the date advances on every refresh
+  // (was a frozen baseline string). Newest data day comes from the daily log.
+  var techEl = document.getElementById("techNotes");
+  if(techEl){
+    var latestD = dailyLog.reduce(function(m,r){ return (r.d > m ? r.d : m); }, "");
+    techEl.textContent = PULL_DATE
+      ? ("Latest Search Console pull: " + PULL_DATE + (PULL_RANGE ? " (" + PULL_RANGE + ")" : "") +
+         (latestD ? ". Most recent data day: " + latestD : "") +
+         ". The by-page table shows the top 10 pages by clicks; site totals are summed from the daily date breakdown. GSC finalizes data over ~2-3 days, so the newest days can still rise.")
+      : "No Search Console pull captured yet — this updates automatically once the daily refresh runs (or after “Pull GSC now”).";
+  }
+  // No-pull footer: keep it client-neutral (the static default names Promix).
+  if(!PULL_DATE){
+    var footEl = document.getElementById("footer");
+    if(footEl) footEl.textContent =
+      "Sources: Google Search Console (" + PROPERTY_LABEL + " property), no pull captured yet, plus manual AI visibility checks. " +
+      "Every figure is labeled with its source and date. Nothing here is estimated or invented; pending means pending.";
   }
   // Hero KPIs come from THIS client's injected GSC data — never from static
   // sample numbers, so no client can ever show another client's figures.
