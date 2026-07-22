@@ -45,7 +45,7 @@ const inTrip = (trip as any).start_date && (trip as any).end_date && today >= (t
     <a href={`/trips/${id}/today`} class="on">Today</a>
   </div>
 
-  {!inTrip && <div class="alert" style="background:#FDF4E3;border:1px solid #EDD9AE;color:#7A5A12;">Today is outside this trip's dates — showing today's schedule anyway.</div>}
+  {!inTrip && <div class="alert" style="background:rgba(245,181,74,.20);border:1px solid rgba(245,181,74,.45);color:#7A5A12;">Today is outside this trip's dates — showing today's schedule anyway.</div>}
 
   <div class="grid2" style="margin-bottom:14px;">
     <div class="card">
