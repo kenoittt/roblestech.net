@@ -1,0 +1,94 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+type Client = { id: string; name: string; gsc_property: string | null; gsc_updated_at: string | null; created_at: string };
+const { data } = await supabase
+  .from('clients')
+  .select('id, name, gsc_property, gsc_updated_at, created_at')
+  .order('name');
+const clients: Client[] = (data as Client[]) ?? [];
+
+// Logins per client (+ emails).
+const admin = createSupabaseAdmin();
+const { data: profs } = await admin.from('profiles').select('id, full_name, client_id').eq('role', 'client');
+const { data: userList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+const emailById = new Map((userList?.users ?? []).map((u) => [u.id, u.email ?? '']));
+type CP = { id: string; full_name: string | null; client_id: string | null };
+const loginsFor = (cid: string) =>
+  ((profs as CP[]) ?? []).filter((p) => p.client_id === cid).map((p) => emailById.get(p.id) || p.full_name || p.id.slice(0, 8));
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
+---
+
+<PortalLayout title="Clients · Robles Tech Portal">
+  <p class="eyebrow">Admin</p>
+  <h1>Clients</h1>
+  <p class="lede">Add, edit, and remove client companies. <a href="/admin" style="color:var(--lime);">← Back to admin</a></p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <!-- Add -->
+  <form method="post" action="/api/create-client" class="card" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:22px;">
+    <div style="flex:1;min-width:200px;"><label>Company name</label><input name="name" required placeholder="Acme Co." /></div>
+    <div style="flex:1;min-width:220px;"><label>GSC property (optional)</label><input name="gsc_property" placeholder="sc-domain:acme.com" /></div>
+    <button class="btn" type="submit">Add client</button>
+  </form>
+
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead>
+        <tr><th>Company</th><th>GSC property</th><th>Logins</th><th>Last GSC pull</th><th>Created</th><th></th></tr>
+      </thead>
+      <tbody>
+        {clients.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">No clients yet.</td></tr>}
+        {clients.map((c) => {
+          const emails = loginsFor(c.id);
+          return (
+            <>
+              <tr>
+                <td class="c-name">{c.name}</td>
+                <td>{c.gsc_property ? <code>{c.gsc_property}</code> : <span class="muted">—</span>}</td>
+                <td>{emails.length ? emails.join(', ') : <span class="muted">none</span>}</td>
+                <td>{fmt(c.gsc_updated_at)}</td>
+                <td>{fmt(c.created_at)}</td>
+                <td style="white-space:nowrap;text-align:right;">
+                  <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" class="mini">Preview</a>
+                  <button type="button" class="mini js-edit" data-id={c.id}>Edit</button>
+                </td>
+              </tr>
+              <tr class="editrow" id={`edit-${c.id}`} hidden>
+                <td colspan="6">
+                  <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
+                    <form method="post" action="/api/client-update" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;flex:1;">
+                      <input type="hidden" name="id" value={c.id} />
+                      <div style="flex:1;min-width:180px;"><label>Name</label><input name="name" value={c.name} required /></div>
+                      <div style="flex:1;min-width:200px;"><label>GSC property</label><input name="gsc_property" value={c.gsc_property ?? ''} /></div>
+                      <button class="btn" type="submit">Save</button>
+                    </form>
+                    <form method="post" action="/api/client-delete" onsubmit="return confirm('Delete this client? Their reports are removed and their logins are unlinked. This cannot be undone.');">
+                      <input type="hidden" name="id" value={c.id} />
+                      <label style="visibility:hidden;">.</label>
+                      <button class="btn-danger" type="submit">Delete client</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            </>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <script is:inline>
+    document.querySelectorAll('.js-edit').forEach((b) => b.addEventListener('click', () => {
+      const row = document.getElementById('edit-' + b.dataset.id);
+      if (row) row.hidden = !row.hidden;
+    }));
+  </script>
+</PortalLayout>

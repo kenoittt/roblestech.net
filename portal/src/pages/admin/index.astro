@@ -19,6 +19,8 @@ const { data: userList } = await adminClient.auth.admin.listUsers({ page: 1, per
 const emailById = new Map((userList?.users ?? []).map((u) => [u.id, u.email ?? '']));
 type CP = { id: string; full_name: string | null; client_id: string | null };
 const logins: CP[] = (clientProfiles as CP[]) ?? [];
+// Only logins that still need a company (once assigned they drop off this list).
+const unassignedLogins = logins.filter((l) => !l.client_id);
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
@@ -105,13 +107,14 @@ const SAMPLE_CONFIG = {
   </div>
 
   <div class="section-gap">
-    <h2>Client access</h2>
+    <h2>Client access <span class="hint" style="font-weight:600;">· logins waiting to be enabled</span></h2>
     <p class="hint" style="margin-bottom:16px;">
-      Each client login must be linked to a company to see a dashboard. Set "Company" to enable it,
-      or "None (disabled)" to turn access off. (This is why a login might see "dashboard not enabled".)
+      New client logins appear here until you link them to a company (which enables their dashboard).
+      Once assigned they drop off this list — manage everyone anytime on the
+      <a href="/admin/clients" style="color:var(--lime);">Clients page →</a>
     </p>
-    {logins.length === 0 && <p class="hint">No client logins yet — create one in step 2.</p>}
-    {logins.map((lg) => (
+    {unassignedLogins.length === 0 && <p class="hint">All client logins are assigned. 🎉</p>}
+    {unassignedLogins.map((lg) => (
       <form method="post" action="/api/link-client" class="card" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:12px;">
         <input type="hidden" name="user_id" value={lg.id} />
         <div style="flex:1;min-width:200px;">
