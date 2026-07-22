@@ -25,23 +25,14 @@ const unassignedLogins = logins.filter((l) => !l.client_id);
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 
+// Show only the client's REAL config — never a pre-filled sample (saving a
+// sample once overwrote a client's content with placeholders).
 const pretty = (c: unknown) => {
   try {
-    const obj = c && Object.keys(c as object).length ? c : SAMPLE_CONFIG;
-    return JSON.stringify(obj, null, 2);
+    return c && Object.keys(c as object).length ? JSON.stringify(c, null, 2) : '';
   } catch {
-    return '{}';
+    return '';
   }
-};
-// Shown when a client has no config yet — a minimal starting point.
-const SAMPLE_CONFIG = {
-  brand: { brand: '#53001C', 'brand-dark': '#3E0016', accent: '#34657F' },
-  hero: { eyebrow: 'Client Name · SEO + GEO', title: 'Post Performance & GEO Dashboard' },
-  baseline: {},
-  aiAudit: {},
-  pipeline: [],
-  sopSteps: [],
-  openItems: [],
 };
 
 const role = Astro.locals.profile?.role;
@@ -182,6 +173,14 @@ const kindLabel: Record<string, string> = {
   </div>
 
   <div class="section-gap">
+    <h2>GSC data</h2>
+    <form method="post" action="/api/run-refresh" class="card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+      <span style="flex:1;min-width:220px;">Search Console data refreshes automatically every day. Pull fresh numbers for all clients now:</span>
+      <button class="btn" type="submit">Refresh GSC now</button>
+    </form>
+  </div>
+
+  <div class="section-gap">
     <h2>3 · Dashboard content &amp; GSC (per client)</h2>
     <p class="hint" style="margin-bottom:16px;">
       The GSC numbers refresh automatically every day. Everything else — brand colors, hero text,
@@ -209,8 +208,8 @@ const kindLabel: Record<string, string> = {
             </div>
             <div>
               <label>Config (JSON) — branding, hero, baseline, aiAudit, pipeline, openItems</label>
-              <textarea name="config" spellcheck="false">{pretty(c.config)}</textarea>
-              <p class="hint">To change the AI audit or any narrative, edit it here. Do not put GSC daily numbers here — those come from the automatic pull.</p>
+              <textarea name="config" spellcheck="false" placeholder={'{ "brand": { "brand": "#53001C" }, "hero": { "eyebrow": "Acme · SEO + GEO" }, "aiAudit": { … } }'}>{pretty(c.config)}</textarea>
+              <p class="hint">Advanced (raw JSON). Prefer the <a href={`/admin/content?client=${c.id}`} style="color:var(--lime);">form editor</a>. Leave empty to keep defaults — an empty save no longer wipes content, but only paste JSON you mean to apply.</p>
             </div>
             <button class="btn" type="submit">Save content</button>
           </form>

@@ -3,7 +3,11 @@ import { createSupabaseServer } from './lib/supabase';
 
 // Routes reachable without a session.
 // The cron endpoint has no session; it authenticates with CRON_SECRET itself.
-const PUBLIC_PATHS = new Set<string>(['/login', '/api/login', '/logout', '/api/cron/refresh']);
+// /forgot + /reset are the password-recovery flow (no session yet).
+const PUBLIC_PATHS = new Set<string>([
+  '/login', '/api/login', '/logout', '/api/cron/refresh',
+  '/forgot', '/api/forgot', '/reset',
+]);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url } = context;

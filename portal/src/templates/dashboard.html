@@ -226,7 +226,7 @@ td.num,th.num{text-align:right;}
       <div class="rollups" style="margin-top:0" id="baselineKpis2">
         <div class="kpi"><div class="lbl">Avg position</div><div class="v" id="blPos">0</div><div class="sub">Google organic, pre-service</div></div>
         <div class="kpi"><div class="lbl">Posts live (RTC)</div><div class="v" id="blPosts">0</div><div class="sub">Optimized posts at service start</div></div>
-        <div class="kpi"><div class="lbl">AI citations</div><div class="v" id="blAi">0/4</div><div class="sub">Engines citing Promix at service start</div></div>
+        <div class="kpi"><div class="lbl">AI citations</div><div class="v" id="blAi">0/4</div><div class="sub">Engines citing the brand at service start</div></div>
       </div>
     </div>
     <div class="card">
@@ -391,6 +391,8 @@ var SOP_FRAMEWORK = [
 ];
 var sopSteps = __C.sopSteps || []; // legacy fallback only
 var AUDITS = __DASH.audits || []; // monthly AI-audit report files uploaded via the portal
+var CLIENT_NAME = __C.clientName || "Promix Nutrition";
+var PROPERTY_LABEL = __C.propertyLabel || "promixnutrition.com";
 /* AI Visibility Audit, Round 2, July 2026. 20 buyer questions x 4 platforms = 80 checks.
    Tested word-for-word, incognito/fresh chats, never naming Promix, July 2-3 2026.
    A cell starting with "Yes" is a hit. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude not tested this round). */
@@ -678,17 +680,28 @@ function renderAi(){
     host.appendChild(mCard);
   }
 
-  // Summary
+  // Summary — only when audit data exists (new clients start empty).
+  if(aiAudit.round || aiAudit.totalChecks){
+  var summaryNote = (aiAudit.note !== undefined && aiAudit.note !== null)
+    ? aiAudit.note
+    : "On the original 10 questions, like for like, visibility moved from 5 of 40 in June to 3 of 40 in July. Every check was captured before any new content published, so this is a clean \"before\" picture. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude was not tested this round).";
   var summary = document.createElement("div");
   summary.className = "card";
   summary.innerHTML =
-    "<h2>AI Visibility Audit &middot; " + aiAudit.round + ", tested " + aiAudit.tested + "</h2>" +
-    '<div class="note" style="margin-top:0">When customers search or ask these questions, Promix shows up for <b>' +
+    "<h2>AI Visibility Audit &middot; " + aiAudit.round + (aiAudit.tested ? ", tested " + aiAudit.tested : "") + "</h2>" +
+    '<div class="note" style="margin-top:0">When customers search or ask these questions, ' + CLIENT_NAME + ' shows up for <b>' +
     aiAudit.visibleChecks + " of " + aiAudit.totalChecks + " checks</b>, " + aiAudit.rate +
-    " visibility across Google and the three major AI answer engines. On the original 10 questions, like for like, visibility moved from 5 of 40 in June to 3 of 40 in July. Every check was captured before any new content published, so this is a clean \"before\" picture. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude was not tested this round).</div>";
+    " visibility across Google and the three major AI answer engines. " + summaryNote + "</div>";
   host.appendChild(summary);
+  } else if(!AUDITS.length){
+    var empty = document.createElement("div");
+    empty.className = "card";
+    empty.innerHTML = "<h2>AI Visibility Audit</h2><div class='note' style='margin-top:0'>No audit loaded yet. The first monthly AI-visibility audit will appear here.</div>";
+    host.appendChild(empty);
+  }
 
   // Channel scorecard + intent scorecard, two columns
+  if(aiAudit.scorecard && aiAudit.scorecard.length){
   var scRows = aiAudit.scorecard.map(function(s){
     return "<tr><td>"+s.channel+"</td><td class='num'>"+s.checks+"</td><td class='num'>"+s.visible+"</td><td class='num'>"+s.rate+"</td></tr>";
   }).join("");
@@ -703,18 +716,22 @@ function renderAi(){
       "<tbody>"+scRows+"<tr class='total'><td>Total</td><td class='num'>"+aiAudit.totalChecks+"</td><td class='num'>"+aiAudit.visibleChecks+"</td><td class='num'>"+aiAudit.rate+"</td></tr></tbody></table></div>" +
     '<div class="card"><h2>By intent group</h2>' +
       "<table><thead><tr><th>Intent group</th><th class='num'>Visible</th></tr></thead><tbody>"+intentRows+"</tbody></table>" +
-      '<div class="note">Gemini is currently the friendliest engine to Promix; both its citations trace to clean-label / no-sweetener positioning language.</div></div>';
+      (aiAudit.intentNote !== undefined ? (aiAudit.intentNote ? '<div class="note">'+aiAudit.intentNote+'</div>' : '')
+        : '<div class="note">Gemini is currently the friendliest engine to ' + CLIENT_NAME + '; both its citations trace to clean-label / no-sweetener positioning language.</div>') + '</div>';
   host.appendChild(scWrap);
+  }
 
   // Wins
+  if(aiAudit.wins && aiAudit.wins.length){
   var winsCard = document.createElement("div");
   winsCard.className = "card";
   winsCard.innerHTML = "<h2>The 3 wins</h2>" +
     aiAudit.wins.map(function(w){ return '<div class="oi"><div class="pri p-high">WIN</div><div>'+w+"</div></div>"; }).join("");
   host.appendChild(winsCard);
+  }
 
   // Full question tables by intent
-  aiAudit.groups.forEach(function(grp){
+  (aiAudit.groups || []).forEach(function(grp){
     var rows = grp.rows.map(function(r){
       return "<tr><td>"+r.n+"</td><td>"+r.q+"</td><td>"+aiCell(r.g)+"</td><td>"+aiCell(r.c)+"</td><td>"+aiCell(r.ge)+"</td><td>"+aiCell(r.p)+"</td><td style='font-size:12.5px;color:var(--steel)'>"+r.won+"</td></tr>";
     }).join("");
@@ -727,6 +744,7 @@ function renderAi(){
   });
 
   // June vs July
+  if(aiAudit.change && aiAudit.change.length){
   var chgRows = aiAudit.change.map(function(c){
     var cls = c.channel === "Total" ? " class='total'" : "";
     return "<tr"+cls+"><td>"+c.channel+"</td><td>"+c.june+"</td><td>"+c.july+"</td><td style='font-size:12.5px;color:var(--steel)'>"+c.note+"</td></tr>";
@@ -735,17 +753,23 @@ function renderAi(){
   chgCard.className = "card";
   chgCard.innerHTML = "<h2>June vs July, like for like (original 10 questions)</h2>" +
     "<table><thead><tr><th>Channel</th><th>June 2026</th><th>July 2026</th><th>What changed</th></tr></thead><tbody>"+chgRows+"</tbody></table>" +
-    '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, Promix lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
+    '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
   host.appendChild(chgCard);
+  }
 
   // Method note
-  var method = document.createElement("div");
-  method.className = "card";
-  method.innerHTML = "<h2>How we tested</h2>" +
-    '<div class="note" style="margin-top:0">20 real customer questions, each checked word for word on Google (incognito, logged out), ChatGPT, Gemini and Perplexity (fresh chats, memory off), July 2 and 3, 2026, without ever naming Promix. Yes means Promix was named or linked; for Google, page 1 or the AI Overview. Every check was screenshotted with the date visible, misses included. Checks were run from a Philippines location (same as the June baseline, so month-over-month holds; US shopper results will differ on shopping-heavy queries). Two Q1 screenshots (Gemini, Perplexity) are pending and marked reported-but-unverified until filed. AI answers are non-deterministic; each result is the single dated run of record. Keyword figures: Semrush, US database, July 2026.</div>';
-  host.appendChild(method);
+  var methodNote = (aiAudit.method !== undefined && aiAudit.method !== null)
+    ? aiAudit.method
+    : '20 real customer questions, each checked word for word on Google (incognito, logged out), ChatGPT, Gemini and Perplexity (fresh chats, memory off), July 2 and 3, 2026, without ever naming ' + CLIENT_NAME + '. Yes means ' + CLIENT_NAME + ' was named or linked; for Google, page 1 or the AI Overview. Every check was screenshotted with the date visible, misses included. Checks were run from a Philippines location (same as the June baseline, so month-over-month holds; US shopper results will differ on shopping-heavy queries). Two Q1 screenshots (Gemini, Perplexity) are pending and marked reported-but-unverified until filed. AI answers are non-deterministic; each result is the single dated run of record. Keyword figures: Semrush, US database, July 2026.';
+  if(methodNote){
+    var method = document.createElement("div");
+    method.className = "card";
+    method.innerHTML = "<h2>How we tested</h2>" +
+      '<div class="note" style="margin-top:0">' + methodNote + '</div>';
+    host.appendChild(method);
+  }
 
-  document.getElementById("kpiAi").textContent = aiAudit.visibleChecks + "/" + aiAudit.totalChecks;
+  document.getElementById("kpiAi").textContent = (aiAudit.visibleChecks || 0) + "/" + (aiAudit.totalChecks || 0);
 }
 
 /* ---------- baseline (pre-service snapshot) ---------- */
@@ -753,13 +777,13 @@ function renderBaseline(){
   document.getElementById("baselineTitle").textContent =
     "Pre-service baseline · " + baseline.window;
   document.getElementById("baselineIntro").innerHTML =
-    "Promix's Google organic performance <b>before</b> the SEO + GEO engagement began (service start: " +
+    CLIENT_NAME + "'s Google organic performance <b>before</b> the SEO + GEO engagement began (service start: " +
     baseline.serviceStart + "). This is a frozen snapshot, captured from Search Console on " + baseline.captured +
     ", and it does not change as new data arrives. Every later result is measured against these numbers.";
   document.getElementById("blClicks").textContent = fmt(baseline.clicks);
-  document.getElementById("blClicksSub").textContent = "Google organic, June 2026";
+  document.getElementById("blClicksSub").textContent = "Google organic, " + (baseline.window || "pre-service");
   document.getElementById("blImpr").textContent = fmt(baseline.impr);
-  document.getElementById("blImprSub").textContent = "Google organic, June 2026";
+  document.getElementById("blImprSub").textContent = "Google organic, " + (baseline.window || "pre-service");
   document.getElementById("blCtr").textContent = baseline.ctr;
   document.getElementById("blPos").textContent = baseline.avgPos;
   document.getElementById("blPosts").textContent = fmt(baseline.postsLive);
@@ -796,12 +820,15 @@ function renderOpenItems(){
 function renderMeta(){
   if(PULL_DATE){
     document.getElementById("subtitle").textContent =
-      "Live visibility for promixnutrition.com. GSC pull: " + PULL_DATE + (PULL_RANGE ? " (" + PULL_RANGE + ")" : "") +
+      "Live visibility for " + PROPERTY_LABEL + ". GSC pull: " + PULL_DATE + (PULL_RANGE ? " (" + PULL_RANGE + ")" : "") +
       ". Data lags ~2-3 days; new posts read zero for a while, that's normal.";
     document.getElementById("footer").textContent =
-      "Sources: Google Search Console (promixnutrition.com property), pulled " + PULL_DATE +
+      "Sources: Google Search Console (" + PROPERTY_LABEL + " property), pulled " + PULL_DATE +
       (PULL_RANGE ? ", range " + PULL_RANGE : "") +
-      ", and the July 2026 AI Visibility Audit (Round 2, 80 checks, tested Jul 2-3 2026, screenshots on file). Every figure is labeled with its source and date. Nothing here is estimated or invented; pending means pending.";
+      (aiAudit.round ? ", and the " + aiAudit.round + " AI Visibility Audit (tested " + aiAudit.tested + ", screenshots on file)" : "") +
+      ". Every figure is labeled with its source and date. Nothing here is estimated or invented; pending means pending.";
+  } else if(__C.hero && __C.hero.subtitle){
+    document.getElementById("subtitle").textContent = __C.hero.subtitle;
   }
   // Posts live counts only pipeline posts whose status is "Live" — drafts,
   // reviews, and not-started posts don't count until they actually ship.

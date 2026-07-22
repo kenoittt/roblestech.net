@@ -1,0 +1,33 @@
+---
+import PortalLayout from '../layouts/PortalLayout.astro';
+
+const ok = Astro.url.searchParams.has('ok');
+const err = Astro.url.searchParams.get('err');
+const errMsg =
+  err === 'short' ? 'Password must be at least 8 characters.' :
+  err === 'mismatch' ? "The passwords don't match." :
+  err === 'failed' ? 'Could not update the password. Please try again.' : null;
+---
+
+<PortalLayout title="Account · Robles Tech Portal">
+  <div style="max-width:440px;">
+    <p class="eyebrow">Account</p>
+    <h1>Change password</h1>
+    <p class="lede">Set a new password for your login.</p>
+
+    {ok && <div class="alert alert-ok">Password updated. Use it the next time you sign in.</div>}
+    {errMsg && <div class="alert alert-error">{errMsg}</div>}
+
+    <form method="post" action="/api/change-password" class="form-grid card">
+      <div>
+        <label for="pw">New password</label>
+        <input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" />
+      </div>
+      <div>
+        <label for="pw2">Confirm new password</label>
+        <input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="8" placeholder="Repeat it" />
+      </div>
+      <button class="btn" type="submit">Update password</button>
+    </form>
+  </div>
+</PortalLayout>

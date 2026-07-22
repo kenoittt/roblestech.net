@@ -1,0 +1,64 @@
+---
+import PortalLayout from '../layouts/PortalLayout.astro';
+import { createSupabaseServer } from '../lib/supabase';
+
+// Landing page for the password-recovery email link. Supabase redirects here
+// with a one-time ?code= which we immediately exchange for a session (the code
+// is single-use, so it is dead the moment it appears in any log). Then the
+// user sets a new password via a POST — never through the URL.
+const code = Astro.url.searchParams.get('code');
+let ready = false;
+
+const supabase = createSupabaseServer(Astro);
+if (code) {
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (!error) return Astro.redirect('/reset'); // drop the code from the URL/history
+}
+{
+  const { data: { user } } = await supabase.auth.getUser();
+  ready = !!user;
+}
+
+const ok = Astro.url.searchParams.has('ok');
+const err = Astro.url.searchParams.get('err');
+const errMsg =
+  err === 'short' ? 'Password must be at least 8 characters.' :
+  err === 'mismatch' ? "The passwords don't match." :
+  err === 'failed' ? 'Could not update the password. Please try again.' : null;
+---
+
+<PortalLayout title="Set new password · Robles Tech Portal" showNav={false}>
+  <div class="login-wrap">
+    <img class="login-logo" src="/logo-white.png" alt="Robles Tech" />
+    <p class="eyebrow">Client Portal</p>
+    <h1>Set a new password</h1>
+
+    {ok ? (
+      <>
+        <div class="alert alert-ok">Password updated. You can sign in with it now.</div>
+        <a class="btn btn-block" href="/dashboard" style="text-align:center;text-decoration:none;display:block;">Continue →</a>
+      </>
+    ) : ready ? (
+      <>
+        {errMsg && <div class="alert alert-error">{errMsg}</div>}
+        <form method="post" action="/api/change-password" class="form-grid">
+          <input type="hidden" name="next" value="/reset" />
+          <div>
+            <label for="pw">New password</label>
+            <input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" />
+          </div>
+          <div>
+            <label for="pw2">Confirm new password</label>
+            <input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="8" placeholder="Repeat it" />
+          </div>
+          <button class="btn btn-block" type="submit">Save new password</button>
+        </form>
+      </>
+    ) : (
+      <>
+        <div class="alert alert-error">This reset link is invalid or has expired.</div>
+        <a href="/forgot" style="color:var(--lime);">Request a new one →</a>
+      </>
+    )}
+  </div>
+</PortalLayout>

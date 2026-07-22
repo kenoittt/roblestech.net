@@ -29,7 +29,7 @@ export const GET: APIRoute = async (context) => {
   const supabase = createSupabaseServer(context);
   const { data: client, error } = await supabase
     .from('clients')
-    .select('name, config, gsc_data')
+    .select('name, config, gsc_data, gsc_property')
     .eq('id', targetId)
     .single();
 
@@ -42,11 +42,64 @@ export const GET: APIRoute = async (context) => {
     .eq('client_id', targetId)
     .order('period', { ascending: false });
 
-  const payload = {
-    gsc: (client as { gsc_data: unknown }).gsc_data ?? {},
-    config: (client as { config: unknown }).config ?? {},
-    audits: audits ?? [],
+  const name = (client as { name: string }).name;
+  const rawCfg = ((client as any).config && typeof (client as any).config === 'object') ? { ...(client as any).config } : {};
+  const rawGsc = ((client as any).gsc_data && typeof (client as any).gsc_data === 'object') ? (client as any).gsc_data : {};
+
+  // Sanitize: drop empty objects/arrays (accidental saves of the old sample
+  // config) and placeholder hero text, so real fallbacks/defaults apply.
+  for (const k of Object.keys(rawCfg)) {
+    const v = rawCfg[k];
+    if (v && typeof v === 'object' && Object.keys(v).length === 0) delete rawCfg[k];
+    if (Array.isArray(v) && v.length === 0) delete rawCfg[k];
+  }
+  if (rawCfg.hero) {
+    for (const k of Object.keys(rawCfg.hero)) {
+      if (String(rawCfg.hero[k]).includes('Client Name')) delete rawCfg.hero[k];
+    }
+    if (Object.keys(rawCfg.hero).length === 0) delete rawCfg.hero;
+  }
+
+  // The template's baked-in rich content belongs to Promix. Every other client
+  // gets neutral defaults so no Promix data or narrative ever leaks through.
+  const isPromix = /promix/i.test(name);
+  const domain = String((client as any).gsc_property ?? '')
+    .replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, '') || name;
+
+  const neutral = {
+    clientName: name,
+    propertyLabel: domain,
+    hero: {
+      eyebrow: `${name} · SEO + GEO`,
+      title: 'Post Performance & GEO Dashboard',
+      docTitle: `${name} · Post Performance & GEO Dashboard`,
+      subtitle: `Live visibility for ${domain}. GSC data refreshes daily and lags ~2-3 days; new posts read zero for a while, that's normal.`,
+    },
+    baseline: { window: '', serviceStart: '—', captured: '—', clicks: 0, impr: 0, ctr: '—', avgPos: '—', postsLive: 0, aiText: '—', aiSub: '', pages: [] },
+    aiAudit: { round: '', tested: '', totalChecks: 0, visibleChecks: 0, rate: '0%', note: '', intentNote: '', method: '', scorecard: [], intent: [], change: [], wins: [], groups: [] },
+    pipeline: [],
+    openItems: [],
   };
+
+  const config = isPromix
+    ? { clientName: name, propertyLabel: 'promixnutrition.com', ...rawCfg }
+    : {
+        ...neutral,
+        ...rawCfg,
+        hero: { ...neutral.hero, ...(rawCfg.hero ?? {}) },
+        baseline: { ...neutral.baseline, ...(rawCfg.baseline ?? {}) },
+        aiAudit: { ...neutral.aiAudit, ...(rawCfg.aiAudit ?? {}) },
+      };
+
+  // Seed GSC with empty (truthy) structures so the template's Promix sample
+  // numbers never render for a client that has no pull yet.
+  const gsc = {
+    dailyLog: [], byPage: [], siteTotal: { clicks: 0, impr: 0 },
+    preLogBaseline: { month: '', c: 0, i: 0 }, pullDate: '', pullRange: '',
+    ...rawGsc,
+  };
+
+  const payload = { gsc, config, audits: audits ?? [] };
   // Escape "<" so the JSON string can't break out of the <script> tag.
   const json = JSON.stringify(payload).replace(/</g, '\\u003c');
   // Floating glass "island" nav injected into the standalone dashboard,
@@ -82,8 +135,10 @@ export const GET: APIRoute = async (context) => {
   const navBar =
     `<nav class="rtc-pnav">` +
     `<a class="b" href="/dashboard"><img src="/logo-white.png" alt="">Robles <i>Tech</i></a>` +
+    `<span style="display:flex;align-items:center;gap:16px;">` +
+    `<a href="/account" style="color:rgba(255,255,255,.85);font-weight:600;font-size:.85rem;text-decoration:none;">Account</a>` +
     `<form method="post" action="/logout"><button class="out" type="submit">Sign out</button></form>` +
-    `</nav>`;
+    `</span></nav>`;
 
   const html = templateHtml
     .replace('</head>', `${inject}\n</head>`)

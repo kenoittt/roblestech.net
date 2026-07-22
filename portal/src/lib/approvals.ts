@@ -1,6 +1,7 @@
 import type { APIContext } from 'astro';
 import { createSupabaseAdmin } from './supabase';
 import { getSession } from './auth';
+import { fetchGscData } from './gsc';
 
 export type ChangeKind =
   | 'client_create' | 'client_update' | 'client_delete'
@@ -12,9 +13,32 @@ export async function applyChange(kind: string, payload: Record<string, any>): P
   const admin = createSupabaseAdmin();
   let error: { message: string } | null = null;
   if (kind === 'client_create') {
-    ({ error } = await admin.from('clients').insert({ name: payload.name, gsc_property: payload.gsc_property || null }));
+    const { data: created, error: insErr } = await admin
+      .from('clients')
+      .insert({ name: payload.name, gsc_property: payload.gsc_property || null })
+      .select('id')
+      .single();
+    error = insErr;
+    // Pull GSC immediately (best-effort) so the new dashboard has data right
+    // away instead of waiting for the next daily cron.
+    if (!insErr && created && payload.gsc_property) {
+      try {
+        const gsc = await fetchGscData(payload.gsc_property);
+        await admin.from('clients')
+          .update({ gsc_data: gsc, gsc_updated_at: new Date().toISOString() })
+          .eq('id', (created as { id: string }).id);
+      } catch { /* the daily cron will retry; property may need GSC access */ }
+    }
   } else if (kind === 'client_update') {
     ({ error } = await admin.from('clients').update({ name: payload.name, gsc_property: payload.gsc_property || null }).eq('id', payload.id));
+    if (!error && payload.gsc_property) {
+      try {
+        const gsc = await fetchGscData(payload.gsc_property);
+        await admin.from('clients')
+          .update({ gsc_data: gsc, gsc_updated_at: new Date().toISOString() })
+          .eq('id', payload.id);
+      } catch { /* daily cron will retry */ }
+    }
   } else if (kind === 'client_delete') {
     ({ error } = await admin.from('clients').delete().eq('id', payload.id));
   } else if (kind === 'link_client') {

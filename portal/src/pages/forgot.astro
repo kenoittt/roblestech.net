@@ -1,0 +1,24 @@
+---
+import PortalLayout from '../layouts/PortalLayout.astro';
+const sent = Astro.url.searchParams.has('sent');
+---
+
+<PortalLayout title="Reset password · Robles Tech Portal" showNav={false}>
+  <div class="login-wrap">
+    <img class="login-logo" src="/logo-white.png" alt="Robles Tech" />
+    <p class="eyebrow">Client Portal</p>
+    <h1>Reset password</h1>
+    <p class="lede">Enter your email and we'll send you a reset link.</p>
+
+    {sent && <div class="alert alert-ok">If that email has an account, a reset link is on its way. Check your inbox (and spam).</div>}
+
+    <form method="post" action="/api/forgot" class="form-grid">
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@company.com" />
+      </div>
+      <button class="btn btn-block" type="submit">Send reset link</button>
+    </form>
+    <p class="hint" style="margin-top:18px;"><a href="/login" style="color:var(--lime);">← Back to sign in</a></p>
+  </div>
+</PortalLayout>
