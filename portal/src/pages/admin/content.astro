@@ -1,0 +1,114 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+
+const clientId = Astro.url.searchParams.get('client') ?? '';
+const supabase = createSupabaseServer(Astro);
+const { data: client } = await supabase.from('clients').select('id, name, config').eq('id', clientId).single();
+if (!client) return Astro.redirect('/admin/clients');
+
+const cfg: any = ((client as any).config && typeof (client as any).config === 'object') ? (client as any).config : {};
+const baseline = cfg.baseline ?? {};
+const pages = Array.isArray(baseline.pages) ? baseline.pages : [];
+const pipeline = Array.isArray(cfg.pipeline) ? cfg.pipeline : [];
+const openItems = Array.isArray(cfg.openItems) ? cfg.openItems : [];
+const isSuper = Astro.locals.profile?.role === 'super_admin';
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const v = (x: any) => (x === undefined || x === null ? '' : String(x));
+---
+
+<PortalLayout title={`Edit content · ${(client as any).name}`}>
+  <p class="eyebrow">Admin · Dashboard content</p>
+  <h1>{(client as any).name}</h1>
+  <p class="lede">Edit the manual parts of this client's dashboard. <a href="/admin" style="color:var(--lime);">← Back to admin</a></p>
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+  {!isSuper && <div class="alert" style="background:rgba(57,146,255,0.12);border:1px solid rgba(57,146,255,0.4);color:#cfe2ff;">Your changes here are submitted for super-admin approval.</div>}
+
+  <form method="post" action="/api/save-content" class="gated">
+    <input type="hidden" name="client_id" value={clientId} />
+
+    <div class="section-h">Baseline (pre-service “before” numbers)</div>
+    <div class="card" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+      <div><label>Window</label><input name="bl_window" value={v(baseline.window)} placeholder="June 1 - 30, 2026" /></div>
+      <div><label>Service start</label><input name="bl_serviceStart" value={v(baseline.serviceStart)} placeholder="July 1, 2026" /></div>
+      <div><label>Captured</label><input name="bl_captured" value={v(baseline.captured)} placeholder="2026-07-18" /></div>
+      <div><label>Clicks</label><input name="bl_clicks" value={v(baseline.clicks)} inputmode="numeric" /></div>
+      <div><label>Impressions</label><input name="bl_impr" value={v(baseline.impr)} inputmode="numeric" /></div>
+      <div><label>Avg CTR</label><input name="bl_ctr" value={v(baseline.ctr)} placeholder="4.1%" /></div>
+      <div><label>Avg position</label><input name="bl_avgPos" value={v(baseline.avgPos)} placeholder="7.9" /></div>
+      <div><label>Posts live (RTC)</label><input name="bl_postsLive" value={v(baseline.postsLive)} inputmode="numeric" /></div>
+      <div><label>AI citations text</label><input name="bl_aiText" value={v(baseline.aiText)} placeholder="5 / 40" /></div>
+      <div style="grid-column:1/-1;"><label>AI sub-note</label><input name="bl_aiSub" value={v(baseline.aiSub)} placeholder="June audit, 10 Qs x 4 engines (12.5%)" /></div>
+    </div>
+
+    <div class="section-h">Top pages at baseline</div>
+    <div id="pagesList"></div>
+    <button type="button" class="mini js-add" data-list="pages">+ Add page</button>
+
+    <div class="section-h">Content pipeline</div>
+    <div id="pipeList"></div>
+    <button type="button" class="mini js-add" data-list="pipe">+ Add post</button>
+
+    <div class="section-h">Open items</div>
+    <div id="oiList"></div>
+    <button type="button" class="mini js-add" data-list="oi">+ Add item</button>
+
+    <input type="hidden" name="bl_pages" id="f-pages" />
+    <input type="hidden" name="pipeline" id="f-pipe" />
+    <input type="hidden" name="openItems" id="f-oi" />
+    <div style="margin-top:22px;"><button class="btn" type="submit">Save content</button></div>
+  </form>
+
+  <script is:inline define:vars={{ pages, pipeline, openItems, isSuper }}>
+    const mk = (html) => { const d = document.createElement('div'); d.className = 'erow'; d.innerHTML = html; return d; };
+    const esc = (s) => (s == null ? '' : String(s)).replace(/"/g, '&quot;');
+    const statusOpts = (sel) => ['Not Started','Drafting','For Review','Live'].map((o) => `<option${o===sel?' selected':''}>${o}</option>`).join('');
+    const priOpts = (sel) => ['HIGH','MED','LOW'].map((o) => `<option${o===sel?' selected':''}>${o}</option>`).join('');
+
+    function pagesRow(d){ d=d||{}; return mk(
+      `<input data-f="page" placeholder="/page-url" value="${esc(d.page)}" style="flex:2;">
+       <input data-f="clicks" placeholder="clicks" value="${esc(d.clicks)}" inputmode="numeric" style="flex:1;">
+       <input data-f="impr" placeholder="impr" value="${esc(d.impr)}" inputmode="numeric" style="flex:1;">
+       <button type="button" class="mini js-del">✕</button>`); }
+    function pipeRow(d){ d=d||{}; return mk(
+      `<input data-f="num" placeholder="#" value="${esc(d.num)}" style="width:74px;" title="Unique post ID">
+       <input data-f="post" placeholder="Post title" value="${esc(d.post)}" style="flex:2;">
+       <select data-f="status" style="flex:1;">${statusOpts(d.status)}</select>
+       <input data-f="published" type="date" value="${esc(d.published)}" style="flex:1;">
+       <button type="button" class="mini js-del">✕</button>`); }
+    function oiRow(d){ d=d||{}; return mk(
+      `<select data-f="pri" style="width:90px;">${priOpts(d.pri)}</select>
+       <input data-f="text" placeholder="Deliverable / item" value="${esc(d.text)}" style="flex:1;">
+       <button type="button" class="mini js-del">✕</button>`); }
+
+    const lists = {
+      pages: { el: document.getElementById('pagesList'), row: pagesRow, data: pages },
+      pipe:  { el: document.getElementById('pipeList'),  row: pipeRow,  data: pipeline },
+      oi:    { el: document.getElementById('oiList'),    row: oiRow,    data: openItems },
+    };
+    Object.values(lists).forEach((L) => (L.data || []).forEach((d) => L.el.appendChild(L.row(d))));
+    document.querySelectorAll('.js-add').forEach((b) => b.addEventListener('click', () => {
+      const L = lists[b.dataset.list]; L.el.appendChild(L.row({}));
+    }));
+    document.addEventListener('click', (e) => { const x = e.target.closest('.js-del'); if (x) x.closest('.erow').remove(); });
+
+    const grab = (el) => { const o = {}; el.querySelectorAll('[data-f]').forEach((i) => o[i.dataset.f] = i.value); return o; };
+    const collect = (el, mapper) => Array.from(el.querySelectorAll('.erow')).map((r) => mapper(grab(r)));
+
+    document.querySelector('form.gated').addEventListener('submit', (e) => {
+      document.getElementById('f-pages').value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
+      document.getElementById('f-pipe').value  = JSON.stringify(collect(lists.pipe.el, (o) => ({ num:o.num, post:o.post, status:o.status, published:o.published })).filter((x)=>x.post||x.num));
+      document.getElementById('f-oi').value    = JSON.stringify(collect(lists.oi.el, (o) => ({ pri:o.pri, text:o.text })).filter((x)=>x.text));
+      if (!isSuper) {
+        const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');
+        if (note === null) { e.preventDefault(); return; }
+        let inp = e.target.querySelector('input[name="reason"]');
+        if (!inp) { inp = document.createElement('input'); inp.type='hidden'; inp.name='reason'; e.target.appendChild(inp); }
+        inp.value = note;
+      }
+    });
+  </script>
+</PortalLayout>

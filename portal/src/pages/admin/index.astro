@@ -195,7 +195,10 @@ const kindLabel: Record<string, string> = {
         <details class="card" style="margin-bottom:14px;">
           <summary style="cursor:pointer;font-weight:700;font-size:1.05rem;">
             {c.name}
-            <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" style="float:right;color:var(--lime);font-size:.85rem;">Preview dashboard →</a>
+            <span style="float:right;font-size:.85rem;">
+              <a href={`/admin/content?client=${c.id}`} style="color:var(--lime);">Edit content (forms) →</a>
+              <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" style="color:var(--sky);margin-left:14px;">Preview →</a>
+            </span>
           </summary>
           <form method="post" action="/api/save-config" class="form-grid gated" style="max-width:none;margin-top:16px;">
             <input type="hidden" name="client_id" value={c.id} />

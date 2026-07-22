@@ -188,7 +188,7 @@ td.num,th.num{text-align:right;}
     <div class="card">
       <h2>Content pipeline</h2>
       <table>
-        <thead><tr><th>Post</th><th>Status</th><th>Published</th><th>SOP</th><th>Schema</th><th>AI</th></tr></thead>
+        <thead><tr><th>#</th><th>Post</th><th>Status</th><th>Published</th><th>SOP</th><th>Schema</th><th>AI</th></tr></thead>
         <tbody id="pipelineBody"></tbody>
       </table>
     </div>
@@ -574,12 +574,12 @@ function renderPipeline(){
   var tb = document.getElementById("pipelineBody");
   tb.innerHTML = "";
   if(pipeline.length === 0){
-    tb.innerHTML = '<tr class="empty-row"><td colspan="6">No posts published yet, baseline pending.</td></tr>';
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7">No posts published yet, baseline pending.</td></tr>';
     return;
   }
   pipeline.forEach(function(p){
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>"+p.post+"</td><td>"+badge(p.status==="Live"?"live":"pending",p.status)+"</td><td>"+p.published+"</td><td>"+p.sop+"</td><td>"+p.schema+"</td><td>"+p.ai+"</td>";
+    tr.innerHTML = "<td>"+(p.num||"")+"</td><td>"+p.post+"</td><td>"+badge(p.status==="Live"?"live":"pending",p.status)+"</td><td>"+(p.published||"")+"</td><td>"+(p.sop||"")+"</td><td>"+(p.schema||"")+"</td><td>"+(p.ai||"")+"</td>";
     tb.appendChild(tr);
   });
 }
