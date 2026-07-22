@@ -1,5 +1,6 @@
 ---
 import PortalLayout from '../../layouts/PortalLayout.astro';
+import EditIcon from '../../components/EditIcon.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 
 const clientId = Astro.url.searchParams.get('client') ?? '';
@@ -55,7 +56,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
         <div style={f.wide ? 'grid-column:1/-1;' : ''}>
           <label style="display:flex;justify-content:space-between;align-items:center;">
             {f.label}
-            <button type="button" class="pencil js-unlock" title={`Edit ${f.label}`}>✏️</button>
+            <button type="button" class="pencil js-unlock" title={`Edit ${f.label}`}><EditIcon title={`Edit ${f.label}`} /></button>
           </label>
           <input name={f.name} value={f.val} placeholder={f.ph} disabled />
         </div>
@@ -64,7 +65,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
     <div class="section-h" style="display:flex;align-items:center;gap:10px;">
       Top pages at baseline
-      <button type="button" class="pencil" id="unlock-pages" title="Edit top pages">✏️</button>
+      <button type="button" class="pencil" id="unlock-pages" title="Edit top pages"><EditIcon size={16} title="Edit top pages" /></button>
     </div>
     <div id="pagesList" class="pages-locked"></div>
     <button type="button" class="mini js-add" data-list="pages" id="pages-add" hidden>+ Add page</button>
@@ -172,7 +173,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       lists.pages.el.querySelectorAll('input').forEach((i) => (i.disabled = false));
       lists.pages.el.querySelectorAll('.js-del').forEach((b) => (b.style.display = ''));
       document.getElementById('pages-add').hidden = false;
-      e.target.style.visibility = 'hidden';
+      e.currentTarget.style.visibility = 'hidden';
     });
     document.querySelectorAll('.js-add').forEach((b) => b.addEventListener('click', () => {
       const L = lists[b.dataset.list]; L.el.appendChild(L.row({}));
