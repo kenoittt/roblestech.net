@@ -1,6 +1,6 @@
 ---
 import PortalLayout from '../../layouts/PortalLayout.astro';
-import { createSupabaseServer } from '../../lib/supabase';
+import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
 
@@ -10,6 +10,15 @@ const { data } = await supabase
   .select('id, name, gsc_property, config')
   .order('name');
 const clients: Client[] = (data as Client[]) ?? [];
+
+// Client logins and which company each is linked to (drives dashboard access).
+const adminClient = createSupabaseAdmin();
+const { data: clientProfiles } = await adminClient
+  .from('profiles').select('id, full_name, client_id').eq('role', 'client').order('full_name');
+const { data: userList } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+const emailById = new Map((userList?.users ?? []).map((u) => [u.id, u.email ?? '']));
+type CP = { id: string; full_name: string | null; client_id: string | null };
+const logins: CP[] = (clientProfiles as CP[]) ?? [];
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
@@ -93,6 +102,32 @@ const SAMPLE_CONFIG = {
       <p style="margin:0 0 16px;">Create additional Robles Tech admin logins (full panel access).</p>
       <a class="btn" href="/admin/create-admin">Create an admin →</a>
     </div>
+  </div>
+
+  <div class="section-gap">
+    <h2>Client access</h2>
+    <p class="hint" style="margin-bottom:16px;">
+      Each client login must be linked to a company to see a dashboard. Set "Company" to enable it,
+      or "None (disabled)" to turn access off. (This is why a login might see "dashboard not enabled".)
+    </p>
+    {logins.length === 0 && <p class="hint">No client logins yet — create one in step 2.</p>}
+    {logins.map((lg) => (
+      <form method="post" action="/api/link-client" class="card" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:12px;">
+        <input type="hidden" name="user_id" value={lg.id} />
+        <div style="flex:1;min-width:200px;">
+          <label>{lg.full_name || '(no name)'}</label>
+          <div class="hint" style="margin:0 0 6px;">{emailById.get(lg.id) || lg.id.slice(0, 8)}</div>
+        </div>
+        <div style="min-width:220px;">
+          <label>Company (dashboard)</label>
+          <select name="client_id">
+            <option value="">None (disabled)</option>
+            {clients.map((c) => <option value={c.id} selected={lg.client_id === c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <button class="btn" type="submit">Save</button>
+      </form>
+    ))}
   </div>
 
   <div class="section-gap">
