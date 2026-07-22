@@ -2,7 +2,10 @@ import type { APIContext } from 'astro';
 import { createSupabaseAdmin } from './supabase';
 import { getSession } from './auth';
 
-export type ChangeKind = 'client_create' | 'client_update' | 'client_delete' | 'link_client' | 'save_config';
+export type ChangeKind =
+  | 'client_create' | 'client_update' | 'client_delete'
+  | 'link_client' | 'save_config'
+  | 'audit_add' | 'audit_delete';
 
 /** Perform the actual DB mutation for a change. Returns an error message or null. */
 export async function applyChange(kind: string, payload: Record<string, any>): Promise<string | null> {
@@ -18,6 +21,15 @@ export async function applyChange(kind: string, payload: Record<string, any>): P
     ({ error } = await admin.from('profiles').update({ client_id: payload.client_id || null }).eq('id', payload.user_id));
   } else if (kind === 'save_config') {
     ({ error } = await admin.from('clients').update({ gsc_property: payload.gsc_property || null, config: payload.config }).eq('id', payload.client_id));
+  } else if (kind === 'audit_add') {
+    // File is already in storage; approval creates the visible row.
+    ({ error } = await admin.from('reports').insert({
+      client_id: payload.client_id, title: payload.title, period: payload.period, storage_path: payload.storage_path,
+    }));
+  } else if (kind === 'audit_delete') {
+    const { error: delErr } = await admin.from('reports').delete().eq('id', payload.id);
+    if (!delErr && payload.storage_path) await admin.storage.from('reports').remove([payload.storage_path]);
+    error = delErr;
   } else {
     return 'Unknown change kind: ' + kind;
   }

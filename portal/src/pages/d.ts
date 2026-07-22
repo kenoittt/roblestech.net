@@ -35,9 +35,17 @@ export const GET: APIRoute = async (context) => {
 
   if (error || !client) return new Response('Dashboard not found', { status: 404 });
 
+  // Monthly AI-audit reports for this client (RLS-scoped read).
+  const { data: audits } = await supabase
+    .from('reports')
+    .select('id, title, period')
+    .eq('client_id', targetId)
+    .order('period', { ascending: false });
+
   const payload = {
     gsc: (client as { gsc_data: unknown }).gsc_data ?? {},
     config: (client as { config: unknown }).config ?? {},
+    audits: audits ?? [],
   };
   // Escape "<" so the JSON string can't break out of the <script> tag.
   const json = JSON.stringify(payload).replace(/</g, '\\u003c');

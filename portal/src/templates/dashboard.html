@@ -392,6 +392,7 @@ var SOP_FRAMEWORK = [
   { n:7, step:"Registered for tracking",      detail:"Added to this dashboard (pipeline + GSC tracking) with its AI baseline. Auto-refreshes daily from here." }
 ];
 var sopSteps = __C.sopSteps || []; // legacy fallback only
+var AUDITS = __DASH.audits || []; // monthly AI-audit report files uploaded via the portal
 /* AI Visibility Audit, Round 2, July 2026. 20 buyer questions x 4 platforms = 80 checks.
    Tested word-for-word, incognito/fresh chats, never naming Promix, July 2-3 2026.
    A cell starting with "Yes" is a hit. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude not tested this round). */
@@ -651,6 +652,19 @@ function aiCell(str){
 function renderAi(){
   var host = document.getElementById("aiCards");
   host.innerHTML = "";
+
+  // Monthly audit report files (uploaded via the portal), newest first.
+  if(AUDITS.length){
+    var mrows = AUDITS.map(function(a){
+      var m = new Date(a.period + "T00:00:00Z").toLocaleDateString("en-US",{month:"long",year:"numeric",timeZone:"UTC"});
+      return "<tr><td>"+m+"</td><td>"+a.title+"</td><td class='num'><a href='/report/"+a.id+"' target='_blank' rel='noopener'>Open report →</a></td></tr>";
+    }).join("");
+    var mCard = document.createElement("div");
+    mCard.className = "card";
+    mCard.innerHTML = "<h2>Monthly audit reports</h2>" +
+      "<table><thead><tr><th>Month</th><th>Report</th><th class='num'></th></tr></thead><tbody>"+mrows+"</tbody></table>";
+    host.appendChild(mCard);
+  }
 
   // Summary
   var summary = document.createElement("div");

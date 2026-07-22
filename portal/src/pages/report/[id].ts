@@ -29,10 +29,13 @@ export const GET: APIRoute = async (context) => {
 
   if (dlErr || !file) return new Response('Report file unavailable', { status: 404 });
 
-  const html = await file.text();
-  return new Response(html, {
+  // Serve by file type: PDFs inline as PDF, everything else as HTML.
+  const isPdf = report.storage_path.toLowerCase().endsWith('.pdf');
+  const body = await file.arrayBuffer();
+  return new Response(body, {
     headers: {
-      'content-type': 'text/html; charset=utf-8',
+      'content-type': isPdf ? 'application/pdf' : 'text/html; charset=utf-8',
+      'content-disposition': 'inline',
       'cache-control': 'private, no-store',
       'x-robots-tag': 'noindex, nofollow',
     },

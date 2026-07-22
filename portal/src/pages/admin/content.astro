@@ -14,6 +14,13 @@ const pipeline = Array.isArray(cfg.pipeline) ? cfg.pipeline : [];
 const openItems = Array.isArray(cfg.openItems) ? cfg.openItems : [];
 const isSuper = Astro.locals.profile?.role === 'super_admin';
 
+// Monthly AI-audit report files for this client.
+type Audit = { id: string; title: string; period: string };
+const { data: auditRows } = await supabase
+  .from('reports').select('id, title, period').eq('client_id', clientId).order('period', { ascending: false });
+const audits: Audit[] = (auditRows as Audit[]) ?? [];
+const monthName = (p: string) => new Date(p + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const v = (x: any) => (x === undefined || x === null ? '' : String(x));
@@ -61,6 +68,38 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     <input type="hidden" name="openItems" id="f-oi" />
     <div style="margin-top:22px;"><button class="btn" type="submit">Save content</button></div>
   </form>
+
+  <div class="section-h">AI Visibility Audit — monthly reports</div>
+  <p class="hint" style="margin-bottom:12px;">One report per month from the client's start date (PDF or HTML). These are listed on the client's dashboard under AI Visibility.</p>
+  <form method="post" action="/api/upload-audit" enctype="multipart/form-data" class="card gated" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:14px;">
+    <input type="hidden" name="client_id" value={clientId} />
+    <div><label>Month</label><input type="month" name="period" required /></div>
+    <div style="flex:1;min-width:220px;"><label>Report file (PDF or HTML)</label><input type="file" name="file" accept=".pdf,.html,.htm" required /></div>
+    <button class="btn" type="submit">Upload report</button>
+  </form>
+  {audits.length > 0 && (
+    <div class="tbl-wrap" style="margin-bottom:10px;">
+      <table class="tbl" style="min-width:0;">
+        <thead><tr><th>Month</th><th>Title</th><th></th></tr></thead>
+        <tbody>
+          {audits.map((a) => (
+            <tr>
+              <td>{monthName(a.period)}</td>
+              <td>{a.title}</td>
+              <td style="white-space:nowrap;text-align:right;">
+                <a href={`/report/${a.id}`} target="_blank" rel="noopener" class="mini">Open</a>
+                <form method="post" action="/api/audit-delete" class="gated" style="display:inline;" onsubmit="return confirm('Remove this monthly report?');">
+                  <input type="hidden" name="id" value={a.id} />
+                  <input type="hidden" name="client_id" value={clientId} />
+                  <button class="mini" type="submit" style="color:#ffb3b3;">Remove</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
 
   <script is:inline define:vars={{ pages, pipeline, openItems, isSuper }}>
     const mk = (html) => { const d = document.createElement('div'); d.className = 'erow'; d.innerHTML = html; return d; };
@@ -117,7 +156,8 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     const grab = (el) => { const o = {}; el.querySelectorAll('[data-f]').forEach((i) => o[i.dataset.f] = i.value); return o; };
     const collect = (el, mapper) => Array.from(el.querySelectorAll('.erow')).map((r) => mapper(grab(r)));
 
-    document.querySelector('form.gated').addEventListener('submit', (e) => {
+    // Serialize the dynamic lists on the main content form only.
+    document.querySelector('form[action="/api/save-content"]').addEventListener('submit', () => {
       document.getElementById('f-pages').value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
       document.getElementById('f-pipe').value = JSON.stringify(
         Array.from(lists.pipe.el.querySelectorAll('.erow')).map((r) => {
@@ -126,13 +166,20 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
           return { num:o.num, post:o.post, status:o.status, published:o.published, sop };
         }).filter((x)=>x.post||x.num));
       document.getElementById('f-oi').value    = JSON.stringify(collect(lists.oi.el, (o) => ({ pri:o.pri, text:o.text })).filter((x)=>x.text));
-      if (!isSuper) {
-        const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');
-        if (note === null) { e.preventDefault(); return; }
-        let inp = e.target.querySelector('input[name="reason"]');
-        if (!inp) { inp = document.createElement('input'); inp.type='hidden'; inp.name='reason'; e.target.appendChild(inp); }
-        inp.value = note;
-      }
     });
+
+    // Regular admins: every gated form (content save, audit upload/remove)
+    // prompts for a note and goes to super-admin approval.
+    if (!isSuper) {
+      document.querySelectorAll('form.gated').forEach((f) => {
+        f.addEventListener('submit', (e) => {
+          const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');
+          if (note === null) { e.preventDefault(); return; }
+          let inp = f.querySelector('input[name="reason"]');
+          if (!inp) { inp = document.createElement('input'); inp.type='hidden'; inp.name='reason'; f.appendChild(inp); }
+          inp.value = note;
+        });
+      });
+    }
   </script>
 </PortalLayout>
