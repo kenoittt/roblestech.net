@@ -3,7 +3,7 @@ import PortalLayout from '../layouts/PortalLayout.astro';
 import { createSupabaseServer } from '../lib/supabase';
 
 const { profile } = Astro.locals;
-const isAdmin = profile?.role === 'admin';
+const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 const supabase = createSupabaseServer(Astro);
 
 // Clients go straight to their living dashboard (served by /d, with a sign-out

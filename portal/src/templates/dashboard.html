@@ -263,8 +263,21 @@ td.num,th.num{text-align:right;}
       <div class="kpi"><div class="lbl">Last 7 days</div><div class="v" id="ruL7">0</div><div class="sub" id="ruL7Sub">clicks &middot; 0 impressions</div></div>
     </div>
     <div class="card">
-      <h2>Daily metrics</h2>
-      <div class="chart-box"><canvas id="dailyChart"></canvas></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h2 style="margin:0;">Trends</h2>
+        <div id="trendControls" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <div class="toggles" id="granToggles" style="margin:0;">
+            <button class="tgl" data-g="day">Day</button>
+            <button class="tgl active" data-g="week">Week</button>
+            <button class="tgl" data-g="month">Month</button>
+            <button class="tgl" data-g="quarter">Quarter</button>
+            <button class="tgl" data-g="year">Year</button>
+          </div>
+          <label style="font-size:12px;color:var(--steel);font-weight:600;">From <input type="date" id="trendStart" style="font-size:12px;padding:4px 6px;width:auto;"></label>
+          <label style="font-size:12px;color:var(--steel);font-weight:600;">To <input type="date" id="trendEnd" style="font-size:12px;padding:4px 6px;width:auto;"></label>
+        </div>
+      </div>
+      <div class="chart-box" style="margin-top:14px;"><canvas id="dailyChart"></canvas></div>
     </div>
     <div class="card">
       <h2>Daily log</h2>
@@ -505,15 +518,19 @@ function fmt(n){ return Number(n).toLocaleString("en-US"); }
 
 /* ---------- rollups: always computed, never hardcoded ---------- */
 function computeRollups(){
-  var now = new Date();
-  var todayStr = now.toISOString().slice(0,10);
+  // Anchor to the LATEST date we actually have data for. GSC lags ~2-3 days,
+  // so anchoring to the real calendar day makes week/month-to-date read zero
+  // early in a period. Using the newest data date fixes that.
+  var latest = dailyLog.reduce(function(m,r){ return r.d > m ? r.d : m; }, "");
+  var anchor = /^\d{4}-\d{2}-\d{2}$/.test(latest) ? new Date(latest + "T00:00:00Z") : new Date();
+  var todayStr = anchor.toISOString().slice(0,10);
   var curMonth = todayStr.slice(0,7);
-  // Monday of current week
-  var dow = (now.getDay() + 6) % 7; // Mon=0
-  var monday = new Date(now); monday.setDate(now.getDate() - dow);
+  // Monday of the anchor week (UTC)
+  var dow = (anchor.getUTCDay() + 6) % 7; // Mon=0
+  var monday = new Date(anchor); monday.setUTCDate(anchor.getUTCDate() - dow);
   var mondayStr = monday.toISOString().slice(0,10);
-  // 7 days ago
-  var d7 = new Date(now); d7.setDate(now.getDate() - 6);
+  // 7 days back from the anchor
+  var d7 = new Date(anchor); d7.setUTCDate(anchor.getUTCDate() - 6);
   var d7Str = d7.toISOString().slice(0,10);
 
   var wtd = {c:0,i:0}, mtd = {c:0,i:0}, l7 = {c:0,i:0};
@@ -789,20 +806,43 @@ function setPerfMode(mode){
 }
 
 /* ---------- daily chart (Trends) — built lazily on first open ---------- */
+function trendBucketKey(d, gran){
+  var y = d.slice(0,4);
+  if(gran === "day") return d;
+  if(gran === "month") return d.slice(0,7);
+  if(gran === "year") return y;
+  if(gran === "quarter"){ var mm = parseInt(d.slice(5,7),10); return y + "-Q" + (Math.floor((mm-1)/3)+1); }
+  // week -> Monday (UTC) of that date
+  var dt = new Date(d + "T00:00:00Z"); var dow = (dt.getUTCDay()+6)%7; dt.setUTCDate(dt.getUTCDate()-dow);
+  return dt.toISOString().slice(0,10);
+}
+function currentGran(){ var b = document.querySelector("#granToggles .tgl.active"); return b ? b.getAttribute("data-g") : "week"; }
+function computeTrend(){
+  var s = document.getElementById("trendStart").value, e = document.getElementById("trendEnd").value, gran = currentGran();
+  var rows = dailyLog.filter(function(r){ return (!s || r.d >= s) && (!e || r.d <= e); });
+  var map = {};
+  rows.forEach(function(r){ var k = trendBucketKey(r.d, gran); (map[k] = map[k] || {c:0,i:0}); map[k].c += r.c; map[k].i += r.i; });
+  var keys = Object.keys(map).sort();
+  return { labels: keys, clicks: keys.map(function(k){return map[k].c;}), impr: keys.map(function(k){return map[k].i;}) };
+}
 function makeDailyChart(){
-  if(dailyChart) return;
   if(typeof Chart === "undefined"){ console.error("Chart.js did not load; dailyChart skipped."); return; }
+  // Prefill the date range from the data the first time.
+  var sEl = document.getElementById("trendStart"), eEl = document.getElementById("trendEnd");
+  if(dailyLog.length && sEl && !sEl.value){
+    var ds = dailyLog.map(function(r){ return r.d; }).sort();
+    sEl.value = ds[0]; eEl.value = ds[ds.length-1];
+  }
+  var t = computeTrend();
+  if(dailyChart){ dailyChart.data.labels = t.labels; dailyChart.data.datasets[0].data = t.impr; dailyChart.data.datasets[1].data = t.clicks; dailyChart.update(); return; }
   var ctx = document.getElementById("dailyChart").getContext("2d");
-  var sorted = dailyLog.slice().sort(function(a,b){ return a.d.localeCompare(b.d); });
   dailyChart = new Chart(ctx, {
     type: "line",
     data: {
-      labels: sorted.map(function(r){ return r.d; }),
+      labels: t.labels,
       datasets: [
-        { label:"Impressions", data: sorted.map(function(r){return r.i;}),
-          borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
-        { label:"Clicks", data: sorted.map(function(r){return r.c;}),
-          borderColor: cv("--accent"), backgroundColor: cv("--accent"), tension:.3, yAxisID:"yC" }
+        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
+        { label:"Clicks", data: t.clicks, borderColor: cv("--accent"), backgroundColor: cv("--accent"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
@@ -814,6 +854,17 @@ function makeDailyChart(){
       }
     }
   });
+}
+function initTrendControls(){
+  var g = document.getElementById("granToggles");
+  if(g) g.addEventListener("click", function(e){
+    var b = e.target.closest(".tgl"); if(!b) return;
+    document.querySelectorAll("#granToggles .tgl").forEach(function(x){ x.classList.remove("active"); });
+    b.classList.add("active"); makeDailyChart();
+  });
+  var sEl = document.getElementById("trendStart"), eEl = document.getElementById("trendEnd");
+  if(sEl) sEl.addEventListener("change", makeDailyChart);
+  if(eEl) eEl.addEventListener("change", makeDailyChart);
 }
 
 /* ---------- tabs ---------- */
@@ -849,6 +900,7 @@ function initDashboard(){
   // Interactions first, so a failure elsewhere (e.g. Chart.js not loading) can never kill the tabs.
   safe(initTabs, "initTabs");
   safe(initPerfToggles, "initPerfToggles");
+  safe(initTrendControls, "initTrendControls");
   safe(renderMeta, "renderMeta");
   safe(renderPipeline, "renderPipeline");
   safe(function(){ renderByPage("byPageBodyOverview"); }, "renderByPage overview");
