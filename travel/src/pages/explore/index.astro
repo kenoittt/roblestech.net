@@ -1,0 +1,46 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+const q = (Astro.url.searchParams.get('q') ?? '').trim();
+type Dest = { id: string; name: string; country: string };
+let query = supabase.from('destinations').select('id,name,country').eq('active', true).order('country').order('name');
+if (q) query = query.or(`name.ilike.%${q}%,country.ilike.%${q}%`);
+const { data } = await query;
+const dests: Dest[] = (data as Dest[]) ?? [];
+const byCountry: Record<string, Dest[]> = {};
+for (const d of dests) (byCountry[d.country] ??= []).push(d);
+const month = new Date().getMonth() + 1;
+---
+<AppLayout title="Explore · WanderWise">
+  <p class="eyebrow">Monthly Destination Explorer</p>
+  <h1>Where next — and <em style="color:var(--teal);font-style:normal;">when</em>?</h1>
+  <p class="lede">Pick a destination to see what it's like month by month.</p>
+
+  <form method="get" class="rowflex" style="margin-bottom:18px;">
+    <div style="flex:1;min-width:200px;"><input name="q" value={q} placeholder="Search: Hong Kong, Samarkand, Taipei…" /></div>
+    <button class="btn" type="submit">Search</button>
+  </form>
+
+  {q && dests.length === 0 && (
+    <div class="card" style="text-align:center;">
+      <h2>“{q}” isn't covered yet 🌍</h2>
+      <p class="hint">Launch coverage is Vietnam, Taiwan, Hong Kong, Kazakhstan, Uzbekistan, and Kyrgyzstan — worldwide is coming. Check back soon!</p>
+    </div>
+  )}
+
+  {Object.entries(byCountry).map(([country, list]) => (
+    <div class="section">
+      <h2>{country}</h2>
+      <div class="trip-list" style="margin-top:8px;">
+        {list.map((d) => (
+          <a class="trip-card" href={`/explore/${d.id}?m=${month}`}>
+            <div class="t">{d.name}</div>
+            <div class="d"><span>{d.country}</span><span>· 12-month profile →</span></div>
+          </a>
+        ))}
+      </div>
+    </div>
+  ))}
+</AppLayout>

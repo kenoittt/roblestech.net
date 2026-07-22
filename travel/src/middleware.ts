@@ -12,7 +12,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { data: { user } } = await supabase.auth.getUser();
   context.locals.user = user ?? null;
 
-  if (!user && !PUBLIC_PATHS.has(path)) return context.redirect('/login');
+  const isPublic = PUBLIC_PATHS.has(path) || path.startsWith('/explore');
+  if (!user && !isPublic) return context.redirect('/login');
   if (user && (path === '/login' || path === '/signup')) return context.redirect('/trips');
 
   const response = await next();

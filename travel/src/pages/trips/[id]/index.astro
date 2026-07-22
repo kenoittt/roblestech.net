@@ -27,7 +27,10 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
   <h1>{trip.name} <span class={`pill ${trip.status}`}>{trip.status}</span></h1>
   <div class="tabbar">
     <a href={`/trips/${id}`} class="on">Details</a>
+    <a href={`/trips/${id}/itinerary`}>Itinerary</a>
+    <a href={`/trips/${id}/map`}>Map</a>
     <a href={`/trips/${id}/budget`}>Budget</a>
+    <a href={`/trips/${id}/today`}>Today</a>
   </div>
   {ok && <div class="alert alert-ok">{decodeURIComponent(ok)}</div>}
   {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}

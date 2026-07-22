@@ -1,0 +1,141 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../../lib/supabase';
+import { aiConfigured } from '../../../lib/claude';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: trip } = await supabase.from('trips').select('id,name,start_date,end_date,pax').eq('id', id).single();
+if (!trip) return Astro.redirect('/trips');
+
+const [{ data: itemsData }, { data: placesData }] = await Promise.all([
+  supabase.from('itinerary_items').select('id,day,time,place_name,category,notes,cost,source').eq('trip_id', id).order('day').order('time'),
+  supabase.from('trip_places').select('id,place_name,status,notes').eq('trip_id', id).order('created_at'),
+]);
+const items = itemsData ?? [];
+const wishlist = (placesData ?? []).filter((p: any) => p.status === 'wishlist');
+
+const byDay: Record<string, any[]> = {};
+for (const it of items as any[]) (byDay[it.day ?? 'Unscheduled'] ??= []).push(it);
+const back = `/trips/${id}/itinerary`;
+---
+
+<AppLayout title={`Itinerary · ${trip.name}`}>
+  <p class="eyebrow">Itinerary</p>
+  <h1>{trip.name}</h1>
+  <div class="tabbar">
+    <a href={`/trips/${id}`}>Details</a>
+    <a href={`/trips/${id}/itinerary`} class="on">Itinerary</a>
+    <a href={`/trips/${id}/map`}>Map</a>
+    <a href={`/trips/${id}/budget`}>Budget</a>
+    <a href={`/trips/${id}/today`}>Today</a>
+  </div>
+
+  <!-- Add item -->
+  <form method="post" action="/api/itinerary-save" class="card rowflex">
+    <input type="hidden" name="trip_id" value={id} />
+    <input type="hidden" name="redirect" value={back} />
+    <div style="flex:2;min-width:170px;"><label>Place / activity</label><input name="place_name" required placeholder="Victoria Peak sunset" /></div>
+    <div style="width:140px;"><label>Date</label><input name="day" type="date" min={trip.start_date} max={trip.end_date} /></div>
+    <div style="width:110px;"><label>Time</label><input name="time" type="time" /></div>
+    <div style="width:130px;"><label>Category</label>
+      <select name="category"><option>activity</option><option>food</option><option>transport</option><option>sight</option></select>
+    </div>
+    <button class="btn" type="submit" style="padding:11px 16px;">Add</button>
+  </form>
+
+  <!-- AI suggestions -->
+  <div class="card" style="margin-top:12px;">
+    <div class="rowflex" style="justify-content:space-between;">
+      <h2 style="margin:0;">Smart suggestions ✨</h2>
+      <button class="mini" type="button" id="suggest-btn" {aiConfigured() ? '' : 'disabled'}>
+        {aiConfigured() ? 'Suggest for my dates' : 'Enable with ANTHROPIC_API_KEY'}
+      </button>
+    </div>
+    <div id="suggestions" class="stack" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- Places to visit -->
+  <div class="section">
+    <h2>Places to visit 📍 <span class="hint">(not scheduled yet)</span></h2>
+    <div class="stack">
+      {wishlist.map((p: any) => (
+        <form method="post" action="/api/place-save" class="card rowflex">
+          <input type="hidden" name="trip_id" value={id} />
+          <input type="hidden" name="id" value={p.id} />
+          <input type="hidden" name="redirect" value={back} />
+          <div style="flex:1;min-width:140px;font-weight:700;">{p.place_name}</div>
+          <div style="width:140px;"><label>Date</label><input name="day" type="date" min={trip.start_date} max={trip.end_date} /></div>
+          <div style="width:110px;"><label>Time</label><input name="time" type="time" /></div>
+          <button class="mini" type="submit" name="op" value="promote">→ Schedule</button>
+          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);">✕</button>
+        </form>
+      ))}
+      {wishlist.length === 0 && <p class="hint">Nothing waiting — add places here, from the map, or via suggestions.</p>}
+      <form method="post" action="/api/place-save" class="card rowflex" style="border-style:dashed;">
+        <input type="hidden" name="trip_id" value={id} />
+        <input type="hidden" name="redirect" value={back} />
+        <div style="flex:1;min-width:180px;"><label>Add a place to visit</label><input name="place_name" required placeholder="Big Buddha, Lantau Island" /></div>
+        <button class="btn" type="submit" style="padding:11px 16px;">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Day by day -->
+  <div class="section">
+    <h2>Day by day</h2>
+    {Object.keys(byDay).length === 0 && <p class="hint">No itinerary items yet.</p>}
+    {Object.entries(byDay).map(([day, list]) => (
+      <div class="card" style="margin-bottom:12px;">
+        <h2 style="color:var(--teal);">{day === 'Unscheduled' ? 'Unscheduled' : new Date(day + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</h2>
+        <div class="stack">
+          {list.map((it: any) => (
+            <form method="post" action="/api/itinerary-save" class="rowflex" style="border-bottom:1px solid var(--line);padding-bottom:10px;">
+              <input type="hidden" name="trip_id" value={id} />
+              <input type="hidden" name="id" value={it.id} />
+              <input type="hidden" name="redirect" value={back} />
+              <div style="min-width:64px;font-weight:700;">{it.time ? String(it.time).slice(0, 5) : '—'}</div>
+              <div style="flex:1;min-width:150px;">
+                <b>{it.place_name}</b> <span class="pill planning" style="font-size:.62rem;">{it.category ?? 'activity'}</span>
+                {it.source === 'ai' && <span class="pill active" style="font-size:.62rem;">AI</span>}
+                {it.notes && <div class="hint">{it.notes}</div>}
+              </div>
+              <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this item?');">✕</button>
+            </form>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <script is:inline define:vars={{ tripId: id, back }}>
+    const btn = document.getElementById('suggest-btn');
+    if (btn && !btn.disabled) btn.addEventListener('click', async () => {
+      const host = document.getElementById('suggestions');
+      host.innerHTML = '<span class="hint">Thinking about your dates & season…</span>';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/recommend', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trip_id: tripId }) });
+        const j = await res.json();
+        host.innerHTML = '';
+        (j.suggestions ?? []).forEach((s) => {
+          const d = document.createElement('div');
+          d.className = 'rowflex';
+          d.style.borderBottom = '1px solid var(--line)';
+          d.style.paddingBottom = '8px';
+          d.innerHTML = `<div style="flex:1;min-width:160px;"><b>${s.name}</b> <span class="pill active" style="font-size:.62rem;">${s.category}</span><div class="hint">${s.why}${s.best_time ? ' · ' + s.best_time : ''}</div></div>`;
+          const add = document.createElement('button');
+          add.className = 'mini'; add.type = 'button'; add.textContent = '+ Add to places';
+          add.addEventListener('click', async () => {
+            await fetch('/api/place-save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'add', trip_id: tripId, place_name: s.name, notes: s.why }) });
+            location.href = back;
+          });
+          d.appendChild(add);
+          host.appendChild(d);
+        });
+        if (!(j.suggestions ?? []).length) host.innerHTML = '<span class="hint">' + (j.error ?? 'No suggestions right now.') + '</span>';
+      } catch { host.innerHTML = '<span class="hint">Could not fetch suggestions.</span>'; }
+      btn.disabled = false;
+    });
+  </script>
+</AppLayout>

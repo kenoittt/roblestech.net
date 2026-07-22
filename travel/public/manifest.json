@@ -1,0 +1,12 @@
+{
+  "name": "WanderWise",
+  "short_name": "WanderWise",
+  "description": "Month-by-month destination insight and group trip planning.",
+  "start_url": "/trips",
+  "display": "standalone",
+  "background_color": "#FAF7F2",
+  "theme_color": "#0F766E",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

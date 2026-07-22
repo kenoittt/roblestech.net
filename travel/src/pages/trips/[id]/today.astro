@@ -1,0 +1,85 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../../lib/supabase';
+import { todayForecast, weatherLabel } from '../../../lib/weather';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: trip } = await supabase.from('trips').select('id,name,start_date,end_date,pax,base_currency').eq('id', id).single();
+if (!trip) return Astro.redirect('/trips');
+
+const today = new Date().toISOString().slice(0, 10);
+const [{ data: itemsData }, { data: lodgingData }, { data: expData }] = await Promise.all([
+  supabase.from('itinerary_items').select('time,place_name,category,notes,lat,lng').eq('trip_id', id).eq('day', today).order('time'),
+  supabase.from('lodgings').select('name,lat,lng,check_in_at,check_out_at').eq('trip_id', id),
+  supabase.from('expenses').select('amount_group,currency,is_actual').eq('trip_id', id),
+]);
+const items = (itemsData ?? []) as any[];
+const lodgings = (lodgingData ?? []) as any[];
+
+// Weather: first coordinates we know (today's first item, else lodging).
+const coord = items.find((i) => i.lat != null) ?? lodgings.find((l) => l.lat != null) ?? null;
+const wx = coord ? await todayForecast(coord.lat, coord.lng) : null;
+
+// Budget at a glance (base currency rows): planned total vs actual so far (FR-MOB-04).
+const base = (trip as any).base_currency;
+let planned = 0, actual = 0;
+for (const e of (expData ?? []) as any[]) {
+  if (e.currency !== base) continue;
+  planned += Number(e.amount_group);
+  if (e.is_actual) actual += Number(e.amount_group);
+}
+const remaining = planned - actual;
+const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const inTrip = (trip as any).start_date && (trip as any).end_date && today >= (trip as any).start_date && today <= (trip as any).end_date;
+---
+
+<AppLayout title={`Today · ${trip.name}`}>
+  <p class="eyebrow">Today · {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+  <h1>{trip.name}</h1>
+  <div class="tabbar">
+    <a href={`/trips/${id}`}>Details</a>
+    <a href={`/trips/${id}/itinerary`}>Itinerary</a>
+    <a href={`/trips/${id}/map`}>Map</a>
+    <a href={`/trips/${id}/budget`}>Budget</a>
+    <a href={`/trips/${id}/today`} class="on">Today</a>
+  </div>
+
+  {!inTrip && <div class="alert" style="background:#FDF4E3;border:1px solid #EDD9AE;color:#7A5A12;">Today is outside this trip's dates — showing today's schedule anyway.</div>}
+
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <h2>Weather now 🌤</h2>
+      {wx ? (
+        <>
+          <div style="font-size:1.6rem;font-weight:800;">{wx.high}° <span class="hint" style="font-size:1rem;">/ {wx.low}°C</span></div>
+          <p class="hint">{weatherLabel(wx.code)}{wx.rain_prob != null ? ` · ${wx.rain_prob}% chance of rain` : ''}</p>
+        </>
+      ) : <p class="hint">Add a lodging or a located itinerary item to see local weather.</p>}
+    </div>
+    <div class="card">
+      <h2>Budget left 💰</h2>
+      <div style="font-size:1.6rem;font-weight:800;color:{remaining >= 0 ? 'var(--teal)' : 'var(--bad)'};">{base} {fmt(remaining)}</div>
+      <p class="hint">planned {base} {fmt(planned)} − actual so far {base} {fmt(actual)}</p>
+      <a class="mini" href={`/trips/${id}/budget`} style="margin-top:8px;">Mark expenses actual →</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Today's plan</h2>
+    {items.length === 0 ? (
+      <p class="hint">Nothing scheduled today. <a href={`/trips/${id}/itinerary`}>Add something →</a></p>
+    ) : (
+      <div class="stack">
+        {items.map((it) => (
+          <div class="rowflex" style="border-bottom:1px solid var(--line);padding-bottom:9px;">
+            <div style="min-width:64px;font-weight:800;color:var(--teal);">{it.time ? String(it.time).slice(0, 5) : '—'}</div>
+            <div style="flex:1;"><b>{it.place_name}</b> <span class="pill planning" style="font-size:.62rem;">{it.category ?? 'activity'}</span>
+              {it.notes && <div class="hint">{it.notes}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</AppLayout>

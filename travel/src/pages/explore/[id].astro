@@ -1,0 +1,109 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+import { getMonthProfile } from '../../lib/insights';
+import { aiConfigured } from '../../lib/claude';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: dest } = await supabase.from('destinations').select('id,name,country,lat,lng').eq('id', id).single();
+if (!dest) return Astro.redirect('/explore');
+
+const month = Math.min(12, Math.max(1, Number(Astro.url.searchParams.get('m')) || new Date().getMonth() + 1));
+const profile = await getMonthProfile(dest as any, month);
+
+const { data: wl } = await supabase.from('wishlists').select('destination_id').eq('destination_id', id).maybeSingle();
+const wished = !!wl;
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const w = profile?.weather_json ?? {};
+const attire = profile?.attire_json ?? {};
+const best = profile?.best_time_json ?? {};
+const festivals: any[] = profile?.festivals_json ?? [];
+const gems: any[] = profile?.hidden_gems_json ?? [];
+const topPlaces: any[] = best?.top_places ?? [];
+const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
+const hasAI = !!profile?.ai_model_version;
+---
+
+<AppLayout title={`${dest.name} in ${MONTHS[month - 1]} · WanderWise`}>
+  <p class="eyebrow">{dest.country}</p>
+  <h1 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">{dest.name}
+    <form method="post" action="/api/wishlist-toggle" class="m0">
+      <input type="hidden" name="destination_id" value={dest.id} />
+      <input type="hidden" name="back" value={`/explore/${dest.id}?m=${month}`} />
+      <button class="mini" type="submit">{wished ? '★ Saved' : '☆ Save to wishlist'}</button>
+    </form>
+  </h1>
+
+  <div class="tabbar" style="flex-wrap:wrap;width:100%;overflow-x:auto;">
+    {MONTHS.map((m, i) => (
+      <a href={`/explore/${dest.id}?m=${i + 1}`} class={month === i + 1 ? 'on' : ''}>{m}</a>
+    ))}
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <h2>Weather in {MONTHS[month - 1]}</h2>
+    {w.avg_high != null ? (
+      <div class="cat-chips" style="margin:0 0 10px;">
+        <span class="chip">High <b>{w.avg_high}°C</b></span>
+        <span class="chip">Low <b>{w.avg_low}°C</b></span>
+        <span class="chip">Rainy days <b>{w.rain_days}</b></span>
+        <span class="chip">Humidity <b>{w.humidity}%</b></span>
+      </div>
+    ) : <p class="hint">Weather data unavailable right now.</p>}
+    {w.climate_summary && <p>{w.climate_summary}</p>}
+    {w.crowd_note && <p class="hint" style="margin-top:6px;">{w.crowd_note}</p>}
+    {profile?.crowd_index && <p style="margin-top:8px;font-weight:700;">{crowdLabel[profile.crowd_index]}</p>}
+  </div>
+
+  {attire?.summary && (
+    <div class="card" style="margin-bottom:14px;">
+      <h2>What to wear & pack 🎒</h2>
+      <p>{attire.summary}</p>
+      {Array.isArray(attire.items) && attire.items.length > 0 && (
+        <div class="cat-chips" style="margin:10px 0 0;">{attire.items.map((i: string) => <span class="chip">{i}</span>)}</div>
+      )}
+    </div>
+  )}
+
+  {festivals.length > 0 && (
+    <div class="card" style="margin-bottom:14px;">
+      <h2>Festivals & events this month 🎉</h2>
+      <div class="stack">
+        {festivals.map((f: any) => <div><b>{f.name}</b> <span class="hint">— {f.timing}</span><br /><span style="font-size:.9rem;">{f.note}</span></div>)}
+      </div>
+    </div>
+  )}
+
+  {best?.verdict && (
+    <div class="card" style="margin-bottom:14px;border-left:4px solid var(--coral);">
+      <h2>Best time to go</h2>
+      <p><b>{best.verdict}</b></p>
+      {Array.isArray(best.best_months) && <p class="hint" style="margin-top:6px;">Best months: {best.best_months.join(', ')} — {best.reason}</p>}
+    </div>
+  )}
+
+  {topPlaces.length > 0 && (
+    <div class="card" style="margin-bottom:14px;">
+      <h2>Top places to visit</h2>
+      <div class="stack">{topPlaces.map((p: any) => <div><b>{p.name}</b> <span class="hint">— {p.why}</span></div>)}</div>
+    </div>
+  )}
+
+  {gems.length > 0 && (
+    <div class="card" style="margin-bottom:14px;">
+      <h2>Hidden gems 💎</h2>
+      <div class="stack">{gems.map((p: any) => <div><b>{p.name}</b> <span class="hint">— {p.why}</span></div>)}</div>
+    </div>
+  )}
+
+  {!hasAI && (
+    <div class="alert" style="background:#FDF4E3;border:1px solid #EDD9AE;color:#7A5A12;">
+      {aiConfigured()
+        ? 'AI insights are being generated — refresh in a moment.'
+        : 'AI narrative (attire, crowds, festivals, gems, best-time verdict) activates once the ANTHROPIC_API_KEY is configured. Weather numbers above are live.'}
+    </div>
+  )}
+  {hasAI && <p class="hint">Insights include AI-generated content ({profile?.ai_model_version}) refreshed {new Date(profile!.refreshed_at).toLocaleDateString()}. Verify dates locally — festival timing can shift.</p>}
+</AppLayout>

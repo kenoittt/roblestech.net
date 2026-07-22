@@ -1,0 +1,40 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../../lib/supabase';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: trip } = await supabase.from('trips').select('id,name').eq('id', id).single();
+if (!trip) return Astro.redirect('/trips');
+
+const [{ data: lodgings }, { data: items }, { data: places }] = await Promise.all([
+  supabase.from('lodgings').select('name,address,lat,lng').eq('trip_id', id),
+  supabase.from('itinerary_items').select('place_name,day,time,notes,lat,lng').eq('trip_id', id),
+  supabase.from('trip_places').select('place_name,status,lat,lng').eq('trip_id', id),
+]);
+const mapData = { tripId: id, lodgings: lodgings ?? [], items: items ?? [], places: places ?? [] };
+---
+
+<AppLayout title={`Map · ${trip.name}`}>
+  <p class="eyebrow">Trip map</p>
+  <h1>{trip.name}</h1>
+  <div class="tabbar">
+    <a href={`/trips/${id}`}>Details</a>
+    <a href={`/trips/${id}/itinerary`}>Itinerary</a>
+    <a href={`/trips/${id}/map`} class="on">Map</a>
+    <a href={`/trips/${id}/budget`}>Budget</a>
+    <a href={`/trips/${id}/today`}>Today</a>
+  </div>
+
+  <form id="map-search" class="rowflex" style="margin-bottom:10px;">
+    <div style="flex:1;min-width:180px;"><input id="map-q" placeholder="Search a place to add… e.g. Big Buddha Lantau" /></div>
+    <button class="btn" type="submit" style="padding:11px 16px;">Search</button>
+  </form>
+  <div id="map-results" style="margin-bottom:10px;"></div>
+
+  <div id="map" style="height:62vh;border-radius:16px;border:1px solid var(--line);"></div>
+  <p class="hint" style="margin-top:8px;">Tap anywhere on the map to drop a pin into Places to Visit. Same-day itinerary stops share a color and route line.</p>
+
+  <script type="application/json" id="map-data" set:html={JSON.stringify(mapData)} />
+  <script src="../../../scripts/trip-map.js"></script>
+</AppLayout>

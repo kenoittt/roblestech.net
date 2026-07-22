@@ -1,0 +1,27 @@
+-- WanderWise launch destinations (FR-DEX-01): Vietnam, Taiwan, Hong Kong,
+-- Kazakhstan, Uzbekistan, Kyrgyzstan. Run after schema.sql. Idempotent.
+insert into public.destinations (name, country, lat, lng, timezone) values
+  ('Hanoi',            'Vietnam',    21.0285, 105.8542, 'Asia/Bangkok'),
+  ('Ho Chi Minh City', 'Vietnam',    10.8231, 106.6297, 'Asia/Ho_Chi_Minh'),
+  ('Da Nang',          'Vietnam',    16.0545, 108.2022, 'Asia/Ho_Chi_Minh'),
+  ('Hoi An',           'Vietnam',    15.8801, 108.3380, 'Asia/Ho_Chi_Minh'),
+  ('Ha Long',          'Vietnam',    20.9101, 107.1839, 'Asia/Bangkok'),
+  ('Sapa',             'Vietnam',    22.3364, 103.8438, 'Asia/Bangkok'),
+  ('Taipei',           'Taiwan',     25.0330, 121.5654, 'Asia/Taipei'),
+  ('Taichung',         'Taiwan',     24.1477, 120.6736, 'Asia/Taipei'),
+  ('Kaohsiung',        'Taiwan',     22.6273, 120.3014, 'Asia/Taipei'),
+  ('Hualien',          'Taiwan',     23.9769, 121.6044, 'Asia/Taipei'),
+  ('Tainan',           'Taiwan',     22.9997, 120.2270, 'Asia/Taipei'),
+  ('Hong Kong',        'Hong Kong',  22.3193, 114.1694, 'Asia/Hong_Kong'),
+  ('Almaty',           'Kazakhstan', 43.2220,  76.8512, 'Asia/Almaty'),
+  ('Astana',           'Kazakhstan', 51.1605,  71.4704, 'Asia/Almaty'),
+  ('Shymkent',         'Kazakhstan', 42.3417,  69.5901, 'Asia/Almaty'),
+  ('Tashkent',         'Uzbekistan', 41.2995,  69.2401, 'Asia/Tashkent'),
+  ('Samarkand',        'Uzbekistan', 39.6270,  66.9750, 'Asia/Samarkand'),
+  ('Bukhara',          'Uzbekistan', 39.7681,  64.4556, 'Asia/Samarkand'),
+  ('Khiva',            'Uzbekistan', 41.3783,  60.3639, 'Asia/Samarkand'),
+  ('Bishkek',          'Kyrgyzstan', 42.8746,  74.5698, 'Asia/Bishkek'),
+  ('Karakol',          'Kyrgyzstan', 42.4907,  78.3936, 'Asia/Bishkek'),
+  ('Osh',              'Kyrgyzstan', 40.5140,  72.8161, 'Asia/Bishkek'),
+  ('Issyk-Kul (Cholpon-Ata)', 'Kyrgyzstan', 42.6490, 77.0820, 'Asia/Bishkek')
+on conflict (name, country) do nothing;

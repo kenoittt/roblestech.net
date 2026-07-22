@@ -18,7 +18,10 @@ const expenses = expData ?? [];
   <h1>{trip.name}</h1>
   <div class="tabbar">
     <a href={`/trips/${id}`}>Details</a>
+    <a href={`/trips/${id}/itinerary`}>Itinerary</a>
+    <a href={`/trips/${id}/map`}>Map</a>
     <a href={`/trips/${id}/budget`} class="on">Budget</a>
+    <a href={`/trips/${id}/today`}>Today</a>
   </div>
 
   <div class="paxbar">
@@ -58,6 +61,7 @@ const expenses = expData ?? [];
   </div>
   <div class="rowflex" style="margin-top:12px;">
     <button type="button" class="btn" id="add-row">+ Add expense</button>
+    <a class="mini" href={`/api/export-expenses?trip=${id}`} style="align-self:center;">↓ Export CSV</a>
     <span class="hint">Type in either cost column — the other fills in automatically. Pax* overrides the trip pax for that row only.</span>
   </div>
 

@@ -187,6 +187,19 @@ returns boolean language sql security definer set search_path = public as $$
                  where trip_id = t and user_id = auth.uid() and role in ('owner', 'editor'));
 $$;
 
+-- Cycle-breakers: policies on trips/trip_members must not subquery each
+-- other's tables directly (RLS would recurse). These run as definer (RLS
+-- bypassed inside), and each touches only ONE table.
+create or replace function public.is_member_of(t uuid)
+returns boolean language sql security definer set search_path = public as $$
+  select exists (select 1 from public.trip_members where trip_id = t and user_id = auth.uid());
+$$;
+
+create or replace function public.owns_trip(t uuid)
+returns boolean language sql security definer set search_path = public as $$
+  select exists (select 1 from public.trips where id = t and owner_id = auth.uid());
+$$;
+
 alter table public.profiles                   enable row level security;
 alter table public.trips                      enable row level security;
 alter table public.trip_members               enable row level security;
@@ -212,8 +225,7 @@ create policy profiles_self on public.profiles
 -- not yet visible to a subquery on trips, which would wrongly reject it.
 drop policy if exists trips_read on public.trips;
 create policy trips_read on public.trips for select using (
-  owner_id = auth.uid()
-  or exists (select 1 from public.trip_members m where m.trip_id = id and m.user_id = auth.uid())
+  owner_id = auth.uid() or public.is_member_of(id)
 );
 drop policy if exists trips_insert on public.trips;
 create policy trips_insert on public.trips for insert with check (owner_id = auth.uid());
@@ -227,8 +239,8 @@ drop policy if exists members_read on public.trip_members;
 create policy members_read on public.trip_members for select using (public.is_trip_member(trip_id));
 drop policy if exists members_write on public.trip_members;
 create policy members_write on public.trip_members
-  for all using (exists (select 1 from public.trips where id = trip_id and owner_id = auth.uid()))
-  with check (exists (select 1 from public.trips where id = trip_id and owner_id = auth.uid()));
+  for all using (public.owns_trip(trip_id))
+  with check (public.owns_trip(trip_id));
 
 -- child tables: members read, editors write (one macro-policy per table)
 do $$
