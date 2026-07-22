@@ -35,33 +35,38 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
   {err && <div class="alert alert-error">{err}</div>}
   {!isSuper && <div class="alert" style="background:rgba(57,146,255,0.12);border:1px solid rgba(57,146,255,0.4);color:#cfe2ff;">Your changes here are submitted for super-admin approval.</div>}
 
+  <div class="section-h">Baseline (pre-service “before” numbers)</div>
+  <p class="hint" style="margin-bottom:10px;">Each field saves on its own: click the edit icon, change the value, hit Save. Nothing else is touched.</p>
+  <div class="card" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+    {[
+      { name: 'window',      label: 'Window',            val: v(baseline.window),      ph: 'June 1 - 30, 2026' },
+      { name: 'serviceStart',label: 'Service start',     val: v(baseline.serviceStart),ph: 'July 1, 2026' },
+      { name: 'captured',    label: 'Captured',          val: v(baseline.captured),    ph: '2026-07-18' },
+      { name: 'clicks',      label: 'Clicks',            val: v(baseline.clicks),      ph: '' },
+      { name: 'impr',        label: 'Impressions',       val: v(baseline.impr),        ph: '' },
+      { name: 'ctr',         label: 'Avg CTR',           val: v(baseline.ctr),         ph: '4.1%' },
+      { name: 'avgPos',      label: 'Avg position',      val: v(baseline.avgPos),      ph: '7.9' },
+      { name: 'postsLive',   label: 'Posts live (RTC)',  val: v(baseline.postsLive),   ph: '' },
+      { name: 'aiText',      label: 'AI citations text', val: v(baseline.aiText),      ph: '5 / 40' },
+      { name: 'aiSub',       label: 'AI sub-note',       val: v(baseline.aiSub),       ph: 'June audit, 10 Qs x 4 engines (12.5%)', wide: true },
+    ].map((f) => (
+      <form method="post" action="/api/save-baseline-field" class="gated" style={f.wide ? 'grid-column:1/-1;margin:0;' : 'margin:0;'}>
+        <input type="hidden" name="client_id" value={clientId} />
+        <input type="hidden" name="field" value={f.name} />
+        <label style="display:flex;justify-content:space-between;align-items:center;">
+          {f.label}
+          <button type="button" class="pencil js-unlock" title={`Edit ${f.label}`}><EditIcon title={`Edit ${f.label}`} /></button>
+        </label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input name="value" value={f.val} placeholder={f.ph} disabled style="flex:1;" />
+          <button type="submit" class="mini js-savef" hidden style="margin:0;background:var(--lime);color:var(--navy);border:0;">Save</button>
+        </div>
+      </form>
+    ))}
+  </div>
+
   <form method="post" action="/api/save-content" class="gated">
     <input type="hidden" name="client_id" value={clientId} />
-
-    <div class="section-h">Baseline (pre-service “before” numbers)</div>
-    <p class="hint" style="margin-bottom:10px;">Fields are locked to protect saved data. Click ✏️ to edit one — only unlocked fields are updated on save.</p>
-    <div class="card" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
-      {[
-        { name: 'bl_window',      label: 'Window',            val: v(baseline.window),      ph: 'June 1 - 30, 2026' },
-        { name: 'bl_serviceStart',label: 'Service start',     val: v(baseline.serviceStart),ph: 'July 1, 2026' },
-        { name: 'bl_captured',    label: 'Captured',          val: v(baseline.captured),    ph: '2026-07-18' },
-        { name: 'bl_clicks',      label: 'Clicks',            val: v(baseline.clicks),      ph: '' },
-        { name: 'bl_impr',        label: 'Impressions',       val: v(baseline.impr),        ph: '' },
-        { name: 'bl_ctr',         label: 'Avg CTR',           val: v(baseline.ctr),         ph: '4.1%' },
-        { name: 'bl_avgPos',      label: 'Avg position',      val: v(baseline.avgPos),      ph: '7.9' },
-        { name: 'bl_postsLive',   label: 'Posts live (RTC)',  val: v(baseline.postsLive),   ph: '' },
-        { name: 'bl_aiText',      label: 'AI citations text', val: v(baseline.aiText),      ph: '5 / 40' },
-        { name: 'bl_aiSub',       label: 'AI sub-note',       val: v(baseline.aiSub),       ph: 'June audit, 10 Qs x 4 engines (12.5%)', wide: true },
-      ].map((f) => (
-        <div style={f.wide ? 'grid-column:1/-1;' : ''}>
-          <label style="display:flex;justify-content:space-between;align-items:center;">
-            {f.label}
-            <button type="button" class="pencil js-unlock" title={`Edit ${f.label}`}><EditIcon title={`Edit ${f.label}`} /></button>
-          </label>
-          <input name={f.name} value={f.val} placeholder={f.ph} disabled />
-        </div>
-      ))}
-    </div>
 
     <div class="section-h" style="display:flex;align-items:center;gap:10px;">
       Top pages at baseline
@@ -182,12 +187,15 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       const x = e.target.closest('.js-del'); if (x) { x.closest('.erow').remove(); return; }
       const s = e.target.closest('.js-sop');
       if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; return; }
-      // Pencil: unlock a single locked baseline field for editing. Locked
-      // (disabled) fields are not submitted, so they keep their saved value.
+      // Pencil: unlock one baseline field and reveal its own Save button.
       const u = e.target.closest('.js-unlock');
       if (u) {
-        const inp = u.closest('div').querySelector('input');
-        if (inp) { inp.disabled = false; inp.focus(); u.style.visibility = 'hidden'; }
+        const scope = u.closest('form') || u.closest('div');
+        const inp = scope.querySelector('input[name="value"]') || scope.querySelector('input:not([type="hidden"])');
+        if (inp) { inp.disabled = false; inp.focus(); }
+        const sv = scope.querySelector('.js-savef');
+        if (sv) sv.hidden = false;
+        u.style.visibility = 'hidden';
       }
     });
 
