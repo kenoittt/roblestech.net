@@ -65,15 +65,33 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     ))}
   </div>
 
+  <div class="section-h">Top pages at baseline</div>
+  <p class="hint" style="margin-bottom:10px;">Each row saves on its own — edit and hit Save, or ✕ to remove. Add new pages at the bottom.</p>
+  <div class="card" style="display:flex;flex-direction:column;gap:8px;">
+    {pages.map((p: any, i: number) => (
+      <form method="post" action="/api/save-baseline-page" class="gated erow" style="margin:0;">
+        <input type="hidden" name="client_id" value={clientId} />
+        <input type="hidden" name="index" value={i} />
+        <input name="page" value={v(p.page)} placeholder="/page-url" style="flex:2;" />
+        <input name="clicks" value={v(p.clicks)} inputmode="numeric" placeholder="clicks" style="flex:1;" />
+        <input name="impr" value={v(p.impr)} inputmode="numeric" placeholder="impressions" style="flex:1;" />
+        <button type="submit" name="op" value="save" class="mini" style="background:var(--lime);color:var(--navy);border:0;">Save</button>
+        <button type="submit" name="op" value="delete" class="mini" style="color:#ffb3b3;" onclick="return confirm('Remove this page row?');">✕</button>
+      </form>
+    ))}
+    {pages.length === 0 && <p class="hint" style="margin:0;">No pages saved yet — add the first one below.</p>}
+    <form method="post" action="/api/save-baseline-page" class="gated erow" style="margin:6px 0 0;border-top:1px solid var(--line);padding-top:12px;">
+      <input type="hidden" name="client_id" value={clientId} />
+      <input type="hidden" name="op" value="add" />
+      <input name="page" placeholder="/new-page-url" style="flex:2;" />
+      <input name="clicks" inputmode="numeric" placeholder="clicks" style="flex:1;" />
+      <input name="impr" inputmode="numeric" placeholder="impressions" style="flex:1;" />
+      <button type="submit" class="mini" style="background:var(--lime);color:var(--navy);border:0;">+ Add page</button>
+    </form>
+  </div>
+
   <form method="post" action="/api/save-content" class="gated">
     <input type="hidden" name="client_id" value={clientId} />
-
-    <div class="section-h" style="display:flex;align-items:center;gap:10px;">
-      Top pages at baseline
-      <button type="button" class="pencil" id="unlock-pages" title="Edit top pages"><EditIcon size={16} title="Edit top pages" /></button>
-    </div>
-    <div id="pagesList" class="pages-locked"></div>
-    <button type="button" class="mini js-add" data-list="pages" id="pages-add" hidden>+ Add page</button>
 
     <div class="section-h">Content pipeline</div>
     <div id="pipeList"></div>
@@ -83,7 +101,6 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     <div id="oiList"></div>
     <button type="button" class="mini js-add" data-list="oi">+ Add item</button>
 
-    <input type="hidden" name="bl_pages" id="f-pages" />
     <input type="hidden" name="pipeline" id="f-pipe" />
     <input type="hidden" name="openItems" id="f-oi" />
     <div style="margin-top:22px;"><button class="btn" type="submit">Save content</button></div>
@@ -121,17 +138,12 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     </div>
   )}
 
-  <script is:inline define:vars={{ pages, pipeline, openItems, isSuper }}>
+  <script is:inline define:vars={{ pipeline, openItems, isSuper }}>
     const mk = (html) => { const d = document.createElement('div'); d.className = 'erow'; d.innerHTML = html; return d; };
     const esc = (s) => (s == null ? '' : String(s)).replace(/"/g, '&quot;');
     const statusOpts = (sel) => ['Not Started','Drafting','For Review','Live'].map((o) => `<option${o===sel?' selected':''}>${o}</option>`).join('');
     const priOpts = (sel) => ['HIGH','MED','LOW'].map((o) => `<option${o===sel?' selected':''}>${o}</option>`).join('');
 
-    function pagesRow(d){ d=d||{}; return mk(
-      `<input data-f="page" placeholder="/page-url" value="${esc(d.page)}" style="flex:2;">
-       <input data-f="clicks" placeholder="clicks" value="${esc(d.clicks)}" inputmode="numeric" style="flex:1;">
-       <input data-f="impr" placeholder="impr" value="${esc(d.impr)}" inputmode="numeric" style="flex:1;">
-       <button type="button" class="mini js-del">✕</button>`); }
     const SOP_STEPS = [
       'Live & correct (View Source)', 'Cluster wiring', 'In sitemap.xml',
       'Indexing requested', 'Schema validated', 'GEO / AI checks', 'Registered for tracking'
@@ -159,32 +171,16 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
        <button type="button" class="mini js-del">✕</button>`); }
 
     const lists = {
-      pages: { el: document.getElementById('pagesList'), row: pagesRow, data: pages },
       pipe:  { el: document.getElementById('pipeList'),  row: pipeRow,  data: pipeline },
       oi:    { el: document.getElementById('oiList'),    row: oiRow,    data: openItems },
     };
     Object.values(lists).forEach((L) => (L.data || []).forEach((d) => L.el.appendChild(L.row(d))));
 
-    // Top pages start LOCKED: inputs disabled, add/delete hidden, and the
-    // list is not submitted at all until unlocked — so saves can't touch it.
-    let pagesUnlocked = false;
-    const lockPages = () => {
-      lists.pages.el.querySelectorAll('input').forEach((i) => (i.disabled = true));
-      lists.pages.el.querySelectorAll('.js-del').forEach((b) => (b.style.display = 'none'));
-    };
-    lockPages();
-    document.getElementById('unlock-pages').addEventListener('click', (e) => {
-      pagesUnlocked = true;
-      lists.pages.el.querySelectorAll('input').forEach((i) => (i.disabled = false));
-      lists.pages.el.querySelectorAll('.js-del').forEach((b) => (b.style.display = ''));
-      document.getElementById('pages-add').hidden = false;
-      e.currentTarget.style.visibility = 'hidden';
-    });
     document.querySelectorAll('.js-add').forEach((b) => b.addEventListener('click', () => {
       const L = lists[b.dataset.list]; L.el.appendChild(L.row({}));
     }));
     document.addEventListener('click', (e) => {
-      const x = e.target.closest('.js-del'); if (x) { x.closest('.erow').remove(); return; }
+      const x = e.target.closest('.js-del'); if (x && !x.closest('form[action="/api/save-baseline-page"]')) { x.closest('.erow').remove(); return; }
       const s = e.target.closest('.js-sop');
       if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; return; }
       // Pencil: unlock one baseline field and reveal its own Save button.
@@ -204,12 +200,6 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
     // Serialize the dynamic lists on the main content form only.
     document.querySelector('form[action="/api/save-content"]').addEventListener('submit', () => {
-      const fPages = document.getElementById('f-pages');
-      if (pagesUnlocked) {
-        fPages.value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
-      } else {
-        fPages.disabled = true; // not submitted → server keeps the stored pages
-      }
       document.getElementById('f-pipe').value = JSON.stringify(
         Array.from(lists.pipe.el.querySelectorAll('.erow')).map((r) => {
           const o = grab(r);
