@@ -2,7 +2,6 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 import { getMonthProfile } from '../../lib/insights';
-import { aiConfigured } from '../../lib/claude';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -23,7 +22,6 @@ const festivals: any[] = profile?.festivals_json ?? [];
 const gems: any[] = profile?.hidden_gems_json ?? [];
 const topPlaces: any[] = best?.top_places ?? [];
 const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
-const hasAI = !!profile?.ai_model_version;
 ---
 
 <AppLayout title={`${dest.name} in ${MONTHS[month - 1]} · WanderWise`}>
@@ -98,12 +96,5 @@ const hasAI = !!profile?.ai_model_version;
     </div>
   )}
 
-  {!hasAI && (
-    <div class="alert" style="background:#FDF4E3;border:1px solid #EDD9AE;color:#7A5A12;">
-      {aiConfigured()
-        ? 'AI insights are being generated — refresh in a moment.'
-        : 'AI narrative (attire, crowds, festivals, gems, best-time verdict) activates once the ANTHROPIC_API_KEY is configured. Weather numbers above are live.'}
-    </div>
-  )}
-  {hasAI && <p class="hint">Insights include AI-generated content ({profile?.ai_model_version}) refreshed {new Date(profile!.refreshed_at).toLocaleDateString()}. Verify dates locally — festival timing can shift.</p>}
+  <p class="hint">Weather numbers are live climate data; travel notes are curated by WanderWise. Verify dates locally — festival timing (especially lunar-calendar events) can shift year to year.</p>
 </AppLayout>

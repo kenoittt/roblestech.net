@@ -1,16 +1,20 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../../lib/supabase';
-import { claudeJSON, aiConfigured } from '../../lib/claude';
+import { PACKS } from '../../lib/dest-content';
 
 export const prerender = false;
 
-// Trip-aware AI recommendations (FR-AI-02): month/season/pax-fit places &
-// activities for the trip's actual destinations and dates. Server-only key.
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/*
+ * Trip-aware suggestions (FR-AI-02) from curated packs — no paid API.
+ * Matches the trip's destinations to knowledge packs, layers in this month's
+ * festivals + best-time note, and skips places already saved to the trip.
+ */
 export const POST: APIRoute = async (context) => {
   const supabase = createSupabaseServer(context);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response(JSON.stringify({ error: 'auth' }), { status: 401 });
-  if (!aiConfigured()) return new Response(JSON.stringify({ error: 'AI is not configured yet.' }), { status: 200 });
 
   let body: any; try { body = await context.request.json(); } catch { return new Response(JSON.stringify({ error: 'bad json' }), { status: 400 }); }
   const tripId = String(body.trip_id ?? '');
@@ -19,13 +23,44 @@ export const POST: APIRoute = async (context) => {
   const { data: legs } = await supabase.from('trip_legs').select('destination_name,start_date,end_date').eq('trip_id', tripId);
   const { data: existing } = await supabase.from('trip_places').select('place_name').eq('trip_id', tripId);
 
-  const ai = await claudeJSON<any>(
-    'You are a sharp local travel curator. Recommend real, currently-operating places/activities. Prefer season- and date-appropriate picks; include a couple of lesser-known options. Never repeat places the traveler already saved.',
-    `Trip: ${(trip as any).name}. Destinations: ${((legs as any[]) ?? []).map((l) => l.destination_name).join(', ') || 'unknown'}.
-Dates: ${(trip as any).start_date ?? '?'} to ${(trip as any).end_date ?? '?'}. Group size: ${(trip as any).pax}.
-Already saved (do not repeat): ${((existing as any[]) ?? []).map((p) => p.place_name).join(', ') || 'none'}.
-Return JSON: {"suggestions":[{"name":"","category":"activity|food|sight|day-trip","why":"one sentence tied to their month/season/group","best_time":"e.g. weekday mornings / sunset"} x 6-8]}`
-  );
-  const suggestions = Array.isArray(ai?.suggestions) ? ai.suggestions.slice(0, 8) : [];
-  return new Response(JSON.stringify({ suggestions }), { headers: { 'content-type': 'application/json' } });
+  const saved = new Set(((existing as any[]) ?? []).map((p) => String(p.place_name).trim().toLowerCase()));
+  const month = ((trip as any).start_date ? new Date((trip as any).start_date + 'T00:00:00Z').getUTCMonth() : new Date().getUTCMonth()) + 1;
+
+  // Fuzzy-match each leg to a curated pack ("Hong Kong, HK" still hits 'Hong Kong').
+  const norm = (s: string) => s.trim().toLowerCase();
+  const packNames = Object.keys(PACKS);
+  const matched = new Map<string, (typeof PACKS)[string]>();
+  for (const leg of (legs as any[]) ?? []) {
+    const ln = norm(leg.destination_name ?? '');
+    if (!ln) continue;
+    const hit = packNames.find((n) => { const pn = norm(n); return pn === ln || ln.includes(pn) || pn.includes(ln); });
+    if (hit) matched.set(hit, PACKS[hit]);
+  }
+  if (matched.size === 0) {
+    return new Response(JSON.stringify({
+      suggestions: [],
+      error: 'No matches for your destinations yet — suggestions cover our Explore destinations (Vietnam, Taiwan, Hong Kong, Central Asia).',
+    }), { headers: { 'content-type': 'application/json' } });
+  }
+
+  type Sug = { name: string; category: string; why: string; best_time: string };
+  const suggestions: Sug[] = [];
+  const push = (name: string, category: string, why: string, best_time: string) => {
+    if (saved.has(norm(name)) || suggestions.some((s) => norm(s.name) === norm(name))) return;
+    suggestions.push({ name, category, why, best_time });
+  };
+
+  const many = matched.size > 1;
+  for (const [destName, pack] of matched) {
+    const tag = many ? ` (${destName})` : '';
+    for (const f of pack.festivals[month] ?? []) push(f.name, 'activity', `${f.note}${tag}`, f.timing);
+    for (const t of pack.top.slice(0, many ? 3 : 4)) push(t.name, 'sight', `${t.why}${tag}`, '');
+    for (const g of pack.gems.slice(0, many ? 2 : 3)) push(g.name, 'day-trip', `Hidden gem — ${g.why}${tag}`, 'quieter on weekdays');
+    if (!pack.best_months.includes(MONTHS[month - 1]) && suggestions.length) {
+      const first = suggestions[0];
+      if (!first.why.includes('Heads-up')) first.why += ` · Heads-up: ${pack.best_months.slice(0, 2).join('/')} is ${destName}'s sweet spot.`;
+    }
+  }
+
+  return new Response(JSON.stringify({ suggestions: suggestions.slice(0, 10) }), { headers: { 'content-type': 'application/json' } });
 };

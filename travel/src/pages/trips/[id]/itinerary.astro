@@ -1,7 +1,6 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../../lib/supabase';
-import { aiConfigured } from '../../../lib/claude';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -48,9 +47,7 @@ const back = `/trips/${id}/itinerary`;
   <div class="card" style="margin-top:12px;">
     <div class="rowflex" style="justify-content:space-between;">
       <h2 style="margin:0;">Smart suggestions ✨</h2>
-      <button class="mini" type="button" id="suggest-btn" {aiConfigured() ? '' : 'disabled'}>
-        {aiConfigured() ? 'Suggest for my dates' : 'Enable with ANTHROPIC_API_KEY'}
-      </button>
+      <button class="mini" type="button" id="suggest-btn">Suggest for my dates</button>
     </div>
     <div id="suggestions" class="stack" style="margin-top:10px;"></div>
   </div>
@@ -110,9 +107,9 @@ const back = `/trips/${id}/itinerary`;
 
   <script is:inline define:vars={{ tripId: id, back }}>
     const btn = document.getElementById('suggest-btn');
-    if (btn && !btn.disabled) btn.addEventListener('click', async () => {
+    if (btn) btn.addEventListener('click', async () => {
       const host = document.getElementById('suggestions');
-      host.innerHTML = '<span class="hint">Thinking about your dates & season…</span>';
+      host.innerHTML = '<span class="hint">Matching your destinations & month…</span>';
       btn.disabled = true;
       try {
         const res = await fetch('/api/recommend', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trip_id: tripId }) });
