@@ -151,6 +151,27 @@ ENTRY['South Korea'] = {
   checked: 'July 2026',
 };
 
+ENTRY['China'] = {
+  country: 'China',
+  free: {
+    // 30-day unilateral visa-free (ordinary passports), as of Feb 2026.
+    ...spread(EU, 30), ...spread(['NO','CH','IS','MC','AD'], 30),
+    ...spread(['GB','CA','AU','NZ','JP','KR','SG','MY','BN','TH','AE','QA'], 30),
+    ...spread(['BR','AR','CL','UY','PE'], 30),
+  },
+  fallback: 'Apply for a Chinese tourist (L) visa at a Visa Application Service Center. US and many others transiting to a THIRD country can instead use 240-hour (10-day) visa-free transit at 60+ ports.',
+  official: [
+    { label: 'China Visa Application Service Center', url: 'https://www.visaforchina.cn' },
+    { label: 'National Immigration Administration', url: 'https://en.nia.gov.cn' },
+  ],
+  notes: [
+    '30-day visa-free covers ~50 countries and runs through Dec 31, 2026 — reconfirm before booking.',
+    '240-hour visa-free transit needs an onward ticket to a different third country and applies only at eligible ports.',
+    'Foreigners must register their address with local police within 24h of arrival (hotels do this automatically).',
+  ],
+  checked: 'July 2026',
+};
+
 export type VisaVerdict = {
   status: 'visa-free' | 'action-needed' | 'unknown';
   headline: string;

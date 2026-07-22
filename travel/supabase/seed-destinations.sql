@@ -32,5 +32,10 @@ insert into public.destinations (name, country, lat, lng, timezone) values
   ('Phuket',     'Thailand',     7.8804,  98.3923, 'Asia/Bangkok'),
   ('Seoul',      'South Korea', 37.5665, 126.9780, 'Asia/Seoul'),
   ('Busan',      'South Korea', 35.1796, 129.0756, 'Asia/Seoul'),
-  ('Jeju',       'South Korea', 33.4996, 126.5312, 'Asia/Seoul')
+  ('Jeju',       'South Korea', 33.4996, 126.5312, 'Asia/Seoul'),
+  ('Beijing',    'China',       39.9042, 116.4074, 'Asia/Shanghai'),
+  ('Shanghai',   'China',       31.2304, 121.4737, 'Asia/Shanghai'),
+  ('Xi''an',     'China',       34.3416, 108.9398, 'Asia/Shanghai'),
+  ('Chengdu',    'China',       30.5728, 104.0668, 'Asia/Shanghai'),
+  ('Guilin',     'China',       25.2736, 110.2907, 'Asia/Shanghai')
 on conflict (name, country) do nothing;
