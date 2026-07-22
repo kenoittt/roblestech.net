@@ -33,14 +33,21 @@ const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
             Robles <span>Tech</span> <em>Portal</em>
           </a>
           {Astro.locals.user && (
-            <nav class="p-nav-links">
-              <a href="/dashboard">Dashboard</a>
-              {isAdmin && <a href="/admin">Admin</a>}
-              <a href="/account">Account</a>
-              <form method="post" action="/logout" class="p-logout">
-                <button type="submit">Sign out</button>
-              </form>
-            </nav>
+            <>
+              <input type="checkbox" id="nav-open" class="nav-open" aria-label="Toggle menu" />
+              <label for="nav-open" class="burger">
+                <svg class="i-menu" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                <svg class="i-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+              </label>
+              <nav class="p-nav-links">
+                <a href="/dashboard">Dashboard</a>
+                {isAdmin && <a href="/admin">Admin</a>}
+                <a href="/account">Account</a>
+                <form method="post" action="/logout" class="p-logout">
+                  <button type="submit">Sign out</button>
+                </form>
+              </nav>
+            </>
           )}
         </header>
       )

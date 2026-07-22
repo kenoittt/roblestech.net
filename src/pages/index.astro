@@ -397,10 +397,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <script>
     // Interactive 3D globe for the Philosophy section (homepage only).
-    // three.js loads only here, via dynamic import, once the canvas exists.
+    // three.js + the texture load lazily, only when the section approaches the
+    // viewport — visitors who never scroll there download none of it.
     const globeCanvas = document.getElementById('c-globe');
     if (globeCanvas) {
-      import('../scripts/globe.js').then(({ initGlobe }) => initGlobe(globeCanvas));
+      const start = () => import('../scripts/globe.js').then(({ initGlobe }) => initGlobe(globeCanvas));
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) { io.disconnect(); start(); }
+        }, { rootMargin: '400px' });
+        io.observe(globeCanvas);
+      } else start();
     }
   </script>
 

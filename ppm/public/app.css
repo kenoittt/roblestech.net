@@ -141,3 +141,24 @@ button { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ── Mobile burger menu: island nav collapses into a dark-glass dropdown ── */
+.nav-open{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+.burger{display:none;}
+@media (max-width: 600px){
+  .burger{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 auto;
+    border:1px solid rgba(255,255,255,0.18);border-radius:10px;background:rgba(255,255,255,0.08);cursor:pointer;color:#fff;}
+  .burger .i-close{display:none;}
+  .nav-open:checked ~ .burger .i-menu{display:none;}
+  .nav-open:checked ~ .burger .i-close{display:block;}
+  .nav-open:focus-visible ~ .burger{outline:3px solid var(--green);outline-offset:2px;}
+  .p-nav-links{display:none;}
+  .nav-open:checked ~ .p-nav-links{display:flex;flex-direction:column;align-items:stretch;gap:2px;
+    position:absolute;top:calc(100% + 8px);left:0;right:0;padding:10px;z-index:1300;
+    background:rgba(6,16,38,0.96);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
+    border:1px solid rgba(255,255,255,0.16);border-radius:16px;box-shadow:0 18px 44px rgba(0,0,0,0.5);}
+  .nav-open:checked ~ .p-nav-links a{display:block;width:100%;text-align:left;padding:13px 14px;font-size:.95rem;border-radius:10px;min-height:0;}
+  .nav-open:checked ~ .p-nav-links a:hover{background:rgba(255,255,255,0.08);}
+  .nav-open:checked ~ .p-nav-links .p-logout{width:100%;margin-top:6px;}
+  .nav-open:checked ~ .p-nav-links .p-logout button{width:100%;padding:12px;}
+}

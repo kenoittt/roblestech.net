@@ -157,8 +157,10 @@ export function initGlobe(canvas, tipEls) {
 
   const clock = new THREE.Clock();
   let alive = true;
+  let onScreen = true; // pause rendering while scrolled away — no idle GPU burn
   const loop = () => {
     if (!alive) return;
+    if (!onScreen) return; // resumed by the IntersectionObserver below
     const t = clock.getElapsedTime(); // advances the clock — pulse dots travel toward each hub
     if (!dragging) { globe.rotation.y += velX; velX += (0.0016 - velX) * 0.02; }
     arcs.forEach(a => {
@@ -168,10 +170,17 @@ export function initGlobe(canvas, tipEls) {
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   };
+  const io = new IntersectionObserver(([e]) => {
+    const was = onScreen;
+    onScreen = e.isIntersecting;
+    if (onScreen && !was) requestAnimationFrame(loop); // restart the loop on re-entry
+  }, { rootMargin: '120px' });
+  io.observe(canvas);
   requestAnimationFrame(loop);
 
   return () => { // teardown
     alive = false;
+    io.disconnect();
     canvas.removeEventListener('pointerdown', onDown);
     canvas.removeEventListener('pointerup', onUp);
     canvas.removeEventListener('pointerleave', onLeave);
