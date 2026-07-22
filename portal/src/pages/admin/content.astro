@@ -73,12 +73,27 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
        <input data-f="clicks" placeholder="clicks" value="${esc(d.clicks)}" inputmode="numeric" style="flex:1;">
        <input data-f="impr" placeholder="impr" value="${esc(d.impr)}" inputmode="numeric" style="flex:1;">
        <button type="button" class="mini js-del">✕</button>`); }
+    const SOP_STEPS = [
+      'Live & correct (View Source)', 'Cluster wiring', 'In sitemap.xml',
+      'Indexing requested', 'Schema validated', 'GEO / AI checks', 'Registered for tracking'
+    ];
+    const sopOpts = (sel) => [['pending','Pending'],['pass','Pass'],['na','N/A']]
+      .map(([v,l]) => `<option value="${v}"${v===sel?' selected':''}>${l}</option>`).join('');
+    function sopPanel(sop){
+      sop = Array.isArray(sop) ? sop : [];
+      return `<div class="sop-panel" hidden style="width:100%;background:rgba(0,0,0,0.22);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;">
+        ${SOP_STEPS.map((s,i)=>`<label style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;font-weight:600;margin:0;">${i+1}. ${s}
+          <select data-s="${i}" style="width:96px;padding:5px 7px;font-size:.78rem;">${sopOpts(sop[i]||'pending')}</select></label>`).join('')}
+      </div>`;
+    }
     function pipeRow(d){ d=d||{}; return mk(
       `<input data-f="num" placeholder="#" value="${esc(d.num)}" style="width:74px;" title="Unique post ID">
        <input data-f="post" placeholder="Post title" value="${esc(d.post)}" style="flex:2;">
        <select data-f="status" style="flex:1;">${statusOpts(d.status)}</select>
        <input data-f="published" type="date" value="${esc(d.published)}" style="flex:1;">
-       <button type="button" class="mini js-del">✕</button>`); }
+       <button type="button" class="mini js-sop" title="Post-publish SOP checklist">SOP</button>
+       <button type="button" class="mini js-del">✕</button>
+       ${sopPanel(d.sop)}`); }
     function oiRow(d){ d=d||{}; return mk(
       `<select data-f="pri" style="width:90px;">${priOpts(d.pri)}</select>
        <input data-f="text" placeholder="Deliverable / item" value="${esc(d.text)}" style="flex:1;">
@@ -93,14 +108,23 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     document.querySelectorAll('.js-add').forEach((b) => b.addEventListener('click', () => {
       const L = lists[b.dataset.list]; L.el.appendChild(L.row({}));
     }));
-    document.addEventListener('click', (e) => { const x = e.target.closest('.js-del'); if (x) x.closest('.erow').remove(); });
+    document.addEventListener('click', (e) => {
+      const x = e.target.closest('.js-del'); if (x) { x.closest('.erow').remove(); return; }
+      const s = e.target.closest('.js-sop');
+      if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; }
+    });
 
     const grab = (el) => { const o = {}; el.querySelectorAll('[data-f]').forEach((i) => o[i.dataset.f] = i.value); return o; };
     const collect = (el, mapper) => Array.from(el.querySelectorAll('.erow')).map((r) => mapper(grab(r)));
 
     document.querySelector('form.gated').addEventListener('submit', (e) => {
       document.getElementById('f-pages').value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
-      document.getElementById('f-pipe').value  = JSON.stringify(collect(lists.pipe.el, (o) => ({ num:o.num, post:o.post, status:o.status, published:o.published })).filter((x)=>x.post||x.num));
+      document.getElementById('f-pipe').value = JSON.stringify(
+        Array.from(lists.pipe.el.querySelectorAll('.erow')).map((r) => {
+          const o = grab(r);
+          const sop = Array.from(r.querySelectorAll('[data-s]')).map((s) => s.value);
+          return { num:o.num, post:o.post, status:o.status, published:o.published, sop };
+        }).filter((x)=>x.post||x.num));
       document.getElementById('f-oi').value    = JSON.stringify(collect(lists.oi.el, (o) => ({ pri:o.pri, text:o.text })).filter((x)=>x.text));
       if (!isSuper) {
         const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');

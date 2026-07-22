@@ -379,15 +379,19 @@ var byPage = __G.byPage || [                                  // one row per URL
 ];
 var siteTotal = __G.siteTotal || { clicks:34344, impr:747124 };  // property totals, summed from the GSC daily breakdown (date dimension sums match property totals; headline UI shows 34.3K / 747K)
 var pipeline = __C.pipeline || [];                              // one row per post: {post, status, published, sop, schema, ai}
-var sopSteps = __C.sopSteps || [
-  { n:1, step:"Live & correct",       status:"pending", detail:"Awaiting first published post." },
-  { n:2, step:"Topic-cluster wiring", status:"pending", detail:"Cluster links verified in raw HTML (View Source), not the rendered page." },
-  { n:3, step:"In sitemap.xml",       status:"pending", detail:"URL present in sitemap.xml." },
-  { n:4, step:"Indexing requested",   status:"pending", detail:"Submitted in GSC URL Inspection." },
-  { n:5, step:"Schema validated",     status:"pending", detail:"validator.schema.org, 0 errors required." },
-  { n:6, step:"GEO / AI checks",      status:"pending", detail:"Answer-first structure, FAQ block, plain language." },
-  { n:7, step:"Register for tracking",status:"pending", detail:"Post registered in this dashboard with AI baseline captured." }
+/* Post-Publish SOP framework — the fixed 7-step checklist every post runs
+   the moment it goes live. Each pipeline post carries its own statuses
+   (p.sop = array of "pending" | "pass" | "na"); these are the step labels. */
+var SOP_FRAMEWORK = [
+  { n:1, step:"Live & correct (View Source)", detail:"Title, single H1, meta description, internal links resolve, images + alt text. Book a Call CTA has a real href — conversion first, SEO second." },
+  { n:2, step:"Cluster wiring",               detail:"Homepage/blog → post; post → Services + Book a Call; post ↔ sibling posts, both directions. Push live." },
+  { n:3, step:"In sitemap.xml",               detail:"Added with lastmod = today; committed. URLs match the canonical." },
+  { n:4, step:"Indexing requested",           detail:"GSC URL Inspection → Request Indexing." },
+  { n:5, step:"Schema validated",             detail:"validator.schema.org, 0 errors (N/A if the post has no schema by design)." },
+  { n:6, step:"GEO / AI checks",              detail:"robots.txt not blocking, AI crawlers allowed; AI-visibility baseline captured across ChatGPT, Claude, Perplexity, Gemini." },
+  { n:7, step:"Registered for tracking",      detail:"Added to this dashboard (pipeline + GSC tracking) with its AI baseline. Auto-refreshes daily from here." }
 ];
+var sopSteps = __C.sopSteps || []; // legacy fallback only
 /* AI Visibility Audit, Round 2, July 2026. 20 buyer questions x 4 platforms = 80 checks.
    Tested word-for-word, incognito/fresh chats, never naming Promix, July 2-3 2026.
    A cell starting with "Yes" is a hit. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude not tested this round). */
@@ -579,7 +583,9 @@ function renderPipeline(){
   }
   pipeline.forEach(function(p){
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>"+(p.num||"")+"</td><td>"+p.post+"</td><td>"+badge(p.status==="Live"?"live":"pending",p.status)+"</td><td>"+(p.published||"")+"</td><td>"+(p.sop||"")+"</td><td>"+(p.schema||"")+"</td><td>"+(p.ai||"")+"</td>";
+    var sopN = sopCount(p);
+    var sopCell = sopN !== null ? sopN + "/7" : (typeof p.sop === "string" ? p.sop : "");
+    tr.innerHTML = "<td>"+(p.num||"")+"</td><td>"+p.post+"</td><td>"+badge(p.status==="Live"?"live":"pending",p.status)+"</td><td>"+(p.published||"")+"</td><td>"+sopCell+"</td><td>"+(p.schema||"")+"</td><td>"+(p.ai||"")+"</td>";
     tb.appendChild(tr);
   });
 }
@@ -603,16 +609,34 @@ function renderByPage(tbodyId){
   tb.appendChild(tot);
 }
 
-/* ---------- SOP table ---------- */
+/* ---------- SOP: per-post checklists from the fixed framework ---------- */
+function sopBadge(st){
+  if(st === "pass") return badge("pass","Pass");
+  if(st === "na")   return badge("pending","N/A");
+  if(st === "no")   return badge("no","No");
+  return badge("pending","Pending");
+}
+function sopCount(p){ // pass count for a post's checklist
+  if(!p || !Array.isArray(p.sop)) return null;
+  return p.sop.filter(function(s){ return s === "pass"; }).length;
+}
+function latestSopPost(){
+  var withSop = pipeline.filter(function(p){ return Array.isArray(p.sop); });
+  if(!withSop.length) return null;
+  return withSop.slice().sort(function(a,b){ return String(b.published||"").localeCompare(String(a.published||"")); })[0];
+}
 function renderSop(){
   var tb = document.getElementById("sopBody");
   tb.innerHTML = "";
+  var post = latestSopPost();
+  var head = document.querySelector("#panel-sop h2");
+  if(head) head.innerHTML = "Post-publish SOP &middot; " + (post ? (post.num ? "#"+post.num+" — " : "") + (post.post || "most recent post") : "most recent post");
   var done = 0;
-  sopSteps.forEach(function(s){
-    if(s.status === "pass") done++;
-    var b = s.status === "pass" ? badge("pass","Pass") : (s.status === "no" ? badge("no","No") : badge("pending","Pending"));
+  SOP_FRAMEWORK.forEach(function(s, i){
+    var st = post ? (post.sop[i] || "pending") : (sopSteps[i] && sopSteps[i].status) || "pending";
+    if(st === "pass") done++;
     var tr = document.createElement("tr");
-    tr.innerHTML = "<td>"+s.n+"</td><td>"+s.step+"</td><td>"+b+"</td><td>"+s.detail+"</td>";
+    tr.innerHTML = "<td>"+s.n+"</td><td>"+s.step+"</td><td>"+sopBadge(st)+"</td><td>"+s.detail+"</td>";
     tb.appendChild(tr);
   });
   document.getElementById("kpiSop").textContent = done + "/7";
