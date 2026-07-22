@@ -1,6 +1,8 @@
 ---
 import PortalLayout from '../../layouts/PortalLayout.astro';
 
+if (Astro.locals.profile?.role !== 'super_admin') return Astro.redirect('/admin');
+
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 ---

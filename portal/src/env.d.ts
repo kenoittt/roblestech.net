@@ -4,7 +4,7 @@
 type PortalProfile = {
   id: string;
   client_id: string | null;
-  role: 'admin' | 'client';
+  role: 'super_admin' | 'admin' | 'client';
   full_name: string | null;
 };
 

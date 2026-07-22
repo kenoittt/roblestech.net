@@ -7,7 +7,7 @@ export const prerender = false;
 // Admin-only: create a client login and link it to a client company.
 export const POST: APIRoute = async (context) => {
   const { profile } = await getSession(context);
-  if (profile?.role !== 'admin') return new Response('Forbidden', { status: 403 });
+  if (profile?.role !== 'super_admin') return new Response('Forbidden', { status: 403 });
 
   const form = await context.request.formData();
   const clientId = String(form.get('client_id') ?? '');

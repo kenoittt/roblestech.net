@@ -3,7 +3,7 @@
 
 type PpmProfile = {
   id: string;
-  role: 'admin' | 'staff' | 'client';
+  role: 'super_admin' | 'admin' | 'staff' | 'client';
   full_name: string | null;
 };
 

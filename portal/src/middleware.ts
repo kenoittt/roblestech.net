@@ -44,8 +44,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/dashboard');
   }
 
-  // Admin area is admin-only.
-  if (path.startsWith('/admin') && context.locals.profile?.role !== 'admin') {
+  // Admin area is for admins and super admins.
+  const role = context.locals.profile?.role;
+  if (path.startsWith('/admin') && role !== 'admin' && role !== 'super_admin') {
     return context.redirect('/dashboard');
   }
 

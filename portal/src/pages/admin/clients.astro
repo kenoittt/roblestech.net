@@ -21,6 +21,7 @@ const loginsFor = (cid: string) =>
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
+const isSuper = Astro.locals.profile?.role === 'super_admin';
 const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—');
 ---
 
@@ -33,7 +34,7 @@ const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—')
   {err && <div class="alert alert-error">{err}</div>}
 
   <!-- Add -->
-  <form method="post" action="/api/create-client" class="card" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:22px;">
+  <form method="post" action="/api/create-client" class="card gated" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:22px;">
     <div style="flex:1;min-width:200px;"><label>Company name</label><input name="name" required placeholder="Acme Co." /></div>
     <div style="flex:1;min-width:220px;"><label>GSC property (optional)</label><input name="gsc_property" placeholder="sc-domain:acme.com" /></div>
     <button class="btn" type="submit">Add client</button>
@@ -64,13 +65,13 @@ const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—')
               <tr class="editrow" id={`edit-${c.id}`} hidden>
                 <td colspan="6">
                   <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;">
-                    <form method="post" action="/api/client-update" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;flex:1;">
+                    <form method="post" action="/api/client-update" class="gated" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;flex:1;">
                       <input type="hidden" name="id" value={c.id} />
                       <div style="flex:1;min-width:180px;"><label>Name</label><input name="name" value={c.name} required /></div>
                       <div style="flex:1;min-width:200px;"><label>GSC property</label><input name="gsc_property" value={c.gsc_property ?? ''} /></div>
                       <button class="btn" type="submit">Save</button>
                     </form>
-                    <form method="post" action="/api/client-delete" onsubmit="return confirm('Delete this client? Their reports are removed and their logins are unlinked. This cannot be undone.');">
+                    <form method="post" action="/api/client-delete" class="gated" onsubmit="return confirm('Delete this client? Their reports are removed and their logins are unlinked. This cannot be undone.');">
                       <input type="hidden" name="id" value={c.id} />
                       <label style="visibility:hidden;">.</label>
                       <button class="btn-danger" type="submit">Delete client</button>
@@ -85,10 +86,21 @@ const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—')
     </table>
   </div>
 
-  <script is:inline>
+  <script is:inline define:vars={{ isSuper }}>
     document.querySelectorAll('.js-edit').forEach((b) => b.addEventListener('click', () => {
       const row = document.getElementById('edit-' + b.dataset.id);
       if (row) row.hidden = !row.hidden;
     }));
+    if (!isSuper) {
+      document.querySelectorAll('form.gated').forEach((f) => {
+        f.addEventListener('submit', (e) => {
+          const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');
+          if (note === null) { e.preventDefault(); return; }
+          let inp = f.querySelector('input[name="reason"]');
+          if (!inp) { inp = document.createElement('input'); inp.type = 'hidden'; inp.name = 'reason'; f.appendChild(inp); }
+          inp.value = note;
+        });
+      });
+    }
   </script>
 </PortalLayout>

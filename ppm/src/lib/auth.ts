@@ -16,4 +16,5 @@ export async function getSession(context: APIContext) {
   return { user, profile: (profile as App.Locals['profile']) ?? null, supabase };
 }
 
-export const canUsePpm = (p: App.Locals['profile']) => p?.role === 'admin' || p?.role === 'staff';
+export const canUsePpm = (p: App.Locals['profile']) =>
+  p?.role === 'super_admin' || p?.role === 'admin' || p?.role === 'staff';

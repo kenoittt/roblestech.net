@@ -31,14 +31,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const isPublic = PUBLIC_PATHS.has(path);
-  const isPpmUser = context.locals.profile?.role === 'admin' || context.locals.profile?.role === 'staff';
+  const r = context.locals.profile?.role;
+  const isPpmUser = r === 'super_admin' || r === 'admin' || r === 'staff';
 
   if (!user && !isPublic) return context.redirect('/login');
   if (user && path === '/login') return context.redirect('/');
   // Logged in but not a PPM user (e.g. a client account) — deny app access.
   if (user && !isPublic && !isPpmUser) return context.redirect('/login?denied=1');
   // Admin-only areas.
-  if (path.startsWith('/admin') && context.locals.profile?.role !== 'admin') {
+  if (path.startsWith('/admin') && r !== 'admin' && r !== 'super_admin') {
     return context.redirect('/');
   }
 
