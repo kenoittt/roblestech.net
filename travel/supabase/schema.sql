@@ -206,9 +206,15 @@ drop policy if exists profiles_self on public.profiles;
 create policy profiles_self on public.profiles
   for all using (id = auth.uid()) with check (id = auth.uid());
 
--- trips: members read; owner writes; any authed user may create their own
+-- trips: members read; owner writes; any authed user may create their own.
+-- NOTE: the owner case checks the row's own column (not is_trip_member) so
+-- INSERT ... RETURNING passes the SELECT policy — a same-statement insert is
+-- not yet visible to a subquery on trips, which would wrongly reject it.
 drop policy if exists trips_read on public.trips;
-create policy trips_read on public.trips for select using (public.is_trip_member(id));
+create policy trips_read on public.trips for select using (
+  owner_id = auth.uid()
+  or exists (select 1 from public.trip_members m where m.trip_id = id and m.user_id = auth.uid())
+);
 drop policy if exists trips_insert on public.trips;
 create policy trips_insert on public.trips for insert with check (owner_id = auth.uid());
 drop policy if exists trips_update on public.trips;

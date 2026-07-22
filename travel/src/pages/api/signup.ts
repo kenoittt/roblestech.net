@@ -13,7 +13,16 @@ export const POST: APIRoute = async (context) => {
     return context.redirect('/signup?error=' + encodeURIComponent('Email and a password of 8+ characters are required.'));
   }
   const supabase = createSupabaseServer(context);
-  const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { display_name } } });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { display_name },
+      // Confirmation email links back to THIS deployment (must also be in
+      // Supabase Auth -> URL Configuration -> Redirect URLs).
+      emailRedirectTo: `${context.url.origin}/login?confirmed=1`,
+    },
+  });
   if (error) return context.redirect('/signup?error=' + encodeURIComponent(error.message));
   await audit(data.user?.id ?? null, 'auth.signup', 'auth');
   // With email confirmation enabled there is no session yet.
