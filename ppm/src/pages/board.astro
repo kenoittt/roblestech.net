@@ -1,0 +1,106 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { loadPpmData, nameOf } from '../lib/queries';
+
+const { tasks, people, projects, fAssignee, fProject } = await loadPpmData(Astro);
+const back = Astro.url.pathname + Astro.url.search;
+
+const cols = [
+  { key: 'todo', label: 'To do' },
+  { key: 'in_progress', label: 'In progress' },
+  { key: 'done', label: 'Done' },
+];
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+
+<AppLayout title="Board · Robles Tech PPM">
+  <p class="eyebrow">Project Management</p>
+  <h1>Board</h1>
+  <p class="lede">Drag-free kanban: change status or assignee right on the card.</p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <!-- New task -->
+  <div class="card">
+    <form method="post" action="/api/task-create" class="row" id="new-task">
+      <input type="hidden" name="back" value={back} />
+      <div><label>New task</label><input name="title" required placeholder="What needs doing?" /></div>
+      <div><label>Assignee</label>
+        <select name="assignee_id">
+          <option value="">Unassigned</option>
+          {people.map((p) => <option value={p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+        </select>
+      </div>
+      <div><label>Priority</label>
+        <select name="priority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+      </div>
+      <div><label>Due</label><input type="date" name="due_date" /></div>
+    </form>
+    <div style="margin-top:12px;display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+      <div style="min-width:200px;">
+        <label>Project (optional)</label>
+        <select name="project_id" form="new-task">
+          <option value="">No project</option>
+          {projects.map((p) => <option value={p.id}>{p.name}</option>)}
+        </select>
+      </div>
+      <button class="btn" form="new-task" type="submit">Add task</button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" class="filterbar">
+    <label>Assignee
+      <select name="assignee" class="js-filter">
+        <option value="">Everyone</option>
+        <option value="none" selected={fAssignee === 'none'}>Unassigned</option>
+        {people.map((p) => <option value={p.id} selected={fAssignee === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+      </select>
+    </label>
+    <label>Project
+      <select name="project" class="js-filter">
+        <option value="">All projects</option>
+        {projects.map((p) => <option value={p.id} selected={fProject === p.id}>{p.name}</option>)}
+      </select>
+    </label>
+    {(fAssignee || fProject) && <a href="/board" class="mini-link">Clear filters</a>}
+  </form>
+
+  <div class="board" style="margin-top:14px;">
+    {cols.map((c) => (
+      <div class="col">
+        <h3>{c.label}<span>{tasks.filter((t) => t.status === c.key).length}</span></h3>
+        {tasks.filter((t) => t.status === c.key).map((t) => (
+          <div class="task">
+            <div class="t">{t.title}</div>
+            <div class="m">
+              <span class={`pill ${t.priority}`}>{t.priority}</span>
+              <span>{nameOf(people, t.assignee_id)}</span>
+              {t.due_date && <span>· due {t.due_date}</span>}
+            </div>
+            <form method="post" action="/api/task-update" class="statusform">
+              <input type="hidden" name="id" value={t.id} />
+              <input type="hidden" name="back" value={back} />
+              <select name="status" class="js-auto">
+                <option value="todo" selected={t.status === 'todo'}>To do</option>
+                <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
+                <option value="done" selected={t.status === 'done'}>Done</option>
+              </select>
+              <select name="assignee_id" class="js-auto">
+                <option value="">Unassigned</option>
+                {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+              </select>
+            </form>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+
+  <script is:inline>
+    document.querySelectorAll('.js-auto').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
+    document.querySelectorAll('.js-filter').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
+  </script>
+</AppLayout>

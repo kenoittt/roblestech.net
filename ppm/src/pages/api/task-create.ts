@@ -11,13 +11,15 @@ export const POST: APIRoute = async (context) => {
   if (!user || !canUsePpm(profile)) return new Response('Forbidden', { status: 403 });
 
   const form = await context.request.formData();
+  const backRaw = String(form.get('back') ?? '');
+  const back = backRaw.startsWith('/') && !backRaw.startsWith('//') ? backRaw : '/board';
   const title = String(form.get('title') ?? '').trim();
   const assignee_id = String(form.get('assignee_id') ?? '') || null;
   const priority = String(form.get('priority') ?? 'medium');
   const due_date = String(form.get('due_date') ?? '') || null;
   const project_id = String(form.get('project_id') ?? '') || null;
   const description = String(form.get('description') ?? '') || null;
-  if (!title) return context.redirect('/?err=' + encodeURIComponent('Task title is required.'));
+  if (!title) return context.redirect(back + '?err=' + encodeURIComponent('Task title is required.'));
 
   const admin = createSupabaseAdmin();
   const { data: task, error } = await admin
@@ -25,7 +27,7 @@ export const POST: APIRoute = async (context) => {
     .insert({ title, assignee_id, priority, due_date, project_id, description, created_by: user.id })
     .select('id')
     .single();
-  if (error || !task) return context.redirect('/?err=' + encodeURIComponent(error?.message ?? 'Could not create task.'));
+  if (error || !task) return context.redirect(back + '?err=' + encodeURIComponent(error?.message ?? 'Could not create task.'));
 
   const taskId = (task as { id: string }).id;
   await admin.from('ppm_task_events').insert([
@@ -51,5 +53,5 @@ export const POST: APIRoute = async (context) => {
     } catch { /* email is best-effort */ }
   }
 
-  return context.redirect('/?ok=' + encodeURIComponent('Task added.'));
+  return context.redirect(back + '?ok=' + encodeURIComponent('Task added.'));
 };

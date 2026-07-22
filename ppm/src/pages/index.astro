@@ -1,57 +1,47 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
-import { createSupabaseServer } from '../lib/supabase';
+import { loadPpmData, nameOf } from '../lib/queries';
 
-const supabase = createSupabaseServer(Astro);
+const { all: tasks, people } = await loadPpmData(Astro);
 
-type Task = {
-  id: string; title: string; description: string | null; status: string; priority: string;
-  due_date: string | null; assignee_id: string | null; project_id: string | null; completed_at: string | null;
-};
-type Person = { id: string; full_name: string | null; role: string };
-type Project = { id: string; name: string; color: string };
-
-const [{ data: tasksData }, { data: peopleData }, { data: projData }] = await Promise.all([
-  supabase.from('ppm_tasks').select('id,title,description,status,priority,due_date,assignee_id,project_id,completed_at').order('created_at', { ascending: false }),
-  supabase.from('profiles').select('id,full_name,role').in('role', ['super_admin', 'admin', 'staff']),
-  supabase.from('ppm_projects').select('id,name,color').eq('archived', false).order('name'),
-]);
-const tasks: Task[] = (tasksData as Task[]) ?? [];
-const people: Person[] = (peopleData as Person[]) ?? [];
-const projects: Project[] = (projData as Project[]) ?? [];
-const nameOf = (id: string | null) => people.find((p) => p.id === id)?.full_name || '—';
-const projOf = (id: string | null) => projects.find((p) => p.id === id) ?? null;
-const statusLabel: Record<string, string> = { todo: 'To do', in_progress: 'In progress', done: 'Done' };
-
-// Analytics
 const todo = tasks.filter((t) => t.status === 'todo').length;
 const prog = tasks.filter((t) => t.status === 'in_progress').length;
 const done = tasks.filter((t) => t.status === 'done').length;
-// Week boundaries (Monday start), computed on the server.
+
 const now = new Date();
 const day = (now.getUTCDay() + 6) % 7;
 const monThis = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - day));
 const monLast = new Date(monThis); monLast.setUTCDate(monThis.getUTCDate() - 7);
-const inRange = (iso: string | null, a: Date, b: Date) => iso ? (new Date(iso) >= a && new Date(iso) < b) : false;
+const inRange = (iso: string | null, a: Date, b: Date) => (iso ? new Date(iso) >= a && new Date(iso) < b : false);
 const doneThisWeek = tasks.filter((t) => inRange(t.completed_at, monThis, new Date(now.getTime() + 86400000))).length;
 const doneLastWeek = tasks.filter((t) => inRange(t.completed_at, monLast, monThis)).length;
 
-const cols = [
-  { key: 'todo', label: 'To do' },
-  { key: 'in_progress', label: 'In progress' },
-  { key: 'done', label: 'Done' },
-];
-const ok = Astro.url.searchParams.get('ok');
-const err = Astro.url.searchParams.get('err');
+// Per-member workload (open tasks = todo + in progress).
+const rows = people.map((p) => {
+  const mine = tasks.filter((t) => t.assignee_id === p.id);
+  return {
+    id: p.id,
+    name: p.full_name || '(no name)',
+    todo: mine.filter((t) => t.status === 'todo').length,
+    prog: mine.filter((t) => t.status === 'in_progress').length,
+    done: mine.filter((t) => t.status === 'done').length,
+    week: mine.filter((t) => inRange(t.completed_at, monThis, new Date(now.getTime() + 86400000))).length,
+  };
+});
+const unassigned = tasks.filter((t) => !t.assignee_id && t.status !== 'done').length;
+// Due soon (next 7 days, not done)
+const in7 = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
+const today = now.toISOString().slice(0, 10);
+const dueSoon = tasks
+  .filter((t) => t.status !== 'done' && t.due_date && t.due_date <= in7)
+  .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))
+  .slice(0, 8);
 ---
 
-<AppLayout title="Board · Robles Tech PPM">
+<AppLayout title="Dashboard · Robles Tech PPM">
   <p class="eyebrow">Project Management</p>
-  <h1>Task Board</h1>
-  <p class="lede">Track work across the team. Assignees are emailed when tasks are assigned, added, or change status.</p>
-
-  {ok && <div class="alert alert-ok">{ok}</div>}
-  {err && <div class="alert alert-error">{err}</div>}
+  <h1>Dashboard</h1>
+  <p class="lede">The team's work at a glance. Jump to the <a href="/board" style="color:var(--green);">Board</a> or the <a href="/tasks" style="color:var(--green);">Tasks sheet</a>.</p>
 
   <div class="stats">
     <div class="stat todo"><div class="n">{todo}</div><div class="l">Not started</div></div>
@@ -61,149 +51,47 @@ const err = Astro.url.searchParams.get('err');
     <div class="stat week"><div class="n">{doneLastWeek}</div><div class="l">Finished last week</div></div>
   </div>
 
-  <!-- New task -->
-  <div class="card">
-    <form method="post" action="/api/task-create" class="row">
-      <div><label>New task</label><input name="title" required placeholder="What needs doing?" /></div>
-      <div><label>Assignee</label>
-        <select name="assignee_id">
-          <option value="">Unassigned</option>
-          {people.map((p) => <option value={p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
-        </select>
-      </div>
-      <div><label>Priority</label>
-        <select name="priority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
-      </div>
-      <div><label>Due</label><input type="date" name="due_date" /></div>
-    </form>
-    <div style="margin-top:12px;display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
-      <div style="min-width:200px;">
-        <label>Project (optional)</label>
-        <select name="project_id" form="ignored" id="proj-select">
-          <option value="">No project</option>
-          {projects.map((p) => <option value={p.id}>{p.name}</option>)}
-        </select>
-      </div>
-      <button class="btn" form="ignored" type="button" id="add-btn">Add task</button>
-    </div>
-  </div>
-
-  <!-- Bulk import -->
-  <details class="card" style="margin-top:16px;">
-    <summary style="cursor:pointer;font-weight:700;">Bulk import tasks (CSV)</summary>
-    <p class="hint" style="margin:12px 0;">
-      Download the template, fill it in, and upload. Columns: <code>title, description, assignee_email, priority, due_date, project</code>.
-      Emails must match a PPM member; unknown projects are created. (Bulk import doesn't send assignment emails.)
-    </p>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <a class="btn" href="/api/task-template.csv" style="background:rgba(255,255,255,0.1);color:#fff;">↓ Download template</a>
-      <form method="post" action="/api/task-import" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <input type="file" name="file" accept=".csv,text/csv" required />
-        <button class="btn" type="submit">Upload CSV</button>
-      </form>
-    </div>
-  </details>
-
-  <div class="view-toggle" style="margin-top:24px;">
-    <button type="button" class="vbtn active" data-v="board">▦ Board</button>
-    <button type="button" class="vbtn" data-v="table">▤ Table</button>
-  </div>
-
-  <div id="view-board" class="board" style="margin-top:14px;">
-    {cols.map((c) => (
-      <div class="col">
-        <h3>{c.label}<span>{tasks.filter((t) => t.status === c.key).length}</span></h3>
-        {tasks.filter((t) => t.status === c.key).map((t) => (
-          <div class="task">
-            <div class="t">{t.title}</div>
-            <div class="m">
-              <span class={`pill ${t.priority}`}>{t.priority}</span>
-              <span>{nameOf(t.assignee_id)}</span>
-              {t.due_date && <span>· due {t.due_date}</span>}
-            </div>
-            <form method="post" action="/api/task-update" class="statusform">
-              <input type="hidden" name="id" value={t.id} />
-              <select name="status" class="js-auto">
-                <option value="todo" selected={t.status === 'todo'}>To do</option>
-                <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
-                <option value="done" selected={t.status === 'done'}>Done</option>
-              </select>
-              <select name="assignee_id" class="js-auto">
-                <option value="">Unassigned</option>
-                {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
-              </select>
-            </form>
-          </div>
-        ))}
-      </div>
-    ))}
-  </div>
-
-  <div id="view-table" class="ttable-wrap" hidden>
-    <table class="ttable">
-      <thead>
-        <tr>
-          <th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th>
-        </tr>
-      </thead>
-      <tbody>
-        {tasks.map((t) => {
-          const pr = projOf(t.project_id);
-          return (
-            <tr class={t.status === 'done' ? 'is-done' : ''}>
-              <td class="c-title">{t.title}</td>
-              <td>{pr ? (<span class="proj"><span class="dot" style={`background:${pr.color}`}></span>{pr.name}</span>) : <span class="muted">—</span>}</td>
-              <td>
-                <form method="post" action="/api/task-update">
-                  <input type="hidden" name="id" value={t.id} />
-                  <select name="assignee_id" class="js-auto cell-select">
-                    <option value="">Unassigned</option>
-                    {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
-                  </select>
-                </form>
-              </td>
-              <td><span class={`pill ${t.priority}`}>{t.priority}</span></td>
-              <td>
-                <form method="post" action="/api/task-update">
-                  <input type="hidden" name="id" value={t.id} />
-                  <select name="status" class={`js-auto cell-select st-${t.status}`}>
-                    <option value="todo" selected={t.status === 'todo'}>To do</option>
-                    <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
-                    <option value="done" selected={t.status === 'done'}>Done</option>
-                  </select>
-                </form>
-              </td>
-              <td class={t.due_date ? 'c-due' : 'muted'}>{t.due_date ?? '—'}</td>
+  <div class="dash-grid">
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin-bottom:14px;">Workload by member</h2>
+      <table class="ttable" style="min-width:0;">
+        <thead><tr><th>Member</th><th class="num">To do</th><th class="num">In progress</th><th class="num">Done</th><th class="num">This week</th><th></th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <td class="c-title">{r.name}</td>
+              <td class="num">{r.todo}</td>
+              <td class="num">{r.prog}</td>
+              <td class="num">{r.done}</td>
+              <td class="num" style="color:var(--green);font-weight:700;">{r.week}</td>
+              <td style="text-align:right;"><a href={`/tasks?assignee=${r.id}`} style="color:var(--azure);font-size:.8rem;font-weight:700;text-decoration:none;">View →</a></td>
             </tr>
-          );
-        })}
-        {tasks.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">No tasks yet.</td></tr>}
-      </tbody>
-    </table>
+          ))}
+          {unassigned > 0 && (
+            <tr>
+              <td class="c-title" style="color:var(--muted);">Unassigned</td>
+              <td class="num" colspan="4" style="text-align:left;color:var(--muted);">{unassigned} open task{unassigned === 1 ? '' : 's'}</td>
+              <td style="text-align:right;"><a href="/tasks?assignee=none" style="color:var(--azure);font-size:.8rem;font-weight:700;text-decoration:none;">View →</a></td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.05rem;margin-bottom:14px;">Due in the next 7 days</h2>
+      {dueSoon.length === 0 ? (
+        <p class="hint" style="margin:0;">Nothing due soon. 🎉</p>
+      ) : (
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;">
+          {dueSoon.map((t) => (
+            <li style="display:flex;justify-content:space-between;gap:10px;font-size:.9rem;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:8px;">
+              <span>{t.title} <span class="hint">· {nameOf(people, t.assignee_id)}</span></span>
+              <span style={`white-space:nowrap;font-weight:700;color:${t.due_date! < today ? '#ff8a8a' : 'var(--azure)'};`}>{t.due_date! < today ? 'overdue ' : ''}{t.due_date}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   </div>
-
-  <script is:inline>
-    // Auto-submit status/assignee changes.
-    document.querySelectorAll('.js-auto').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
-
-    // Board / Table view toggle (remembers choice).
-    const setView = (v) => {
-      document.getElementById('view-board').hidden = v !== 'board';
-      document.getElementById('view-table').hidden = v !== 'table';
-      document.querySelectorAll('.vbtn').forEach((b) => b.classList.toggle('active', b.dataset.v === v));
-      try { localStorage.setItem('ppm-view', v); } catch (e) {}
-    };
-    document.querySelectorAll('.vbtn').forEach((b) => b.addEventListener('click', () => setView(b.dataset.v)));
-    try { const saved = localStorage.getItem('ppm-view'); if (saved) setView(saved); } catch (e) {}
-    // The "Add task" button submits the new-task form with the chosen project.
-    const addBtn = document.getElementById('add-btn');
-    if (addBtn) addBtn.addEventListener('click', () => {
-      const form = document.querySelector('form[action="/api/task-create"]');
-      const proj = document.getElementById('proj-select');
-      const hidden = document.createElement('input');
-      hidden.type = 'hidden'; hidden.name = 'project_id'; hidden.value = proj ? proj.value : '';
-      form.appendChild(hidden);
-      form.submit();
-    });
-  </script>
 </AppLayout>

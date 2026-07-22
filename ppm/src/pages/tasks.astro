@@ -1,0 +1,146 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { loadPpmData } from '../lib/queries';
+
+const { tasks, people, projects, fAssignee, fProject, fStatus } = await loadPpmData(Astro);
+const back = Astro.url.pathname + Astro.url.search;
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+---
+
+<AppLayout title="Tasks · Robles Tech PPM">
+  <p class="eyebrow">Project Management</p>
+  <h1>Tasks</h1>
+  <p class="lede">Sheet view — click any cell, change it, and it saves instantly.</p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <!-- Filters -->
+  <form method="get" class="filterbar">
+    <label>Assignee
+      <select name="assignee" class="js-filter">
+        <option value="">Everyone</option>
+        <option value="none" selected={fAssignee === 'none'}>Unassigned</option>
+        {people.map((p) => <option value={p.id} selected={fAssignee === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+      </select>
+    </label>
+    <label>Project
+      <select name="project" class="js-filter">
+        <option value="">All projects</option>
+        {projects.map((p) => <option value={p.id} selected={fProject === p.id}>{p.name}</option>)}
+      </select>
+    </label>
+    <label>Status
+      <select name="status" class="js-filter">
+        <option value="">All</option>
+        <option value="todo" selected={fStatus === 'todo'}>To do</option>
+        <option value="in_progress" selected={fStatus === 'in_progress'}>In progress</option>
+        <option value="done" selected={fStatus === 'done'}>Done</option>
+      </select>
+    </label>
+    {(fAssignee || fProject || fStatus) && <a href="/tasks" class="mini-link">Clear filters</a>}
+  </form>
+
+  <div class="ttable-wrap" style="margin-top:14px;">
+    <table class="ttable">
+      <thead>
+        <tr><th style="min-width:240px;">Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th></tr>
+      </thead>
+      <tbody>
+        {tasks.map((t) => {
+          const fid = `f-${t.id}`;
+          return (
+            <tr class={t.status === 'done' ? 'is-done' : ''}>
+              <td><input form={fid} name="title" value={t.title} class="cell-input js-auto" /></td>
+              <td>
+                <select form={fid} name="project_id" class="cell-select js-auto">
+                  <option value="">—</option>
+                  {projects.map((p) => <option value={p.id} selected={t.project_id === p.id}>{p.name}</option>)}
+                </select>
+              </td>
+              <td>
+                <select form={fid} name="assignee_id" class="cell-select js-auto">
+                  <option value="">Unassigned</option>
+                  {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+                </select>
+              </td>
+              <td>
+                <select form={fid} name="priority" class={`cell-select js-auto pr-${t.priority}`}>
+                  <option value="low" selected={t.priority === 'low'}>Low</option>
+                  <option value="medium" selected={t.priority === 'medium'}>Medium</option>
+                  <option value="high" selected={t.priority === 'high'}>High</option>
+                </select>
+              </td>
+              <td>
+                <select form={fid} name="status" class={`cell-select js-auto st-${t.status}`}>
+                  <option value="todo" selected={t.status === 'todo'}>To do</option>
+                  <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
+                  <option value="done" selected={t.status === 'done'}>Done</option>
+                </select>
+              </td>
+              <td><input form={fid} type="date" name="due_date" value={t.due_date ?? ''} class="cell-input js-auto" style="max-width:150px;" /></td>
+            </tr>
+          );
+        })}
+        {tasks.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">No tasks match these filters.</td></tr>}
+        <!-- Add row -->
+        <tr class="addrow">
+          <td><input form="f-new" name="title" required placeholder="+ New task…" class="cell-input" /></td>
+          <td>
+            <select form="f-new" name="project_id" class="cell-select"><option value="">—</option>{projects.map((p) => <option value={p.id}>{p.name}</option>)}</select>
+          </td>
+          <td>
+            <select form="f-new" name="assignee_id" class="cell-select"><option value="">Unassigned</option>{people.map((p) => <option value={p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}</select>
+          </td>
+          <td>
+            <select form="f-new" name="priority" class="cell-select"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
+          </td>
+          <td class="muted" style="font-size:.8rem;">To do</td>
+          <td style="display:flex;gap:8px;align-items:center;">
+            <input form="f-new" type="date" name="due_date" class="cell-input" style="max-width:140px;" />
+            <button form="f-new" type="submit" class="btn" style="padding:7px 14px;font-size:.8rem;">Add</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Row forms (form attribute keeps table HTML valid) -->
+  {tasks.map((t) => (
+    <form id={`f-${t.id}`} method="post" action="/api/task-update" hidden>
+      <input type="hidden" name="id" value={t.id} />
+      <input type="hidden" name="back" value={back} />
+    </form>
+  ))}
+  <form id="f-new" method="post" action="/api/task-create" hidden>
+    <input type="hidden" name="back" value={back} />
+  </form>
+
+  <!-- Bulk import -->
+  <details class="card" style="margin-top:18px;">
+    <summary style="cursor:pointer;font-weight:700;">Bulk import tasks (CSV)</summary>
+    <p class="hint" style="margin:12px 0;">
+      Download the template, fill it in, and upload. Columns: <code>title, description, assignee_email, priority, due_date, project</code>.
+    </p>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <a class="btn" href="/api/task-template.csv" style="background:rgba(255,255,255,0.1);color:#fff;">↓ Download template</a>
+      <form method="post" action="/api/task-import" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="file" name="file" accept=".csv,text/csv" required />
+        <button class="btn" type="submit">Upload CSV</button>
+      </form>
+    </div>
+  </details>
+
+  <script is:inline>
+    // Sheet behavior: any change saves that row immediately (selects on change,
+    // text/date inputs on change = blur or Enter).
+    document.querySelectorAll('.js-auto').forEach((el) =>
+      el.addEventListener('change', () => { if (el.form) el.form.submit(); })
+    );
+    document.querySelectorAll('.js-filter').forEach((el) =>
+      el.addEventListener('change', (e) => e.target.closest('form').submit())
+    );
+  </script>
+</AppLayout>

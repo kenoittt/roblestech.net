@@ -24,7 +24,9 @@ const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
         <a class="p-brand" href="/"><img class="p-logo" src="/logo-white.png" alt="Robles Tech" /> Robles <span>Tech</span> <em>PPM</em></a>
         {Astro.locals.user && (
           <nav class="p-nav-links">
-            <a href="/">Board</a>
+            <a href="/">Dashboard</a>
+            <a href="/board">Board</a>
+            <a href="/tasks">Tasks</a>
             {isAdmin && <a href="/admin">Team</a>}
             <form method="post" action="/logout" class="p-logout"><button type="submit">Sign out</button></form>
           </nav>

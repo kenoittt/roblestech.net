@@ -67,6 +67,23 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .login-wrap{max-width:400px;margin:10vh auto 0;}
 .login-logo{height:52px;margin-bottom:20px;display:block;}
 
+/* Filter bar */
+.filterbar{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin-top:18px;background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+.filterbar label{display:flex;flex-direction:column;gap:5px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0;}
+.filterbar select{width:auto;min-width:150px;padding:8px 10px;font-size:.85rem;}
+.mini-link{color:var(--green);font-size:.8rem;font-weight:700;text-decoration:none;padding-bottom:10px;}
+
+/* Editable sheet cells */
+.cell-input{font-family:inherit;font-size:.88rem;color:#fff;background:transparent;border:1px solid transparent;border-radius:7px;padding:6px 8px;width:100%;}
+.cell-input:hover{border-color:var(--line);background:rgba(0,0,0,0.25);}
+.cell-input:focus{outline:none;border-color:var(--green);background:rgba(0,0,0,0.35);}
+.addrow td{background:rgba(174,227,123,0.05);}
+.pr-high{color:#ffb3b3;}.pr-low{color:#d7f2b8;}
+
+/* Dashboard grid */
+.dash-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start;}
+@media(max-width:900px){.dash-grid{grid-template-columns:1fr;}}
+
 /* View toggle */
 .view-toggle{display:inline-flex;gap:2px;background:rgba(255,255,255,0.05);border:1px solid var(--line);border-radius:10px;padding:3px;}
 .vbtn{font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;color:var(--muted);background:none;border:0;padding:8px 16px;border-radius:8px;}
