@@ -145,13 +145,13 @@ td.num,th.num{text-align:right;}
 <div class="kpis">
   <div class="kpi">
     <div class="lbl">Site clicks</div>
-    <div class="v" data-count="34344" id="kpiClicks">0</div>
-    <div class="sub" id="kpiClicksSub">GSC last 28 days, pulled 2026-07-21</div>
+    <div class="v" data-count="0" id="kpiClicks">0</div>
+    <div class="sub" id="kpiClicksSub">No GSC pull yet</div>
   </div>
   <div class="kpi">
     <div class="lbl">Impressions</div>
-    <div class="v" data-count="747124" id="kpiImpr">0</div>
-    <div class="sub" id="kpiImprSub">CTR 4.6% &middot; Avg position 8.4</div>
+    <div class="v" data-count="0" id="kpiImpr">0</div>
+    <div class="sub" id="kpiImprSub">&nbsp;</div>
   </div>
   <div class="kpi">
     <div class="lbl">Posts live</div>
@@ -165,8 +165,8 @@ td.num,th.num{text-align:right;}
   </div>
   <div class="kpi">
     <div class="lbl">AI visibility</div>
-    <div class="v" id="kpiAi">0/80</div>
-    <div class="sub">Checks visible &middot; Jul 2026 audit</div>
+    <div class="v" id="kpiAi">0/0</div>
+    <div class="sub" id="kpiAiSub">Checks visible</div>
   </div>
 </div>
 
@@ -831,6 +831,21 @@ function renderMeta(){
   } else if(__C.hero && __C.hero.subtitle){
     document.getElementById("subtitle").textContent = __C.hero.subtitle;
   }
+  // Hero KPIs come from THIS client's injected GSC data — never from static
+  // sample numbers, so no client can ever show another client's figures.
+  document.getElementById("kpiClicks").setAttribute("data-count", String(siteTotal.clicks || 0));
+  document.getElementById("kpiImpr").setAttribute("data-count", String(siteTotal.impr || 0));
+  document.getElementById("kpiClicksSub").textContent = PULL_DATE
+    ? "GSC last 28 days, pulled " + PULL_DATE
+    : "No GSC pull yet";
+  var ctr = (siteTotal.impr > 0) ? (100 * siteTotal.clicks / siteTotal.impr) : null;
+  var imprSub = [];
+  if(ctr !== null) imprSub.push("CTR " + ctr.toFixed(1) + "%");
+  if(siteTotal.pos) imprSub.push("Avg position " + Number(siteTotal.pos).toFixed(1));
+  document.getElementById("kpiImprSub").innerHTML = imprSub.length ? imprSub.join(" &middot; ") : "&nbsp;";
+  var aiSubEl = document.getElementById("kpiAiSub");
+  if(aiSubEl) aiSubEl.textContent = aiAudit.tested ? "Checks visible · " + aiAudit.tested : "Checks visible";
+
   // Posts live counts only pipeline posts whose status is "Live" — drafts,
   // reviews, and not-started posts don't count until they actually ship.
   var liveCount = pipeline.filter(function(p){ return p.status === "Live"; }).length;

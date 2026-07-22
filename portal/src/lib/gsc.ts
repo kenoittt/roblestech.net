@@ -45,7 +45,7 @@ async function query(token: string, property: string, body: Record<string, unkno
 export type GscData = {
   dailyLog: { d: string; c: number; i: number }[];
   byPage: { page: string; clicks: number; impr: number }[];
-  siteTotal: { clicks: number; impr: number };
+  siteTotal: { clicks: number; impr: number; pos?: number };
   preLogBaseline: { month: string; c: number; i: number };
   pullDate: string;
   pullRange: string;
@@ -78,9 +78,14 @@ export async function fetchGscData(property: string): Promise<GscData> {
     .sort((a, b) => b.clicks - a.clicks)
     .slice(0, 10);
 
-  const total = dailyLog
+  const total: { clicks: number; impr: number; pos?: number } = dailyLog
     .filter((r) => r.d >= iso(page28Start))
     .reduce((acc, r) => ({ clicks: acc.clicks + r.c, impr: acc.impr + r.i }), { clicks: 0, impr: 0 });
+
+  // Impression-weighted average position over the 28-day window.
+  const win = dateRows.filter((r) => (r.keys?.[0] ?? '') >= iso(page28Start));
+  const wImpr = win.reduce((s, r) => s + r.impressions, 0);
+  if (wImpr > 0) total.pos = Math.round((win.reduce((s, r) => s + r.position * r.impressions, 0) / wImpr) * 10) / 10;
 
   return {
     dailyLog,
