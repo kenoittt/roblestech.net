@@ -490,7 +490,7 @@ var PULL_RANGE = __G.pullRange || "Jun 22 - Jul 19, 2026 (last 28 days)";
 /* Frozen pre-service baseline. The "before" the engagement is measured against.
    Real Search Console data for the full month of June 2026 (service start: July 1, 2026),
    captured 2026-07-18. This object is FROZEN: the daily refresh must never edit it. */
-var baseline = __C.baseline || {
+var BASELINE_DEFAULT = {
   window: "June 1 - 30, 2026",
   serviceStart: "July 1, 2026",
   captured: "2026-07-18",
@@ -514,6 +514,11 @@ var baseline = __C.baseline || {
     {page:"/en-ca/collections/protein-supplements", clicks:400, impr:4812}
   ]
 };
+/* Saved baseline fields MERGE over the defaults — an admin editing one field
+   through the portal must never blank the rest. Injected pages win only when
+   they are a real array (empty array = deliberately empty, still wins). */
+var baseline = Object.assign({}, BASELINE_DEFAULT, __C.baseline || {});
+if(!Array.isArray(baseline.pages)) baseline.pages = BASELINE_DEFAULT.pages;
 /* ===================== end data model ===================== */
 /* ---- Per-client branding + hero (injected via __C; falls back to defaults) ---- */
 (function(){
