@@ -24,23 +24,21 @@ export const POST: APIRoute = async (context) => {
   const { data: row } = await admin.from('clients').select('config, gsc_property').eq('id', clientId).single();
   const existing = ((row as any)?.config && typeof (row as any).config === 'object') ? (row as any).config : {};
 
+  // Merge baseline per field: locked (disabled) inputs are not submitted by
+  // the browser, so only fields the admin unlocked with the pencil are
+  // updated — everything else keeps its stored value.
+  const baseline: Record<string, unknown> = { ...(existing.baseline ?? {}) };
+  const strFields = ['window', 'serviceStart', 'captured', 'ctr', 'avgPos', 'aiText', 'aiSub'];
+  const numFields = ['clicks', 'impr', 'postsLive'];
+  for (const f of strFields) if (form.has('bl_' + f)) baseline[f] = String(form.get('bl_' + f) ?? '');
+  for (const f of numFields) if (form.has('bl_' + f)) baseline[f] = num(form.get('bl_' + f));
+  if (form.has('bl_pages')) baseline.pages = parseArr(form.get('bl_pages'));
+
   const config = {
     ...existing,
-    baseline: {
-      window: String(form.get('bl_window') ?? ''),
-      serviceStart: String(form.get('bl_serviceStart') ?? ''),
-      captured: String(form.get('bl_captured') ?? ''),
-      clicks: num(form.get('bl_clicks')),
-      impr: num(form.get('bl_impr')),
-      ctr: String(form.get('bl_ctr') ?? ''),
-      avgPos: String(form.get('bl_avgPos') ?? ''),
-      postsLive: num(form.get('bl_postsLive')),
-      aiText: String(form.get('bl_aiText') ?? ''),
-      aiSub: String(form.get('bl_aiSub') ?? ''),
-      pages: parseArr(form.get('bl_pages')),
-    },
-    pipeline: parseArr(form.get('pipeline')),
-    openItems: parseArr(form.get('openItems')),
+    baseline,
+    ...(form.has('pipeline') ? { pipeline: parseArr(form.get('pipeline')) } : {}),
+    ...(form.has('openItems') ? { openItems: parseArr(form.get('openItems')) } : {}),
   };
 
   return gateChange(

@@ -38,17 +38,28 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     <input type="hidden" name="client_id" value={clientId} />
 
     <div class="section-h">Baseline (pre-service “before” numbers)</div>
+    <p class="hint" style="margin-bottom:10px;">Fields are locked to protect saved data. Click ✏️ to edit one — only unlocked fields are updated on save.</p>
     <div class="card" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
-      <div><label>Window</label><input name="bl_window" value={v(baseline.window)} placeholder="June 1 - 30, 2026" /></div>
-      <div><label>Service start</label><input name="bl_serviceStart" value={v(baseline.serviceStart)} placeholder="July 1, 2026" /></div>
-      <div><label>Captured</label><input name="bl_captured" value={v(baseline.captured)} placeholder="2026-07-18" /></div>
-      <div><label>Clicks</label><input name="bl_clicks" value={v(baseline.clicks)} inputmode="numeric" /></div>
-      <div><label>Impressions</label><input name="bl_impr" value={v(baseline.impr)} inputmode="numeric" /></div>
-      <div><label>Avg CTR</label><input name="bl_ctr" value={v(baseline.ctr)} placeholder="4.1%" /></div>
-      <div><label>Avg position</label><input name="bl_avgPos" value={v(baseline.avgPos)} placeholder="7.9" /></div>
-      <div><label>Posts live (RTC)</label><input name="bl_postsLive" value={v(baseline.postsLive)} inputmode="numeric" /></div>
-      <div><label>AI citations text</label><input name="bl_aiText" value={v(baseline.aiText)} placeholder="5 / 40" /></div>
-      <div style="grid-column:1/-1;"><label>AI sub-note</label><input name="bl_aiSub" value={v(baseline.aiSub)} placeholder="June audit, 10 Qs x 4 engines (12.5%)" /></div>
+      {[
+        { name: 'bl_window',      label: 'Window',            val: v(baseline.window),      ph: 'June 1 - 30, 2026' },
+        { name: 'bl_serviceStart',label: 'Service start',     val: v(baseline.serviceStart),ph: 'July 1, 2026' },
+        { name: 'bl_captured',    label: 'Captured',          val: v(baseline.captured),    ph: '2026-07-18' },
+        { name: 'bl_clicks',      label: 'Clicks',            val: v(baseline.clicks),      ph: '' },
+        { name: 'bl_impr',        label: 'Impressions',       val: v(baseline.impr),        ph: '' },
+        { name: 'bl_ctr',         label: 'Avg CTR',           val: v(baseline.ctr),         ph: '4.1%' },
+        { name: 'bl_avgPos',      label: 'Avg position',      val: v(baseline.avgPos),      ph: '7.9' },
+        { name: 'bl_postsLive',   label: 'Posts live (RTC)',  val: v(baseline.postsLive),   ph: '' },
+        { name: 'bl_aiText',      label: 'AI citations text', val: v(baseline.aiText),      ph: '5 / 40' },
+        { name: 'bl_aiSub',       label: 'AI sub-note',       val: v(baseline.aiSub),       ph: 'June audit, 10 Qs x 4 engines (12.5%)', wide: true },
+      ].map((f) => (
+        <div style={f.wide ? 'grid-column:1/-1;' : ''}>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            {f.label}
+            <button type="button" class="pencil js-unlock" title={`Edit ${f.label}`}>✏️</button>
+          </label>
+          <input name={f.name} value={f.val} placeholder={f.ph} disabled />
+        </div>
+      ))}
     </div>
 
     <div class="section-h">Top pages at baseline</div>
@@ -150,7 +161,14 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     document.addEventListener('click', (e) => {
       const x = e.target.closest('.js-del'); if (x) { x.closest('.erow').remove(); return; }
       const s = e.target.closest('.js-sop');
-      if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; }
+      if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; return; }
+      // Pencil: unlock a single locked baseline field for editing. Locked
+      // (disabled) fields are not submitted, so they keep their saved value.
+      const u = e.target.closest('.js-unlock');
+      if (u) {
+        const inp = u.closest('div').querySelector('input');
+        if (inp) { inp.disabled = false; inp.focus(); u.style.visibility = 'hidden'; }
+      }
     });
 
     const grab = (el) => { const o = {}; el.querySelectorAll('[data-f]').forEach((i) => o[i.dataset.f] = i.value); return o; };
