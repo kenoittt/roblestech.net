@@ -117,3 +117,27 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
   .p-nav-links{gap:12px;font-size:.82rem;}.p-main{padding:84px 16px 24px;}
   .row{grid-template-columns:1fr;}h1{font-size:1.5rem;}
 }
+
+/* ── A11y & interaction polish (ui-ux-pro-max pass) ─────────────────────
+   Focus rings, input focus glow, smooth 150-250ms feedback, touch targets,
+   reduced-motion. Brand colors untouched. */
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 6px; }
+input:focus, select:focus, textarea:focus, .cell-input:focus, .cell-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(174,227,123,.20); }
+a, button, .btn, .vbtn, .task, .stat, .cell-input, .cell-select, .p-logout button, input, select, textarea {
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease,
+    box-shadow .2s ease, transform .15s ease, filter .2s ease;
+}
+.btn:hover, .p-logout button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn:active, .p-logout button:active { transform: translateY(0) scale(.98); }
+.task:hover { border-color: rgba(57,146,255,.45); }
+.p-nav-links a { padding: 8px 2px; border-radius: 6px; }
+button { cursor: pointer; }
+::selection { background: rgba(174,227,123,.30); color: #04210b; }
+@media (pointer: coarse) {
+  .task select, .task button, .cell-select { min-height: 40px; }
+  .vbtn { min-height: 44px; }
+  .p-nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

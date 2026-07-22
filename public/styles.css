@@ -1752,3 +1752,14 @@ html.preloaded .loader{ display:none; }
 @media (max-width:900px){
   #globe-wrap{ height:460px; }
 }
+
+/* ── A11y & interaction polish (ui-ux-pro-max pass) ─────────────────────
+   Visible keyboard focus, brand selection color, comfortable touch targets.
+   Colors unchanged — this layer only adds feedback and compliance. */
+:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; border-radius: 4px; }
+.nav-links a:focus-visible, .btn:focus-visible, button:focus-visible { outline-color: var(--azure); }
+::selection { background: rgba(57,146,255,.30); }
+a, button { touch-action: manipulation; }
+@media (pointer: coarse) {
+  .nav-links a, .btn, button { min-height: 44px; }
+}

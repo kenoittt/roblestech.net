@@ -180,3 +180,26 @@ textarea {
   .login-wrap { margin-top: 5vh; }
   .login-logo { height: 46px; }
 }
+
+/* ── A11y & interaction polish (ui-ux-pro-max pass) ─────────────────────
+   Focus rings, input focus glow, smooth 150-250ms feedback, touch targets,
+   reduced-motion. Brand colors untouched. */
+:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; border-radius: 6px; }
+input:focus, select:focus, textarea:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(174,227,123,.20); }
+a, button, .btn, .mini, .btn-danger, .pencil, .report-row, .p-logout button, input, select, textarea {
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease,
+    box-shadow .2s ease, transform .15s ease, filter .2s ease;
+}
+.btn:hover, .p-logout button:hover { transform: translateY(-1px); }
+.btn:active, .mini:active, .p-logout button:active { transform: translateY(0) scale(.98); }
+.p-nav-links a { padding: 8px 2px; border-radius: 6px; }
+button { cursor: pointer; }
+::selection { background: rgba(174,227,123,.30); color: #04210b; }
+@media (pointer: coarse) {
+  .mini { min-height: 42px; padding: 9px 13px; }
+  .pencil { padding: 10px; }
+  .p-nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
