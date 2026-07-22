@@ -294,11 +294,9 @@ td.num,th.num{text-align:right;}
   <!-- ============ SOP STATUS ============ -->
   <div class="panel" id="panel-sop">
     <div class="card">
-      <h2>Post-publish SOP &middot; most recent post</h2>
-      <table>
-        <thead><tr><th style="width:36px">#</th><th>Step</th><th style="width:120px">Status</th><th>Detail</th></tr></thead>
-        <tbody id="sopBody"></tbody>
-      </table>
+      <h2>Post-publish SOP &middot; all posts</h2>
+      <p class="note" style="margin:0 0 14px;">Every post runs the same 7-step post-publish SOP the moment it goes live. Click a post to see its checklist.</p>
+      <div id="sopList"></div>
     </div>
   </div>
 
@@ -621,26 +619,40 @@ function sopCount(p){ // pass count for a post's checklist
   if(!p || !Array.isArray(p.sop)) return null;
   return p.sop.filter(function(s){ return s === "pass"; }).length;
 }
-function latestSopPost(){
-  var withSop = pipeline.filter(function(p){ return Array.isArray(p.sop); });
-  if(!withSop.length) return null;
-  return withSop.slice().sort(function(a,b){ return String(b.published||"").localeCompare(String(a.published||"")); })[0];
+function sopStepsTable(sop){
+  var rows = SOP_FRAMEWORK.map(function(s, i){
+    var st = (sop && sop[i]) || "pending";
+    return "<tr><td>"+s.n+"</td><td>"+s.step+"</td><td>"+sopBadge(st)+"</td><td>"+s.detail+"</td></tr>";
+  }).join("");
+  return "<table><thead><tr><th style='width:36px'>#</th><th>Step</th><th style='width:110px'>Status</th><th>Detail</th></tr></thead><tbody>"+rows+"</tbody></table>";
 }
 function renderSop(){
-  var tb = document.getElementById("sopBody");
-  tb.innerHTML = "";
-  var post = latestSopPost();
-  var head = document.querySelector("#panel-sop h2");
-  if(head) head.innerHTML = "Post-publish SOP &middot; " + (post ? (post.num ? "#"+post.num+" — " : "") + (post.post || "most recent post") : "most recent post");
-  var done = 0;
-  SOP_FRAMEWORK.forEach(function(s, i){
-    var st = post ? (post.sop[i] || "pending") : (sopSteps[i] && sopSteps[i].status) || "pending";
-    if(st === "pass") done++;
-    var tr = document.createElement("tr");
-    tr.innerHTML = "<td>"+s.n+"</td><td>"+s.step+"</td><td>"+sopBadge(st)+"</td><td>"+s.detail+"</td>";
-    tb.appendChild(tr);
+  var host = document.getElementById("sopList");
+  host.innerHTML = "";
+  // Every post, newest first (by published date, undated last).
+  var posts = pipeline.slice().sort(function(a,b){ return String(b.published||"").localeCompare(String(a.published||"")); });
+  if(!posts.length){
+    host.innerHTML = '<div class="note">No posts yet. Each post added to the content pipeline gets its own post-publish SOP checklist here.</div>';
+    document.getElementById("kpiSop").textContent = "0/7";
+    return;
+  }
+  posts.forEach(function(p, idx){
+    var n = sopCount(p) || 0;
+    var det = document.createElement("details");
+    if(idx === 0) det.open = true; // newest post expanded by default
+    det.style.cssText = "border:1px solid var(--line);border-radius:8px;margin-bottom:10px;background:var(--card);";
+    det.innerHTML =
+      '<summary style="cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;list-style:none;">' +
+        '<span style="font-weight:700;color:var(--ink-black);">' + (p.num ? "#"+p.num+" · " : "") + (p.post || "(untitled post)") + '</span>' +
+        badge(p.status === "Live" ? "live" : "pending", p.status || "Not Started") +
+        '<span style="margin-left:auto;font-weight:700;color:' + (n === 7 ? "var(--green-dark)" : "var(--steel)") + ';">' + n + "/7 steps</span>" +
+        (p.published ? '<span style="font-size:12px;color:var(--muted);">' + p.published + "</span>" : "") +
+      "</summary>" +
+      '<div style="padding:0 14px 14px;">' + sopStepsTable(Array.isArray(p.sop) ? p.sop : null) + "</div>";
+    host.appendChild(det);
   });
-  document.getElementById("kpiSop").textContent = done + "/7";
+  // KPI reflects the most recent post's progress.
+  document.getElementById("kpiSop").textContent = (sopCount(posts[0]) || 0) + "/7";
 }
 
 /* ---------- AI visibility audit ---------- */
@@ -791,7 +803,10 @@ function renderMeta(){
       (PULL_RANGE ? ", range " + PULL_RANGE : "") +
       ", and the July 2026 AI Visibility Audit (Round 2, 80 checks, tested Jul 2-3 2026, screenshots on file). Every figure is labeled with its source and date. Nothing here is estimated or invented; pending means pending.";
   }
-  document.getElementById("kpiPosts").setAttribute("data-count", String(pipeline.length));
+  // Posts live counts only pipeline posts whose status is "Live" — drafts,
+  // reviews, and not-started posts don't count until they actually ship.
+  var liveCount = pipeline.filter(function(p){ return p.status === "Live"; }).length;
+  document.getElementById("kpiPosts").setAttribute("data-count", String(liveCount));
 }
 
 /* ---------- count-up on .v[data-count] ---------- */
