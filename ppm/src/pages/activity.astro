@@ -1,0 +1,155 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+
+// Filters
+const fActor = Astro.url.searchParams.get('actor') ?? '';
+const fType = Astro.url.searchParams.get('type') ?? '';   // completed | assigned | updated | status
+const fTask = Astro.url.searchParams.get('task') ?? '';
+
+let q = supabase.from('ppm_task_events')
+  .select('id,task_id,actor_id,type,from_status,to_status,meta,created_at')
+  .order('created_at', { ascending: false })
+  .limit(200);
+if (fActor) q = q.eq('actor_id', fActor);
+if (fTask) q = q.eq('task_id', fTask);
+const { data: evData } = await q;
+let events = (evData ?? []) as any[];
+if (fType === 'completed') events = events.filter((e) => e.type === 'status_changed' && e.to_status === 'done');
+else if (fType === 'status') events = events.filter((e) => e.type === 'status_changed');
+else if (fType === 'assigned') events = events.filter((e) => e.type === 'assigned');
+else if (fType === 'updated') events = events.filter((e) => e.type === 'updated');
+
+// Lookups: task titles, people names
+const [{ data: taskRows }, { data: peopleRows }] = await Promise.all([
+  supabase.from('ppm_tasks').select('id,title'),
+  supabase.from('profiles').select('id,full_name').in('role', ['super_admin', 'admin', 'staff']),
+]);
+const titleOf = new Map((taskRows ?? []).map((t: any) => [t.id, t.title]));
+const nameOf = (id: string | null) => (id ? (peopleRows ?? []).find((p: any) => p.id === id)?.full_name || 'Someone' : 'Someone');
+const people = (peopleRows ?? []) as { id: string; full_name: string | null }[];
+
+const STATUS_LABEL: Record<string, string> = { todo: 'To Do', in_progress: 'In Progress', done: 'Done' };
+const sl = (s: string | null) => (s ? STATUS_LABEL[s] ?? s : '');
+
+// One human sentence + an icon key per event
+function describe(e: any): { icon: string; verb: string; detail: string } {
+  const who = nameOf(e.actor_id);
+  const title = titleOf.get(e.task_id) ?? 'a task';
+  if (e.type === 'created') return { icon: 'plus', verb: `${who} created`, detail: title };
+  if (e.type === 'assigned') {
+    const to = e.meta?.assignee_id ? nameOf(e.meta.assignee_id) : null;
+    return { icon: 'user', verb: `${who} ${to ? 'assigned' : 'unassigned'}`, detail: to ? `${title} → ${to}` : title };
+  }
+  if (e.type === 'status_changed') {
+    if (e.to_status === 'done') return { icon: 'check', verb: `${who} completed`, detail: title };
+    return { icon: 'move', verb: `${who} moved`, detail: `${title} · ${sl(e.from_status)} → ${sl(e.to_status)}` };
+  }
+  if (e.type === 'updated') {
+    const f = e.meta?.field ?? 'a field';
+    const to = e.meta?.to != null && e.meta?.to !== '' ? ` → ${e.meta.to}` : '';
+    return { icon: 'edit', verb: `${who} edited ${f} of`, detail: `${title}${to}` };
+  }
+  return { icon: 'edit', verb: `${who} changed`, detail: title };
+}
+
+const rel = (iso: string) => {
+  const then = new Date(iso).getTime();
+  const now = new Date().getTime();
+  const s = Math.round((now - then) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+};
+const fullDate = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+// group events by calendar day for readable sections
+const groups: { day: string; items: any[] }[] = [];
+for (const e of events) {
+  const day = new Date(e.created_at).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const g = groups[groups.length - 1];
+  if (g && g.day === day) g.items.push(e); else groups.push({ day, items: [e] });
+}
+
+const ICONS: Record<string, string> = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+  user: '<circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+  move: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  edit: '<path d="M4 20h4L18 10l-4-4L4 16v4Z"/><path d="M14 6l4 4"/>',
+};
+const qs = (o: Record<string, string>) => {
+  const p = new URLSearchParams({ ...(fActor && { actor: fActor }), ...(fType && { type: fType }), ...(fTask && { task: fTask }), ...o });
+  for (const [k, v] of [...p.entries()]) if (!v) p.delete(k);
+  const s = p.toString();
+  return s ? `/activity?${s}` : '/activity';
+};
+---
+<AppLayout title="Activity · PPM">
+  <p class="eyebrow">Audit trail</p>
+  <h1>Activity log</h1>
+  <p class="lede">Every task edit, status change, assignment and completion — who did it and when.</p>
+
+  <form method="get" class="filterbar">
+    <label>Member
+      <select name="actor" onchange="this.form.submit()">
+        <option value="">Everyone</option>
+        {people.map((p) => <option value={p.id} selected={fActor === p.id}>{p.full_name ?? 'Unnamed'}</option>)}
+      </select>
+    </label>
+    <label>Activity
+      <select name="type" onchange="this.form.submit()">
+        <option value="" selected={!fType}>All activity</option>
+        <option value="completed" selected={fType === 'completed'}>Completions</option>
+        <option value="status" selected={fType === 'status'}>Status changes</option>
+        <option value="updated" selected={fType === 'updated'}>Edits</option>
+        <option value="assigned" selected={fType === 'assigned'}>Assignments</option>
+      </select>
+    </label>
+    {fTask && <a class="mini-link" href={qs({ task: '' })}>Clear task filter</a>}
+    {(fActor || fType) && <a class="mini-link" href="/activity">Reset</a>}
+  </form>
+
+  {events.length === 0 && <p class="empty" style="margin-top:18px;">No activity matches these filters yet.</p>}
+
+  {groups.map((g) => (
+    <div class="section-gap" style="margin-top:24px;">
+      <div class="day-h">{g.day}</div>
+      <div class="feed">
+        {g.items.map((e) => {
+          const d = describe(e);
+          return (
+            <div class={`act ${d.icon}`}>
+              <span class="act-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={ICONS[d.icon]} />
+              </span>
+              <span class="act-text"><b>{d.verb}</b> {d.detail}</span>
+              <a class="act-time" href={`/activity?task=${e.task_id}`} title={fullDate(e.created_at)}>{rel(e.created_at)}</a>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  ))}
+
+  <style>
+    .day-h{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:10px;}
+    .feed{display:flex;flex-direction:column;gap:2px;}
+    .act{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);}
+    .act + .act{margin-top:6px;}
+    .act-ic{flex:0 0 auto;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(255,255,255,.06);color:var(--azure);}
+    .act.check .act-ic{color:var(--green);background:rgba(174,227,123,.14);}
+    .act.edit .act-ic{color:var(--azure);}
+    .act.user .act-ic{color:#c9b3ff;}
+    .act.plus .act-ic{color:#9fb2d8;}
+    .act-text{flex:1;min-width:0;font-size:.92rem;line-height:1.4;}
+    .act-text b{font-weight:700;}
+    .act-time{flex:0 0 auto;color:var(--muted);font-size:.78rem;text-decoration:none;white-space:nowrap;}
+    .act-time:hover{color:var(--green);}
+    @media(max-width:560px){ .act{flex-wrap:wrap;} .act-text{flex:1 1 100%;order:3;} }
+  </style>
+</AppLayout>

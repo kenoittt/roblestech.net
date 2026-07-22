@@ -33,6 +33,7 @@ const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
               <a href="/">Dashboard</a>
               <a href="/board">Board</a>
               <a href="/tasks">Tasks</a>
+              <a href="/activity">Activity</a>
               {isAdmin && <a href="/admin">Team</a>}
               <form method="post" action="/logout" class="p-logout"><button type="submit">Sign out</button></form>
             </nav>
