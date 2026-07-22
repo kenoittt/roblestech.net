@@ -3,13 +3,15 @@ import { fetchGscData } from './gsc';
 
 export type RefreshResult = { client: string; ok: boolean; detail?: string };
 
-/** Pull fresh GSC data for every client with a property set. */
-export async function runGscRefresh(): Promise<RefreshResult[]> {
+/** Pull fresh GSC data — for one client (pass their id) or all clients with a property set. */
+export async function runGscRefresh(clientId?: string): Promise<RefreshResult[]> {
   const admin = createSupabaseAdmin();
-  const { data: clients, error } = await admin
+  let query = admin
     .from('clients')
     .select('id, name, gsc_property')
     .not('gsc_property', 'is', null);
+  if (clientId) query = query.eq('id', clientId);
+  const { data: clients, error } = await query;
   if (error) throw new Error(error.message);
 
   const results: RefreshResult[] = [];

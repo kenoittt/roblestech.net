@@ -58,6 +58,12 @@ const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString() : '—')
                 <td>{fmt(c.gsc_updated_at)}</td>
                 <td>{fmt(c.created_at)}</td>
                 <td style="white-space:nowrap;text-align:right;">
+                  {c.gsc_property && (
+                    <form method="post" action="/api/run-refresh" style="display:inline;">
+                      <input type="hidden" name="client_id" value={c.id} />
+                      <button class="mini" type="submit" title="Pull fresh Search Console data for this client">Pull GSC</button>
+                    </form>
+                  )}
                   <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" class="mini">Preview</a>
                   <button type="button" class="mini js-edit" data-id={c.id}>Edit</button>
                 </td>
