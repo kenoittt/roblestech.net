@@ -3,9 +3,11 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
-type Trip = { id: string; name: string; start_date: string | null; end_date: string | null; pax: number; status: string; base_currency: string };
-const { data } = await supabase.from('trips').select('id,name,start_date,end_date,pax,status,base_currency').order('created_at', { ascending: false });
+type Trip = { id: string; name: string; start_date: string | null; end_date: string | null; pax: number; status: string; base_currency: string; owner_id: string };
+// RLS returns trips you own plus trips shared with you.
+const { data } = await supabase.from('trips').select('id,name,start_date,end_date,pax,status,base_currency,owner_id').order('created_at', { ascending: false });
 const trips: Trip[] = (data as Trip[]) ?? [];
+const me = Astro.locals.user?.id;
 const active = trips.filter((t) => t.status !== 'archived');
 const archived = trips.filter((t) => t.status === 'archived');
 const ok = Astro.url.searchParams.get('ok');
@@ -29,7 +31,8 @@ const dates = (t: Trip) => t.start_date ? `${t.start_date}${t.end_date ? ' → '
   <div class="trip-list">
     {active.map((t) => (
       <a class="trip-card" href={`/trips/${t.id}`}>
-        <div class="t">{t.name} <span class={`pill ${t.status}`}>{t.status}</span></div>
+        <div class="t">{t.name} <span class={`pill ${t.status}`}>{t.status}</span>
+          {t.owner_id !== me && <span class="pill active">🤝 shared with you</span>}</div>
         <div class="d"><span>📅 {dates(t)}</span><span>👥 {t.pax} pax</span><span>💰 {t.base_currency}</span></div>
       </a>
     ))}

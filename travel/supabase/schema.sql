@@ -9,16 +9,18 @@
 create table if not exists public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
   display_name  text,
+  email         text,
   home_currency text not null default 'USD',
   created_at    timestamptz not null default now()
 );
+create unique index if not exists profiles_email_idx on public.profiles (lower(email));
 
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)))
-  on conflict (id) do nothing;
+  insert into public.profiles (id, display_name, email)
+  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)), new.email)
+  on conflict (id) do update set email = excluded.email;
   return new;
 end; $$;
 drop trigger if exists on_auth_user_created on auth.users;
@@ -128,13 +130,14 @@ create index if not exists expenses_trip_idx on public.expenses (trip_id, positi
 
 -- Destination intelligence (Phase 2 content; schema fixed now, FR-DEX-01) -----
 create table if not exists public.destinations (
-  id       uuid primary key default gen_random_uuid(),
-  name     text not null,
-  country  text not null,
-  lat      double precision,
-  lng      double precision,
-  timezone text,
-  active   boolean not null default true,
+  id        uuid primary key default gen_random_uuid(),
+  name      text not null,
+  country   text not null,
+  lat       double precision,
+  lng       double precision,
+  timezone  text,
+  image_url text,
+  active    boolean not null default true,
   unique (name, country)
 );
 
@@ -241,6 +244,10 @@ drop policy if exists members_write on public.trip_members;
 create policy members_write on public.trip_members
   for all using (public.owns_trip(trip_id))
   with check (public.owns_trip(trip_id));
+-- members may remove THEMSELVES (leave a trip)
+drop policy if exists members_leave on public.trip_members;
+create policy members_leave on public.trip_members
+  for delete using (user_id = auth.uid());
 
 -- child tables: members read, editors write (one macro-policy per table)
 do $$

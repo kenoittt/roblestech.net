@@ -1,6 +1,6 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
-import { createSupabaseServer } from '../../../lib/supabase';
+import { createSupabaseServer, createSupabaseAdmin } from '../../../lib/supabase';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -17,6 +17,21 @@ const [{ data: legsData }, { data: lodgingData }] = await Promise.all([
 const legs: Leg[] = (legsData as Leg[]) ?? [];
 const lodgings: Lodging[] = (lodgingData as Lodging[]) ?? [];
 const isOwner = trip.owner_id === Astro.locals.user?.id;
+
+// Sharing: membership rows come through RLS; names/emails resolved via admin
+// (profiles are self-read-only under RLS, so members can still see who's on).
+const { data: memberRows } = await supabase.from('trip_members')
+  .select('user_id,role,created_at').eq('trip_id', id).order('created_at');
+const memberIds = [trip.owner_id, ...(memberRows ?? []).map((m: any) => m.user_id)];
+const admin = createSupabaseAdmin();
+const { data: profs } = await admin.from('profiles').select('id,display_name,email').in('id', memberIds);
+const who = (uid: string) => {
+  const p = (profs ?? []).find((x: any) => x.id === uid);
+  return { name: p?.display_name || 'Traveler', email: p?.email || '' };
+};
+const members = (memberRows ?? []).map((m: any) => ({ ...m, ...who(m.user_id) }));
+const owner = who(trip.owner_id);
+const isMember = members.some((m: any) => m.user_id === Astro.locals.user?.id);
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
@@ -114,6 +129,50 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
     </div>
   </div>
 
+  <div class="section">
+    <h2>Share this trip 🤝</h2>
+    <div class="card stack">
+      <div class="rowflex" style="align-items:center;">
+        <span class="pill active">owner</span>
+        <div style="flex:1;min-width:150px;"><b>{owner.name}</b> <span class="hint">{owner.email}</span></div>
+      </div>
+      {members.map((m: any) => (
+        <div class="rowflex" style="align-items:center;border-top:1px solid var(--line);padding-top:10px;">
+          <span class="pill planning">{m.role}</span>
+          <div style="flex:1;min-width:150px;"><b>{m.name}</b> <span class="hint">{m.email}</span></div>
+          {isOwner && (
+            <form method="post" action="/api/member-save" class="m0 rowflex" style="gap:6px;">
+              <input type="hidden" name="trip_id" value={trip.id} />
+              <input type="hidden" name="user_id" value={m.user_id} />
+              <select name="role" style="width:auto;padding:6px 8px;font-size:.8rem;">
+                <option value="editor" selected={m.role === 'editor'}>editor</option>
+                <option value="viewer" selected={m.role === 'viewer'}>viewer</option>
+              </select>
+              <button class="mini" type="submit" name="op" value="role">Save</button>
+              <button class="mini" type="submit" name="op" value="remove" style="color:var(--bad);"
+                onclick={`return confirm('Remove ${m.name} from this trip?');`}>✕</button>
+            </form>
+          )}
+        </div>
+      ))}
+      {members.length === 0 && <p class="hint">No one else yet — invite a travel buddy below.</p>}
+      {isOwner ? (
+        <form method="post" action="/api/member-save" class="rowflex" style="border-top:1px dashed var(--line);padding-top:12px;">
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <input type="hidden" name="op" value="add" />
+          <div style="flex:1;min-width:200px;"><label>Invite by email</label><input name="email" type="email" required placeholder="friend@example.com" /></div>
+          <div style="width:130px;"><label>Role</label>
+            <select name="role"><option value="editor">Editor (can edit)</option><option value="viewer">Viewer (read-only)</option></select>
+          </div>
+          <button class="btn" type="submit" style="padding:11px 16px;">Invite</button>
+        </form>
+      ) : (
+        <p class="hint">Only the trip owner can invite or remove people.</p>
+      )}
+      <p class="hint">They need a free WanderWise account with that email. Editors can change everything except membership; viewers can only look.</p>
+    </div>
+  </div>
+
   <div class="section card">
     <h2>Trip actions</h2>
     <div class="rowflex">
@@ -125,6 +184,12 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
         <form method="post" action="/api/trip-action" class="m0" onsubmit="return confirm('Delete this trip and all its data? This cannot be undone.');">
           <input type="hidden" name="id" value={trip.id} /><input type="hidden" name="op" value="delete" />
           <button class="mini" type="submit" style="color:var(--bad);border-color:var(--bad);">Delete trip</button>
+        </form>
+      )}
+      {!isOwner && isMember && (
+        <form method="post" action="/api/member-save" class="m0" onsubmit="return confirm('Leave this trip? You will lose access until the owner invites you again.');">
+          <input type="hidden" name="trip_id" value={trip.id} /><input type="hidden" name="op" value="leave" />
+          <button class="mini" type="submit" style="color:var(--bad);border-color:var(--bad);">Leave trip</button>
         </form>
       )}
     </div>

@@ -8,14 +8,18 @@ export type Pack = {
   crowd: string;
   best_months: string[];
   best_reason: string;
+  /** 12 entries Jan→Dec: the local climate season that month */
+  seasons: string[];
   top: { name: string; why: string }[];
   gems: { name: string; why: string }[];
+  adventures: { name: string; why: string }[];
   festivals: Record<number, { name: string; timing: string; note: string }[]>;
 };
 
 export const PACKS: Record<string, Pack> = {
   'Hanoi': {
     crowd: 'psooossssppp',
+    seasons: ['Cool dry winter', 'Cool drizzly winter (crachin)', 'Warming spring, humid', 'Warm spring', 'Hot — summer rains begin', 'Hot rainy summer', 'Peak summer rains', 'Hot rainy summer', 'Rains easing', 'Golden dry autumn', 'Cool dry autumn', 'Cool dry winter'],
     best_months: ['October', 'November', 'March', 'April'],
     best_reason: 'dry, mild air and golden light between the sticky summer and the damp chill of deep winter',
     top: [
@@ -29,6 +33,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Banana Island (Bai Giua)', why: 'rural river life ten minutes from the Old Quarter' },
       { name: 'Cafe Giang', why: 'the original egg coffee, hidden up an alley staircase' },
     ],
+    adventures: [
+      { name: 'Hang Mua peak, Ninh Binh (day trip)', why: '500 steps to a dragon-ridge view over Trang An karsts and paddies' },
+      { name: 'Ba Vi National Park summit hike', why: 'cloud-forest temple at 1,296 m, 90 minutes from the city' },
+      { name: 'Ham Lon Mountain trek', why: 'Hanoi’s closest proper summit — easy overnight camp lake' },
+    ],
     festivals: {
       1: [{ name: 'Tet (Lunar New Year)', timing: 'late Jan–mid Feb, lunar', note: 'the city empties and glows — magical but many shops close for a week' }],
       2: [{ name: 'Perfume Pagoda Festival', timing: 'from mid Feb, lunar', note: 'huge riverboat pilgrimage south of the city' }],
@@ -38,6 +47,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Ho Chi Minh City': {
     crowd: 'ppsooooosssp',
+    seasons: ['Dry season, warm', 'Dry season, hot', 'Hot dry season', 'Hottest month, dry', 'Rainy season begins', 'Rainy season (afternoon downpours)', 'Rainy season', 'Rainy season', 'Peak rains', 'Heavy rains, easing late', 'Rains taper off', 'Dry season returns'],
     best_months: ['December', 'January', 'February', 'March'],
     best_reason: 'the dry season — hot but rain-free evenings made for rooftop bars and street food crawls',
     top: [
@@ -51,6 +61,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Binh Tay Market, Cholon', why: 'the real Chinatown wholesale bustle, tourist-light' },
       { name: 'Thao Dien by scooter ferry', why: 'leafy expat riverside without the bridge traffic' },
     ],
+    adventures: [
+      { name: 'Nui Ba Den (Black Virgin Mountain)', why: 'the south’s highest peak — hike up, cable car down, 2.5 hrs away' },
+      { name: 'Can Gio mangrove biosphere', why: 'kayak and boardwalk through a UNESCO monkey-filled forest' },
+      { name: 'Cat Tien National Park (overnight)', why: 'gibbons at dawn and night safaris in real jungle' },
+    ],
     festivals: {
       1: [{ name: 'Tet (Lunar New Year)', timing: 'late Jan–mid Feb, lunar', note: 'Nguyen Hue flower street is spectacular; book rooms far ahead' }],
       4: [{ name: 'Reunification Day', timing: 'Apr 30', note: 'parades and fireworks over the Saigon River' }],
@@ -59,6 +74,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Da Nang': {
     crowd: 'ossppppssoos',
+    seasons: ['Cool, last wet-season showers', 'Dry season begins, mild', 'Warm dry spring', 'Warm dry — beach season opens', 'Hot dry beach season', 'Hot dry midsummer', 'Hot dry midsummer', 'Hot — late storms possible', 'Wet season & typhoon risk', 'Peak rains & typhoon season', 'Heavy rains, flood-prone', 'Wet season winding down'],
     best_months: ['March', 'April', 'May'],
     best_reason: 'warm dry beach weather before peak domestic summer and well before the Sep–Nov typhoon rains',
     top: [
@@ -72,6 +88,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Son Tra (Monkey Mountain)', why: 'red-shanked douc langurs in wild jungle 20 min from town' },
       { name: 'Han Market upstairs tailors', why: 'Hoi An tailoring speed at Da Nang prices' },
     ],
+    adventures: [
+      { name: 'Hai Van Pass by motorbike', why: 'the ocean-cloud pass Top Gear made famous' },
+      { name: 'Son Tra peninsula jungle trails', why: 'hike or ride to the giant Lady Buddha and hidden coves' },
+      { name: 'Bach Ma National Park (day trip)', why: 'waterfall-laced summit trail in a former French hill station' },
+    ],
     festivals: {
       6: [{ name: 'Da Nang International Fireworks Festival', timing: 'weekends Jun–Jul', note: 'world-class pyrotechnics over the Han River' }],
       9: [{ name: 'Mid-Autumn Festival', timing: 'full moon, Sep–early Oct', note: 'lion dances along Bach Dang riverfront' }],
@@ -79,6 +100,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Hoi An': {
     crowd: 'osspppssooos',
+    seasons: ['Cool, drying out', 'Dry season begins, mild', 'Warm dry spring', 'Warm dry spring', 'Hot dry season', 'Hot dry midsummer', 'Hot dry midsummer', 'Hot — late storms possible', 'Wet season & typhoon risk', 'Peak rains — old town can flood', 'Heavy rains, flood-prone', 'Wet season winding down'],
     best_months: ['February', 'March', 'April'],
     best_reason: 'dry golden weather, lantern light on the river, and the fields at their greenest',
     top: [
@@ -92,6 +114,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Hoi An central market at 6am', why: 'the town before the tour buses — chefs shopping' },
       { name: 'Cam Kim island loop by bike', why: 'rice paddies, bamboo bridges, zero crowds' },
     ],
+    adventures: [
+      { name: 'Cham Islands snorkel & hike', why: 'marine-reserve reefs 45 minutes offshore (Mar–Aug seas)' },
+      { name: 'Marble Mountains caves climb', why: 'shrine-filled grottoes and summit views toward Da Nang' },
+      { name: 'My Son sanctuary by bicycle', why: 'ride paddy backroads to the jungle-wrapped Cham temples' },
+    ],
     festivals: {
       1: [{ name: 'Full Moon Lantern Festival', timing: '14th of each lunar month', note: 'electric lights off, candle lanterns on the Thu Bon river — every month, check lunar dates' }],
       2: [{ name: 'Tet in the Ancient Town', timing: 'late Jan–mid Feb, lunar', note: 'flower markets and calligraphy streets' }],
@@ -100,6 +127,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Ha Long': {
     crowd: 'ssoosppposss',
+    seasons: ['Cool dry winter, misty', 'Cool drizzle & fog', 'Mild spring, hazy', 'Warm spring, clearing', 'Hot — summer rains begin', 'Hot humid, storms', 'Peak rains & typhoon risk', 'Hot rainy, typhoon risk', 'Storms easing', 'Dry autumn, clear seas', 'Crisp dry autumn', 'Cool dry winter'],
     best_months: ['October', 'November', 'March', 'April'],
     best_reason: 'clear-enough skies and calm seas for cruising the karsts, minus summer’s domestic crowds and storms',
     top: [
@@ -113,12 +141,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Vung Vieng floating village', why: 'pearl farms and stilt life far from the marina' },
       { name: 'Bai Tu Long Bay', why: 'the quiet northeastern third most itineraries skip' },
     ],
+    adventures: [
+      { name: 'Cat Ba National Park — Ngu Lam peak', why: 'jungle ridge walk above the karst archipelago' },
+      { name: 'Kayak the Lan Ha lagoons', why: 'paddle through arches into enclosed emerald bowls' },
+      { name: 'Rock climbing on Cat Ba', why: 'deep-water solo over the bay with local guides' },
+    ],
     festivals: {
       4: [{ name: 'Ha Long Carnival', timing: 'late Apr–early May', note: 'parades and beach concerts opening summer season' }],
     },
   },
   'Sapa': {
     crowd: 'oossspsspsoo',
+    seasons: ['Cold foggy winter (frost possible)', 'Cold damp winter', 'Mild dry spring', 'Warm clear spring', 'Planting season — flooded terraces', 'Rainy summer', 'Peak summer rains', 'Rainy — terraces greenest', 'Harvest gold, clearing', 'Clear dry autumn', 'Cool crisp autumn', 'Cold winter begins'],
     best_months: ['September', 'October', 'March', 'April', 'May'],
     best_reason: 'terraces gold at harvest (Sep–Oct) or mirror-flooded at planting (May); winters are cold and fog-bound',
     top: [
@@ -132,12 +166,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Y Linh Ho hamlet', why: 'the steepest, prettiest terrace amphitheatre' },
       { name: 'Bac Ha Sunday market (day trip)', why: 'the most colourful minority market in the north' },
     ],
+    adventures: [
+      { name: 'Fansipan summit trek (2 days)', why: 'earn the 3,143 m “Roof of Indochina” on foot instead of the cable car' },
+      { name: 'Muong Hoa valley-to-valley trek', why: 'full-day terrace traverse with a village homestay night' },
+      { name: 'Silver Waterfall & Tram Ton Pass', why: 'the highest road pass in Vietnam, gateway to cloud hikes' },
+    ],
     festivals: {
       9: [{ name: 'Harvest season', timing: 'mid Sep–early Oct', note: 'not a festival but the event — terraces turn gold for ~3 weeks' }],
     },
   },
   'Taipei': {
     crowd: 'pssssoosspps',
+    seasons: ['Cool damp winter', 'Cool damp winter', 'Mild spring', 'Warm spring', 'Plum rains begin', 'Plum-rain season, humid', 'Hot typhoon summer', 'Hot typhoon summer', 'Hot — typhoon tail risk', 'Warm dry autumn', 'Mild autumn', 'Cool winter drizzle'],
     best_months: ['October', 'November', 'December', 'March', 'April'],
     best_reason: 'comfortable temps and lower rain outside the sweltering typhoon summer',
     top: [
@@ -152,6 +192,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Treasure Hill Artist Village', why: 'hillside veterans’ settlement turned art warren' },
       { name: 'Jinguashi & Jiufen early morning', why: 'gold-rush mountain lanes before the tour buses' },
     ],
+    adventures: [
+      { name: 'Yangmingshan — Qixing main peak', why: 'volcanic fumaroles and silvergrass on Taipei’s rooftop' },
+      { name: 'Teapot Mountain ridge', why: 'short scramble to the coast’s best gold-country panorama' },
+      { name: 'Pingxi Crags (Xiaozi/Cimu)', why: 'ladder-and-chain mini-summits above the sky-lantern valley' },
+    ],
     festivals: {
       2: [
         { name: 'Lunar New Year', timing: 'late Jan–mid Feb, lunar', note: 'Dihua Street market is the place to feel it' },
@@ -164,6 +209,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Taichung': {
     crowd: 'sssssoosssps',
+    seasons: ['Mild dry winter, sunny', 'Mild dry winter', 'Warm spring', 'Warm spring', 'Plum rains', 'Hot, plum rains', 'Hot summer, typhoon risk', 'Hot summer, typhoon risk', 'Hot — storms easing', 'Warm dry autumn', 'Mild dry autumn', 'Mild dry winter'],
     best_months: ['October', 'November', 'March', 'April'],
     best_reason: 'Taiwan’s sunniest big city is best when the plains cool down',
     top: [
@@ -177,12 +223,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Gaomei Wetlands at sunset', why: 'mirror flats, windmills and migratory birds' },
       { name: 'Dakeng trails no. 9–10', why: 'log-path ridge hikes locals do at dawn' },
     ],
+    adventures: [
+      { name: 'Xueshan (Snow Mountain) via Wuling', why: 'Taiwan’s second-highest summit — permits + 2 days' },
+      { name: 'Dasyueshan forest road', why: 'high-mountain birding and sea-of-clouds sunsets' },
+      { name: 'Guguan hot-spring trails', why: 'seven short gorge hikes, then soak in the springs' },
+    ],
     festivals: {
       3: [{ name: 'Dajia Mazu Pilgrimage', timing: 'lunar Mar, ~Apr', note: 'nine days, 300 km, a million pilgrims — Taiwan’s biggest religious event departs from nearby Dajia' }],
     },
   },
   'Kaohsiung': {
     crowd: 'psssoooosssp',
+    seasons: ['Warm dry winter', 'Warm dry winter', 'Warm dry spring', 'Hot — dry season ending', 'Hot, rains begin', 'Hot rainy season', 'Hot rainy, typhoon risk', 'Peak rains & typhoons', 'Hot rainy, typhoon risk', 'Warm, drying out', 'Warm dry season', 'Warm dry winter'],
     best_months: ['November', 'December', 'January', 'February'],
     best_reason: 'the tropical south stays warm and dry while the north shivers in drizzle',
     top: [
@@ -196,12 +248,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Weiwuying wetlands & arts center', why: 'the world’s largest single-roof theater beside birdlife' },
       { name: 'Meinong Hakka town (day trip)', why: 'paper umbrellas and butterfly valleys' },
     ],
+    adventures: [
+      { name: 'Shoushan (Monkey Mountain) trails', why: 'macaque-lined coastal ridge right behind the city' },
+      { name: 'Maolin valley & Purple Butterfly hikes', why: 'gorge suspension bridges; millions of butterflies Dec–Feb' },
+      { name: 'Xiaoliuqiu island snorkel', why: 'swim with green sea turtles, 30 min by ferry' },
+    ],
     festivals: {
       2: [{ name: 'Kaohsiung Lantern Festival', timing: 'around lunar new year’s 15th day', note: 'light art along the Love River' }],
     },
   },
   'Tainan': {
     crowd: 'psssoooossss',
+    seasons: ['Mild dry winter', 'Mild dry winter', 'Warm dry spring', 'Hot — dry season ending', 'Hot, rains begin', 'Hot rainy season', 'Hot rainy, typhoon risk', 'Peak rains & typhoons', 'Hot rainy, typhoon risk', 'Warm, drying out', 'Warm dry season', 'Mild dry winter'],
     best_months: ['November', 'December', 'January', 'February', 'March'],
     best_reason: 'cool dry months suit temple-lane walking in Taiwan’s oldest city',
     top: [
@@ -215,12 +273,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Bao-an temple ironwork gods', why: 'craftsman temples without a single tour group' },
       { name: 'Qigu salt mountain & lagoons', why: 'blinding-white salt fields and oyster shacks' },
     ],
+    adventures: [
+      { name: 'Guanziling Water-Fire Cave & mud springs', why: 'flames burning out of spring water, then a rare mud bath' },
+      { name: 'Erliao sunrise ridge', why: 'sea-of-clouds over badland hills 40 minutes from town' },
+      { name: 'Sicao lagoon kayak', why: 'paddle the mangrove channels past oyster farms' },
+    ],
     festivals: {
       2: [{ name: 'Yanshui Beehive Fireworks', timing: 'lunar new year’s 14th–15th day', note: 'rockets fired INTO the crowd — Taiwan’s wildest festival; full protective gear required' }],
     },
   },
   'Hualien': {
     crowd: 'osssspposoos',
+    seasons: ['Mild winter drizzle', 'Mild damp winter', 'Warm spring', 'Warm spring', 'Plum rains', 'Hot humid — storms build', 'Typhoon season', 'Peak typhoon season', 'Typhoon risk, rainy', 'Warm autumn, clearing', 'Mild dry autumn', 'Mild winter'],
     best_months: ['October', 'November', 'March', 'April', 'May'],
     best_reason: 'stable weather for Taroko’s marble gorges outside typhoon season',
     top: [
@@ -234,12 +298,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Mataian wetlands', why: 'Amis fish-trap ecology and palusami-style feasts' },
       { name: 'Highway 11 coast by scooter', why: 'terrace cafés over the Pacific every few km' },
     ],
+    adventures: [
+      { name: 'Zhuilu Old Road', why: 'the vertigo ledge 500 m above Taroko’s gorge floor (permit + reopening status)' },
+      { name: 'Shakadang Trail', why: 'sapphire-water canyon walk, gentle and stunning' },
+      { name: 'Jinzun sea kayaking at dawn', why: 'paddle beneath the Qingshui-style cliffs as the sun rises' },
+    ],
     festivals: {
       7: [{ name: 'Amis Harvest Festival', timing: 'Jul–Aug, village-by-village', note: 'indigenous song-and-dance gatherings; ask locally which villages welcome visitors' }],
     },
   },
   'Hong Kong': {
     crowd: 'ppsssooosspp',
+    seasons: ['Cool dry winter', 'Cool — humidity rising', 'Warm humid spring, fog', 'Warm humid spring', 'Hot, rains begin', 'Hot wet summer', 'Hot wet, typhoon season', 'Peak heat & typhoon risk', 'Hot, typhoon risk', 'Sunny dry autumn', 'Crisp dry autumn', 'Cool dry winter'],
     best_months: ['October', 'November', 'December'],
     best_reason: 'crisp blue-sky days after the humid typhoon summer — hiking and harbour views at their best',
     top: [
@@ -255,6 +325,12 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Sham Shui Po fabric & gadget streets', why: 'the working-class city tourists miss' },
       { name: 'Po Toi island weekend ferry', why: 'seafood terraces and granite headlands' },
     ],
+    adventures: [
+      { name: 'Lion Rock summit', why: 'the city’s definitive skyline-through-the-clouds hike' },
+      { name: 'Lantau Peak for sunrise', why: 'watch dawn hit the Big Buddha from 934 m' },
+      { name: 'MacLehose Trail section 2', why: 'Sai Kung’s wild beaches — Hong Kong’s best coastline on foot' },
+      { name: 'Tai Mo Shan', why: 'the territory’s highest point, waterfalls on the way down' },
+    ],
     festivals: {
       2: [{ name: 'Chinese New Year', timing: 'late Jan–mid Feb, lunar', note: 'night parade, flower markets, harbour fireworks' }],
       4: [{ name: 'Hong Kong Sevens', timing: 'late Mar–early Apr', note: 'the city’s biggest party disguised as rugby' }],
@@ -265,6 +341,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Almaty': {
     crowd: 'psoospppsoos',
+    seasons: ['Snowy winter (ski season)', 'Snowy winter (ski season)', 'Thaw — spring showers', 'Green spring, blossom', 'Mild spring, showery', 'Warm summer', 'Hot summer (peak)', 'Hot dry summer', 'Golden autumn', 'Crisp autumn', 'First snows', 'Snowy winter (ski season)'],
     best_months: ['May', 'June', 'September', 'October'],
     best_reason: 'green foothills or golden steppe-autumn — plus a genuine ski-season second peak (Dec–Feb)',
     top: [
@@ -279,12 +356,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Arasan Baths', why: 'Soviet-brutalist banya — steam like a local' },
       { name: 'Turgen Gorge waterfalls', why: 'picnic valleys locals prefer to Charyn' },
     ],
+    adventures: [
+      { name: 'Furmanov Peak day hike', why: '3,053 m straight from the Medeu bus stop — Almaty’s classic' },
+      { name: 'Kolsai & Kaindy lakes (day trip)', why: 'alpine lakes and a sunken spruce forest from a 1911 quake' },
+      { name: 'Shymbulak ski season', why: 'Dec–Mar powder 25 minutes from downtown' },
+    ],
     festivals: {
       3: [{ name: 'Nauryz', timing: 'Mar 21–23', note: 'Kazakh new year — yurts, kokpar horse games and nauryz-kozhe in every park' }],
     },
   },
   'Astana': {
     crowd: 'ooosspppsoos',
+    seasons: ['Deep freeze (−20 to −30°C)', 'Deep freeze, blizzards', 'Late-winter thaw begins', 'Muddy spring thaw', 'Cool spring, greening', 'Warm steppe summer', 'Warm summer (peak)', 'Warm summer, cooling late', 'Brief crisp autumn', 'Cold autumn, first snow', 'Winter sets in', 'Deep freeze'],
     best_months: ['June', 'July', 'August'],
     best_reason: 'the steppe capital only makes sense in summer — winters hit −30°C with knife winds',
     top: [
@@ -298,6 +381,10 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Korgalzhyn flamingo lakes', why: 'the world’s northernmost flamingos, 2 hrs away' },
       { name: 'Soviet-era right bank', why: 'the old Tselinograd town the towers replaced' },
     ],
+    adventures: [
+      { name: 'Burabay (Borovoe) National Park', why: 'granite crags and pine lakes — the “Kazakh Switzerland”, 3 hrs north' },
+      { name: 'Steppe horse riding', why: 'ride the endless flat gold that made the nomad world' },
+    ],
     festivals: {
       7: [{ name: 'Astana Day', timing: 'Jul 6', note: 'concerts and fireworks across the Left Bank' }],
       3: [{ name: 'Nauryz', timing: 'Mar 21–23', note: 'spring new year celebrated even in the snow' }],
@@ -305,6 +392,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Shymkent': {
     crowd: 'oossppssssoo',
+    seasons: ['Chilly winter', 'Chilly winter, late thaw', 'Spring bloom begins', 'Warm spring — wild tulips', 'Warm late spring', 'Hot dry summer', 'Scorching summer', 'Scorching dry summer', 'Warm harvest autumn', 'Mild golden autumn', 'Cool rainy autumn', 'Chilly winter'],
     best_months: ['April', 'May', 'September', 'October'],
     best_reason: 'spring blossom or autumn harvest in Kazakhstan’s garden south; summers scorch',
     top: [
@@ -317,12 +405,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Aksu-Zhabagly reserve', why: 'Central Asia’s oldest nature reserve — tulips in the wild (Apr–May)' },
       { name: 'Sauran fortress ruins', why: 'desert walls nobody visits en route to Turkistan' },
     ],
+    adventures: [
+      { name: 'Sayram-Ugam National Park treks', why: 'juniper valleys under 4,000 m peaks, homestay villages' },
+      { name: 'Aksu Canyon rim walk', why: 'a 500 m-deep green gash in the steppe, wild tulips in spring' },
+      { name: 'Kazygurt Mountain', why: 'the local “Ararat” — legend says the Ark grounded here' },
+    ],
     festivals: {
       3: [{ name: 'Nauryz', timing: 'Mar 21–23', note: 'the south celebrates hardest — horse games and street plov' }],
     },
   },
   'Tashkent': {
     crowd: 'oosspposssoo',
+    seasons: ['Cold winter', 'Cold winter, late thaw', 'Spring bloom, showery', 'Warm green spring', 'Warm, drying out', 'Hot dry summer', 'Scorching “chilla” heat (40°C+)', 'Scorching dry summer', 'Warm grape-harvest autumn', 'Mild golden autumn', 'Cool cloudy autumn', 'Cold winter'],
     best_months: ['April', 'May', 'September', 'October'],
     best_reason: 'blossom or grape-harvest weather; July–August bakes past 40°C',
     top: [
@@ -336,6 +430,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Plov Centre (Besh Qozon)', why: 'watch cauldrons the size of hot tubs feed a city' },
       { name: 'Chimgan mountains (day trip)', why: 'Tashkent’s alpine escape, 90 minutes away' },
     ],
+    adventures: [
+      { name: 'Greater Chimgan ascent', why: 'guided 3,309 m summit day in the western Tian Shan' },
+      { name: 'Beldersay ridge & cable car hikes', why: 'walk the grassy crest lines above Charvak’s turquoise' },
+      { name: 'Charvak reservoir watersports', why: 'kayaks and paddleboards under mountain walls all summer' },
+    ],
     festivals: {
       3: [{ name: 'Navruz', timing: 'Mar 21', note: 'sumalak stirred all night in courtyards across the city' }],
       9: [{ name: 'Independence Day', timing: 'Sep 1', note: 'concerts and lights along the boulevards' }],
@@ -343,6 +442,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Samarkand': {
     crowd: 'oosppossppoo',
+    seasons: ['Cold winter', 'Cold winter, late thaw', 'Spring bloom, showery', 'Warm green spring', 'Warm late spring', 'Hot dry summer', 'Scorching summer (40°C+)', 'Scorching dry summer', 'Warm harvest autumn', 'Mild golden autumn', 'Cool autumn', 'Cold winter'],
     best_months: ['April', 'May', 'September', 'October'],
     best_reason: 'Registan blue against spring gardens or autumn gold — and bearable walking heat',
     top: [
@@ -357,6 +457,10 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Registan at 6am', why: 'you, the pigeons, and the turquoise — no coaches until 9' },
       { name: 'Urgut Sunday bazaar', why: 'suzani embroidery hunting with zero middlemen' },
     ],
+    adventures: [
+      { name: 'Amankutan gorge hikes', why: 'walnut-forest trails in the Zarafshan foothills, 40 min away' },
+      { name: 'Agalyk village day-hike', why: 'shepherd paths and petroglyph boulders above orchard hamlets' },
+    ],
     festivals: {
       3: [{ name: 'Navruz', timing: 'Mar 21', note: 'games and plov in front of the Registan' }],
       8: [{ name: 'Sharq Taronalari music festival', timing: 'late Aug, biennial (odd years)', note: 'world musicians performing ON the Registan' }],
@@ -364,6 +468,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Bukhara': {
     crowd: 'oosppossppoo',
+    seasons: ['Cold desert winter', 'Cold winter, late thaw', 'Mild spring bloom', 'Warm spring', 'Hot late spring', 'Hot dry summer', 'Furnace heat (40°C+)', 'Furnace dry summer', 'Hot early autumn', 'Mild golden autumn', 'Cool autumn', 'Cold desert winter'],
     best_months: ['April', 'May', 'September', 'October'],
     best_reason: 'the desert oasis is gentle in spring and autumn; summer is a furnace',
     top: [
@@ -377,6 +482,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Sitorai Mokhi-Khosa', why: 'the last emir’s summer palace of mirrored kitsch' },
       { name: 'Hammam Bozori Kord', why: '16th-century bathhouse still steaming daily' },
     ],
+    adventures: [
+      { name: 'Kyzylkum camel trek & yurt night', why: 'ride into the red desert and sleep under raw stars' },
+      { name: 'Aydarkul lake swim', why: 'an accidental Soviet sea on the desert’s edge' },
+      { name: 'Nuratau mountains homestay trek', why: 'village-to-village walking with wild pistachio slopes' },
+    ],
     festivals: {
       3: [{ name: 'Navruz', timing: 'Mar 21', note: 'street feasts under the trading domes' }],
       5: [{ name: 'Silk and Spices Festival', timing: 'late May–early Jun', note: 'artisans and dancers fill the old town' }],
@@ -384,6 +494,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Khiva': {
     crowd: 'oospposssooo',
+    seasons: ['Cold desert winter (freezing)', 'Cold winter', 'Chilly early spring', 'Warm spring', 'Hot late spring', 'Very hot dry summer', 'Furnace heat (40°C+)', 'Furnace dry summer', 'Hot early autumn', 'Mild golden autumn', 'Cool autumn', 'Cold desert winter'],
     best_months: ['April', 'May', 'September', 'October'],
     best_reason: 'the walled museum-city glows at golden hour in the mild seasons; summers exceed 40°C',
     top: [
@@ -396,6 +507,10 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Dishan Kala outer town', why: 'where actual Khivans live — bread ovens and weddings' },
       { name: 'Elliq Qala desert fortresses (day trip)', why: 'crumbling Khorezm citadels in the Kyzylkum' },
     ],
+    adventures: [
+      { name: 'Ayaz-Kala fortress camel camp', why: 'sunset from 2,000-year-old walls, yurt dinner below' },
+      { name: 'Sultan Uvays desert mountains', why: 'pilgrim ridge between the Kyzylkum and the Amu Darya' },
+    ],
     festivals: {
       3: [{ name: 'Navruz', timing: 'Mar 21', note: 'tightrope walkers and wrestling inside the walls' }],
       8: [{ name: 'Melon festival', timing: 'Aug', note: 'Khorezm’s legendary melons get their own party' }],
@@ -403,6 +518,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Bishkek': {
     crowd: 'oossspppssoo',
+    seasons: ['Snowy winter', 'Snowy winter', 'Spring thaw, showery', 'Green spring (wettest month)', 'Mild spring, showery', 'Warm summer', 'Hot summer', 'Hot dry summer', 'Clear golden autumn', 'Crisp autumn', 'First snows', 'Snowy winter'],
     best_months: ['June', 'July', 'August', 'September'],
     best_reason: 'gateway weather for the mountains — the city itself is leafy and mild while the peaks open up',
     top: [
@@ -416,6 +532,11 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Burana Tower (day trip)', why: 'leaning 11th-century minaret amid balbal stone warriors' },
       { name: 'Chunkurchak valley yurts', why: 'weekend kumis and horse rides without tourists' },
     ],
+    adventures: [
+      { name: 'Ala Archa — Ak-Sai waterfall & glacier trail', why: 'from picnic path to alpinist basecamp in one valley' },
+      { name: 'Kegeti gorge & waterfall', why: 'quieter canyon hike with a 20 m cascade' },
+      { name: 'Alamedin valley hot walk', why: 'meadow trail to warm springs under 4,000 m walls' },
+    ],
     festivals: {
       3: [{ name: 'Nooruz', timing: 'Mar 21', note: 'horse games in the hippodrome, sumolok in the squares' }],
       8: [{ name: 'Independence Day', timing: 'Aug 31', note: 'concerts on Ala-Too Square' }],
@@ -423,6 +544,7 @@ export const PACKS: Record<string, Pack> = {
   },
   'Karakol': {
     crowd: 'osooospppsoo',
+    seasons: ['Snowy winter (ski season)', 'Snowy winter (ski season)', 'Late ski season, thaw', 'Muddy spring', 'Green valleys, snowy passes', 'Alpine summer begins', 'Trekking season — passes open', 'Peak trekking season', 'Golden autumn, passes closing', 'Cold autumn, first snow', 'Winter sets in', 'Snowy winter (ski season)'],
     best_months: ['July', 'August', 'September'],
     best_reason: 'the trekking window — Ala-Kul and the Terskey Alatau passes are snow-free',
     top: [
@@ -436,12 +558,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Ashlan-fu alley', why: 'the cold spicy Dungan noodle bowl for ~$1' },
       { name: 'Altyn Arashan hot springs', why: 'soak at 2,600 m after the walk in' },
     ],
+    adventures: [
+      { name: 'Ala-Kul pass loop (2–3 days)', why: 'Karakol valley → 3,860 m pass → Altyn Arashan springs — the classic' },
+      { name: 'Boz-Uchuk lakes', why: 'twin alpine tarns with far fewer boots than Ala-Kul' },
+      { name: 'Karakol Ski Base', why: 'Dec–Mar tree-line powder at bargain lift prices' },
+    ],
     festivals: {
       7: [{ name: 'Yurt & eagle-hunting demos', timing: 'Jul–Aug, various', note: 'community tourism days around Issyk-Kul’s south shore' }],
     },
   },
   'Osh': {
     crowd: 'oosspppsssoo',
+    seasons: ['Cold winter', 'Cold winter', 'Spring bloom', 'Warm green spring', 'Warm late spring', 'Hot dry summer', 'Scorching valley summer', 'Scorching dry summer', 'Warm harvest autumn', 'Mild autumn', 'Cool autumn', 'Cold winter'],
     best_months: ['May', 'June', 'September', 'October'],
     best_reason: 'Fergana valley heat is friendliest in late spring and early autumn',
     top: [
@@ -454,12 +582,18 @@ export const PACKS: Record<string, Pack> = {
       { name: 'Chil-Ustun caves (day trip)', why: 'karst caverns almost nobody visits' },
       { name: 'Uzgen minaret & mausoleums', why: 'Karakhanid brickwork an hour away' },
     ],
+    adventures: [
+      { name: 'Alay valley & Tulpar-Kul lake', why: 'yurt camps staring straight at 7,134 m Peak Lenin' },
+      { name: 'Abshir-Ata waterfall', why: 'a spring bursting from a cliff face, picnic valley below' },
+      { name: 'Kyrgyz-Ata National Park', why: 'juniper alpine valley with shepherd yurts, 40 km out' },
+    ],
     festivals: {
       3: [{ name: 'Nooruz', timing: 'Mar 21', note: 'the valley’s biggest sumolok cauldrons' }],
     },
   },
   'Issyk-Kul (Cholpon-Ata)': {
     crowd: 'oooossppsooo',
+    seasons: ['Cold winter (the lake never freezes)', 'Cold winter', 'Chilly early spring', 'Cool spring', 'Mild — hills greening', 'Warming, lake still cool', 'Beach season', 'Peak beach season', 'Warm days, crisp nights', 'Golden autumn', 'Cold and quiet', 'Cold winter'],
     best_months: ['July', 'August'],
     best_reason: 'the “warm lake” beach season — alpine swimming ringed by 4,000 m peaks',
     top: [
@@ -471,6 +605,11 @@ export const PACKS: Record<string, Pack> = {
     gems: [
       { name: 'South shore (Bokonbayevo)', why: 'eagle hunters, red canyons like Skazka, no crowds' },
       { name: 'Sunken Silk Road settlements', why: 'dive or boat over medieval ruins beneath the lake' },
+    ],
+    adventures: [
+      { name: 'Grigoriev–Semenov gorge horse trek', why: 'ride fir valleys between yurt camps above the north shore' },
+      { name: 'Konorchek red canyons', why: 'badland slot-canyon hike to eroded towers (dry months)' },
+      { name: 'Skazka (Fairy Tale) Canyon', why: 'walk-through Mars on the quiet south shore' },
     ],
     festivals: {
       9: [{ name: 'World Nomad Games heritage', timing: 'Sep, biennial (host rotates)', note: 'born here — kok-boru and eagle contests when hosted; smaller ethno-festivals most summers' }],

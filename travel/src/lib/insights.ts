@@ -1,22 +1,24 @@
 /*
  * Destination-month insight synthesis (SRS §5.2), zero runtime cost:
  * live Open-Meteo climate numbers + curated knowledge packs (dest-content.ts)
- * + attire derived from the climate by rules. Cached per destination+month in
- * destination_month_profiles (FR-DEX-09); rows written by the old AI path
- * (ai_model_version null or non-curated) are rebuilt on first view.
+ * + attire derived from the climate by rules + free Wikipedia place photos.
+ * Cached per destination+month in destination_month_profiles (FR-DEX-09);
+ * rows written by older content versions are rebuilt on first view.
  */
 import { createSupabaseAdmin } from './supabase';
 import { monthClimate, type MonthClimate } from './weather';
 import { PACKS } from './dest-content';
+import { wikiImage, destImage } from './images';
 
 export type Destination = { id: string; name: string; country: string; lat: number; lng: number };
 export type MonthProfile = {
   weather_json: any; attire_json: any; crowd_index: string | null;
   festivals_json: any[]; hidden_gems_json: any[]; best_time_json: any;
+  hero_image_url: string | null;
   ai_model_version: string | null; refreshed_at: string;
 };
 
-export const CONTENT_VERSION = 'curated-v1';
+export const CONTENT_VERSION = 'curated-v2';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CROWD: Record<string, 'peak' | 'shoulder' | 'off-season'> = { p: 'peak', s: 'shoulder', o: 'off-season' };
@@ -51,17 +53,35 @@ export function deriveAttire(c: MonthClimate | null) {
   };
 }
 
-function buildProfile(dest: Destination, month: number, climate: MonthClimate | null): Omit<MonthProfile, 'refreshed_at'> & { destination_id: string; month: number; refreshed_at: string } {
+/* Attach a Wikipedia thumbnail to each place (best effort, cached with the profile). */
+async function withImages<T extends { name: string }>(list: T[], destName: string): Promise<(T & { img: string | null })[]> {
+  return Promise.all(list.map(async (p) => ({
+    ...p,
+    img: await wikiImage(`${p.name.replace(/\s*\(.*?\)\s*/g, ' ').trim()} ${destName}`, 480),
+  })));
+}
+
+async function buildProfile(dest: Destination, month: number) {
   const pack = PACKS[dest.name];
+  const [climate, hero] = await Promise.all([
+    monthClimate(dest.lat, dest.lng, month),
+    destImage(dest.name, dest.country, 960),
+  ]);
   const weather_json: any = climate ? { ...climate } : {};
   let crowd: string | null = null;
   let festivals: any[] = [], gems: any[] = [], best: any = {};
 
   if (pack) {
+    weather_json.season = pack.seasons[month - 1] ?? null;
     crowd = CROWD[pack.crowd[month - 1]] ?? null;
     if (crowd) weather_json.crowd_note = CROWD_NOTE[crowd];
     festivals = pack.festivals[month] ?? [];
-    gems = pack.gems;
+    const [gemsImg, topImg, advImg] = await Promise.all([
+      withImages(pack.gems, dest.name),
+      withImages(pack.top, dest.name),
+      withImages(pack.adventures, dest.name),
+    ]);
+    gems = gemsImg;
     const isBest = pack.best_months.includes(MONTHS[month - 1]);
     best = {
       verdict: isBest
@@ -69,7 +89,8 @@ function buildProfile(dest: Destination, month: number, climate: MonthClimate | 
         : `${MONTHS[month - 1]} works, but ${pack.best_months.slice(0, 2).join(' or ')} is the sweet spot for ${dest.name}.`,
       best_months: pack.best_months,
       reason: pack.best_reason,
-      top_places: pack.top,
+      top_places: topImg,
+      adventures: advImg,
     };
   }
 
@@ -77,6 +98,7 @@ function buildProfile(dest: Destination, month: number, climate: MonthClimate | 
     destination_id: dest.id, month,
     weather_json, attire_json: deriveAttire(climate), crowd_index: crowd,
     festivals_json: festivals, hidden_gems_json: gems, best_time_json: best,
+    hero_image_url: hero,
     ai_model_version: CONTENT_VERSION,
     refreshed_at: new Date().toISOString(),
   };
@@ -88,9 +110,8 @@ export async function getMonthProfile(dest: Destination, month: number): Promise
     .select('*').eq('destination_id', dest.id).eq('month', month).single();
   if (cached && cached.ai_model_version === CONTENT_VERSION) return cached as MonthProfile;
 
-  // Miss, or a stale row from the retired AI path: rebuild from curated packs.
-  const climate = await monthClimate(dest.lat, dest.lng, month);
-  const row = buildProfile(dest, month, climate);
+  // Miss, or a row from an older content version: rebuild from curated packs.
+  const row = await buildProfile(dest, month);
   await admin.from('destination_month_profiles').upsert(row, { onConflict: 'destination_id,month' });
   return row as unknown as MonthProfile;
 }

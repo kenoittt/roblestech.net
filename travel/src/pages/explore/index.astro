@@ -1,14 +1,28 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
-import { createSupabaseServer } from '../../lib/supabase';
+import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
+import { destImage } from '../../lib/images';
 
 const supabase = createSupabaseServer(Astro);
 const q = (Astro.url.searchParams.get('q') ?? '').trim();
-type Dest = { id: string; name: string; country: string };
-let query = supabase.from('destinations').select('id,name,country').eq('active', true).order('country').order('name');
+type Dest = { id: string; name: string; country: string; image_url?: string | null };
+let query = supabase.from('destinations').select('*').eq('active', true).order('country').order('name');
 if (q) query = query.or(`name.ilike.%${q}%,country.ilike.%${q}%`);
 const { data } = await query;
 const dests: Dest[] = (data as Dest[]) ?? [];
+
+// Fill missing photos from Wikipedia once, then persist so future loads are instant.
+const missing = dests.filter((d) => !d.image_url);
+if (missing.length) {
+  const admin = createSupabaseAdmin();
+  await Promise.all(missing.map(async (d) => {
+    const img = await destImage(d.name, d.country, 480);
+    if (!img) return;
+    d.image_url = img;
+    await admin.from('destinations').update({ image_url: img }).eq('id', d.id); // no-op until migration adds the column
+  }));
+}
+
 const byCountry: Record<string, Dest[]> = {};
 for (const d of dests) (byCountry[d.country] ??= []).push(d);
 const month = new Date().getMonth() + 1;
@@ -33,14 +47,30 @@ const month = new Date().getMonth() + 1;
   {Object.entries(byCountry).map(([country, list]) => (
     <div class="section">
       <h2>{country}</h2>
-      <div class="trip-list" style="margin-top:8px;">
+      <div class="dest-grid">
         {list.map((d) => (
-          <a class="trip-card" href={`/explore/${d.id}?m=${month}`}>
-            <div class="t">{d.name}</div>
-            <div class="d"><span>{d.country}</span><span>· 12-month profile →</span></div>
+          <a class="dest-card" href={`/explore/${d.id}?m=${month}`}>
+            {d.image_url
+              ? <img src={d.image_url} alt={d.name} loading="lazy" />
+              : <div class="dest-ph">🌏</div>}
+            <div class="dest-label"><b>{d.name}</b><span>12-month profile →</span></div>
           </a>
         ))}
       </div>
     </div>
   ))}
+
+  <p class="hint" style="margin-top:20px;">Photos via Wikipedia/Wikimedia Commons.</p>
+
+  <style>
+    .dest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px;}
+    .dest-card{display:block;border-radius:16px;overflow:hidden;text-decoration:none;color:var(--ink);
+      background:var(--glass);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+      border:1px solid var(--glass-edge);box-shadow:0 8px 24px rgba(28,43,43,.08);}
+    .dest-card:active{transform:scale(.99);}
+    .dest-card img,.dest-ph{width:100%;height:120px;object-fit:cover;display:block;}
+    .dest-ph{display:flex;align-items:center;justify-content:center;font-size:2rem;background:rgba(15,118,110,.10);}
+    .dest-label{padding:10px 12px;display:flex;flex-direction:column;gap:2px;}
+    .dest-label span{color:var(--muted);font-size:.78rem;}
+  </style>
 </AppLayout>

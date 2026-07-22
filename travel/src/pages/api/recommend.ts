@@ -55,6 +55,7 @@ export const POST: APIRoute = async (context) => {
     const tag = many ? ` (${destName})` : '';
     for (const f of pack.festivals[month] ?? []) push(f.name, 'activity', `${f.note}${tag}`, f.timing);
     for (const t of pack.top.slice(0, many ? 3 : 4)) push(t.name, 'sight', `${t.why}${tag}`, '');
+    for (const a of pack.adventures.slice(0, many ? 2 : 3)) push(a.name, 'adventure', `${a.why}${tag}`, pack.seasons[month - 1] ?? '');
     for (const g of pack.gems.slice(0, many ? 2 : 3)) push(g.name, 'day-trip', `Hidden gem — ${g.why}${tag}`, 'quieter on weekdays');
     if (!pack.best_months.includes(MONTHS[month - 1]) && suggestions.length) {
       const first = suggestions[0];
@@ -62,5 +63,5 @@ export const POST: APIRoute = async (context) => {
     }
   }
 
-  return new Response(JSON.stringify({ suggestions: suggestions.slice(0, 10) }), { headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify({ suggestions: suggestions.slice(0, 12) }), { headers: { 'content-type': 'application/json' } });
 };

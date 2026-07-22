@@ -21,6 +21,8 @@ const best = profile?.best_time_json ?? {};
 const festivals: any[] = profile?.festivals_json ?? [];
 const gems: any[] = profile?.hidden_gems_json ?? [];
 const topPlaces: any[] = best?.top_places ?? [];
+const adventures: any[] = best?.adventures ?? [];
+const hero = profile?.hero_image_url ?? null;
 const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
 ---
 
@@ -40,8 +42,12 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     ))}
   </div>
 
+  {hero && <img src={hero} alt={`${dest.name}`} loading="lazy"
+    style="width:100%;height:220px;object-fit:cover;border-radius:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(28,43,43,.12);" />}
+
   <div class="card" style="margin-bottom:14px;">
     <h2>Weather in {MONTHS[month - 1]}</h2>
+    {w.season && <p style="font-weight:800;color:var(--teal);margin:0 0 8px;">🗓 Season: {w.season}</p>}
     {w.avg_high != null ? (
       <div class="cat-chips" style="margin:0 0 10px;">
         <span class="chip">High <b>{w.avg_high}°C</b></span>
@@ -85,16 +91,46 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
   {topPlaces.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
       <h2>Top places to visit</h2>
-      <div class="stack">{topPlaces.map((p: any) => <div><b>{p.name}</b> <span class="hint">— {p.why}</span></div>)}</div>
+      <div class="stack">{topPlaces.map((p: any) => (
+        <div class="place-row">
+          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">📍</div>}
+          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+        </div>
+      ))}</div>
+    </div>
+  )}
+
+  {adventures.length > 0 && (
+    <div class="card" style="margin-bottom:14px;">
+      <h2>Adventures nearby 🥾</h2>
+      <p class="hint" style="margin:0 0 10px;">Hikes, mountains and outdoor days within reach.</p>
+      <div class="stack">{adventures.map((p: any) => (
+        <div class="place-row">
+          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">⛰️</div>}
+          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+        </div>
+      ))}</div>
     </div>
   )}
 
   {gems.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
       <h2>Hidden gems 💎</h2>
-      <div class="stack">{gems.map((p: any) => <div><b>{p.name}</b> <span class="hint">— {p.why}</span></div>)}</div>
+      <div class="stack">{gems.map((p: any) => (
+        <div class="place-row">
+          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">💎</div>}
+          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+        </div>
+      ))}</div>
     </div>
   )}
 
-  <p class="hint">Weather numbers are live climate data; travel notes are curated by WanderWise. Verify dates locally — festival timing (especially lunar-calendar events) can shift year to year.</p>
+  <p class="hint">Weather numbers are live climate data; travel notes are curated by WanderWise; photos via Wikipedia/Wikimedia Commons. Verify dates locally — festival timing (especially lunar-calendar events) can shift year to year.</p>
+
+  <style>
+    .place-row{display:flex;gap:12px;align-items:center;}
+    .place-row img,.place-row .ph{width:76px;height:56px;flex:0 0 76px;border-radius:10px;object-fit:cover;
+      border:1px solid var(--glass-edge);box-shadow:0 2px 8px rgba(28,43,43,.10);}
+    .place-row .ph{display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.45);}
+  </style>
 </AppLayout>
