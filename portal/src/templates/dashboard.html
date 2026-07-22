@@ -417,7 +417,7 @@ var aiAudit = __C.aiAudit || {
     { channel:"ChatGPT",    june:"2 of 10", july:"1 of 10", note:"Lost Q4 (answer went brandless); Q3 held but demoted to passing mention" },
     { channel:"Gemini",     june:"1 of 10", july:"2 of 10", note:"Q3 top spot held; gained Q9, first electrolyte visibility" },
     { channel:"Perplexity", june:"1 of 10", july:"0 of 10", note:"Lost Q6 (was 3rd)" },
-    { channel:"Total",      june:"5 of 40 (12.5%)", july:"3 of 40 (7.5%)", note:"Net loss of 2, with 1 genuine gain" }
+    { channel:"Total",      june:"5 of 40 (12.5%)", july:"3 of 40 (7.5%)", note:"Net loss of 2, with 1 genuine gain. Like-for-like subset only; the full Round 2 audit is 3 of 80 (3.75%) across all 20 questions." }
   ],
   wins: [
     "Q3 Gemini, top spot, held from June with richer detail. Promix's own phrase \"zero artificial anything\" survives inside Gemini's answer.",
@@ -752,6 +752,7 @@ function renderAi(){
   var chgCard = document.createElement("div");
   chgCard.className = "card";
   chgCard.innerHTML = "<h2>June vs July, like for like (original 10 questions)</h2>" +
+    '<div class="note" style="margin-top:0;margin-bottom:12px">This table compares only the 10 questions tracked since June (10 &times; 4 engines = 40 checks), so the month-over-month movement is apples to apples. The headline figure above covers the full audit' + (aiAudit.totalChecks ? " (" + aiAudit.visibleChecks + " of " + aiAudit.totalChecks + " checks)" : "") + '.</div>' +
     "<table><thead><tr><th>Channel</th><th>June 2026</th><th>July 2026</th><th>What changed</th></tr></thead><tbody>"+chgRows+"</tbody></table>" +
     '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
   host.appendChild(chgCard);
