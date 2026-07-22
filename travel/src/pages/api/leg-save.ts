@@ -21,6 +21,8 @@ export const POST: APIRoute = async (context) => {
     destination_name: String(form.get('destination_name') ?? '').trim(),
     arrival_airport: String(form.get('arrival_airport') ?? '').trim().toUpperCase() || null,
     departure_airport: String(form.get('departure_airport') ?? '').trim().toUpperCase() || null,
+    airline: String(form.get('airline') ?? '').trim() || null,
+    flight_no: String(form.get('flight_no') ?? '').trim().toUpperCase().replace(/\s+/g, '') || null,
     start_date: String(form.get('start_date') ?? '') || null,
     end_date: String(form.get('end_date') ?? '') || null,
   };

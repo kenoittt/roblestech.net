@@ -18,8 +18,10 @@ const confirm = Astro.url.searchParams.has('confirm');
         <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
         <div>
           <label for="country">Passport country</label>
-          <input id="country" name="passport_country" list="country-list" autocomplete="country-name"
-            placeholder="Start typing… e.g. Philippines" />
+          <select id="country" name="passport_country" autocomplete="country-name">
+            <option value="">Select your country…</option>
+            {COUNTRIES.map((c) => <option value={c.name}>{c.name}</option>)}
+          </select>
           <p class="hint" style="margin-top:4px;">Powers visa &amp; entry-requirement checks on your trips. You can change it later in Account.</p>
         </div>
         <div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="8+ characters" /></div>
@@ -35,5 +37,4 @@ const confirm = Astro.url.searchParams.has('confirm');
       </>
     )}
   </div>
-  <datalist id="country-list">{COUNTRIES.map((c) => <option value={c.name} />)}</datalist>
 </AppLayout>

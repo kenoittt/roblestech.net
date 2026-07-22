@@ -26,6 +26,7 @@ if (missing.length) {
 const byCountry: Record<string, Dest[]> = {};
 for (const d of dests) (byCountry[d.country] ??= []).push(d);
 const month = new Date().getMonth() + 1;
+const mapData = dests.map((d: any) => ({ id: d.id, name: d.name, country: d.country, lat: d.lat, lng: d.lng, image_url: d.image_url ?? null, month }));
 ---
 <AppLayout title="Explore · WanderWise">
   <p class="eyebrow">Monthly Destination Explorer</p>
@@ -44,9 +45,20 @@ const month = new Date().getMonth() + 1;
     </div>
   )}
 
+  <div class="card" style="margin-bottom:8px;">
+    <h2>Map view 🗺</h2>
+    <div id="explore-map" style="height:44vh;border-radius:14px;border:1px solid var(--line);"></div>
+    <p class="hint" style="margin-top:6px;">Tap a pin to open that city's month-by-month profile.</p>
+  </div>
+
   {Object.entries(byCountry).map(([country, list]) => (
     <div class="section">
-      <h2>{country}</h2>
+      <div class="country-head">
+        {list.find((d) => d.image_url)?.image_url && (
+          <img src={list.find((d) => d.image_url)!.image_url!} alt={country} loading="lazy" />
+        )}
+        <h2>{country}</h2>
+      </div>
       <div class="dest-grid">
         {list.map((d) => (
           <a class="dest-card" href={`/explore/${d.id}?m=${month}`}>
@@ -62,6 +74,14 @@ const month = new Date().getMonth() + 1;
 
   <p class="hint" style="margin-top:20px;">Photos via Wikipedia/Wikimedia Commons.</p>
 
+  <script type="application/json" id="explore-map-data" set:html={JSON.stringify(mapData)} />
+  <script src="../../scripts/explore-map.js"></script>
+
+  <style>
+    .country-head{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+    .country-head img{width:104px;height:56px;object-fit:cover;border-radius:12px;border:1px solid var(--glass-edge);box-shadow:0 2px 10px rgba(28,43,43,.12);}
+    .country-head h2{margin:0;}
+  </style>
   <style>
     .dest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px;}
     .dest-card{display:block;border-radius:16px;overflow:hidden;text-decoration:none;color:var(--ink);

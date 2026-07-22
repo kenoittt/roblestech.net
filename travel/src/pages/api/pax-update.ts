@@ -21,14 +21,19 @@ export const POST: APIRoute = async (context) => {
   const { error } = await supabase.from('trips').update({ pax }).eq('id', tripId);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400 });
 
-  const { data: rowsData } = await supabase.from('expenses')
-    .select('id,amount_group,amount_individual,entry_mode,pax_override').eq('trip_id', tripId);
-  for (const r of (rowsData as any[]) ?? []) {
-    const eff = Math.max(1, r.pax_override ?? pax);
-    const patch = r.entry_mode === 'group'
-      ? { amount_individual: round2(Number(r.amount_group) / eff) }
-      : { amount_group: round2(Number(r.amount_individual) * eff) };
-    await supabase.from('expenses').update(patch).eq('id', r.id);
+  // One SQL statement recalculates every row (upgrade-2.sql). Fall back to
+  // the per-row loop only if the function isn't installed yet.
+  const { error: rpcErr } = await supabase.rpc('recalc_expenses', { t: tripId });
+  if (rpcErr) {
+    const { data: rowsData } = await supabase.from('expenses')
+      .select('id,amount_group,amount_individual,entry_mode,pax_override').eq('trip_id', tripId);
+    for (const r of (rowsData as any[]) ?? []) {
+      const eff = Math.max(1, r.pax_override ?? pax);
+      const patch = r.entry_mode === 'group'
+        ? { amount_individual: round2(Number(r.amount_group) / eff) }
+        : { amount_group: round2(Number(r.amount_individual) * eff) };
+      await supabase.from('expenses').update(patch).eq('id', r.id);
+    }
   }
   return new Response(JSON.stringify({ ok: true }));
 };

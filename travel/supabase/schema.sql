@@ -58,10 +58,13 @@ create table if not exists public.trip_legs (
   destination_name  text not null,
   arrival_airport   text,
   departure_airport text,
+  airline           text,
+  flight_no         text,
   start_date        date,
   end_date          date,
   position          int not null default 0
 );
+create index if not exists trip_legs_trip_idx on public.trip_legs (trip_id, position);
 
 create table if not exists public.lodgings (
   id               uuid primary key default gen_random_uuid(),
@@ -74,8 +77,10 @@ create table if not exists public.lodgings (
   check_out_at     timestamptz,
   cost             numeric(12,2),
   confirmation_ref text,
+  booking_url      text,
   notes            text
 );
+create index if not exists lodgings_trip_idx on public.lodgings (trip_id, check_in_at);
 
 create table if not exists public.itinerary_items (
   id         uuid primary key default gen_random_uuid(),
@@ -112,6 +117,16 @@ create table if not exists public.place_images (
   fetched_at  timestamptz not null default now()
 );
 
+create table if not exists public.trip_checklist (
+  id         uuid primary key default gen_random_uuid(),
+  trip_id    uuid not null references public.trips(id) on delete cascade,
+  item       text not null,
+  done       boolean not null default false,
+  position   int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists trip_checklist_trip_idx on public.trip_checklist (trip_id, position);
+
 -- Expenses — bidirectional pax math (FR-BDG-01..08) ----------------------------
 create table if not exists public.expenses (
   id                uuid primary key default gen_random_uuid(),
@@ -131,6 +146,20 @@ create table if not exists public.expenses (
   created_at        timestamptz not null default now()
 );
 create index if not exists expenses_trip_idx on public.expenses (trip_id, position);
+
+-- Recalculate every budget row for a trip in one statement (RLS-gated: invoker)
+create or replace function public.recalc_expenses(t uuid)
+returns void language sql security invoker set search_path = public as $$
+  update public.expenses e set
+    amount_individual = case when e.entry_mode = 'group'
+      then round(e.amount_group / greatest(coalesce(e.pax_override, tr.pax), 1)::numeric, 2)
+      else e.amount_individual end,
+    amount_group = case when e.entry_mode = 'individual'
+      then round(e.amount_individual * greatest(coalesce(e.pax_override, tr.pax), 1)::numeric, 2)
+      else e.amount_group end
+  from public.trips tr
+  where e.trip_id = t and tr.id = t;
+$$;
 
 -- Destination intelligence (Phase 2 content; schema fixed now, FR-DEX-01) -----
 create table if not exists public.destinations (
@@ -257,7 +286,7 @@ create policy members_leave on public.trip_members
 do $$
 declare t text;
 begin
-  foreach t in array array['trip_legs','lodgings','itinerary_items','trip_places','expenses'] loop
+  foreach t in array array['trip_legs','lodgings','itinerary_items','trip_places','expenses','trip_checklist'] loop
     execute format('drop policy if exists %I_read on public.%I', t, t);
     execute format('create policy %I_read on public.%I for select using (public.is_trip_member(trip_id))', t, t);
     execute format('drop policy if exists %I_write on public.%I', t, t);

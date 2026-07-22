@@ -1,6 +1,7 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../../lib/supabase';
+import { CURRENCIES } from '../../../lib/currencies';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -37,7 +38,28 @@ const expenses = expData ?? [];
     <div style="margin-left:auto;" class="hint" id="save-state">All changes saved</div>
   </div>
 
+  <div class="rowflex card" style="margin-bottom:12px;align-items:end;">
+    <div style="min-width:150px;"><label>Filter category</label>
+      <select id="f-cat"><option value="">All categories</option>
+        <option>flights</option><option>lodging</option><option>food</option>
+        <option>activities</option><option>transport</option><option>misc</option>
+      </select>
+    </div>
+    <div style="min-width:150px;"><label>Show</label>
+      <select id="f-kind"><option value="">Planned + actual</option><option value="planned">Planned only</option><option value="actual">Actual only</option></select>
+    </div>
+    <div style="min-width:150px;"><label>View totals as</label>
+      <select id="f-view"><option value="group">Whole group</option><option value="ind">Per person (individual)</option></select>
+    </div>
+    <span class="hint" style="align-self:center;" id="f-note"></span>
+  </div>
+
   <div class="cat-chips" id="chips"></div>
+
+  <div class="card" style="margin-bottom:12px;" id="breakdown-card">
+    <h2 style="margin-bottom:8px;">Breakdown 📊</h2>
+    <div id="breakdown" class="stack" style="gap:6px;"></div>
+  </div>
 
   <div class="sheet-wrap">
     <table class="sheet" id="sheet">
@@ -65,8 +87,12 @@ const expenses = expData ?? [];
     <span class="hint">Type in either cost column — the other fills in automatically. Pax* overrides the trip pax for that row only.</span>
   </div>
 
-  <script is:inline define:vars={{ tripId: id, tripPax: trip.pax, baseCur: trip.base_currency, initialRows: expenses }}>
+  <script is:inline define:vars={{ tripId: id, tripPax: trip.pax, baseCur: trip.base_currency, initialRows: expenses, CURS: CURRENCIES }}>
     const CATS = ['flights','lodging','food','activities','transport','misc'];
+    const SYM = Object.fromEntries(CURS.map((c) => [c.code, c.sym]));
+    const sym = (c) => SYM[c] ?? c;
+    let fCat = '', fKind = '', fView = 'group';
+    const visible = (r) => (!fCat || r.category === fCat) && (!fKind || (fKind === 'actual') === !!r.is_actual);
     let pax = tripPax;
     const rows = new Map(); // id -> row state
     let tempSeq = 0;
@@ -117,25 +143,52 @@ const expenses = expData ?? [];
     }
 
     function totals() {
-      const byCur = {}, chips = {};
-      let planned = { g: 0, i: 0 }, actual = { g: 0, i: 0 };
+      const byCur = {}, chips = {}, brk = {};
+      let planned = { g: 0, i: 0 }, actual = { g: 0, i: 0 }, hidden = 0;
       rows.forEach((r) => {
+        if (!visible(r)) { hidden++; return; }
         (byCur[r.currency] ??= { g: 0, i: 0 });
         byCur[r.currency].g += r.amount_group; byCur[r.currency].i += r.amount_individual;
-        (chips[r.category] ??= 0); chips[r.category] += r.currency === baseCur ? r.amount_group : 0;
+        (chips[r.category] ??= 0); chips[r.category] += r.currency === baseCur ? (fView === 'ind' ? r.amount_individual : r.amount_group) : 0;
+        (brk[r.category] ??= { g: 0, i: 0, n: 0 });
+        if (r.currency === baseCur) { brk[r.category].g += r.amount_group; brk[r.category].i += r.amount_individual; }
+        brk[r.category].n++;
         const tgt = r.is_actual ? actual : planned;
         if (r.currency === baseCur) { tgt.g += r.amount_group; tgt.i += r.amount_individual; }
       });
       const base = byCur[baseCur] ?? { g: 0, i: 0 };
-      document.getElementById('tot-group').textContent = `${baseCur} ${fmt(base.g)}`;
-      document.getElementById('tot-ind').textContent = `${baseCur} ${fmt(base.i)}`;
+      document.getElementById('tot-group').textContent = `${sym(baseCur)}${fmt(base.g)}`;
+      document.getElementById('tot-ind').textContent = `${sym(baseCur)}${fmt(base.i)}`;
       const others = Object.entries(byCur).filter(([c]) => c !== baseCur)
-        .map(([c, v]) => `${c} ${fmt(v.g)} group / ${fmt(v.i)} pp`).join(' · ');
+        .map(([c, v]) => `${sym(c)}${fmt(v.g)} group / ${sym(c)}${fmt(v.i)} pp`).join(' · ');
       document.getElementById('tot-extra').textContent = others ? `+ ${others}` : '';
-      document.getElementById('total-note').textContent = `planned ${baseCur} ${fmt(planned.g)} · actual ${baseCur} ${fmt(actual.g)}`;
+      document.getElementById('total-note').textContent = `planned ${sym(baseCur)}${fmt(planned.g)} · actual ${sym(baseCur)}${fmt(actual.g)}`;
       document.getElementById('chips').innerHTML = CATS
-        .filter((c) => chips[c]).map((c) => `<span class="chip">${c} <b>${baseCur} ${fmt(chips[c])}</b></span>`).join('');
+        .filter((c) => chips[c]).map((c) => `<span class="chip">${c} <b>${sym(baseCur)}${fmt(chips[c])}</b></span>`).join('');
+      document.getElementById('f-note').textContent = hidden ? `${hidden} row${hidden > 1 ? 's' : ''} hidden by filters` : '';
+      // Per-category breakdown, group AND per-person side by side.
+      const total = Object.values(brk).reduce((s, v) => s + v.g, 0) || 1;
+      document.getElementById('breakdown').innerHTML = CATS.filter((c) => brk[c]).map((c) => {
+        const v = brk[c], pct = Math.round((v.g / total) * 100);
+        return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="min-width:86px;font-weight:700;">${c}</span>
+          <span style="flex:1;min-width:120px;height:8px;border-radius:99px;background:rgba(28,43,43,.08);overflow:hidden;">
+            <span style="display:block;height:100%;width:${pct}%;background:var(--teal);"></span></span>
+          <span class="hint" style="min-width:210px;text-align:right;">${sym(baseCur)}${fmt(v.g)} group · ${sym(baseCur)}${fmt(v.i)} per person · ${pct}%</span>
+        </div>`;
+      }).join('') || '<span class="hint">No expenses match the current filters.</span>';
     }
+
+    function applyFilters() {
+      rows.forEach((r) => {
+        const tr = document.querySelector(`tr[data-id="${r.id}"]`);
+        if (tr) tr.style.display = visible(r) ? '' : 'none';
+      });
+      totals();
+    }
+    document.getElementById('f-cat').addEventListener('change', (e) => { fCat = e.target.value; applyFilters(); });
+    document.getElementById('f-kind').addEventListener('change', (e) => { fKind = e.target.value; applyFilters(); });
+    document.getElementById('f-view').addEventListener('change', (e) => { fView = e.target.value; totals(); });
 
     function render(r) {
       const tr = document.createElement('tr');
@@ -146,7 +199,7 @@ const expenses = expData ?? [];
         <td class="num"><input class="num" inputmode="decimal" data-f="group" value="${fmt(r.amount_group)}"><span class="autotag" data-tag="g"></span></td>
         <td class="num"><input class="num" inputmode="decimal" data-f="ind" value="${fmt(r.amount_individual)}"><span class="autotag" data-tag="i"></span></td>
         <td><input class="num" inputmode="numeric" data-f="pax_override" value="${r.pax_override ?? ''}" placeholder="${pax}" style="max-width:58px;" title="Pax override for this row"></td>
-        <td><input data-f="currency" value="${r.currency}" maxlength="3" style="max-width:56px;text-transform:uppercase;"></td>
+        <td><select data-f="currency" style="max-width:96px;">${CURS.map((c) => `<option value="${c.code}"${c.code === r.currency ? ' selected' : ''}>${c.sym} ${c.code}</option>`).join('')}${CURS.some((c) => c.code === r.currency) ? '' : `<option selected>${r.currency}</option>`}</select></td>
         <td style="text-align:center;"><input type="checkbox" data-f="is_actual" ${r.is_actual ? 'checked' : ''} style="width:auto;"></td>
         <td style="text-align:center;"><input type="checkbox" data-f="paid" ${r.paid ? 'checked' : ''} style="width:auto;"></td>
         <td><button type="button" class="del" title="Delete row" aria-label="Delete row">✕</button></td>`;
@@ -159,7 +212,7 @@ const expenses = expData ?? [];
         else if (f === 'ind') { r.entry_mode = 'individual'; r.amount_individual = parseFloat(e.target.value.replace(/[, ]/g, '')) || 0; }
         else if (f === 'pax_override') r.pax_override = parseInt(e.target.value) || null;
         else if (f === 'currency') r.currency = e.target.value.toUpperCase();
-        else if (f === 'category') r.category = e.target.value;
+        else if (f === 'category') { r.category = e.target.value; if (fCat) { recalcRow(r, tr); queueSave(r); return applyFilters(); } }
         else if (f === 'description') r.description = e.target.value;
         recalcRow(r, tr); totals(); queueSave(r);
       });

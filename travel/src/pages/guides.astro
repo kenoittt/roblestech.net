@@ -1,0 +1,75 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+
+const GUIDES = [
+  {
+    icon: '🌇', title: 'Day trip', frame: 'One city, one day',
+    plan: ['Pick ONE neighborhood or 2–3 nearby sights — not a checklist sprint.', 'Book anything timed (towers, museums, trains) before you go.', 'Anchor the day around one meal worth traveling for.', 'Leave 2 hours unplanned — the best finds are accidental.'],
+    pack: ['Small daypack only', 'Water bottle & sunscreen', 'Power bank', 'Offline map of the area (download in Google Maps)'],
+  },
+  {
+    icon: '🏖', title: 'Weekend (2–3 days)', frame: 'One base, no hotel changes',
+    plan: ['Stay in ONE lodging — checkout hops eat half a day each.', 'Day 1 icons, day 2 neighborhoods, morning 3 the market + departure.', 'Check our Explore page for that month\'s crowds and festival dates.', 'Pre-book the airport transfer for the late-night arrival.'],
+    pack: ['Carry-on only — no checked bag', '2 outfits + 1 spare, layers over bulk', 'Meds & chargers in the daypack, never checked', 'One dressier option for a nice dinner'],
+  },
+  {
+    icon: '🗺', title: 'One week', frame: 'Two bases max',
+    plan: ['Two cities max — a 7-day trip with 4 hotels is a moving exercise.', 'Alternate: heavy sightseeing day → slow local day. Burnout is real.', 'Book intercity trains/flights first; everything else flexes around them.', 'One "zero day" mid-trip: laundry, pool, wandering. Trust us.', 'Use the Budget tab per-person view so nobody gets surprised.'],
+    pack: ['A week fits in a carry-on with 4–5 outfits + laundry mid-trip', 'Universal adapter + multi-port charger', 'Copies of passport & visas (photo + printed)', 'Basic meds kit: pain relief, rehydration salts, plasters', 'Check the destination\'s "What to wear & pack" for the month'],
+  },
+  {
+    icon: '🌏', title: 'A month or longer', frame: 'Slow travel — regions, not countries',
+    plan: ['Pick a region (e.g. Vietnam north→south) instead of country-hopping.', 'Book only the first week — plans always change once you land.', 'Weekly rhythm: 2 sight days, 2 work/rest days, 3 wander days.', 'Monthly stays unlock big lodging discounts — ask or filter for them.', 'Watch visa day-limits on your trip page; set a calendar reminder.'],
+    pack: ['Pack for ONE week regardless of trip length — laundry exists everywhere', 'Second bank card + some USD cash stored separately', 'Travel insurance covering the whole stretch', 'eSIM with regional data (airalo/roaming apps) or local SIMs', 'Leave 20% bag space — you WILL acquire things'],
+  },
+];
+
+const PRACTICES = [
+  ['🛂', 'Check entry rules first', 'Every destination page and your trip details show visa/entry requirements with official government links. Verify them before booking anything non-refundable.'],
+  ['💸', 'Card + cash split', 'Carry two cards in different bags plus a day\'s cash. Enable travel mode in your banking apps before leaving.'],
+  ['📱', 'Go offline-ready', 'Download offline maps, save your lodging address in the local language, screenshot bookings — airports have the worst wifi at the worst times.'],
+  ['🏥', 'Insurance is not optional', 'A hospital day abroad can cost more than the whole trip. Annual multi-trip policies are cheap for regulars.'],
+  ['🎒', 'Use the trip checklist', 'Every trip has a Travel Checklist section — fill it the week before, tick it while packing, thank yourself at security.'],
+  ['🌦', 'Trust the month, not the brochure', 'Our Explore pages show real seasonal data per month — typhoon windows, monsoons, peak crowds. Plan around them, not around averages.'],
+];
+---
+<AppLayout title="Travel guides · WanderWise">
+  <p class="eyebrow">Travel Guides</p>
+  <h1>How to plan any trip length</h1>
+  <p class="lede">Field-tested playbooks — from a day out to a month on the road — plus the practices that save every trip.</p>
+
+  <div class="stack">
+    {GUIDES.map((g) => (
+      <details class="edit-block card">
+        <summary>
+          <div class="read"><b>{g.icon} {g.title}</b><span class="hint">{g.frame}</span></div>
+          <span class="pencil" aria-hidden="true">▾</span>
+        </summary>
+        <div class="grid2" style="margin-top:12px;">
+          <div>
+            <h2 style="font-size:.95rem;">Plan it</h2>
+            {g.plan.map((p) => <p style="margin:0 0 8px;font-size:.92rem;">• {p}</p>)}
+          </div>
+          <div>
+            <h2 style="font-size:.95rem;">Pack it 🎒</h2>
+            {g.pack.map((p) => <p style="margin:0 0 8px;font-size:.92rem;">• {p}</p>)}
+          </div>
+        </div>
+      </details>
+    ))}
+  </div>
+
+  <div class="section">
+    <h2>Best practices, always</h2>
+    <div class="stack">
+      {PRACTICES.map(([icon, title, body]) => (
+        <div class="card" style="padding:14px 16px;">
+          <b>{icon} {title}</b>
+          <p class="hint" style="margin-top:4px;font-size:.88rem;">{body}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <p class="hint" style="margin-top:18px;">Ready to use these? <a href="/explore">Explore destinations</a> or <a href="/trips">start a trip</a>.</p>
+</AppLayout>

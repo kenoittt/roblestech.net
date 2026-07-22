@@ -23,5 +23,14 @@ insert into public.destinations (name, country, lat, lng, timezone) values
   ('Bishkek',          'Kyrgyzstan', 42.8746,  74.5698, 'Asia/Bishkek'),
   ('Karakol',          'Kyrgyzstan', 42.4907,  78.3936, 'Asia/Bishkek'),
   ('Osh',              'Kyrgyzstan', 40.5140,  72.8161, 'Asia/Bishkek'),
-  ('Issyk-Kul (Cholpon-Ata)', 'Kyrgyzstan', 42.6490, 77.0820, 'Asia/Bishkek')
+  ('Issyk-Kul (Cholpon-Ata)', 'Kyrgyzstan', 42.6490, 77.0820, 'Asia/Bishkek'),
+  ('Tokyo',      'Japan',       35.6762, 139.6503, 'Asia/Tokyo'),
+  ('Kyoto',      'Japan',       35.0116, 135.7681, 'Asia/Tokyo'),
+  ('Osaka',      'Japan',       34.6937, 135.5023, 'Asia/Tokyo'),
+  ('Bangkok',    'Thailand',    13.7563, 100.5018, 'Asia/Bangkok'),
+  ('Chiang Mai', 'Thailand',    18.7883,  98.9853, 'Asia/Bangkok'),
+  ('Phuket',     'Thailand',     7.8804,  98.3923, 'Asia/Bangkok'),
+  ('Seoul',      'South Korea', 37.5665, 126.9780, 'Asia/Seoul'),
+  ('Busan',      'South Korea', 35.1796, 129.0756, 'Asia/Seoul'),
+  ('Jeju',       'South Korea', 33.4996, 126.5312, 'Asia/Seoul')
 on conflict (name, country) do nothing;

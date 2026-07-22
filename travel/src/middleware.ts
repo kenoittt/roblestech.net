@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServer } from './lib/supabase';
 
 // Public: landing, auth pages, and auth endpoints. Everything else needs a session.
-const PUBLIC_PATHS = new Set<string>(['/', '/login', '/signup', '/api/login', '/api/signup', '/logout', '/api/oauth-google', '/api/auth-callback']);
+const PUBLIC_PATHS = new Set<string>(['/', '/login', '/signup', '/api/login', '/api/signup', '/logout', '/api/oauth-google', '/api/auth-callback', '/guides']);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const path = context.url.pathname;
@@ -18,6 +18,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const response = await next();
   const h = response.headers;
+  // NOTE: do NOT CDN-cache /explore pages — Vercel keys its cache by URL
+  // only, so a cached anonymous copy would also be served to signed-in users
+  // (losing their wishlist state and passport-personalized visa card). The
+  // expensive parts (month profiles, photos) are already cached in the DB.
   h.set('X-Content-Type-Options', 'nosniff');
   h.set('X-Frame-Options', 'SAMEORIGIN');
   h.set('Referrer-Policy', 'strict-origin-when-cross-origin');

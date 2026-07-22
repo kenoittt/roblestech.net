@@ -2,6 +2,7 @@
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../../lib/supabase';
 import { entryFor } from '../../../lib/visa';
+import { CURRENCIES } from '../../../lib/currencies';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -9,14 +10,16 @@ const { data: trip } = await supabase.from('trips')
   .select('id,name,start_date,end_date,pax,base_currency,status,owner_id').eq('id', id).single();
 if (!trip) return Astro.redirect('/trips?err=' + encodeURIComponent('Trip not found.'));
 
-type Leg = { id: string; destination_name: string; arrival_airport: string | null; departure_airport: string | null; start_date: string | null; end_date: string | null };
-type Lodging = { id: string; name: string; address: string | null; check_in_at: string | null; check_out_at: string | null; confirmation_ref: string | null };
-const [{ data: legsData }, { data: lodgingData }] = await Promise.all([
-  supabase.from('trip_legs').select('id,destination_name,arrival_airport,departure_airport,start_date,end_date').eq('trip_id', id).order('position'),
-  supabase.from('lodgings').select('id,name,address,check_in_at,check_out_at,confirmation_ref').eq('trip_id', id).order('check_in_at'),
+type Leg = { id: string; destination_name: string; arrival_airport: string | null; departure_airport: string | null; airline?: string | null; flight_no?: string | null; start_date: string | null; end_date: string | null };
+type Lodging = { id: string; name: string; address: string | null; check_in_at: string | null; check_out_at: string | null; confirmation_ref: string | null; booking_url?: string | null };
+const [{ data: legsData }, { data: lodgingData }, { data: checklistData }] = await Promise.all([
+  supabase.from('trip_legs').select('*').eq('trip_id', id).order('position'),
+  supabase.from('lodgings').select('*').eq('trip_id', id).order('check_in_at'),
+  supabase.from('trip_checklist').select('id,item,done').eq('trip_id', id).order('position').order('created_at'),
 ]);
 const legs: Leg[] = (legsData as Leg[]) ?? [];
 const lodgings: Lodging[] = (lodgingData as Lodging[]) ?? [];
+const checklist = (checklistData ?? []) as { id: string; item: string; done: boolean }[];
 const isOwner = trip.owner_id === Astro.locals.user?.id;
 
 // Sharing: membership rows come through RLS; names/emails resolved via admin
@@ -34,9 +37,11 @@ const members = (memberRows ?? []).map((m: any) => ({ ...m, ...who(m.user_id) })
 const owner = who(trip.owner_id);
 const isMember = members.some((m: any) => m.user_id === Astro.locals.user?.id);
 
-// Searchable destination list + entry requirements for the trip's countries.
-const { data: destRows } = await supabase.from('destinations').select('name,country').eq('active', true).order('name');
+// Destination dropdown + entry requirements for the trip's countries.
+const { data: destRows } = await supabase.from('destinations').select('name,country').eq('active', true).order('country').order('name');
 const destList = (destRows ?? []) as { name: string; country: string }[];
+const destByCountry: Record<string, string[]> = {};
+for (const d of destList) (destByCountry[d.country] ??= []).push(d.name);
 const { data: myProfile } = await supabase.from('profiles').select('passport_country').eq('id', Astro.locals.user?.id).maybeSingle();
 const passport = (myProfile as any)?.passport_country ?? null;
 
@@ -44,12 +49,15 @@ const norm = (s: string) => s.trim().toLowerCase();
 const legCountries = [...new Set(legs.map((l) => {
   const ln = norm(l.destination_name);
   const hit = destList.find((d) => { const dn = norm(d.name); return dn === ln || ln.includes(dn) || dn.includes(ln) || ln === norm(d.country); });
-  return hit?.country ?? (destList.some((d) => norm(d.country) === ln) ? destList.find((d) => norm(d.country) === ln)!.country : null);
+  return hit?.country ?? null;
 }).filter(Boolean))] as string[];
 const entryCards = legCountries.map((c) => entryFor(passport, c)).filter(Boolean);
+
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+const flightStatusUrl = (fno: string) => `https://www.flightaware.com/live/flight/${encodeURIComponent(fno)}`;
+const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
 ---
 
 <AppLayout title={`${trip.name} · WanderWise`}>
@@ -65,51 +73,100 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
   {ok && <div class="alert alert-ok">{decodeURIComponent(ok)}</div>}
   {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
 
-  <form method="post" action="/api/trip-update" class="card stack">
-    <input type="hidden" name="id" value={trip.id} />
-    <div class="grid2">
-      <div><label>Trip name</label><input name="name" value={trip.name} required /></div>
-      <div><label>Pax (travelers)</label><input name="pax" type="number" min="1" value={trip.pax} /></div>
-      <div><label>Start date</label><input name="start_date" type="date" value={trip.start_date ?? ''} /></div>
-      <div><label>End date</label><input name="end_date" type="date" value={trip.end_date ?? ''} /></div>
-      <div><label>Base currency</label><input name="base_currency" value={trip.base_currency} maxlength="3" style="text-transform:uppercase;" /></div>
-      <div><label>Status</label>
-        <select name="status">
-          <option value="planning" selected={trip.status === 'planning'}>Planning</option>
-          <option value="active" selected={trip.status === 'active'}>Active (on the trip)</option>
-          <option value="archived" selected={trip.status === 'archived'}>Archived</option>
-        </select>
+  <details class="edit-block card">
+    <summary>
+      <div class="read">
+        <b>Trip settings</b>
+        <span class="hint">📅 {trip.start_date ?? 'no dates'}{trip.end_date ? ' → ' + trip.end_date : ''} · 👥 {trip.pax} pax · 💰 {trip.base_currency}</span>
       </div>
-    </div>
-    <div class="rowflex">
-      <button class="btn" type="submit">Save trip</button>
-    </div>
-    <p class="hint">Changing pax instantly recalculates every budget row from its entry side (group or per-person).</p>
-  </form>
+      <span class="pencil" aria-hidden="true">✏️</span>
+    </summary>
+    <form method="post" action="/api/trip-update" class="stack" style="margin-top:14px;">
+      <input type="hidden" name="id" value={trip.id} />
+      <div class="grid2">
+        <div><label>Trip name</label><input name="name" value={trip.name} required placeholder="Put the name of your trip" /></div>
+        <div><label>Pax (travelers)</label><input name="pax" type="number" min="1" value={trip.pax} /></div>
+        <div><label>Start date</label><input name="start_date" type="date" value={trip.start_date ?? ''} /></div>
+        <div><label>End date</label><input name="end_date" type="date" value={trip.end_date ?? ''} /></div>
+        <div><label>Currency</label>
+          <select name="base_currency">
+            {!currencyKnown && <option value={trip.base_currency} selected>{trip.base_currency}</option>}
+            {CURRENCIES.map((c) => <option value={c.code} selected={trip.base_currency === c.code}>{c.sym} · {c.code} — {c.name}</option>)}
+          </select>
+        </div>
+        <div><label>Status</label>
+          <select name="status">
+            <option value="planning" selected={trip.status === 'planning'}>Planning</option>
+            <option value="active" selected={trip.status === 'active'}>Active (on the trip)</option>
+            <option value="archived" selected={trip.status === 'archived'}>Archived</option>
+          </select>
+        </div>
+      </div>
+      <div class="rowflex"><button class="btn" type="submit">Save trip</button></div>
+      <p class="hint">Changing pax instantly recalculates every budget row from its entry side (group or per-person).</p>
+    </form>
+  </details>
 
   <div class="section">
-    <h2>Destinations & flights</h2>
+    <h2>Destinations & flights ✈️</h2>
     <div class="stack">
       {legs.map((l) => (
-        <form method="post" action="/api/leg-save" class="card rowflex">
-          <input type="hidden" name="id" value={l.id} />
-          <input type="hidden" name="trip_id" value={trip.id} />
-          <div style="flex:2;min-width:150px;"><label>Destination</label><input name="destination_name" value={l.destination_name} list="dest-list" required /></div>
-          <div style="width:110px;"><label>Arrive (airport)</label><input name="arrival_airport" value={l.arrival_airport ?? ''} placeholder="HKG" /></div>
-          <div style="width:110px;"><label>Depart (airport)</label><input name="departure_airport" value={l.departure_airport ?? ''} placeholder="TPE" /></div>
-          <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={l.start_date ?? ''} /></div>
-          <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={l.end_date ?? ''} /></div>
-          <button class="mini" type="submit">Save</button>
-          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');" aria-label="Remove destination">✕</button>
-        </form>
+        <details class="edit-block card">
+          <summary>
+            <div class="read">
+              <b>{l.destination_name}</b>
+              <span class="hint">
+                {l.airline || l.flight_no ? `✈ ${[l.airline, l.flight_no].filter(Boolean).join(' ')}` : 'No flight yet'}
+                {l.arrival_airport ? ` · → ${l.arrival_airport}` : ''}
+                {l.start_date ? ` · ${l.start_date}` : ''}
+              </span>
+              {l.flight_no && <a class="mini" style="margin-left:8px;" href={flightStatusUrl(l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🛰 Live flight status ↗</a>}
+            </div>
+            <span class="pencil" aria-hidden="true">✏️</span>
+          </summary>
+          <form method="post" action="/api/leg-save" class="rowflex" style="margin-top:14px;">
+            <input type="hidden" name="id" value={l.id} />
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <div style="flex:2;min-width:170px;"><label>Destination</label>
+              <select name="destination_name" required>
+                {!destList.some((d) => d.name === l.destination_name) && <option value={l.destination_name} selected>{l.destination_name}</option>}
+                {Object.entries(destByCountry).map(([country, names]) => (
+                  <optgroup label={country}>{names.map((n) => <option value={n} selected={n === l.destination_name}>{n}</option>)}</optgroup>
+                ))}
+              </select>
+            </div>
+            <div style="width:130px;"><label>Airline</label><input name="airline" value={l.airline ?? ''} placeholder="Cebu Pacific" /></div>
+            <div style="width:110px;"><label>Flight #</label><input name="flight_no" value={l.flight_no ?? ''} placeholder="5J310" /></div>
+            <div style="width:100px;"><label>Arrive</label><input name="arrival_airport" value={l.arrival_airport ?? ''} placeholder="HKG" /></div>
+            <div style="width:100px;"><label>Depart</label><input name="departure_airport" value={l.departure_airport ?? ''} placeholder="TPE" /></div>
+            <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={l.start_date ?? ''} /></div>
+            <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={l.end_date ?? ''} /></div>
+            <button class="mini" type="submit">Save</button>
+            <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');" aria-label="Remove destination">✕</button>
+          </form>
+        </details>
       ))}
-      <form method="post" action="/api/leg-save" class="card rowflex" style="border-style:dashed;">
-        <input type="hidden" name="trip_id" value={trip.id} />
-        <div style="flex:2;min-width:150px;"><label>Add destination</label><input name="destination_name" list="dest-list" required placeholder="Start typing… Hong Kong, Taipei, Samarkand" /></div>
-        <div style="width:110px;"><label>Arrive</label><input name="arrival_airport" placeholder="HKG" /></div>
-        <div style="width:110px;"><label>Depart</label><input name="departure_airport" /></div>
-        <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
-      </form>
+      <details class="edit-block card" style="border-style:dashed;">
+        <summary>
+          <div class="read"><b>＋ Add a destination</b><span class="hint">Pick a city, add your flight — live status links automatically</span></div>
+          <span class="pencil" aria-hidden="true">✏️</span>
+        </summary>
+        <form method="post" action="/api/leg-save" class="rowflex" style="margin-top:14px;">
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <div style="flex:2;min-width:170px;"><label>Destination</label>
+            <select name="destination_name" required>
+              <option value="" disabled selected>Choose a city…</option>
+              {Object.entries(destByCountry).map(([country, names]) => (
+                <optgroup label={country}>{names.map((n) => <option value={n}>{n}</option>)}</optgroup>
+              ))}
+            </select>
+          </div>
+          <div style="width:130px;"><label>Airline</label><input name="airline" placeholder="Cebu Pacific" /></div>
+          <div style="width:110px;"><label>Flight #</label><input name="flight_no" placeholder="5J310" /></div>
+          <div style="width:100px;"><label>Arrive</label><input name="arrival_airport" placeholder="HKG" /></div>
+          <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
+        </form>
+      </details>
     </div>
   </div>
 
@@ -125,7 +182,7 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
             <p style="margin:0 0 8px;">{v.detail}</p>
             {v.status === 'unknown' && <p style="margin:0 0 8px;"><a href="/account">Set passport country →</a></p>}
             {v.notes.map((n: string) => <p class="hint" style="margin:0 0 4px;">• {n}</p>)}
-            <p style="margin:8px 0 0;font-size:.85rem;">
+            <p style="margin:8px 0 0;font-size:.85rem;overflow-wrap:anywhere;">
               {v.official.map((o: any, i: number) => (
                 <>{i > 0 && ' · '}<a href={o.url} target="_blank" rel="noopener noreferrer">{o.label} ↗</a></>
               ))}
@@ -138,33 +195,82 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
   )}
 
   <div class="section">
-    <h2>Lodging</h2>
+    <h2>Lodging 🏨</h2>
     <div class="stack">
       {lodgings.map((g) => (
-        <form method="post" action="/api/lodging-save" class="card stack">
-          <input type="hidden" name="id" value={g.id} />
-          <input type="hidden" name="trip_id" value={trip.id} />
-          <div class="grid2">
-            <div><label>Name</label><input name="name" value={g.name} required /></div>
-            <div><label>Confirmation #</label><input name="confirmation_ref" value={g.confirmation_ref ?? ''} /></div>
-            <div style="grid-column:1/-1;"><label>Address</label><input name="address" value={g.address ?? ''} /></div>
-            <div><label>Check-in</label><input name="check_in_at" type="datetime-local" value={g.check_in_at ? g.check_in_at.slice(0, 16) : ''} /></div>
-            <div><label>Check-out</label><input name="check_out_at" type="datetime-local" value={g.check_out_at ? g.check_out_at.slice(0, 16) : ''} /></div>
-          </div>
-          <div class="rowflex">
-            <button class="mini" type="submit">Save</button>
-            <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this lodging?');">Remove</button>
-            <span class="hint">{fmtDT(g.check_in_at)} → {fmtDT(g.check_out_at)}</span>
-          </div>
-        </form>
+        <details class="edit-block card">
+          <summary>
+            <div class="read">
+              <b>{g.name}</b>
+              <span class="hint">{fmtDT(g.check_in_at)} → {fmtDT(g.check_out_at)}{g.address ? ` · ${g.address}` : ''}</span>
+              {g.booking_url && <a class="mini" style="margin-left:8px;" href={g.booking_url} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 Open booking ↗</a>}
+            </div>
+            <span class="pencil" aria-hidden="true">✏️</span>
+          </summary>
+          <form method="post" action="/api/lodging-save" class="stack" style="margin-top:14px;">
+            <input type="hidden" name="id" value={g.id} />
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <div class="grid2">
+              <div><label>Name</label><input name="name" value={g.name} required /></div>
+              <div><label>Confirmation #</label><input name="confirmation_ref" value={g.confirmation_ref ?? ''} /></div>
+              <div style="grid-column:1/-1;"><label>Address</label><input name="address" value={g.address ?? ''} /></div>
+              <div style="grid-column:1/-1;"><label>Booking link (Trip.com, Airbnb, Agoda, airline ticket…)</label>
+                <input name="booking_url" type="url" value={g.booking_url ?? ''} placeholder="https://www.trip.com/…" /></div>
+              <div><label>Check-in</label><input name="check_in_at" type="datetime-local" value={g.check_in_at ? g.check_in_at.slice(0, 16) : ''} /></div>
+              <div><label>Check-out</label><input name="check_out_at" type="datetime-local" value={g.check_out_at ? g.check_out_at.slice(0, 16) : ''} /></div>
+            </div>
+            <div class="rowflex">
+              <button class="mini" type="submit">Save</button>
+              <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this lodging?');">Remove</button>
+            </div>
+          </form>
+        </details>
       ))}
-      <form method="post" action="/api/lodging-save" class="card rowflex" style="border-style:dashed;">
+      <details class="edit-block card" style="border-style:dashed;">
+        <summary>
+          <div class="read"><b>＋ Add lodging</b><span class="hint">Hotel, Airbnb or any reservation — paste the booking link to open it anytime</span></div>
+          <span class="pencil" aria-hidden="true">✏️</span>
+        </summary>
+        <form method="post" action="/api/lodging-save" class="rowflex" style="margin-top:14px;">
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <div style="flex:1;min-width:180px;"><label>Name</label><input name="name" required placeholder="Harbour View Hotel" /></div>
+          <div style="flex:1;min-width:200px;"><label>Booking link</label><input name="booking_url" type="url" placeholder="https://www.airbnb.com/…" /></div>
+          <div style="width:170px;"><label>Check-in</label><input name="check_in_at" type="datetime-local" /></div>
+          <div style="width:170px;"><label>Check-out</label><input name="check_out_at" type="datetime-local" /></div>
+          <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
+        </form>
+      </details>
+    </div>
+  </div>
+
+  <div class="section" id="checklist">
+    <h2>Travel checklist 🎒</h2>
+    <div class="card stack">
+      {checklist.map((c) => (
+        <div class="rowflex" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px;">
+          <form method="post" action="/api/checklist-save" class="m0">
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <input type="hidden" name="id" value={c.id} />
+            <input type="hidden" name="op" value="toggle" />
+            <input type="hidden" name="done" value={c.done ? '0' : '1'} />
+            <button type="submit" class="checkbox" aria-label={c.done ? 'Mark as not packed' : 'Mark as packed'}>{c.done ? '☑' : '☐'}</button>
+          </form>
+          <span style={`flex:1;${c.done ? 'text-decoration:line-through;color:var(--muted);' : ''}`}>{c.item}</span>
+          <form method="post" action="/api/checklist-save" class="m0">
+            <input type="hidden" name="trip_id" value={trip.id} />
+            <input type="hidden" name="id" value={c.id} />
+            <input type="hidden" name="op" value="delete" />
+            <button class="mini" type="submit" style="color:var(--bad);" aria-label="Delete item">✕</button>
+          </form>
+        </div>
+      ))}
+      {checklist.length === 0 && <p class="hint">Nothing yet — add what you don't want to forget: passport, chargers, meds, adapters…</p>}
+      <form method="post" action="/api/checklist-save" class="rowflex">
         <input type="hidden" name="trip_id" value={trip.id} />
-        <div style="flex:1;min-width:180px;"><label>Add lodging</label><input name="name" required placeholder="Harbour View Hotel" /></div>
-        <div style="width:170px;"><label>Check-in</label><input name="check_in_at" type="datetime-local" /></div>
-        <div style="width:170px;"><label>Check-out</label><input name="check_out_at" type="datetime-local" /></div>
-        <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
+        <div style="flex:1;min-width:180px;"><label>Add an item</label><input name="item" required placeholder="Passport, power bank, sunscreen…" /></div>
+        <button class="btn" type="submit" style="padding:11px 16px;">Add</button>
       </form>
+      <p class="hint">Tip: the <a href={`/explore`}>Explore</a> page's "What to wear & pack" for your destination and month is a great starting list.</p>
     </div>
   </div>
 
@@ -189,7 +295,7 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
               </select>
               <button class="mini" type="submit" name="op" value="role">Save</button>
               <button class="mini" type="submit" name="op" value="remove" style="color:var(--bad);"
-                onclick={`return confirm('Remove ${m.name} from this trip?');`}>✕</button>
+                onclick={`return confirm('Remove ${m.name} from this trip?');`} aria-label="Remove member">✕</button>
             </form>
           )}
         </div>
@@ -200,7 +306,7 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
           <input type="hidden" name="trip_id" value={trip.id} />
           <input type="hidden" name="op" value="add" />
           <div style="flex:1;min-width:200px;"><label>Invite by email</label><input name="email" type="email" required placeholder="friend@example.com" /></div>
-          <div style="width:130px;"><label>Role</label>
+          <div style="width:150px;"><label>Role</label>
             <select name="role"><option value="editor">Editor (can edit)</option><option value="viewer">Viewer (read-only)</option></select>
           </div>
           <button class="btn" type="submit" style="padding:11px 16px;">Invite</button>
@@ -233,9 +339,4 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
       )}
     </div>
   </div>
-
-  <datalist id="dest-list">
-    {destList.map((d) => <option value={d.name}>{d.country}</option>)}
-    {[...new Set(destList.map((d) => d.country))].map((c) => <option value={c} />)}
-  </datalist>
 </AppLayout>

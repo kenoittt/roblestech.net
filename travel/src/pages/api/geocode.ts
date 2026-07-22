@@ -21,7 +21,14 @@ export const GET: APIRoute = async (context) => {
     const results = (Array.isArray(j) ? j : []).map((r: any) => ({
       display_name: r.display_name, lat: Number(r.lat), lng: Number(r.lon),
     }));
-    return new Response(JSON.stringify({ results }), { headers: { 'content-type': 'application/json' } });
+    return new Response(JSON.stringify({ results }), {
+      headers: {
+        'content-type': 'application/json',
+        // Same query → same places; cache at the CDN for a day to keep
+        // Nominatim volume low (their usage policy) and responses instant.
+        'cache-control': 'public, s-maxage=86400, stale-while-revalidate=604800',
+      },
+    });
   } catch {
     return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
   }

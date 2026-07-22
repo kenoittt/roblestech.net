@@ -21,8 +21,10 @@ const { data: profile } = await supabase.from('profiles')
       <div><label for="dn">Display name</label><input id="dn" name="display_name" value={profile?.display_name ?? ''} /></div>
       <div>
         <label for="country">Passport country</label>
-        <input id="country" name="passport_country" list="country-list" autocomplete="country-name"
-          value={profile?.passport_country ?? ''} placeholder="Start typing… e.g. Philippines" />
+        <select id="country" name="passport_country" autocomplete="country-name">
+          <option value="">Select your country…</option>
+          {COUNTRIES.map((c) => <option value={c.name} selected={profile?.passport_country === c.name}>{c.name}</option>)}
+        </select>
         <p class="hint" style="margin-top:4px;">Used for visa &amp; entry-requirement checks on your trips.</p>
       </div>
       <button class="btn" type="submit">Save profile</button>
@@ -34,5 +36,4 @@ const { data: profile } = await supabase.from('profiles')
       <button class="btn" type="submit">Update password</button>
     </form>
   </div>
-  <datalist id="country-list">{COUNTRIES.map((c) => <option value={c.name} />)}</datalist>
 </AppLayout>

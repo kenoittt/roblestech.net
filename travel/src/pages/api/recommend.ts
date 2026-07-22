@@ -43,11 +43,27 @@ export const POST: APIRoute = async (context) => {
     }), { headers: { 'content-type': 'application/json' } });
   }
 
-  type Sug = { name: string; category: string; why: string; best_time: string };
+  // Thumbnails come free from the cached month profiles (built on Explore).
+  const imgOf = new Map<string, string>();
+  {
+    const { data: destRows } = await supabase.from('destinations').select('id,name').in('name', [...matched.keys()]);
+    const ids = ((destRows as any[]) ?? []).map((d) => d.id);
+    if (ids.length) {
+      const { data: profs } = await supabase.from('destination_month_profiles')
+        .select('best_time_json,hidden_gems_json').in('destination_id', ids).eq('month', month);
+      for (const p of (profs as any[]) ?? []) {
+        for (const arr of [p.best_time_json?.top_places, p.best_time_json?.adventures, p.hidden_gems_json]) {
+          for (const it of arr ?? []) if (it?.img && it?.name) imgOf.set(norm(it.name), it.img);
+        }
+      }
+    }
+  }
+
+  type Sug = { name: string; category: string; why: string; best_time: string; img: string | null };
   const suggestions: Sug[] = [];
   const push = (name: string, category: string, why: string, best_time: string) => {
     if (saved.has(norm(name)) || suggestions.some((s) => norm(s.name) === norm(name))) return;
-    suggestions.push({ name, category, why, best_time });
+    suggestions.push({ name, category, why, best_time, img: imgOf.get(norm(name)) ?? null });
   };
 
   const many = matched.size > 1;

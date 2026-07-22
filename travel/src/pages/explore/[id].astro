@@ -32,6 +32,9 @@ if (Astro.locals.user) {
 }
 const entry = entryFor(passport, dest.country);
 const mapsUrl = (place: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place + ', ' + dest.name + ', ' + dest.country)}`;
+// Route to the best source for the place — official sites, guides, reviews —
+// rather than assuming Wikipedia has it.
+const infoUrl = (place: string) => `https://www.google.com/search?q=${encodeURIComponent(place + ' ' + dest.name + ' ' + dest.country)}`;
 const wikiUrl = (place: string) => `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(place + ' ' + dest.name)}`;
 const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
 ---
@@ -52,8 +55,26 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     ))}
   </div>
 
-  {hero && <img src={hero} alt={`${dest.name}`} loading="lazy"
-    style="width:100%;height:220px;object-fit:cover;border-radius:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(28,43,43,.12);" />}
+  {hero && <a href={hero} target="_blank" rel="noopener noreferrer" title="Open full-size photo">
+    <img src={hero} alt={`${dest.name}`} loading="lazy"
+      style="width:100%;height:220px;object-fit:cover;border-radius:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(28,43,43,.12);" />
+  </a>}
+
+  <div class="card" style="margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-left:4px solid var(--coral);">
+    <div style="flex:1;min-width:200px;">
+      <b>Want to start a trip to {dest.name}? ✈️</b>
+      <p class="hint" style="margin-top:2px;">One tap creates a trip project with {dest.name} as your first destination.</p>
+    </div>
+    {Astro.locals.user ? (
+      <form method="post" action="/api/trip-create" class="m0">
+        <input type="hidden" name="destination_name" value={dest.name} />
+        <input type="hidden" name="pax" value="2" />
+        <button class="btn btn-coral" type="submit">Start a trip</button>
+      </form>
+    ) : (
+      <a class="btn btn-coral" href="/signup" style="text-decoration:none;">Sign up free to start</a>
+    )}
+  </div>
 
   <div class="card" style="margin-bottom:14px;">
     <h2>Weather in {MONTHS[month - 1]}</h2>
@@ -125,12 +146,13 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
       <div class="stack">{topPlaces.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">📍</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">📍</div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
           </div>
         </details>
       ))}</div>
@@ -144,12 +166,13 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
       <div class="stack">{adventures.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">⛰️</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">⛰️</div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
           </div>
         </details>
       ))}</div>
@@ -162,12 +185,13 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
       <div class="stack">{gems.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">💎</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">💎</div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
           </div>
         </details>
       ))}</div>
@@ -180,6 +204,7 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     .place-row{display:flex;gap:12px;align-items:center;}
     .place-row img,.place-row .ph{width:76px;height:56px;flex:0 0 76px;border-radius:10px;object-fit:cover;
       border:1px solid var(--glass-edge);box-shadow:0 2px 8px rgba(28,43,43,.10);}
+    .place-row .imglink{flex:0 0 76px;line-height:0;}
     .place-row .ph{display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.45);}
     .place-det summary{cursor:pointer;list-style:none;border-radius:10px;padding:4px;}
     .place-det summary::-webkit-details-marker{display:none;}

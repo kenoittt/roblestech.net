@@ -45,9 +45,31 @@ items.forEach((it) => {
   pin(it.lat, it.lng, c, `<b>${it.place_name}</b><br>${it.day ?? 'unscheduled'} ${it.time ?? ''}<br>${it.notes ?? ''}<br><a href="/trips/${tripId}/itinerary">Edit in itinerary</a>`);
   if (it.day) (byDay[it.day] ??= []).push(it);
 });
+// Distance between consecutive stops (haversine, km) → route plausibility.
+const kmBetween = (a, b) => {
+  const R = 6371, dLat = ((b[0] - a[0]) * Math.PI) / 180, dLng = ((b[1] - a[1]) * Math.PI) / 180;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos((a[0] * Math.PI) / 180) * Math.cos((b[0] * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+};
+const routeSummary = document.getElementById('route-summary');
 Object.entries(byDay).forEach(([d, list]) => {
-  const pts = list.sort((a, b) => String(a.time ?? '').localeCompare(String(b.time ?? ''))).map((i) => [i.lat, i.lng]);
+  const sorted = list.sort((a, b) => String(a.time ?? '').localeCompare(String(b.time ?? '')));
+  const pts = sorted.map((i) => [i.lat, i.lng]);
   if (pts.length > 1) L.polyline(pts, { color: colorForDay(d), weight: 3, opacity: 0.6, dashArray: '6 6' }).addTo(map);
+  if (routeSummary && pts.length > 1) {
+    let total = 0;
+    for (let i = 1; i < pts.length; i++) total += kmBetween(pts[i - 1], pts[i]);
+    const verdict = total <= 12 ? '✅ easy day (walk/short rides)'
+      : total <= 60 ? '🚕 doable with transit or taxis'
+      : '⚠️ very long day — consider splitting or reordering';
+    const row = document.createElement('div');
+    row.className = 'hint';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:6px;';
+    row.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${colorForDay(d)};flex:0 0 auto;"></span>` +
+      `<span><b>${new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</b>` +
+      ` — ${sorted.length} stops · ~${total.toFixed(1)} km between stops · ${verdict}</span>`;
+    routeSummary.appendChild(row);
+  }
 });
 
 places.forEach((p) => {
@@ -70,10 +92,11 @@ map.on('click', async (e) => {
   location.reload();
 });
 
-// ── Add place: search ─────────────────────────────────────────────────────
+// ── Add place: search (only when the page provides the search bar) ───────
 const q = document.getElementById('map-q');
 const results = document.getElementById('map-results');
-document.getElementById('map-search').addEventListener('submit', async (e) => {
+const searchForm = document.getElementById('map-search');
+if (searchForm) searchForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   results.innerHTML = '<span class="hint">Searching…</span>';
   const res = await fetch('/api/geocode?q=' + encodeURIComponent(q.value));

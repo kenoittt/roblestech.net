@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../../lib/supabase';
 import { audit } from '../../lib/audit';
+import { siteUrl } from '../../lib/site';
 
 export const prerender = false;
 
@@ -19,9 +20,9 @@ export const POST: APIRoute = async (context) => {
     password,
     options: {
       data: { display_name, passport_country },
-      // Confirmation email links back to THIS deployment (must also be in
+      // Confirmation email links back to the canonical site (must also be in
       // Supabase Auth -> URL Configuration -> Redirect URLs).
-      emailRedirectTo: `${context.url.origin}/login?confirmed=1`,
+      emailRedirectTo: `${siteUrl(context)}/login?confirmed=1`,
     },
   });
   if (error) return context.redirect('/signup?error=' + encodeURIComponent(error.message));

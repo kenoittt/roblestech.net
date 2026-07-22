@@ -109,6 +109,48 @@ export const ENTRY: Record<string, EntryInfo> = {
   },
 };
 
+ENTRY['Japan'] = {
+  country: 'Japan',
+  free: {
+    ...spread(['US','CA','GB','AU','NZ','KR','SG','MY','HK','TW','IL','TR','MX','AR','BR','CL','CH','NO','IS','LI','MC'], 90), ...spread(EU, 90),
+    TH: 15, BN: 14,
+  },
+  fallback: 'Apply for a visa — Philippine and several other passports can use the official JAPAN eVISA for tourism (single entry, up to 90 days).',
+  official: [
+    { label: 'JAPAN eVISA (official)', url: 'https://www.evisa.mofa.go.jp' },
+    { label: 'MOFA Japan — visa info', url: 'https://www.mofa.go.jp/j_info/visit/visa/index.html' },
+    { label: 'Visit Japan Web (arrival QR)', url: 'https://www.vjw.digital.go.jp' },
+  ],
+  notes: ['Fill Visit Japan Web before landing to speed up immigration & customs.'],
+  checked: 'July 2026',
+};
+ENTRY['Thailand'] = {
+  country: 'Thailand',
+  free: {
+    ...spread(['US','CA','GB','AU','NZ','JP','KR','SG','MY','PH','ID','VN','KH','LA','BN','IN','CN','HK','TW','TR','AE','SA','QA','KW','BH','OM','IL','ZA','BR','AR','CL','MX','PE','KZ','UZ','CH','NO','IS'], 60), ...spread(EU, 60),
+  },
+  fallback: 'Apply for the official Thai e-Visa before travel.',
+  official: [
+    { label: 'Thai e-Visa (official)', url: 'https://www.thaievisa.go.th' },
+    { label: 'Thailand Digital Arrival Card (required for ALL visitors)', url: 'https://tdac.immigration.go.th' },
+  ],
+  notes: ['Everyone must submit the online Thailand Digital Arrival Card (TDAC) within 3 days before arrival.', '60-day visa-exempt stays are extendable once by 30 days at immigration.'],
+  checked: 'July 2026',
+};
+ENTRY['South Korea'] = {
+  country: 'South Korea',
+  free: {
+    US: 90, CA: 180, GB: 180, ...spread(['AU','NZ','SG','MY','HK','TW','JP','TH','AE','IL','TR','MX','BR','CL','CH','NO','IS'], 90), ...spread(EU, 90), RU: 60,
+  },
+  fallback: 'Apply for a visa via the official Korea Visa Portal. Note: Jeju Island alone admits many additional nationalities visa-free on direct flights.',
+  official: [
+    { label: 'K-ETA (required for most visa-exempt travelers)', url: 'https://www.k-eta.go.kr' },
+    { label: 'Korea Visa Portal (official)', url: 'https://www.visa.go.kr' },
+  ],
+  notes: ['Visa-exempt travelers generally need a K-ETA approved before boarding — some nationalities have had temporary exemptions, so check the K-ETA site for the current list.'],
+  checked: 'July 2026',
+};
+
 export type VisaVerdict = {
   status: 'visa-free' | 'action-needed' | 'unknown';
   headline: string;

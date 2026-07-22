@@ -22,7 +22,7 @@ const dates = (t: Trip) => t.start_date ? `${t.start_date}${t.end_date ? ' → '
   {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
 
   <form method="post" action="/api/trip-create" class="card rowflex">
-    <div style="flex:2;min-width:180px;"><label>New trip</label><input name="name" required placeholder="Hong Kong + Taipei 2027" /></div>
+    <div style="flex:2;min-width:180px;"><label>New trip</label><input name="name" required placeholder="Put the name of your trip" /></div>
     <div style="width:110px;"><label>Pax</label><input name="pax" type="number" min="1" value="2" /></div>
     <div style="width:110px;"><label>Currency</label><input name="base_currency" value="USD" maxlength="3" style="text-transform:uppercase;" /></div>
     <button class="btn" type="submit">Create</button>

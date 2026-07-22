@@ -130,6 +130,16 @@ tr.total-row td{font-weight:800;background:rgba(245,181,74,.18);border-top:2px s
   h1{font-size:1.4rem;}
 }
 
+/* Pencil-edit blocks: closed = read view + ✏️, open = form with Save */
+.edit-block > summary{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;}
+.edit-block > summary::-webkit-details-marker{display:none;}
+.edit-block .read{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;}
+.edit-block .read .hint{overflow-wrap:anywhere;}
+.edit-block .pencil{flex:0 0 auto;font-size:.95rem;opacity:.7;border:1px solid var(--glass-edge);border-radius:8px;padding:6px 9px;background:var(--glass-strong);box-shadow:0 2px 8px rgba(28,43,43,.07);}
+.edit-block[open] .pencil{opacity:1;background:rgba(15,118,110,.12);}
+.edit-block > summary:hover .pencil{border-color:var(--teal);}
+.checkbox{font-size:1.3rem;background:none;border:0;cursor:pointer;line-height:1;padding:4px 6px;color:var(--teal);}
+
 /* ── A11y & interaction polish (ui-ux-pro-max pass) ─────────────────────
    Focus rings, smooth 150-250ms feedback, card lift, touch targets,
    reduced-motion. Palette untouched. */
@@ -153,4 +163,30 @@ button { cursor: pointer; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ── Density & mobile pass (desktop breathing room + iPhone-class widths) ──
+   Wider container, more section air, and fully stacked form fields on
+   phones so nothing cramps or overlaps. */
+.main{max-width:980px;}
+.nav{max-width:980px;}
+.section{margin-top:32px;}
+.rowflex{gap:12px;row-gap:14px;}
+.card{padding:20px;}
+.stack{gap:14px;}
+h1{margin-bottom:8px;}
+@media(max-width:600px){
+  .brand{font-size:.98rem;}
+  .brand svg{width:18px;height:18px;}
+  .nav-links{gap:10px;}
+  .nav-links a,.btn-ghost{font-size:.8rem;}
+  .btn-sm{padding:7px 10px;}
+  .tabbar{width:100%;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;}
+  .tabbar a{white-space:nowrap;padding:9px 13px;flex:0 0 auto;}
+  /* Stack every multi-field form row: full-width fields beat cramped columns */
+  .rowflex > div{min-width:100% !important;width:100% !important;flex:1 1 100% !important;}
+  .rowflex .btn,.rowflex .mini{width:auto;}
+  .card{padding:16px 14px;}
+  .grid2{grid-template-columns:1fr;}
+  #map,#explore-map{height:48vh !important;}
 }

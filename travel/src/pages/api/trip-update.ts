@@ -27,15 +27,18 @@ export const POST: APIRoute = async (context) => {
   if (error) return context.redirect(back + '?err=' + encodeURIComponent(error.message));
 
   if (before && (before as any).pax !== pax) {
-    // Recalculate both derived sides. pax_override wins when set (FR-BDG-08).
-    const { data: rows } = await supabase.from('expenses')
-      .select('id,amount_group,amount_individual,entry_mode,pax_override').eq('trip_id', id);
-    for (const r of (rows as any[]) ?? []) {
-      const eff = Math.max(1, r.pax_override ?? pax);
-      const patch = r.entry_mode === 'group'
-        ? { amount_individual: Math.round((r.amount_group / eff) * 100) / 100 }
-        : { amount_group: Math.round((r.amount_individual * eff) * 100) / 100 };
-      await supabase.from('expenses').update(patch).eq('id', r.id);
+    // Recalculate both derived sides in one statement; pax_override wins (FR-BDG-08).
+    const { error: rpcErr } = await supabase.rpc('recalc_expenses', { t: id });
+    if (rpcErr) {
+      const { data: rows } = await supabase.from('expenses')
+        .select('id,amount_group,amount_individual,entry_mode,pax_override').eq('trip_id', id);
+      for (const r of (rows as any[]) ?? []) {
+        const eff = Math.max(1, r.pax_override ?? pax);
+        const patch = r.entry_mode === 'group'
+          ? { amount_individual: Math.round((r.amount_group / eff) * 100) / 100 }
+          : { amount_group: Math.round((r.amount_individual * eff) * 100) / 100 };
+        await supabase.from('expenses').update(patch).eq('id', r.id);
+      }
     }
   }
   return context.redirect(back + '?ok=' + encodeURIComponent('Trip saved.'));
