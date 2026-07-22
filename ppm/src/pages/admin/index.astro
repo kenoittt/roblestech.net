@@ -3,7 +3,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
-const { data: people } = await supabase.from('profiles').select('id, full_name, role').in('role', ['admin', 'staff']).order('role');
+const { data: people } = await supabase.from('profiles').select('id, full_name, role').in('role', ['super_admin', 'admin', 'staff']).order('role');
 const { data: projects } = await supabase.from('ppm_projects').select('id, name, color').eq('archived', false).order('name');
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');

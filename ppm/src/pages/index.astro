@@ -13,7 +13,7 @@ type Project = { id: string; name: string; color: string };
 
 const [{ data: tasksData }, { data: peopleData }, { data: projData }] = await Promise.all([
   supabase.from('ppm_tasks').select('id,title,description,status,priority,due_date,assignee_id,project_id,completed_at').order('created_at', { ascending: false }),
-  supabase.from('profiles').select('id,full_name,role').in('role', ['admin', 'staff']),
+  supabase.from('profiles').select('id,full_name,role').in('role', ['super_admin', 'admin', 'staff']),
   supabase.from('ppm_projects').select('id,name,color').eq('archived', false).order('name'),
 ]);
 const tasks: Task[] = (tasksData as Task[]) ?? [];
