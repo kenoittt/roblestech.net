@@ -81,7 +81,7 @@ const dueSoon = tasks
     <div class="card">
       <h2 style="font-size:1.05rem;margin-bottom:14px;">Due in the next 7 days</h2>
       {dueSoon.length === 0 ? (
-        <p class="hint" style="margin:0;">Nothing due soon. 🎉</p>
+        <p class="hint" style="margin:0;display:inline-flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg> Nothing due soon.</p>
       ) : (
         <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;">
           {dueSoon.map((t) => (

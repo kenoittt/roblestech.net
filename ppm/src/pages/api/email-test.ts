@@ -24,7 +24,7 @@ export const GET: APIRoute = async (context) => {
       result.note = 'Email is not configured — set MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MAIL_FROM in Vercel and redeploy.';
     } else {
       try {
-        await sendMail(to, 'PPM email test', notifyHtml('It works ✅', ['This is a test from Robles Tech PPM.'], `${APP_URL}/`));
+        await sendMail(to, 'PPM email test', notifyHtml('It works', ['This is a test from Robles Tech PPM.'], `${APP_URL}/`));
         result.sent = true;
       } catch (e) {
         result.sent = false;

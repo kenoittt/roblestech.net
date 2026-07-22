@@ -152,7 +152,7 @@ const kindLabel: Record<string, string> = {
       Once assigned they drop off this list — manage everyone anytime on the
       <a href="/admin/clients" style="color:var(--lime);">Clients page →</a>
     </p>
-    {unassignedLogins.length === 0 && <p class="hint">All client logins are assigned. 🎉</p>}
+    {unassignedLogins.length === 0 && <p class="hint" style="display:inline-flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg> All client logins are assigned.</p>}
     {unassignedLogins.map((lg) => (
       <form method="post" action="/api/link-client" class="card gated" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:12px;">
         <input type="hidden" name="user_id" value={lg.id} />
