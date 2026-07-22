@@ -99,6 +99,55 @@ export const GET: APIRoute = async (context) => {
     ...rawGsc,
   };
 
+  // Dashboard "still underway" gate: no GSC pull yet and no manual content
+  // means the dashboard is being built. Clients get a branded waiting screen
+  // (auto-retries); admins can bypass with the Preview-anyway link.
+  const hasData =
+    (Array.isArray((gsc as any).dailyLog) && (gsc as any).dailyLog.length > 0) ||
+    (Array.isArray((config as any).pipeline) && (config as any).pipeline.length > 0) ||
+    !!((config as any).baseline && (config as any).baseline.window);
+  const bypass = isAdmin && context.url.searchParams.get('preview') === '1';
+  if (!hasData && !bypass) {
+    const waiting = `<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="60">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>${name} · Dashboard coming soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',system-ui,sans-serif;color:#fff;
+    background:radial-gradient(120% 120% at 100% 0%, #133984 0%, transparent 55%),radial-gradient(120% 100% at 0% 100%, #032c7c 0%, transparent 60%),#010b1f;}
+  .card{max-width:460px;margin:20px;text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);
+    border-radius:18px;padding:44px 36px;backdrop-filter:blur(18px);}
+  img{height:52px;margin-bottom:20px;}
+  .eyebrow{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:#aee37b;font-weight:700;margin-bottom:12px;}
+  h1{font-size:1.5rem;font-weight:800;letter-spacing:-.01em;margin-bottom:12px;}
+  p{color:#9aa6c7;font-size:.95rem;line-height:1.6;margin-bottom:22px;}
+  .dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:#aee37b;margin:0 4px;animation:b 1.2s infinite;}
+  .dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+  @keyframes b{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+  .actions{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  a.btn,button.btn{font-family:inherit;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none;
+    color:#010b1f;background:#aee37b;border:0;padding:11px 20px;border-radius:10px;}
+  a.ghost{color:rgba(255,255,255,.8);background:none;border:1px solid rgba(255,255,255,.25);}
+</style></head><body>
+<div class="card">
+  <img src="/logo-white.png" alt="Robles Tech">
+  <div class="eyebrow">Robles Tech · Client Portal</div>
+  <h1>Your dashboard is being built</h1>
+  <p>We're wiring up ${name}'s live Search Console data and reporting right now. This page checks again automatically — or come back a little later.</p>
+  <div class="dots"><span></span><span></span><span></span></div>
+  <div class="actions">
+    ${isAdmin ? `<a class="btn" href="/d?client=${targetId}&preview=1">Preview anyway →</a><a class="btn ghost" href="/admin">Back to admin</a>` : `<form method="post" action="/logout" style="margin:0;"><button class="btn ghost" type="submit" style="color:rgba(255,255,255,.8);">Sign out</button></form>`}
+  </div>
+</div></body></html>`;
+    return new Response(waiting, {
+      headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'private, no-store', 'x-robots-tag': 'noindex, nofollow' },
+    });
+  }
+
   const payload = { gsc, config, audits: audits ?? [] };
   // Escape "<" so the JSON string can't break out of the <script> tag.
   const json = JSON.stringify(payload).replace(/</g, '\\u003c');
