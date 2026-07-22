@@ -21,6 +21,8 @@ const [{ data: legsData }, { data: lodgingData }, { data: checklistData }] = awa
 const legs: Leg[] = (legsData as Leg[]) ?? [];
 const lodgings: Lodging[] = (lodgingData as Lodging[]) ?? [];
 const checklist = (checklistData ?? []) as { id: string; item: string; done: boolean }[];
+const { data: presetRows } = await supabase.from('checklist_presets').select('id,name').order('created_at');
+const presets = (presetRows ?? []) as { id: string; name: string }[];
 const isOwner = trip.owner_id === Astro.locals.user?.id;
 
 // Sharing: membership rows come through RLS; names/emails resolved via admin
@@ -271,12 +273,28 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
           </form>
         </div>
       ))}
-      {checklist.length === 0 && <p class="hint">Nothing yet — add what you don't want to forget: passport, chargers, meds, adapters…</p>}
+      {checklist.length === 0 && <p class="hint">Nothing yet — apply one of your presets below, or add items by hand.</p>}
       <form method="post" action="/api/checklist-save" class="rowflex">
         <input type="hidden" name="trip_id" value={trip.id} />
         <div style="flex:1;min-width:180px;"><label>Add an item</label><input name="item" required placeholder="Passport, power bank, sunscreen…" /></div>
         <button class="btn" type="submit" style="padding:11px 16px;">Add</button>
       </form>
+
+      {presets.length > 0 ? (
+        <form method="post" action="/api/checklist-save" class="rowflex" style="border-top:1px dashed var(--line);padding-top:12px;">
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <input type="hidden" name="op" value="apply-preset" />
+          <div style="flex:1;min-width:180px;"><label>Apply a preset checklist</label>
+            <select name="preset_id" required>
+              <option value="" disabled selected>Choose one of your presets…</option>
+              {presets.map((p) => <option value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <button class="mini" type="submit" style="align-self:end;">Add its items</button>
+        </form>
+      ) : (
+        <p class="hint" style="border-top:1px dashed var(--line);padding-top:12px;">Build reusable packing lists for beach, business, winter and more on the <a href="/checklists">Checklists</a> page, then apply them here.</p>
+      )}
       <p class="hint">Tip: the <a href={`/explore`}>Explore</a> page's "What to wear & pack" for your destination and month is a great starting list.</p>
     </div>
   </div>

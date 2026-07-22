@@ -127,6 +127,24 @@ create table if not exists public.trip_checklist (
 );
 create index if not exists trip_checklist_trip_idx on public.trip_checklist (trip_id, position);
 
+-- Reusable checklist presets ("occasions"), owned by a user, applied to trips.
+create table if not exists public.checklist_presets (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  name       text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists checklist_presets_user_idx on public.checklist_presets (user_id, created_at);
+
+create table if not exists public.checklist_preset_items (
+  id         uuid primary key default gen_random_uuid(),
+  preset_id  uuid not null references public.checklist_presets(id) on delete cascade,
+  item       text not null,
+  position   int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index if not exists checklist_preset_items_preset_idx on public.checklist_preset_items (preset_id, position);
+
 -- Expenses — bidirectional pax math (FR-BDG-01..08) ----------------------------
 create table if not exists public.expenses (
   id                uuid primary key default gen_random_uuid(),
@@ -249,6 +267,17 @@ alter table public.destinations               enable row level security;
 alter table public.destination_month_profiles enable row level security;
 alter table public.wishlists                  enable row level security;
 alter table public.audit_logs                 enable row level security;
+alter table public.checklist_presets          enable row level security;
+alter table public.checklist_preset_items     enable row level security;
+
+-- checklist presets: user owns their own; items flow through the parent
+drop policy if exists checklist_presets_own on public.checklist_presets;
+create policy checklist_presets_own on public.checklist_presets
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists checklist_preset_items_own on public.checklist_preset_items;
+create policy checklist_preset_items_own on public.checklist_preset_items
+  for all using (exists (select 1 from public.checklist_presets p where p.id = preset_id and p.user_id = auth.uid()))
+  with check (exists (select 1 from public.checklist_presets p where p.id = preset_id and p.user_id = auth.uid()));
 
 -- profiles: self read/update
 drop policy if exists profiles_self on public.profiles;

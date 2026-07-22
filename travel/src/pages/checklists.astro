@@ -1,0 +1,111 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import Icon from '../components/Icon.astro';
+import { createSupabaseServer } from '../lib/supabase';
+import { STARTERS } from '../lib/checklist-starters';
+
+const supabase = createSupabaseServer(Astro);
+const { data: presetRows } = await supabase.from('checklist_presets')
+  .select('id,name,created_at').order('created_at');
+const presets = (presetRows ?? []) as { id: string; name: string }[];
+
+// Fetch items for all presets in one query, then group.
+const ids = presets.map((p) => p.id);
+const { data: itemRows } = ids.length
+  ? await supabase.from('checklist_preset_items').select('id,preset_id,item').in('preset_id', ids).order('position')
+  : { data: [] as any[] };
+const itemsByPreset: Record<string, { id: string; item: string }[]> = {};
+for (const r of (itemRows ?? []) as any[]) (itemsByPreset[r.preset_id] ??= []).push({ id: r.id, item: r.item });
+
+const err = Astro.url.searchParams.get('err');
+const ownedNames = new Set(presets.map((p) => p.name.toLowerCase()));
+---
+<AppLayout title="Checklists · WanderWise">
+  <p class="eyebrow">Travel Checklists</p>
+  <h1>Preset packing lists</h1>
+  <p class="lede">Build reusable checklists for the way you travel — beach, business, winter — then apply one to any trip in a tap.</p>
+  {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
+
+  <!-- Start from a template -->
+  <div class="section">
+    <h2>Start from a template</h2>
+    <div class="starter-grid">
+      {STARTERS.map((s) => (
+        <form method="post" action="/api/preset-save" class="starter">
+          <input type="hidden" name="op" value="clone-starter" />
+          <input type="hidden" name="key" value={s.key} />
+          <div class="starter-head"><Icon name={s.icon} /> <b>{s.name}</b></div>
+          <p class="hint">{s.items.length} items — {s.items.slice(0, 4).join(', ')}…</p>
+          <button class="mini" type="submit">{ownedNames.has(s.name.toLowerCase()) ? 'Add another copy' : 'Use this template'}</button>
+        </form>
+      ))}
+    </div>
+  </div>
+
+  <!-- Blank new preset -->
+  <div class="section">
+    <h2>Or create your own</h2>
+    <form method="post" action="/api/preset-save" class="card rowflex">
+      <input type="hidden" name="op" value="create" />
+      <div style="flex:1;min-width:200px;"><label>Checklist name</label><input name="name" required placeholder="e.g. Diving trip, Festival weekend" /></div>
+      <button class="btn" type="submit" style="padding:11px 16px;">Create checklist</button>
+    </form>
+  </div>
+
+  <!-- Your presets -->
+  <div class="section">
+    <h2>Your checklists</h2>
+    {presets.length === 0 && <p class="hint">None yet — use a template above or create one.</p>}
+    <div class="stack">
+      {presets.map((p) => (
+        <div class="card">
+          <div class="rowflex" style="justify-content:space-between;align-items:center;">
+            <form method="post" action="/api/preset-save" class="rowflex m0" style="flex:1;gap:8px;align-items:center;">
+              <input type="hidden" name="op" value="rename" />
+              <input type="hidden" name="id" value={p.id} />
+              <input name="name" value={p.name} style="font-weight:800;max-width:320px;" aria-label="Checklist name" />
+              <button class="mini" type="submit">Rename</button>
+            </form>
+            <form method="post" action="/api/preset-save" class="m0" onsubmit="return confirm('Delete this checklist?');">
+              <input type="hidden" name="op" value="delete" />
+              <input type="hidden" name="id" value={p.id} />
+              <button class="mini" type="submit" style="color:var(--bad);" aria-label="Delete checklist">Delete</button>
+            </form>
+          </div>
+          <div class="stack" style="margin-top:12px;gap:6px;">
+            {(itemsByPreset[p.id] ?? []).map((it) => (
+              <div class="rowflex" style="align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px;">
+                <Icon name="check" size={15} />
+                <span style="flex:1;min-width:120px;">{it.item}</span>
+                <form method="post" action="/api/preset-save" class="m0">
+                  <input type="hidden" name="op" value="del-item" />
+                  <input type="hidden" name="id" value={it.id} />
+                  <button class="mini" type="submit" style="color:var(--bad);" aria-label="Remove item">✕</button>
+                </form>
+              </div>
+            ))}
+            {(itemsByPreset[p.id] ?? []).length === 0 && <p class="hint">No items yet — add the first below.</p>}
+            <form method="post" action="/api/preset-save" class="rowflex" style="margin-top:4px;">
+              <input type="hidden" name="op" value="add-item" />
+              <input type="hidden" name="preset_id" value={p.id} />
+              <div style="flex:1;min-width:180px;"><input name="item" required placeholder="Add an item…" aria-label="New item" /></div>
+              <button class="mini" type="submit">Add</button>
+            </form>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <p class="hint" style="margin-top:16px;">Open any trip's <b>Travel checklist</b> section to apply one of these presets to that trip and tick items off as you pack.</p>
+
+  <style>
+    .starter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+    .starter{background:var(--glass);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+      border:1px solid var(--glass-edge);border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(28,43,43,.08);
+      display:flex;flex-direction:column;gap:8px;}
+    .starter-head{display:flex;align-items:center;gap:8px;font-size:1rem;}
+    .starter .hint{flex:1;}
+    .starter button{align-self:flex-start;}
+  </style>
+</AppLayout>

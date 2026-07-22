@@ -13,6 +13,21 @@ export const POST: APIRoute = async (context) => {
   const back = `/trips/${tripId}#checklist`;
   if (!tripId) return context.redirect('/trips');
 
+  if (op === 'apply-preset') {
+    const presetId = String(form.get('preset_id') ?? '');
+    if (!presetId) return context.redirect(back);
+    // Copy the preset's items into this trip's checklist (RLS: preset read
+    // gated to owner, trip_checklist write gated to trip editors).
+    const { data: items } = await supabase.from('checklist_preset_items')
+      .select('item,position').eq('preset_id', presetId).order('position');
+    const rows = ((items as any[]) ?? []).map((r) => ({ trip_id: tripId, item: r.item, position: r.position }));
+    if (rows.length) {
+      const { error } = await supabase.from('trip_checklist').insert(rows);
+      if (error) return context.redirect(back + '&err=' + encodeURIComponent(error.message));
+    }
+    return context.redirect(back);
+  }
+
   if (op === 'toggle' && id) {
     const done = String(form.get('done') ?? '') === '1';
     await supabase.from('trip_checklist').update({ done }).eq('id', id);
