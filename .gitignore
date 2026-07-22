@@ -16,3 +16,4 @@ node_modules/
 # logs / os
 npm-debug.log*
 .DS_Store
+__pycache__/
