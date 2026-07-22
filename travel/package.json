@@ -1,0 +1,19 @@
+{
+  "name": "wanderwise",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WanderWise — global travel companion & trip planning platform (SRS v1.2). Dedicated Vercel + Supabase stack.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^8.2.7",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.48.1",
+    "astro": "^5.6.1"
+  }
+}

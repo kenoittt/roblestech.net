@@ -1,0 +1,17 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+const hasError = Astro.url.searchParams.has('error');
+---
+<AppLayout title="Sign in · WanderWise">
+  <div style="max-width:400px;margin:6vh auto 0;">
+    <h1>Welcome back</h1>
+    <p class="lede">Sign in to your trips.</p>
+    {hasError && <div class="alert alert-error">Incorrect email or password.</div>}
+    <form method="post" action="/api/login" class="card stack">
+      <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
+      <div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required /></div>
+      <button class="btn" type="submit">Sign in</button>
+      <p class="hint">No account? <a href="/signup">Create one</a></p>
+    </form>
+  </div>
+</AppLayout>

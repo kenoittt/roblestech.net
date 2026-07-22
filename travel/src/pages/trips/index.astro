@@ -1,0 +1,52 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+type Trip = { id: string; name: string; start_date: string | null; end_date: string | null; pax: number; status: string; base_currency: string };
+const { data } = await supabase.from('trips').select('id,name,start_date,end_date,pax,status,base_currency').order('created_at', { ascending: false });
+const trips: Trip[] = (data as Trip[]) ?? [];
+const active = trips.filter((t) => t.status !== 'archived');
+const archived = trips.filter((t) => t.status === 'archived');
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const dates = (t: Trip) => t.start_date ? `${t.start_date}${t.end_date ? ' → ' + t.end_date : ''}` : 'No dates yet';
+---
+<AppLayout title="My Trips · WanderWise">
+  <p class="eyebrow">Trip Projects</p>
+  <h1>My Trips</h1>
+  <p class="lede">Plan it, budget it, live it.</p>
+  {ok && <div class="alert alert-ok">{decodeURIComponent(ok)}</div>}
+  {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
+
+  <form method="post" action="/api/trip-create" class="card rowflex">
+    <div style="flex:2;min-width:180px;"><label>New trip</label><input name="name" required placeholder="Hong Kong + Taipei 2027" /></div>
+    <div style="width:110px;"><label>Pax</label><input name="pax" type="number" min="1" value="2" /></div>
+    <div style="width:110px;"><label>Currency</label><input name="base_currency" value="USD" maxlength="3" style="text-transform:uppercase;" /></div>
+    <button class="btn" type="submit">Create</button>
+  </form>
+
+  <div class="trip-list">
+    {active.map((t) => (
+      <a class="trip-card" href={`/trips/${t.id}`}>
+        <div class="t">{t.name} <span class={`pill ${t.status}`}>{t.status}</span></div>
+        <div class="d"><span>📅 {dates(t)}</span><span>👥 {t.pax} pax</span><span>💰 {t.base_currency}</span></div>
+      </a>
+    ))}
+    {active.length === 0 && <p class="hint">No trips yet — create your first above.</p>}
+  </div>
+
+  {archived.length > 0 && (
+    <details class="section">
+      <summary style="cursor:pointer;font-weight:700;">Archived ({archived.length})</summary>
+      <div class="trip-list">
+        {archived.map((t) => (
+          <a class="trip-card" href={`/trips/${t.id}`} style="opacity:.7;">
+            <div class="t">{t.name} <span class="pill archived">archived</span></div>
+            <div class="d"><span>📅 {dates(t)}</span><span>👥 {t.pax} pax</span></div>
+          </a>
+        ))}
+      </div>
+    </details>
+  )}
+</AppLayout>

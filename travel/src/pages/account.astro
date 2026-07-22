@@ -1,0 +1,19 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+const ok = Astro.url.searchParams.has('ok');
+const err = Astro.url.searchParams.get('err');
+const email = Astro.locals.user?.email ?? '';
+---
+<AppLayout title="Account · WanderWise">
+  <div style="max-width:440px;">
+    <h1>Account</h1>
+    <p class="lede">{email}</p>
+    {ok && <div class="alert alert-ok">Password updated.</div>}
+    {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
+    <form method="post" action="/api/change-password" class="card stack">
+      <div><label for="pw">New password</label><input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8" /></div>
+      <div><label for="pw2">Confirm</label><input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="8" /></div>
+      <button class="btn" type="submit">Update password</button>
+    </form>
+  </div>
+</AppLayout>

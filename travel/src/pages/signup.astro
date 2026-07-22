@@ -1,0 +1,23 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+const err = Astro.url.searchParams.get('error');
+const confirm = Astro.url.searchParams.has('confirm');
+---
+<AppLayout title="Create account · WanderWise">
+  <div style="max-width:400px;margin:6vh auto 0;">
+    <h1>Create your account</h1>
+    <p class="lede">Free while we build. No card needed.</p>
+    {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
+    {confirm ? (
+      <div class="alert alert-ok">Check your inbox — confirm your email, then sign in.</div>
+    ) : (
+      <form method="post" action="/api/signup" class="card stack">
+        <div><label for="name">Name</label><input id="name" name="display_name" type="text" required placeholder="Ken R." /></div>
+        <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required /></div>
+        <div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="8+ characters" /></div>
+        <button class="btn" type="submit">Create account</button>
+        <p class="hint">Already have one? <a href="/login">Sign in</a></p>
+      </form>
+    )}
+  </div>
+</AppLayout>

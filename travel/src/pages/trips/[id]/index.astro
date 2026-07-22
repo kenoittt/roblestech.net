@@ -1,0 +1,129 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../../lib/supabase';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: trip } = await supabase.from('trips')
+  .select('id,name,start_date,end_date,pax,base_currency,status,owner_id').eq('id', id).single();
+if (!trip) return Astro.redirect('/trips?err=' + encodeURIComponent('Trip not found.'));
+
+type Leg = { id: string; destination_name: string; arrival_airport: string | null; departure_airport: string | null; start_date: string | null; end_date: string | null };
+type Lodging = { id: string; name: string; address: string | null; check_in_at: string | null; check_out_at: string | null; confirmation_ref: string | null };
+const [{ data: legsData }, { data: lodgingData }] = await Promise.all([
+  supabase.from('trip_legs').select('id,destination_name,arrival_airport,departure_airport,start_date,end_date').eq('trip_id', id).order('position'),
+  supabase.from('lodgings').select('id,name,address,check_in_at,check_out_at,confirmation_ref').eq('trip_id', id).order('check_in_at'),
+]);
+const legs: Leg[] = (legsData as Leg[]) ?? [];
+const lodgings: Lodging[] = (lodgingData as Lodging[]) ?? [];
+const isOwner = trip.owner_id === Astro.locals.user?.id;
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+---
+
+<AppLayout title={`${trip.name} · WanderWise`}>
+  <p class="eyebrow">Trip Project</p>
+  <h1>{trip.name} <span class={`pill ${trip.status}`}>{trip.status}</span></h1>
+  <div class="tabbar">
+    <a href={`/trips/${id}`} class="on">Details</a>
+    <a href={`/trips/${id}/budget`}>Budget</a>
+  </div>
+  {ok && <div class="alert alert-ok">{decodeURIComponent(ok)}</div>}
+  {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
+
+  <form method="post" action="/api/trip-update" class="card stack">
+    <input type="hidden" name="id" value={trip.id} />
+    <div class="grid2">
+      <div><label>Trip name</label><input name="name" value={trip.name} required /></div>
+      <div><label>Pax (travelers)</label><input name="pax" type="number" min="1" value={trip.pax} /></div>
+      <div><label>Start date</label><input name="start_date" type="date" value={trip.start_date ?? ''} /></div>
+      <div><label>End date</label><input name="end_date" type="date" value={trip.end_date ?? ''} /></div>
+      <div><label>Base currency</label><input name="base_currency" value={trip.base_currency} maxlength="3" style="text-transform:uppercase;" /></div>
+      <div><label>Status</label>
+        <select name="status">
+          <option value="planning" selected={trip.status === 'planning'}>Planning</option>
+          <option value="active" selected={trip.status === 'active'}>Active (on the trip)</option>
+          <option value="archived" selected={trip.status === 'archived'}>Archived</option>
+        </select>
+      </div>
+    </div>
+    <div class="rowflex">
+      <button class="btn" type="submit">Save trip</button>
+    </div>
+    <p class="hint">Changing pax instantly recalculates every budget row from its entry side (group or per-person).</p>
+  </form>
+
+  <div class="section">
+    <h2>Destinations & flights</h2>
+    <div class="stack">
+      {legs.map((l) => (
+        <form method="post" action="/api/leg-save" class="card rowflex">
+          <input type="hidden" name="id" value={l.id} />
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <div style="flex:2;min-width:150px;"><label>Destination</label><input name="destination_name" value={l.destination_name} required /></div>
+          <div style="width:110px;"><label>Arrive (airport)</label><input name="arrival_airport" value={l.arrival_airport ?? ''} placeholder="HKG" /></div>
+          <div style="width:110px;"><label>Depart (airport)</label><input name="departure_airport" value={l.departure_airport ?? ''} placeholder="TPE" /></div>
+          <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={l.start_date ?? ''} /></div>
+          <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={l.end_date ?? ''} /></div>
+          <button class="mini" type="submit">Save</button>
+          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');">✕</button>
+        </form>
+      ))}
+      <form method="post" action="/api/leg-save" class="card rowflex" style="border-style:dashed;">
+        <input type="hidden" name="trip_id" value={trip.id} />
+        <div style="flex:2;min-width:150px;"><label>Add destination</label><input name="destination_name" required placeholder="Hong Kong" /></div>
+        <div style="width:110px;"><label>Arrive</label><input name="arrival_airport" placeholder="HKG" /></div>
+        <div style="width:110px;"><label>Depart</label><input name="departure_airport" /></div>
+        <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Lodging</h2>
+    <div class="stack">
+      {lodgings.map((g) => (
+        <form method="post" action="/api/lodging-save" class="card stack">
+          <input type="hidden" name="id" value={g.id} />
+          <input type="hidden" name="trip_id" value={trip.id} />
+          <div class="grid2">
+            <div><label>Name</label><input name="name" value={g.name} required /></div>
+            <div><label>Confirmation #</label><input name="confirmation_ref" value={g.confirmation_ref ?? ''} /></div>
+            <div style="grid-column:1/-1;"><label>Address</label><input name="address" value={g.address ?? ''} /></div>
+            <div><label>Check-in</label><input name="check_in_at" type="datetime-local" value={g.check_in_at ? g.check_in_at.slice(0, 16) : ''} /></div>
+            <div><label>Check-out</label><input name="check_out_at" type="datetime-local" value={g.check_out_at ? g.check_out_at.slice(0, 16) : ''} /></div>
+          </div>
+          <div class="rowflex">
+            <button class="mini" type="submit">Save</button>
+            <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this lodging?');">Remove</button>
+            <span class="hint">{fmtDT(g.check_in_at)} → {fmtDT(g.check_out_at)}</span>
+          </div>
+        </form>
+      ))}
+      <form method="post" action="/api/lodging-save" class="card rowflex" style="border-style:dashed;">
+        <input type="hidden" name="trip_id" value={trip.id} />
+        <div style="flex:1;min-width:180px;"><label>Add lodging</label><input name="name" required placeholder="Harbour View Hotel" /></div>
+        <div style="width:170px;"><label>Check-in</label><input name="check_in_at" type="datetime-local" /></div>
+        <div style="width:170px;"><label>Check-out</label><input name="check_out_at" type="datetime-local" /></div>
+        <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="section card">
+    <h2>Trip actions</h2>
+    <div class="rowflex">
+      <form method="post" action="/api/trip-action" class="m0">
+        <input type="hidden" name="id" value={trip.id} /><input type="hidden" name="op" value="duplicate" />
+        <button class="mini" type="submit">Duplicate trip</button>
+      </form>
+      {isOwner && (
+        <form method="post" action="/api/trip-action" class="m0" onsubmit="return confirm('Delete this trip and all its data? This cannot be undone.');">
+          <input type="hidden" name="id" value={trip.id} /><input type="hidden" name="op" value="delete" />
+          <button class="mini" type="submit" style="color:var(--bad);border-color:var(--bad);">Delete trip</button>
+        </form>
+      )}
+    </div>
+  </div>
+</AppLayout>

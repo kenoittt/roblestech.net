@@ -1,0 +1,13 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+if (Astro.locals.user) return Astro.redirect('/trips');
+---
+<AppLayout title="WanderWise — know before you go">
+  <div class="hero">
+    <p class="eyebrow">Travel companion</p>
+    <h1>What is this place like in <em style="color:var(--teal);font-style:normal;">June</em>?</h1>
+    <p>Month-by-month destination insight — weather, what to wear, crowds, festivals — then plan the whole trip: map, itinerary, and a budget that does the pax math for you.</p>
+    <a class="btn" href="/signup">Start planning free</a>
+    <p class="hint" style="margin-top:12px;">Launch coverage: Vietnam · Taiwan · Hong Kong · Kazakhstan · Uzbekistan · Kyrgyzstan</p>
+  </div>
+</AppLayout>

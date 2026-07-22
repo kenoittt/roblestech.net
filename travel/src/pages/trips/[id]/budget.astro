@@ -1,0 +1,209 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { createSupabaseServer } from '../../../lib/supabase';
+
+const { id } = Astro.params;
+const supabase = createSupabaseServer(Astro);
+const { data: trip } = await supabase.from('trips').select('id,name,pax,base_currency,status').eq('id', id).single();
+if (!trip) return Astro.redirect('/trips?err=' + encodeURIComponent('Trip not found.'));
+
+const { data: expData } = await supabase.from('expenses')
+  .select('id,category,description,amount_group,amount_individual,entry_mode,pax_override,currency,is_actual,paid,notes')
+  .eq('trip_id', id).order('position').order('created_at');
+const expenses = expData ?? [];
+---
+
+<AppLayout title={`Budget · ${trip.name}`}>
+  <p class="eyebrow">Budget</p>
+  <h1>{trip.name}</h1>
+  <div class="tabbar">
+    <a href={`/trips/${id}`}>Details</a>
+    <a href={`/trips/${id}/budget`} class="on">Budget</a>
+  </div>
+
+  <div class="paxbar">
+    <div class="pn">
+      <button type="button" id="pax-minus" aria-label="Decrease pax">−</button>
+      <span class="pv" id="pax-val">{trip.pax}</span>
+      <button type="button" id="pax-plus" aria-label="Increase pax">+</button>
+    </div>
+    <div>
+      <div style="font-weight:800;">travelers (pax)</div>
+      <div class="hint">Every row recalculates instantly from its entry side.</div>
+    </div>
+    <div style="margin-left:auto;" class="hint" id="save-state">All changes saved</div>
+  </div>
+
+  <div class="cat-chips" id="chips"></div>
+
+  <div class="sheet-wrap">
+    <table class="sheet" id="sheet">
+      <thead>
+        <tr>
+          <th>Category</th><th style="min-width:200px;">Description</th>
+          <th class="num">Group cost</th><th class="num">Per person</th>
+          <th>Pax*</th><th>Cur</th><th>Actual</th><th>Paid</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td colspan="2">TOTAL <span class="hint" id="total-note"></span></td>
+          <td class="num" id="tot-group">0.00</td>
+          <td class="num" id="tot-ind">0.00</td>
+          <td colspan="5" id="tot-extra" class="hint"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <div class="rowflex" style="margin-top:12px;">
+    <button type="button" class="btn" id="add-row">+ Add expense</button>
+    <span class="hint">Type in either cost column — the other fills in automatically. Pax* overrides the trip pax for that row only.</span>
+  </div>
+
+  <script is:inline define:vars={{ tripId: id, tripPax: trip.pax, baseCur: trip.base_currency, initialRows: expenses }}>
+    const CATS = ['flights','lodging','food','activities','transport','misc'];
+    let pax = tripPax;
+    const rows = new Map(); // id -> row state
+    let tempSeq = 0;
+    const tbody = document.getElementById('rows');
+    const saveState = document.getElementById('save-state');
+    const r2 = (n) => Math.round(n * 100) / 100;
+    const fmt = (n) => (Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const effPax = (r) => Math.max(1, r.pax_override || pax);
+
+    let pending = 0;
+    const setSaving = (d) => { pending += d; saveState.textContent = pending > 0 ? 'Saving…' : 'All changes saved'; };
+    async function persist(r) {
+      setSaving(1);
+      try {
+        const res = await fetch('/api/expense-save', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            op: 'save', trip_id: tripId, id: r.id.startsWith('tmp-') ? null : r.id,
+            category: r.category, description: r.description,
+            entry_mode: r.entry_mode, amount: r.entry_mode === 'group' ? r.amount_group : r.amount_individual,
+            pax_override: r.pax_override || null, currency: r.currency,
+            is_actual: r.is_actual, paid: r.paid, notes: r.notes || '',
+          }),
+        });
+        const j = await res.json();
+        if (j.ok && r.id.startsWith('tmp-')) {
+          const old = r.id; r.id = j.id; rows.delete(old); rows.set(r.id, r);
+          const tr = document.querySelector(`tr[data-id="${old}"]`); if (tr) tr.dataset.id = r.id;
+        }
+        if (!j.ok) saveState.textContent = 'Save failed — retry';
+      } catch { saveState.textContent = 'Offline — will retry on next edit'; }
+      setSaving(-1);
+    }
+    const debounces = new Map();
+    const queueSave = (r) => { clearTimeout(debounces.get(r.id)); debounces.set(r.id, setTimeout(() => persist(r), 500)); };
+
+    function recalcRow(r, tr) {
+      const e = effPax(r);
+      if (r.entry_mode === 'group') r.amount_individual = r2(r.amount_group / e);
+      else r.amount_group = r2(r.amount_individual * e);
+      const gi = tr.querySelector('input[data-f="group"]'), ii = tr.querySelector('input[data-f="ind"]');
+      if (document.activeElement !== gi) gi.value = fmt(r.amount_group);
+      if (document.activeElement !== ii) ii.value = fmt(r.amount_individual);
+      gi.closest('td').classList.toggle('auto-cell', r.entry_mode === 'individual');
+      ii.closest('td').classList.toggle('auto-cell', r.entry_mode === 'group');
+      tr.querySelector('[data-tag="g"]').textContent = r.entry_mode === 'individual' ? 'auto' : '';
+      tr.querySelector('[data-tag="i"]').textContent = r.entry_mode === 'group' ? 'auto' : '';
+    }
+
+    function totals() {
+      const byCur = {}, chips = {};
+      let planned = { g: 0, i: 0 }, actual = { g: 0, i: 0 };
+      rows.forEach((r) => {
+        (byCur[r.currency] ??= { g: 0, i: 0 });
+        byCur[r.currency].g += r.amount_group; byCur[r.currency].i += r.amount_individual;
+        (chips[r.category] ??= 0); chips[r.category] += r.currency === baseCur ? r.amount_group : 0;
+        const tgt = r.is_actual ? actual : planned;
+        if (r.currency === baseCur) { tgt.g += r.amount_group; tgt.i += r.amount_individual; }
+      });
+      const base = byCur[baseCur] ?? { g: 0, i: 0 };
+      document.getElementById('tot-group').textContent = `${baseCur} ${fmt(base.g)}`;
+      document.getElementById('tot-ind').textContent = `${baseCur} ${fmt(base.i)}`;
+      const others = Object.entries(byCur).filter(([c]) => c !== baseCur)
+        .map(([c, v]) => `${c} ${fmt(v.g)} group / ${fmt(v.i)} pp`).join(' · ');
+      document.getElementById('tot-extra').textContent = others ? `+ ${others}` : '';
+      document.getElementById('total-note').textContent = `planned ${baseCur} ${fmt(planned.g)} · actual ${baseCur} ${fmt(actual.g)}`;
+      document.getElementById('chips').innerHTML = CATS
+        .filter((c) => chips[c]).map((c) => `<span class="chip">${c} <b>${baseCur} ${fmt(chips[c])}</b></span>`).join('');
+    }
+
+    function render(r) {
+      const tr = document.createElement('tr');
+      tr.dataset.id = r.id;
+      tr.innerHTML = `
+        <td><select data-f="category">${CATS.map((c) => `<option${c === r.category ? ' selected' : ''}>${c}</option>`).join('')}</select></td>
+        <td><input data-f="description" value="${(r.description || '').replace(/"/g, '&quot;')}" placeholder="e.g. Harbour View Hotel, 3 nights"></td>
+        <td class="num"><input class="num" inputmode="decimal" data-f="group" value="${fmt(r.amount_group)}"><span class="autotag" data-tag="g"></span></td>
+        <td class="num"><input class="num" inputmode="decimal" data-f="ind" value="${fmt(r.amount_individual)}"><span class="autotag" data-tag="i"></span></td>
+        <td><input class="num" inputmode="numeric" data-f="pax_override" value="${r.pax_override ?? ''}" placeholder="${pax}" style="max-width:58px;" title="Pax override for this row"></td>
+        <td><input data-f="currency" value="${r.currency}" maxlength="3" style="max-width:56px;text-transform:uppercase;"></td>
+        <td style="text-align:center;"><input type="checkbox" data-f="is_actual" ${r.is_actual ? 'checked' : ''} style="width:auto;"></td>
+        <td style="text-align:center;"><input type="checkbox" data-f="paid" ${r.paid ? 'checked' : ''} style="width:auto;"></td>
+        <td><button type="button" class="del" title="Delete row">✕</button></td>`;
+      tbody.appendChild(tr);
+      recalcRow(r, tr);
+
+      tr.addEventListener('input', (e) => {
+        const f = e.target.dataset.f; if (!f) return;
+        if (f === 'group') { r.entry_mode = 'group'; r.amount_group = parseFloat(e.target.value.replace(/[, ]/g, '')) || 0; }
+        else if (f === 'ind') { r.entry_mode = 'individual'; r.amount_individual = parseFloat(e.target.value.replace(/[, ]/g, '')) || 0; }
+        else if (f === 'pax_override') r.pax_override = parseInt(e.target.value) || null;
+        else if (f === 'currency') r.currency = e.target.value.toUpperCase();
+        else if (f === 'category') r.category = e.target.value;
+        else if (f === 'description') r.description = e.target.value;
+        recalcRow(r, tr); totals(); queueSave(r);
+      });
+      tr.addEventListener('change', (e) => {
+        const f = e.target.dataset.f;
+        if (f === 'is_actual') { r.is_actual = e.target.checked; totals(); queueSave(r); }
+        if (f === 'paid') { r.paid = e.target.checked; queueSave(r); }
+        if (f === 'group' || f === 'ind') { e.target.value = fmt(f === 'group' ? r.amount_group : r.amount_individual); }
+      });
+      tr.querySelector('.del').addEventListener('click', async () => {
+        if (!confirm('Delete this expense row?')) return;
+        rows.delete(r.id); tr.remove(); totals();
+        if (!r.id.startsWith('tmp-')) {
+          setSaving(1);
+          await fetch('/api/expense-save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ op: 'delete', trip_id: tripId, id: r.id }) }).catch(() => {});
+          setSaving(-1);
+        }
+      });
+    }
+
+    initialRows.forEach((raw) => {
+      const r = { ...raw, amount_group: Number(raw.amount_group), amount_individual: Number(raw.amount_individual) };
+      rows.set(r.id, r); render(r);
+    });
+    totals();
+
+    document.getElementById('add-row').addEventListener('click', () => {
+      const r = { id: `tmp-${++tempSeq}`, category: 'misc', description: '', amount_group: 0, amount_individual: 0, entry_mode: 'group', pax_override: null, currency: baseCur, is_actual: false, paid: false, notes: '' };
+      rows.set(r.id, r); render(r); totals();
+      const tr = tbody.lastElementChild; tr.querySelector('input[data-f="description"]').focus();
+    });
+
+    // Pax stepper: recalc every row instantly, persist trip pax (server also
+    // recalculates all rows so the DB matches, FR-BDG-02).
+    let paxTimer;
+    const setPax = (v) => {
+      pax = Math.max(1, v);
+      document.getElementById('pax-val').textContent = pax;
+      rows.forEach((r) => { const tr = document.querySelector(`tr[data-id="${r.id}"]`); if (tr) { recalcRow(r, tr); tr.querySelector('input[data-f="pax_override"]').placeholder = pax; } });
+      totals();
+      clearTimeout(paxTimer);
+      paxTimer = setTimeout(async () => {
+        setSaving(1);
+        await fetch('/api/pax-update', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trip_id: tripId, pax }) }).catch(() => {});
+        setSaving(-1);
+      }, 600);
+    };
+    document.getElementById('pax-minus').addEventListener('click', () => setPax(pax - 1));
+    document.getElementById('pax-plus').addEventListener('click', () => setPax(pax + 1));
+  </script>
+</AppLayout>
