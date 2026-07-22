@@ -8,7 +8,7 @@ export const prerender = false;
 // pasted into the textarea or uploaded as a .html file.
 export const POST: APIRoute = async (context) => {
   const { profile } = await getSession(context);
-  if (profile?.role !== 'admin') return new Response('Forbidden', { status: 403 });
+  if (profile?.role !== 'admin' && profile?.role !== 'super_admin') return new Response('Forbidden', { status: 403 });
 
   const form = await context.request.formData();
   const clientId = String(form.get('client_id') ?? '');
