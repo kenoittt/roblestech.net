@@ -3,6 +3,7 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../../lib/supabase';
 import { entryFor } from '../../../lib/visa';
 import { CURRENCIES } from '../../../lib/currencies';
+import Icon from '../../../components/Icon.astro';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -77,7 +78,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
     <summary>
       <div class="read">
         <b>Trip settings</b>
-        <span class="hint">📅 {trip.start_date ?? 'no dates'}{trip.end_date ? ' → ' + trip.end_date : ''} · 👥 {trip.pax} pax · 💰 {trip.base_currency}</span>
+        <span class="hint" style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;"><Icon name="calendar" size={13} /> {trip.start_date ?? 'no dates'}{trip.end_date ? ' → ' + trip.end_date : ''} · <Icon name="users" size={13} /> {trip.pax} pax · <Icon name="wallet" size={13} /> {trip.base_currency}</span>
       </div>
       <span class="row-toggle" data-closed="Edit" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
     </summary>
@@ -108,7 +109,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
   </details>
 
   <div class="section">
-    <h2>Destinations & flights ✈️</h2>
+    <h2><Icon name="plane" /> Destinations &amp; flights</h2>
     <div class="stack">
       {legs.map((l) => (
         <details class="edit-block card">
@@ -116,11 +117,11 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
             <div class="read">
               <b>{l.destination_name}</b>
               <span class="hint">
-                {l.airline || l.flight_no ? `✈ ${[l.airline, l.flight_no].filter(Boolean).join(' ')}` : 'No flight yet'}
+                {(l.airline || l.flight_no) ? [l.airline, l.flight_no].filter(Boolean).join(' ') : 'No flight yet'}
                 {l.arrival_airport ? ` · → ${l.arrival_airport}` : ''}
                 {l.start_date ? ` · ${l.start_date}` : ''}
               </span>
-              {l.flight_no && <a class="mini" style="margin-left:8px;" href={flightStatusUrl(l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🛰 Live flight status ↗</a>}
+              {l.flight_no && <a class="mini" style="margin-left:8px;" href={flightStatusUrl(l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Live flight status →</a>}
             </div>
             <span class="row-toggle" data-closed="Edit" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
           </summary>
@@ -172,12 +173,12 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
 
   {entryCards.length > 0 && (
     <div class="section">
-      <h2>Visas & entry requirements 🛂</h2>
+      <h2><Icon name="passport" /> Visas &amp; entry requirements</h2>
       <div class="stack">
         {entryCards.map((v: any) => (
           <div class="card" style={`border-left:4px solid ${v.status === 'visa-free' ? 'var(--ok)' : v.status === 'action-needed' ? 'var(--coral)' : 'var(--sun)'};`}>
-            <p style="font-weight:800;margin:0 0 6px;">
-              {v.status === 'visa-free' ? '✅' : v.status === 'action-needed' ? '🛂' : 'ℹ️'} {v.headline}
+            <p style="font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:7px;">
+              <Icon name={v.status === 'visa-free' ? 'check' : v.status === 'action-needed' ? 'passport' : 'alert'} /> {v.headline}
             </p>
             <p style="margin:0 0 8px;">{v.detail}</p>
             {v.status === 'unknown' && <p style="margin:0 0 8px;"><a href="/account">Set passport country →</a></p>}
@@ -195,7 +196,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
   )}
 
   <div class="section">
-    <h2>Lodging 🏨</h2>
+    <h2><Icon name="bed" /> Lodging</h2>
     <div class="stack">
       {lodgings.map((g) => (
         <details class="edit-block card">
@@ -203,7 +204,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
             <div class="read">
               <b>{g.name}</b>
               <span class="hint">{fmtDT(g.check_in_at)} → {fmtDT(g.check_out_at)}{g.address ? ` · ${g.address}` : ''}</span>
-              {g.booking_url && <a class="mini" style="margin-left:8px;" href={g.booking_url} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">🔗 Open booking ↗</a>}
+              {g.booking_url && <a class="mini" style="margin-left:8px;" href={g.booking_url} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Open booking →</a>}
             </div>
             <span class="row-toggle" data-closed="Edit" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
           </summary>
@@ -244,7 +245,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
   </div>
 
   <div class="section" id="checklist">
-    <h2>Travel checklist 🎒</h2>
+    <h2><Icon name="bag" /> Travel checklist</h2>
     <div class="card stack">
       {checklist.map((c) => (
         <div class="rowflex" style="align-items:center;border-bottom:1px solid var(--line);padding-bottom:8px;">
@@ -281,7 +282,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
   </div>
 
   <div class="section">
-    <h2>Share this trip 🤝</h2>
+    <h2><Icon name="share" /> Share this trip</h2>
     <div class="card stack">
       <div class="rowflex" style="align-items:center;">
         <span class="pill active">owner</span>

@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
+import Icon from '../../components/Icon.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
 import { destImage } from '../../lib/images';
 
@@ -40,13 +41,13 @@ const mapData = dests.map((d: any) => ({ id: d.id, name: d.name, country: d.coun
 
   {q && dests.length === 0 && (
     <div class="card" style="text-align:center;">
-      <h2>“{q}” isn't covered yet 🌍</h2>
+      <h2>“{q}” isn't covered yet</h2>
       <p class="hint">Launch coverage is Vietnam, Taiwan, Hong Kong, Kazakhstan, Uzbekistan, and Kyrgyzstan — worldwide is coming. Check back soon!</p>
     </div>
   )}
 
   <div class="card" style="margin-bottom:8px;">
-    <h2>Map view 🗺</h2>
+    <h2><Icon name="map" /> Map view</h2>
     <div id="explore-map" style="height:44vh;border-radius:14px;border:1px solid var(--line);"></div>
     <p class="hint" style="margin-top:6px;">Tap a pin to open that city's month-by-month profile.</p>
   </div>
@@ -64,7 +65,7 @@ const mapData = dests.map((d: any) => ({ id: d.id, name: d.name, country: d.coun
           <a class="dest-card" href={`/explore/${d.id}?m=${month}`}>
             {d.image_url
               ? <img src={d.image_url} alt={d.name} loading="lazy" />
-              : <div class="dest-ph">🌏</div>}
+              : <div class="dest-ph"><Icon name="globe" size={28} /></div>}
             <div class="dest-label"><b>{d.name}</b><span>12-month profile →</span></div>
           </a>
         ))}

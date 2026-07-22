@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
+import Icon from '../../../components/Icon.astro';
 import { createSupabaseServer } from '../../../lib/supabase';
 
 const { id } = Astro.params;
@@ -48,7 +49,7 @@ const back = `/trips/${id}/itinerary`;
 
   <!-- Live map of the itinerary -->
   <div class="card" style="margin-top:12px;">
-    <h2>Your route 🗺</h2>
+    <h2><Icon name="map" /> Your route</h2>
     <div id="map" style="height:44vh;border-radius:14px;border:1px solid var(--line);"></div>
     <div id="route-summary" style="margin-top:10px;"></div>
     <p class="hint" style="margin-top:6px;">Same-day stops share a color; the dashed line traces your day in time order. Distances are straight-line between stops.</p>
@@ -57,7 +58,7 @@ const back = `/trips/${id}/itinerary`;
   <!-- Smart suggestions -->
   <div class="card" style="margin-top:12px;">
     <div class="rowflex" style="justify-content:space-between;">
-      <h2 style="margin:0;">Smart suggestions ✨</h2>
+      <h2 style="margin:0;">Smart suggestions</h2>
       <button class="mini" type="button" id="suggest-btn">Suggest for my dates</button>
     </div>
     <div id="suggestions" class="stack" style="margin-top:10px;"></div>
@@ -65,7 +66,7 @@ const back = `/trips/${id}/itinerary`;
 
   <!-- Places to visit -->
   <div class="section">
-    <h2>Places to visit 📍 <span class="hint">(not scheduled yet)</span></h2>
+    <h2><Icon name="pin" /> Places to visit <span class="hint">(not scheduled yet)</span></h2>
     <div class="stack">
       {wishlist.map((p: any) => (
         <form method="post" action="/api/place-save" class="card rowflex">
@@ -154,7 +155,7 @@ const back = `/trips/${id}/itinerary`;
           d.style.cssText = 'border-bottom:1px solid var(--line);padding-bottom:8px;align-items:center;';
           const img = s.img
             ? `<img src="${s.img}" alt="" loading="lazy" style="width:64px;height:48px;object-fit:cover;border-radius:8px;flex:0 0 64px;border:1px solid var(--glass-edge);">`
-            : `<span style="width:64px;height:48px;flex:0 0 64px;border-radius:8px;background:rgba(15,118,110,.08);display:inline-flex;align-items:center;justify-content:center;">📍</span>`;
+            : `<span style="width:64px;height:48px;flex:0 0 64px;border-radius:8px;background:rgba(15,118,110,.08);display:inline-flex;align-items:center;justify-content:center;color:var(--teal);"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10Z"/><circle cx="12" cy="11" r="2.2"/></svg></span>`;
           d.innerHTML = `${img}<div style="flex:1;min-width:150px;"><b></b> <span class="pill active" style="font-size:.62rem;">${s.category}</span><div class="hint"></div></div>`;
           d.querySelector('b').textContent = s.name;
           d.querySelector('.hint').textContent = s.why + (s.best_time ? ' · ' + s.best_time : '');

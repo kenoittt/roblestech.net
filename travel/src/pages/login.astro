@@ -7,7 +7,7 @@ const confirmed = Astro.url.searchParams.has('confirmed');
   <div style="max-width:400px;margin:6vh auto 0;">
     <h1>Welcome back</h1>
     <p class="lede">Sign in to your trips.</p>
-    {confirmed && <div class="alert alert-ok">Email confirmed — sign in below. ✈️</div>}
+    {confirmed && <div class="alert alert-ok">Email confirmed — sign in below.</div>}
     {err && <div class="alert alert-error">{err === '1' || err === '' ? 'Incorrect email or password.' : decodeURIComponent(err)}</div>}
     <form method="post" action="/api/login" class="card stack">
       <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required /></div>

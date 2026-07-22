@@ -3,6 +3,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 import { getMonthProfile } from '../../lib/insights';
 import { entryFor } from '../../lib/visa';
+import Icon from '../../components/Icon.astro';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -36,7 +37,8 @@ const mapsUrl = (place: string) => `https://www.google.com/maps/search/?api=1&qu
 // rather than assuming Wikipedia has it.
 const infoUrl = (place: string) => `https://www.google.com/search?q=${encodeURIComponent(place + ' ' + dest.name + ' ' + dest.country)}`;
 const wikiUrl = (place: string) => `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(place + ' ' + dest.name)}`;
-const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
+const crowdDot: Record<string, string> = { peak: '#C0392B', shoulder: '#E0930B', 'off-season': '#177E4D' };
+const crowdText: Record<string, string> = { peak: 'Peak season', shoulder: 'Shoulder season', 'off-season': 'Off-season (local feel)' };
 ---
 
 <AppLayout title={`${dest.name} in ${MONTHS[month - 1]} · WanderWise`}>
@@ -45,7 +47,7 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     <form method="post" action="/api/wishlist-toggle" class="m0">
       <input type="hidden" name="destination_id" value={dest.id} />
       <input type="hidden" name="back" value={`/explore/${dest.id}?m=${month}`} />
-      <button class="mini" type="submit">{wished ? '★ Saved' : '☆ Save to wishlist'}</button>
+      <button class="mini" type="submit">{wished ? <><Icon name="star" /> Saved</> : <><Icon name="star" /> Save to wishlist</>}</button>
     </form>
   </h1>
 
@@ -62,7 +64,7 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   <div class="card" style="margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-left:4px solid var(--coral);">
     <div style="flex:1;min-width:200px;">
-      <b>Want to start a trip to {dest.name}? ✈️</b>
+      <b style="display:inline-flex;align-items:center;gap:8px;"><Icon name="plane" /> Want to start a trip to {dest.name}?</b>
       <p class="hint" style="margin-top:2px;">One tap creates a trip project with {dest.name} as your first destination.</p>
     </div>
     {Astro.locals.user ? (
@@ -78,7 +80,7 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   <div class="card" style="margin-bottom:14px;">
     <h2>Weather in {MONTHS[month - 1]}</h2>
-    {w.season && <p style="font-weight:800;color:var(--teal);margin:0 0 8px;">🗓 Season: {w.season}</p>}
+    {w.season && <p style="font-weight:800;color:var(--teal);margin:0 0 8px;display:flex;align-items:center;gap:7px;"><Icon name="calendar" /> Season: {w.season}</p>}
     {w.avg_high != null ? (
       <div class="cat-chips" style="margin:0 0 10px;">
         <span class="chip">High <b>{w.avg_high}°C</b></span>
@@ -89,12 +91,12 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     ) : <p class="hint">Weather data unavailable right now.</p>}
     {w.climate_summary && <p>{w.climate_summary}</p>}
     {w.crowd_note && <p class="hint" style="margin-top:6px;">{w.crowd_note}</p>}
-    {profile?.crowd_index && <p style="margin-top:8px;font-weight:700;">{crowdLabel[profile.crowd_index]}</p>}
+    {profile?.crowd_index && <p style="margin-top:8px;font-weight:700;display:flex;align-items:center;gap:8px;"><span style={`width:11px;height:11px;border-radius:50%;flex:0 0 auto;background:${crowdDot[profile.crowd_index]};`}></span>{crowdText[profile.crowd_index]}</p>}
   </div>
 
   {attire?.summary && (
     <div class="card" style="margin-bottom:14px;">
-      <h2>What to wear & pack 🎒</h2>
+      <h2><Icon name="bag" /> What to wear &amp; pack</h2>
       <p>{attire.summary}</p>
       {Array.isArray(attire.items) && attire.items.length > 0 && (
         <div class="cat-chips" style="margin:10px 0 0;">{attire.items.map((i: string) => <span class="chip">{i}</span>)}</div>
@@ -104,7 +106,7 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   {festivals.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
-      <h2>Festivals & events this month 🎉</h2>
+      <h2><Icon name="ticket" /> Festivals &amp; events this month</h2>
       <div class="stack">
         {festivals.map((f: any) => <div><b>{f.name}</b> <span class="hint">— {f.timing}</span><br /><span style="font-size:.9rem;">{f.note}</span></div>)}
       </div>
@@ -121,8 +123,8 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   {entry && (
     <div class="card" style={`margin-bottom:14px;border-left:4px solid ${entry.status === 'visa-free' ? 'var(--ok)' : entry.status === 'action-needed' ? 'var(--coral)' : 'var(--sun)'};`}>
-      <h2>Visas & entry 🛂</h2>
-      <p style="font-weight:800;margin:0 0 6px;">{entry.status === 'visa-free' ? '✅' : entry.status === 'action-needed' ? '🛂' : 'ℹ️'} {entry.headline}</p>
+      <h2><Icon name="passport" /> Visas &amp; entry</h2>
+      <p style="font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:7px;"><Icon name={entry.status === 'visa-free' ? 'check' : entry.status === 'action-needed' ? 'passport' : 'alert'} /> {entry.headline}</p>
       <p style="margin:0 0 8px;">{entry.detail}</p>
       {entry.status === 'unknown' && (
         <p style="margin:0 0 8px;">{Astro.locals.user
@@ -141,18 +143,18 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   {topPlaces.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
-      <h2>Top places to visit</h2>
+      <h2><Icon name="pin" /> Top places to visit</h2>
       <p class="hint" style="margin:0 0 10px;">Tap a place for map & background links.</p>
       <div class="stack">{topPlaces.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">📍</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph"><Icon name="pin" /></div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">Best guides &amp; official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">Wikipedia</a>
           </div>
         </details>
       ))}</div>
@@ -161,18 +163,18 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   {adventures.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
-      <h2>Adventures nearby 🥾</h2>
+      <h2><Icon name="mountain" /> Adventures nearby</h2>
       <p class="hint" style="margin:0 0 10px;">Hikes, mountains and outdoor days within reach — tap for details.</p>
       <div class="stack">{adventures.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">⛰️</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph"><Icon name="mountain" /></div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">Best guides &amp; official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">Wikipedia</a>
           </div>
         </details>
       ))}</div>
@@ -181,17 +183,17 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
 
   {gems.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
-      <h2>Hidden gems 💎</h2>
+      <h2><Icon name="gem" /> Hidden gems</h2>
       <div class="stack">{gems.map((p: any) => (
         <details class="place-det">
           <summary class="place-row">
-            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph">💎</div>}
+            {p.img ? <a class="imglink" href={p.img} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Open full-size photo"><img src={p.img} alt={p.name} loading="lazy" /></a> : <div class="ph"><Icon name="gem" /></div>}
             <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
           </summary>
           <div class="place-actions">
-            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">🔎 Best guides & official info</a>
-            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Google Maps</a>
-            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Wikipedia</a>
+            <a class="mini" href={infoUrl(p.name)} target="_blank" rel="noopener noreferrer">Best guides &amp; official info</a>
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">Wikipedia</a>
           </div>
         </details>
       ))}</div>

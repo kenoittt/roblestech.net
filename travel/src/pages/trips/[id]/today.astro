@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
+import Icon from '../../../components/Icon.astro';
 import { createSupabaseServer } from '../../../lib/supabase';
 import { todayForecast, weatherLabel } from '../../../lib/weather';
 
@@ -49,7 +50,7 @@ const inTrip = (trip as any).start_date && (trip as any).end_date && today >= (t
 
   <div class="grid2" style="margin-bottom:14px;">
     <div class="card">
-      <h2>Weather now 🌤</h2>
+      <h2><Icon name="cloud" /> Weather now</h2>
       {wx ? (
         <>
           <div style="font-size:1.6rem;font-weight:800;">{wx.high}° <span class="hint" style="font-size:1rem;">/ {wx.low}°C</span></div>
@@ -58,7 +59,7 @@ const inTrip = (trip as any).start_date && (trip as any).end_date && today >= (t
       ) : <p class="hint">Add a lodging or a located itinerary item to see local weather.</p>}
     </div>
     <div class="card">
-      <h2>Budget left 💰</h2>
+      <h2><Icon name="wallet" /> Budget left</h2>
       <div style="font-size:1.6rem;font-weight:800;color:{remaining >= 0 ? 'var(--teal)' : 'var(--bad)'};">{base} {fmt(remaining)}</div>
       <p class="hint">planned {base} {fmt(planned)} − actual so far {base} {fmt(actual)}</p>
       <a class="mini" href={`/trips/${id}/budget`} style="margin-top:8px;">Mark expenses actual →</a>

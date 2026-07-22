@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
+import Icon from '../../../components/Icon.astro';
 import { createSupabaseServer } from '../../../lib/supabase';
 import { CURRENCIES } from '../../../lib/currencies';
 
@@ -57,7 +58,7 @@ const expenses = expData ?? [];
   <div class="cat-chips" id="chips"></div>
 
   <div class="card" style="margin-bottom:12px;" id="breakdown-card">
-    <h2 style="margin-bottom:8px;">Breakdown 📊</h2>
+    <h2 style="margin-bottom:8px;"><Icon name="chart" /> Breakdown</h2>
     <div id="breakdown" class="stack" style="gap:6px;"></div>
   </div>
 
@@ -83,7 +84,7 @@ const expenses = expData ?? [];
   </div>
   <div class="rowflex" style="margin-top:12px;">
     <button type="button" class="btn" id="add-row">+ Add expense</button>
-    <a class="mini" href={`/api/export-expenses?trip=${id}`} style="align-self:center;">↓ Export CSV</a>
+    <a class="mini" href={`/api/export-expenses?trip=${id}`} style="align-self:center;">Export CSV</a>
     <span class="hint">Type in either cost column — the other fills in automatically. Pax* overrides the trip pax for that row only.</span>
   </div>
 

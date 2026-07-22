@@ -34,7 +34,7 @@ const pin = (lat, lng, color, html) => {
 
 lodgings.forEach((g) => {
   if (g.lat == null) return;
-  pin(g.lat, g.lng, '#0F766E', `<b>🏨 ${g.name}</b><br>${g.address ?? ''}<br><a href="/trips/${tripId}">Edit in details</a>`);
+  pin(g.lat, g.lng, '#0F766E', `<b>${g.name}</b><br>${g.address ?? ''}<br><a href="/trips/${tripId}">Edit in details</a>`);
 });
 
 // group same-day stops and draw the day's route (FR-MAP-03)
@@ -59,9 +59,9 @@ Object.entries(byDay).forEach(([d, list]) => {
   if (routeSummary && pts.length > 1) {
     let total = 0;
     for (let i = 1; i < pts.length; i++) total += kmBetween(pts[i - 1], pts[i]);
-    const verdict = total <= 12 ? '✅ easy day (walk/short rides)'
-      : total <= 60 ? '🚕 doable with transit or taxis'
-      : '⚠️ very long day — consider splitting or reordering';
+    const verdict = total <= 12 ? 'easy day (walk / short rides)'
+      : total <= 60 ? 'doable with transit or taxis'
+      : 'very long day — consider splitting or reordering';
     const row = document.createElement('div');
     row.className = 'hint';
     row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:6px;';
@@ -75,7 +75,7 @@ Object.entries(byDay).forEach(([d, list]) => {
 places.forEach((p) => {
   if (p.lat == null) return;
   pin(p.lat, p.lng, p.status === 'scheduled' ? '#F5B54A' : '#9AA7A4',
-    `<b>📍 ${p.place_name}</b><br>${p.status === 'wishlist' ? 'Places to visit' : 'Scheduled'}<br><a href="/trips/${tripId}/itinerary">Manage</a>`);
+    `<b>${p.place_name}</b><br>${p.status === 'wishlist' ? 'Places to visit' : 'Scheduled'}<br><a href="/trips/${tripId}/itinerary">Manage</a>`);
 });
 
 if (bounds.length) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 13 });
