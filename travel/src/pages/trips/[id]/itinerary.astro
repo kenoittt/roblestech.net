@@ -109,7 +109,7 @@ const back = `/trips/${id}/itinerary`;
                     {it.notes && <span class="hint" style="display:block;">{it.notes}</span>}
                   </span>
                 </div>
-                <span class="pencil" aria-hidden="true">✏️</span>
+                <span class="row-toggle" data-closed="Edit" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
               </summary>
               <form method="post" action="/api/itinerary-save" class="rowflex" style="margin-top:12px;">
                 <input type="hidden" name="trip_id" value={id} />
