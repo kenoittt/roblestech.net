@@ -195,9 +195,16 @@ const kindLabel: Record<string, string> = {
         <details class="card" style="margin-bottom:14px;">
           <summary style="cursor:pointer;font-weight:700;font-size:1.05rem;">
             {c.name}
-            <span style="float:right;font-size:.85rem;">
+            <span style="float:right;font-size:.85rem;display:inline-flex;gap:14px;align-items:center;">
+              {c.gsc_property && (
+                <form method="post" action="/api/run-refresh" style="margin:0;display:inline;">
+                  <input type="hidden" name="client_id" value={c.id} />
+                  <input type="hidden" name="back" value="/admin" />
+                  <button type="submit" class="mini" style="margin:0;" title="Pull fresh Search Console data for this client only">Pull GSC</button>
+                </form>
+              )}
               <a href={`/admin/content?client=${c.id}`} style="color:var(--lime);">Edit content (forms) →</a>
-              <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" style="color:var(--sky);margin-left:14px;">Preview →</a>
+              <a href={`/d?client=${c.id}`} target="_blank" rel="noopener" style="color:var(--sky);">Preview →</a>
             </span>
           </summary>
           <form method="post" action="/api/save-config" class="form-grid gated" style="max-width:none;margin-top:16px;">

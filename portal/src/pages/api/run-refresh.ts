@@ -13,7 +13,10 @@ export const POST: APIRoute = async (context) => {
   }
   const form = await context.request.formData().catch(() => new FormData());
   const clientId = String(form.get('client_id') ?? '') || undefined; // omit = all clients
-  const back = clientId ? '/admin/clients' : '/admin';
+  const backRaw = String(form.get('back') ?? '');
+  const back = backRaw.startsWith('/') && !backRaw.startsWith('//')
+    ? backRaw
+    : clientId ? '/admin/clients' : '/admin';
   try {
     const results = await runGscRefresh(clientId);
     if (!results.length) {
