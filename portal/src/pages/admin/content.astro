@@ -72,11 +72,12 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       <form method="post" action="/api/save-baseline-page" class="gated erow" style="margin:0;">
         <input type="hidden" name="client_id" value={clientId} />
         <input type="hidden" name="index" value={i} />
-        <input name="page" value={v(p.page)} placeholder="/page-url" style="flex:2;" />
-        <input name="clicks" value={v(p.clicks)} inputmode="numeric" placeholder="clicks" style="flex:1;" />
-        <input name="impr" value={v(p.impr)} inputmode="numeric" placeholder="impressions" style="flex:1;" />
-        <button type="submit" name="op" value="save" class="mini" style="background:var(--lime);color:var(--navy);border:0;">Save</button>
-        <button type="submit" name="op" value="delete" class="mini" style="color:#ffb3b3;" onclick="return confirm('Remove this page row?');">✕</button>
+        <input name="page" value={v(p.page)} placeholder="/page-url" style="flex:2;" disabled />
+        <input name="clicks" value={v(p.clicks)} inputmode="numeric" placeholder="clicks" style="flex:1;" disabled />
+        <input name="impr" value={v(p.impr)} inputmode="numeric" placeholder="impressions" style="flex:1;" disabled />
+        <button type="button" class="pencil js-unlock" title="Edit this row"><EditIcon size={15} title="Edit this row" /></button>
+        <button type="submit" name="op" value="save" class="mini js-savef" hidden style="background:var(--lime);color:var(--navy);border:0;">Save</button>
+        <button type="submit" name="op" value="delete" class="mini js-savef" hidden style="color:#ffb3b3;" onclick="return confirm('Remove this page row?');">✕</button>
       </form>
     ))}
     {pages.length === 0 && <p class="hint" style="margin:0;">No pages saved yet — add the first one below.</p>}
@@ -183,15 +184,16 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       const x = e.target.closest('.js-del'); if (x && !x.closest('form[action="/api/save-baseline-page"]')) { x.closest('.erow').remove(); return; }
       const s = e.target.closest('.js-sop');
       if (s) { const p = s.closest('.erow').querySelector('.sop-panel'); if (p) p.hidden = !p.hidden; return; }
-      // Pencil: unlock one baseline field and reveal its own Save button.
+      // Pencil: unlock a field/row for editing — enable its inputs and
+      // reveal its Save (and delete) buttons.
       const u = e.target.closest('.js-unlock');
       if (u) {
         const scope = u.closest('form') || u.closest('div');
-        const inp = scope.querySelector('input[name="value"]') || scope.querySelector('input:not([type="hidden"])');
-        if (inp) { inp.disabled = false; inp.focus(); }
-        const sv = scope.querySelector('.js-savef');
-        if (sv) sv.hidden = false;
-        u.style.visibility = 'hidden';
+        const inputs = scope.querySelectorAll('input:not([type="hidden"])');
+        inputs.forEach((i) => (i.disabled = false));
+        if (inputs[0]) inputs[0].focus();
+        scope.querySelectorAll('.js-savef').forEach((b) => (b.hidden = false));
+        u.style.display = 'none';
       }
     });
 
