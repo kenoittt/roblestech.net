@@ -62,9 +62,12 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       ))}
     </div>
 
-    <div class="section-h">Top pages at baseline</div>
-    <div id="pagesList"></div>
-    <button type="button" class="mini js-add" data-list="pages">+ Add page</button>
+    <div class="section-h" style="display:flex;align-items:center;gap:10px;">
+      Top pages at baseline
+      <button type="button" class="pencil" id="unlock-pages" title="Edit top pages">✏️</button>
+    </div>
+    <div id="pagesList" class="pages-locked"></div>
+    <button type="button" class="mini js-add" data-list="pages" id="pages-add" hidden>+ Add page</button>
 
     <div class="section-h">Content pipeline</div>
     <div id="pipeList"></div>
@@ -155,6 +158,22 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       oi:    { el: document.getElementById('oiList'),    row: oiRow,    data: openItems },
     };
     Object.values(lists).forEach((L) => (L.data || []).forEach((d) => L.el.appendChild(L.row(d))));
+
+    // Top pages start LOCKED: inputs disabled, add/delete hidden, and the
+    // list is not submitted at all until unlocked — so saves can't touch it.
+    let pagesUnlocked = false;
+    const lockPages = () => {
+      lists.pages.el.querySelectorAll('input').forEach((i) => (i.disabled = true));
+      lists.pages.el.querySelectorAll('.js-del').forEach((b) => (b.style.display = 'none'));
+    };
+    lockPages();
+    document.getElementById('unlock-pages').addEventListener('click', (e) => {
+      pagesUnlocked = true;
+      lists.pages.el.querySelectorAll('input').forEach((i) => (i.disabled = false));
+      lists.pages.el.querySelectorAll('.js-del').forEach((b) => (b.style.display = ''));
+      document.getElementById('pages-add').hidden = false;
+      e.target.style.visibility = 'hidden';
+    });
     document.querySelectorAll('.js-add').forEach((b) => b.addEventListener('click', () => {
       const L = lists[b.dataset.list]; L.el.appendChild(L.row({}));
     }));
@@ -176,7 +195,12 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
     // Serialize the dynamic lists on the main content form only.
     document.querySelector('form[action="/api/save-content"]').addEventListener('submit', () => {
-      document.getElementById('f-pages').value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
+      const fPages = document.getElementById('f-pages');
+      if (pagesUnlocked) {
+        fPages.value = JSON.stringify(collect(lists.pages.el, (o) => ({ page:o.page, clicks:Number(o.clicks)||0, impr:Number(o.impr)||0 })).filter((x)=>x.page));
+      } else {
+        fPages.disabled = true; // not submitted → server keeps the stored pages
+      }
       document.getElementById('f-pipe').value = JSON.stringify(
         Array.from(lists.pipe.el.querySelectorAll('.erow')).map((r) => {
           const o = grab(r);
