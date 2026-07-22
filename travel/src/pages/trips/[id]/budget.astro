@@ -149,7 +149,7 @@ const expenses = expData ?? [];
         <td><input data-f="currency" value="${r.currency}" maxlength="3" style="max-width:56px;text-transform:uppercase;"></td>
         <td style="text-align:center;"><input type="checkbox" data-f="is_actual" ${r.is_actual ? 'checked' : ''} style="width:auto;"></td>
         <td style="text-align:center;"><input type="checkbox" data-f="paid" ${r.paid ? 'checked' : ''} style="width:auto;"></td>
-        <td><button type="button" class="del" title="Delete row">✕</button></td>`;
+        <td><button type="button" class="del" title="Delete row" aria-label="Delete row">✕</button></td>`;
       tbody.appendChild(tr);
       recalcRow(r, tr);
 

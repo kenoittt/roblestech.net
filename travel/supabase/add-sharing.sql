@@ -5,15 +5,19 @@
 --  2) members may remove THEMSELVES (leave a trip); owner still manages all
 -- ============================================================================
 
--- 1) Email on profiles (kept in sync on signup; backfilled for existing users)
+-- 1) Email + passport country on profiles (synced on signup; email backfilled)
 alter table public.profiles add column if not exists email text;
+alter table public.profiles add column if not exists passport_country text;
 create unique index if not exists profiles_email_idx on public.profiles (lower(email));
 
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, display_name, email)
-  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)), new.email)
+  insert into public.profiles (id, display_name, email, passport_country)
+  values (new.id,
+          coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)),
+          new.email,
+          nullif(new.raw_user_meta_data->>'passport_country', ''))
   on conflict (id) do update set email = excluded.email;
   return new;
 end; $$;

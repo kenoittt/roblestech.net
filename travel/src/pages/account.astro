@@ -1,19 +1,38 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
-const ok = Astro.url.searchParams.has('ok');
+import { createSupabaseServer } from '../lib/supabase';
+import { COUNTRIES } from '../lib/countries';
+
+const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const email = Astro.locals.user?.email ?? '';
+const supabase = createSupabaseServer(Astro);
+const { data: profile } = await supabase.from('profiles')
+  .select('display_name,passport_country').eq('id', Astro.locals.user?.id).maybeSingle();
 ---
 <AppLayout title="Account · WanderWise">
   <div style="max-width:440px;">
     <h1>Account</h1>
     <p class="lede">{email}</p>
-    {ok && <div class="alert alert-ok">Password updated.</div>}
+    {ok && <div class="alert alert-ok">{ok === '1' ? 'Password updated.' : decodeURIComponent(ok)}</div>}
     {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
-    <form method="post" action="/api/change-password" class="card stack">
+
+    <form method="post" action="/api/profile-update" class="card stack">
+      <div><label for="dn">Display name</label><input id="dn" name="display_name" value={profile?.display_name ?? ''} /></div>
+      <div>
+        <label for="country">Passport country</label>
+        <input id="country" name="passport_country" list="country-list" autocomplete="country-name"
+          value={profile?.passport_country ?? ''} placeholder="Start typing… e.g. Philippines" />
+        <p class="hint" style="margin-top:4px;">Used for visa &amp; entry-requirement checks on your trips.</p>
+      </div>
+      <button class="btn" type="submit">Save profile</button>
+    </form>
+
+    <form method="post" action="/api/change-password" class="card stack" style="margin-top:14px;">
       <div><label for="pw">New password</label><input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8" /></div>
       <div><label for="pw2">Confirm</label><input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="8" /></div>
       <button class="btn" type="submit">Update password</button>
     </form>
   </div>
+  <datalist id="country-list">{COUNTRIES.map((c) => <option value={c.name} />)}</datalist>
 </AppLayout>

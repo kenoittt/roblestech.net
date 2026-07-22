@@ -2,6 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 import { getMonthProfile } from '../../lib/insights';
+import { entryFor } from '../../lib/visa';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -23,6 +24,15 @@ const gems: any[] = profile?.hidden_gems_json ?? [];
 const topPlaces: any[] = best?.top_places ?? [];
 const adventures: any[] = best?.adventures ?? [];
 const hero = profile?.hero_image_url ?? null;
+
+let passport: string | null = null;
+if (Astro.locals.user) {
+  const { data: prof } = await supabase.from('profiles').select('passport_country').eq('id', Astro.locals.user.id).maybeSingle();
+  passport = (prof as any)?.passport_country ?? null;
+}
+const entry = entryFor(passport, dest.country);
+const mapsUrl = (place: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place + ', ' + dest.name + ', ' + dest.country)}`;
+const wikiUrl = (place: string) => `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(place + ' ' + dest.name)}`;
 const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder: '🟡 Shoulder season', 'off-season': '🟢 Off-season (local feel)' };
 ---
 
@@ -88,14 +98,41 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     </div>
   )}
 
+  {entry && (
+    <div class="card" style={`margin-bottom:14px;border-left:4px solid ${entry.status === 'visa-free' ? 'var(--ok)' : entry.status === 'action-needed' ? 'var(--coral)' : 'var(--sun)'};`}>
+      <h2>Visas & entry 🛂</h2>
+      <p style="font-weight:800;margin:0 0 6px;">{entry.status === 'visa-free' ? '✅' : entry.status === 'action-needed' ? '🛂' : 'ℹ️'} {entry.headline}</p>
+      <p style="margin:0 0 8px;">{entry.detail}</p>
+      {entry.status === 'unknown' && (
+        <p style="margin:0 0 8px;">{Astro.locals.user
+          ? <a href="/account">Set your passport country →</a>
+          : <a href="/signup">Create a free account with your passport country for personalized checks →</a>}</p>
+      )}
+      {entry.notes.map((n: string) => <p class="hint" style="margin:0 0 4px;">• {n}</p>)}
+      <p style="margin:8px 0 0;font-size:.85rem;">
+        {entry.official.map((o: any, i: number) => (
+          <>{i > 0 && ' · '}<a href={o.url} target="_blank" rel="noopener noreferrer">{o.label} ↗</a></>
+        ))}
+      </p>
+      <p class="hint" style="margin-top:8px;">Guidance checked {entry.checked}. Rules change — always confirm on the official government site before booking. Not legal advice.</p>
+    </div>
+  )}
+
   {topPlaces.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
       <h2>Top places to visit</h2>
+      <p class="hint" style="margin:0 0 10px;">Tap a place for map & background links.</p>
       <div class="stack">{topPlaces.map((p: any) => (
-        <div class="place-row">
-          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">📍</div>}
-          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
-        </div>
+        <details class="place-det">
+          <summary class="place-row">
+            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">📍</div>}
+            <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+          </summary>
+          <div class="place-actions">
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+          </div>
+        </details>
       ))}</div>
     </div>
   )}
@@ -103,12 +140,18 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
   {adventures.length > 0 && (
     <div class="card" style="margin-bottom:14px;">
       <h2>Adventures nearby 🥾</h2>
-      <p class="hint" style="margin:0 0 10px;">Hikes, mountains and outdoor days within reach.</p>
+      <p class="hint" style="margin:0 0 10px;">Hikes, mountains and outdoor days within reach — tap for details.</p>
       <div class="stack">{adventures.map((p: any) => (
-        <div class="place-row">
-          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">⛰️</div>}
-          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
-        </div>
+        <details class="place-det">
+          <summary class="place-row">
+            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">⛰️</div>}
+            <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+          </summary>
+          <div class="place-actions">
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+          </div>
+        </details>
       ))}</div>
     </div>
   )}
@@ -117,10 +160,16 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     <div class="card" style="margin-bottom:14px;">
       <h2>Hidden gems 💎</h2>
       <div class="stack">{gems.map((p: any) => (
-        <div class="place-row">
-          {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">💎</div>}
-          <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
-        </div>
+        <details class="place-det">
+          <summary class="place-row">
+            {p.img ? <img src={p.img} alt={p.name} loading="lazy" /> : <div class="ph">💎</div>}
+            <div><b>{p.name}</b><div class="hint">{p.why}</div></div>
+          </summary>
+          <div class="place-actions">
+            <a class="mini" href={mapsUrl(p.name)} target="_blank" rel="noopener noreferrer">🗺 Open in Google Maps</a>
+            <a class="mini" href={wikiUrl(p.name)} target="_blank" rel="noopener noreferrer">📖 Read more (Wikipedia)</a>
+          </div>
+        </details>
       ))}</div>
     </div>
   )}
@@ -132,5 +181,11 @@ const crowdLabel: Record<string, string> = { peak: '🔴 Peak season', shoulder:
     .place-row img,.place-row .ph{width:76px;height:56px;flex:0 0 76px;border-radius:10px;object-fit:cover;
       border:1px solid var(--glass-edge);box-shadow:0 2px 8px rgba(28,43,43,.10);}
     .place-row .ph{display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.45);}
+    .place-det summary{cursor:pointer;list-style:none;border-radius:10px;padding:4px;}
+    .place-det summary::-webkit-details-marker{display:none;}
+    .place-det summary:hover{background:rgba(255,255,255,.45);}
+    .place-det[open] summary{background:rgba(15,118,110,.06);}
+    .place-actions{display:flex;gap:8px;flex-wrap:wrap;padding:10px 4px 4px 92px;}
+    @media(max-width:480px){.place-actions{padding-left:4px;}}
   </style>
 </AppLayout>

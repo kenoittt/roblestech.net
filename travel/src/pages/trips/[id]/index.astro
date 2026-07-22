@@ -1,6 +1,7 @@
 ---
 import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../../lib/supabase';
+import { entryFor } from '../../../lib/visa';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -32,6 +33,20 @@ const who = (uid: string) => {
 const members = (memberRows ?? []).map((m: any) => ({ ...m, ...who(m.user_id) }));
 const owner = who(trip.owner_id);
 const isMember = members.some((m: any) => m.user_id === Astro.locals.user?.id);
+
+// Searchable destination list + entry requirements for the trip's countries.
+const { data: destRows } = await supabase.from('destinations').select('name,country').eq('active', true).order('name');
+const destList = (destRows ?? []) as { name: string; country: string }[];
+const { data: myProfile } = await supabase.from('profiles').select('passport_country').eq('id', Astro.locals.user?.id).maybeSingle();
+const passport = (myProfile as any)?.passport_country ?? null;
+
+const norm = (s: string) => s.trim().toLowerCase();
+const legCountries = [...new Set(legs.map((l) => {
+  const ln = norm(l.destination_name);
+  const hit = destList.find((d) => { const dn = norm(d.name); return dn === ln || ln.includes(dn) || dn.includes(ln) || ln === norm(d.country); });
+  return hit?.country ?? (destList.some((d) => norm(d.country) === ln) ? destList.find((d) => norm(d.country) === ln)!.country : null);
+}).filter(Boolean))] as string[];
+const entryCards = legCountries.map((c) => entryFor(passport, c)).filter(Boolean);
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
@@ -79,24 +94,48 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
         <form method="post" action="/api/leg-save" class="card rowflex">
           <input type="hidden" name="id" value={l.id} />
           <input type="hidden" name="trip_id" value={trip.id} />
-          <div style="flex:2;min-width:150px;"><label>Destination</label><input name="destination_name" value={l.destination_name} required /></div>
+          <div style="flex:2;min-width:150px;"><label>Destination</label><input name="destination_name" value={l.destination_name} list="dest-list" required /></div>
           <div style="width:110px;"><label>Arrive (airport)</label><input name="arrival_airport" value={l.arrival_airport ?? ''} placeholder="HKG" /></div>
           <div style="width:110px;"><label>Depart (airport)</label><input name="departure_airport" value={l.departure_airport ?? ''} placeholder="TPE" /></div>
           <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={l.start_date ?? ''} /></div>
           <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={l.end_date ?? ''} /></div>
           <button class="mini" type="submit">Save</button>
-          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');">✕</button>
+          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');" aria-label="Remove destination">✕</button>
         </form>
       ))}
       <form method="post" action="/api/leg-save" class="card rowflex" style="border-style:dashed;">
         <input type="hidden" name="trip_id" value={trip.id} />
-        <div style="flex:2;min-width:150px;"><label>Add destination</label><input name="destination_name" required placeholder="Hong Kong" /></div>
+        <div style="flex:2;min-width:150px;"><label>Add destination</label><input name="destination_name" list="dest-list" required placeholder="Start typing… Hong Kong, Taipei, Samarkand" /></div>
         <div style="width:110px;"><label>Arrive</label><input name="arrival_airport" placeholder="HKG" /></div>
         <div style="width:110px;"><label>Depart</label><input name="departure_airport" /></div>
         <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
       </form>
     </div>
   </div>
+
+  {entryCards.length > 0 && (
+    <div class="section">
+      <h2>Visas & entry requirements 🛂</h2>
+      <div class="stack">
+        {entryCards.map((v: any) => (
+          <div class="card" style={`border-left:4px solid ${v.status === 'visa-free' ? 'var(--ok)' : v.status === 'action-needed' ? 'var(--coral)' : 'var(--sun)'};`}>
+            <p style="font-weight:800;margin:0 0 6px;">
+              {v.status === 'visa-free' ? '✅' : v.status === 'action-needed' ? '🛂' : 'ℹ️'} {v.headline}
+            </p>
+            <p style="margin:0 0 8px;">{v.detail}</p>
+            {v.status === 'unknown' && <p style="margin:0 0 8px;"><a href="/account">Set passport country →</a></p>}
+            {v.notes.map((n: string) => <p class="hint" style="margin:0 0 4px;">• {n}</p>)}
+            <p style="margin:8px 0 0;font-size:.85rem;">
+              {v.official.map((o: any, i: number) => (
+                <>{i > 0 && ' · '}<a href={o.url} target="_blank" rel="noopener noreferrer">{o.label} ↗</a></>
+              ))}
+            </p>
+            <p class="hint" style="margin-top:8px;">Guidance checked {v.checked}. Rules change — always confirm on the official site before booking. Not legal advice.</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
 
   <div class="section">
     <h2>Lodging</h2>
@@ -194,4 +233,9 @@ const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, {
       )}
     </div>
   </div>
+
+  <datalist id="dest-list">
+    {destList.map((d) => <option value={d.name}>{d.country}</option>)}
+    {[...new Set(destList.map((d) => d.country))].map((c) => <option value={c} />)}
+  </datalist>
 </AppLayout>

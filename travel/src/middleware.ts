@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServer } from './lib/supabase';
 
 // Public: landing, auth pages, and auth endpoints. Everything else needs a session.
-const PUBLIC_PATHS = new Set<string>(['/', '/login', '/signup', '/api/login', '/api/signup', '/logout']);
+const PUBLIC_PATHS = new Set<string>(['/', '/login', '/signup', '/api/login', '/api/signup', '/logout', '/api/oauth-google', '/api/auth-callback']);
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const path = context.url.pathname;

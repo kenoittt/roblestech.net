@@ -65,7 +65,7 @@ const back = `/trips/${id}/itinerary`;
           <div style="width:140px;"><label>Date</label><input name="day" type="date" min={trip.start_date} max={trip.end_date} /></div>
           <div style="width:110px;"><label>Time</label><input name="time" type="time" /></div>
           <button class="mini" type="submit" name="op" value="promote">→ Schedule</button>
-          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);">✕</button>
+          <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" aria-label="Remove place">✕</button>
         </form>
       ))}
       {wishlist.length === 0 && <p class="hint">Nothing waiting — add places here, from the map, or via suggestions.</p>}
@@ -97,7 +97,7 @@ const back = `/trips/${id}/itinerary`;
                 {it.source === 'ai' && <span class="pill active" style="font-size:.62rem;">AI</span>}
                 {it.notes && <div class="hint">{it.notes}</div>}
               </div>
-              <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this item?');">✕</button>
+              <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this item?');" aria-label="Remove item">✕</button>
             </form>
           ))}
         </div>

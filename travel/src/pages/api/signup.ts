@@ -9,6 +9,7 @@ export const POST: APIRoute = async (context) => {
   const email = String(form.get('email') ?? '').trim();
   const password = String(form.get('password') ?? '');
   const display_name = String(form.get('display_name') ?? '').trim();
+  const passport_country = String(form.get('passport_country') ?? '').trim();
   if (!email || password.length < 8) {
     return context.redirect('/signup?error=' + encodeURIComponent('Email and a password of 8+ characters are required.'));
   }
@@ -17,7 +18,7 @@ export const POST: APIRoute = async (context) => {
     email,
     password,
     options: {
-      data: { display_name },
+      data: { display_name, passport_country },
       // Confirmation email links back to THIS deployment (must also be in
       // Supabase Auth -> URL Configuration -> Redirect URLs).
       emailRedirectTo: `${context.url.origin}/login?confirmed=1`,
