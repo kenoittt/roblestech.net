@@ -15,12 +15,16 @@ export const GET: APIRoute = async (context) => {
   const { user, profile } = context.locals;
   if (!user) return context.redirect('/login');
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
   const targetId = isAdmin
     ? context.url.searchParams.get('client') ?? profile?.client_id ?? null
     : profile?.client_id ?? null;
 
-  if (!targetId) return new Response('No client dashboard is linked to this account yet.', { status: 404 });
+  if (!targetId) {
+    // Admins/super admins: send them to the client list to pick one.
+    // A client with no linked company: the friendly "not set up" screen.
+    return context.redirect(isAdmin ? '/admin/clients' : '/dashboard');
+  }
 
   const supabase = createSupabaseServer(context);
   const { data: client, error } = await supabase
