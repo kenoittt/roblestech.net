@@ -6,6 +6,12 @@
  * data-min on the .drp root (YYYY-MM-DD) disables earlier days — used on
  * trip CREATION so a new trip can't start in the past; left empty on edit
  * forms so existing/past trips stay editable.
+ *
+ * Click handling is delegated to the (stable, never-replaced) .drp-months
+ * container, and hover-preview only toggles classNames on the existing day
+ * buttons — the grid is rebuilt only on month navigation. Earlier this
+ * rebuilt the whole grid on every hover, which could destroy the button
+ * mid-click and silently swallow the end-date pick.
  */
 (function () {
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -31,8 +37,7 @@
     function updateLabel() {
       valueEl.textContent = start && end ? `${fmt(start)} → ${fmt(end)}` : start ? `${fmt(start)} → pick end date` : 'Select dates';
     }
-    function dayClass(y, m, d) {
-      const s = iso(y, m, d);
+    function dayClassName(s) {
       const cls = ['drp-day'];
       if (minStr && s < minStr) cls.push('drp-disabled');
       const rEnd = end || hoverEnd;
@@ -42,6 +47,11 @@
       if (end === s) cls.push('drp-end');
       if (lo && hi && s > lo && s < hi) cls.push('drp-inrange');
       return cls.join(' ');
+    }
+    // Restyle existing day buttons in place — no rebuild, so a gesture
+    // already in progress (e.g. a click) is never interrupted.
+    function refreshClasses() {
+      monthsWrap.querySelectorAll('.drp-day[data-date]').forEach((btn) => { btn.className = dayClassName(btn.dataset.date); });
     }
     function renderMonth(y, m) {
       const wrap = document.createElement('div'); wrap.className = 'drp-month';
@@ -55,11 +65,7 @@
       for (let d = 1; d <= daysInMonth; d++) {
         const s = iso(y, m, d);
         const btn = document.createElement('button');
-        btn.type = 'button'; btn.className = dayClass(y, m, d); btn.textContent = String(d);
-        if (!(minStr && s < minStr)) {
-          btn.addEventListener('click', () => pick(s));
-          btn.addEventListener('mouseenter', () => { if (start && !end) { hoverEnd = s; renderAll(); } });
-        }
+        btn.type = 'button'; btn.dataset.date = s; btn.className = dayClassName(s); btn.textContent = String(d);
         grid.appendChild(btn);
       }
       wrap.appendChild(grid);
@@ -76,12 +82,26 @@
       else if (s < start) { end = start; start = s; }
       else { end = s; }
       startInp.value = start || ''; endInp.value = end || '';
-      updateLabel(); renderAll();
+      updateLabel(); refreshClasses();
       if (start && end) setTimeout(() => { panel.hidden = true; }, 300);
     }
+
+    // Delegated on the stable container — attached once, survives every
+    // navigation rebuild and every hover-triggered class refresh.
+    monthsWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('.drp-day[data-date]');
+      if (!btn || btn.classList.contains('drp-disabled')) return;
+      pick(btn.dataset.date);
+    });
+    monthsWrap.addEventListener('mouseover', (e) => {
+      const btn = e.target.closest('.drp-day[data-date]');
+      if (!btn || btn.classList.contains('drp-disabled')) return;
+      if (start && !end && hoverEnd !== btn.dataset.date) { hoverEnd = btn.dataset.date; refreshClasses(); }
+    });
+
     panel.querySelector('.drp-prev').addEventListener('click', () => { viewM--; if (viewM < 0) { viewM = 11; viewY--; } renderAll(); });
     panel.querySelector('.drp-next').addEventListener('click', () => { viewM++; if (viewM > 11) { viewM = 0; viewY++; } renderAll(); });
-    panel.querySelector('.drp-clear').addEventListener('click', () => { start = null; end = null; hoverEnd = null; startInp.value = ''; endInp.value = ''; updateLabel(); renderAll(); });
+    panel.querySelector('.drp-clear').addEventListener('click', () => { start = null; end = null; hoverEnd = null; startInp.value = ''; endInp.value = ''; updateLabel(); refreshClasses(); });
     panel.querySelector('.drp-done').addEventListener('click', () => { panel.hidden = true; });
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();

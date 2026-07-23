@@ -295,7 +295,7 @@ const isFilipino = passport === 'Philippines';
       ) : (
         <p class="hint" style="border-top:1px dashed var(--line);padding-top:12px;">Build reusable packing lists for beach, business, winter and more on the <a href="/checklists">Checklists</a> page, then apply them here.</p>
       )}
-      <p class="hint">Tip: tap the box to check off an item; swipe a row left (or hover on desktop) to delete it.</p>
+      <p class="hint">Tip: tap the box to check off an item; drag (swipe) a row left to reveal delete.</p>
     </div>
   </div>
 
@@ -332,21 +332,30 @@ const isFilipino = passport === 'Philippines';
         }
       });
 
-      // Swipe-left to reveal delete (touch). Swipe right / tap elsewhere closes.
+      // Drag (swipe) left to reveal delete — Pointer Events, so it's the
+      // SAME gesture on touch and mouse. Deliberately does nothing on a
+      // plain hover or a plain click/tap (only an actual drag past the
+      // threshold engages), so the checkbox never moves under the cursor.
       list.querySelectorAll('.citem').forEach(function(item){
-        var main = item.querySelector('.citem-main'); var x0=null, y0=null, dx=0, swiping=false;
-        main.addEventListener('touchstart', function(e){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; swiping=false; }, {passive:true});
-        main.addEventListener('touchmove', function(e){
-          if(x0===null) return;
-          dx=e.touches[0].clientX-x0; var dy=e.touches[0].clientY-y0;
-          if(!swiping && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)) swiping=true;
-          if(swiping){ var t=Math.max(-76, Math.min(0, dx + (item.classList.contains('open')?-76:0))); main.style.transform='translateX('+t+'px)'; }
-        }, {passive:true});
-        main.addEventListener('touchend', function(){
-          main.style.transform='';
-          if(swiping){ if(dx < -34){ closeAll(item); item.classList.add('open'); } else if(dx > 34){ item.classList.remove('open'); } }
-          x0=null; y0=null;
+        var main = item.querySelector('.citem-main');
+        var x0=null, y0=null, dx=0, dragging=false, active=false;
+        main.addEventListener('pointerdown', function(e){
+          if(e.pointerType === 'mouse' && e.button !== 0) return;
+          x0=e.clientX; y0=e.clientY; dx=0; dragging=false; active=true;
         });
+        main.addEventListener('pointermove', function(e){
+          if(!active || x0===null) return;
+          dx=e.clientX-x0; var dy=e.clientY-y0;
+          if(!dragging && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)){ dragging=true; main.setPointerCapture(e.pointerId); }
+          if(dragging){ var t=Math.max(-76, Math.min(0, dx + (item.classList.contains('open')?-76:0))); main.style.transform='translateX('+t+'px)'; }
+        });
+        var finish = function(){
+          main.style.transform='';
+          if(dragging){ if(dx < -34){ closeAll(item); item.classList.add('open'); } else if(dx > 34){ item.classList.remove('open'); } }
+          x0=null; y0=null; active=false; dragging=false;
+        };
+        main.addEventListener('pointerup', finish);
+        main.addEventListener('pointercancel', finish);
       });
       document.addEventListener('click', function(e){ if(!e.target.closest('.citem')) closeAll(); });
     })();

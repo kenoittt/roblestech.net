@@ -252,8 +252,9 @@ h1{margin-bottom:8px;}
 .ccheck .ic-on{display:none;} .citem.done .ccheck .ic-off{display:none;} .citem.done .ccheck .ic-on{display:block;}
 .ctext{flex:1;min-width:0;}
 .citem.done .ctext{text-decoration:line-through;color:var(--muted);}
-/* Desktop: reveal delete on hover (no swipe on a mouse) */
-@media (hover:hover){ .citem:hover .citem-main{transform:translateX(-76px);} }
+/* Delete only reveals via an actual drag/swipe gesture (.open, set by JS on
+   a completed drag) — never on mere hover, so the checkbox stays put and
+   clickable while the pointer rests over the row. */
 
 /* Airbnb-style date range picker */
 .drp{position:relative;}
