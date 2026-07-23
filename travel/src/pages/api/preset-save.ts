@@ -14,6 +14,11 @@ export const POST: APIRoute = async (context) => {
   const op = String(form.get('op') ?? '');
   const back = '/checklists';
   const fail = (m: string) => context.redirect(back + '?err=' + encodeURIComponent(m));
+  // Fetch calls (instant toggle/swipe-delete) send Accept: application/json —
+  // answer with JSON instead of a redirect so the page never reloads.
+  const wantsJson = (context.request.headers.get('accept') ?? '').includes('application/json');
+  const ok = () => new Response(JSON.stringify({ ok: true }), { headers: { 'content-type': 'application/json' } });
+  const bad = (m: string) => new Response(JSON.stringify({ ok: false, error: m }), { status: 400, headers: { 'content-type': 'application/json' } });
 
   if (op === 'create') {
     const name = String(form.get('name') ?? '').trim().slice(0, 80);
@@ -57,9 +62,19 @@ export const POST: APIRoute = async (context) => {
     return context.redirect(back);
   }
 
+  if (op === 'toggle-item') {
+    const id = String(form.get('id') ?? '');
+    if (!id) return wantsJson ? bad('missing id') : context.redirect(back);
+    const done = String(form.get('done') ?? '') === '1';
+    const { error } = await supabase.from('checklist_preset_items').update({ done }).eq('id', id);
+    if (wantsJson) return error ? bad(error.message) : ok();
+    return context.redirect(back);
+  }
+
   if (op === 'del-item') {
     const id = String(form.get('id') ?? '');
     if (id) await supabase.from('checklist_preset_items').delete().eq('id', id);
+    if (wantsJson) return ok();
     return context.redirect(back);
   }
 

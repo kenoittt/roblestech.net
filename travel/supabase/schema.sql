@@ -144,6 +144,7 @@ create table if not exists public.checklist_preset_items (
   id         uuid primary key default gen_random_uuid(),
   preset_id  uuid not null references public.checklist_presets(id) on delete cascade,
   item       text not null,
+  done       boolean not null default false,
   position   int not null default 0,
   created_at timestamptz not null default now()
 );

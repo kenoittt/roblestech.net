@@ -299,66 +299,13 @@ const isFilipino = passport === 'Philippines';
     </div>
   </div>
 
-  <script is:inline define:vars={{ tripId: trip.id }}>
-    (function(){
-      var list = document.getElementById('clist');
-      if(!list) return;
-      var post = function(op, id, extra){
-        var body = new URLSearchParams(Object.assign({ trip_id: tripId, op: op, id: id }, extra || {}));
-        return fetch('/api/checklist-save', { method:'POST', headers:{ 'accept':'application/json', 'content-type':'application/x-www-form-urlencoded' }, body: body });
-      };
-      var closeAll = function(except){ list.querySelectorAll('.citem.open').forEach(function(r){ if(r!==except) r.classList.remove('open'); }); };
-
-      list.addEventListener('click', function(e){
-        var toggle = e.target.closest('.js-toggle');
-        var del = e.target.closest('.js-del');
-        if(toggle){
-          var item = toggle.closest('.citem'); var id = item.dataset.id;
-          var willBeDone = !item.classList.contains('done');
-          item.classList.toggle('done', willBeDone);          // optimistic
-          toggle.setAttribute('aria-pressed', willBeDone ? 'true':'false');
-          post('toggle', id, { done: willBeDone ? '1':'0' }).then(function(r){ return r.json(); })
-            .then(function(j){ if(!j || !j.ok){ item.classList.toggle('done', !willBeDone); } })
-            .catch(function(){ item.classList.toggle('done', !willBeDone); });
-          return;
-        }
-        if(del){
-          var row = del.closest('.citem'); var rid = row.dataset.id;
-          row.style.opacity='.5';
-          post('delete', rid).then(function(r){ return r.json(); })
-            .then(function(j){ if(j && j.ok){ row.style.height=row.offsetHeight+'px'; row.classList.add('removing'); setTimeout(function(){ row.remove(); }, 180); } else { row.style.opacity='1'; } })
-            .catch(function(){ row.style.opacity='1'; });
-          return;
-        }
-      });
-
-      // Drag (swipe) left to reveal delete — Pointer Events, so it's the
-      // SAME gesture on touch and mouse. Deliberately does nothing on a
-      // plain hover or a plain click/tap (only an actual drag past the
-      // threshold engages), so the checkbox never moves under the cursor.
-      list.querySelectorAll('.citem').forEach(function(item){
-        var main = item.querySelector('.citem-main');
-        var x0=null, y0=null, dx=0, dragging=false, active=false;
-        main.addEventListener('pointerdown', function(e){
-          if(e.pointerType === 'mouse' && e.button !== 0) return;
-          x0=e.clientX; y0=e.clientY; dx=0; dragging=false; active=true;
-        });
-        main.addEventListener('pointermove', function(e){
-          if(!active || x0===null) return;
-          dx=e.clientX-x0; var dy=e.clientY-y0;
-          if(!dragging && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)){ dragging=true; main.setPointerCapture(e.pointerId); }
-          if(dragging){ var t=Math.max(-76, Math.min(0, dx + (item.classList.contains('open')?-76:0))); main.style.transform='translateX('+t+'px)'; }
-        });
-        var finish = function(){
-          main.style.transform='';
-          if(dragging){ if(dx < -34){ closeAll(item); item.classList.add('open'); } else if(dx > 34){ item.classList.remove('open'); } }
-          x0=null; y0=null; active=false; dragging=false;
-        };
-        main.addEventListener('pointerup', finish);
-        main.addEventListener('pointercancel', finish);
-      });
-      document.addEventListener('click', function(e){ if(!e.target.closest('.citem')) closeAll(); });
-    })();
+  <script>
+    import { initChecklistList } from '../../../scripts/checklist-item.js';
+    const list = document.getElementById('clist');
+    if (list) {
+      initChecklistList(list, '/api/checklist-save', { trip_id: list.dataset.trip }, { toggle: 'toggle', delete: 'delete' });
+      document.addEventListener('click', (e) => { if (!e.target.closest('.citem')) list.querySelectorAll('.citem.open').forEach((r) => r.classList.remove('open')); });
+    }
   </script>
 
   <div class="section">
