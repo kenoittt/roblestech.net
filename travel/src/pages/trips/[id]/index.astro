@@ -3,7 +3,11 @@ import AppLayout from '../../../layouts/AppLayout.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../../lib/supabase';
 import { entryFor } from '../../../lib/visa';
 import { CURRENCIES } from '../../../lib/currencies';
+import { AIRLINES } from '../../../lib/airlines';
+import { PH_ETRAVEL } from '../../../lib/etravel';
 import Icon from '../../../components/Icon.astro';
+import DateRange from '../../../components/DateRange.astro';
+import LegForm from '../../../components/LegForm.astro';
 
 const { id } = Astro.params;
 const supabase = createSupabaseServer(Astro);
@@ -11,7 +15,11 @@ const { data: trip } = await supabase.from('trips')
   .select('id,name,start_date,end_date,pax,base_currency,status,owner_id').eq('id', id).single();
 if (!trip) return Astro.redirect('/trips?err=' + encodeURIComponent('Trip not found.'));
 
-type Leg = { id: string; destination_name: string; arrival_airport: string | null; departure_airport: string | null; airline?: string | null; flight_no?: string | null; start_date: string | null; end_date: string | null };
+type Leg = {
+  id: string; destination_name: string; airline?: string | null; flight_no?: string | null;
+  has_connection?: boolean | null; connection_airport?: string | null; connection_airline?: string | null; connection_flight_no?: string | null;
+  start_date: string | null; end_date: string | null;
+};
 type Lodging = { id: string; name: string; address: string | null; check_in_at: string | null; check_out_at: string | null; confirmation_ref: string | null; booking_url?: string | null };
 const [{ data: legsData }, { data: lodgingData }, { data: checklistData }] = await Promise.all([
   supabase.from('trip_legs').select('*').eq('trip_id', id).order('position'),
@@ -60,7 +68,10 @@ const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 const fmtDT = (s: string | null) => (s ? new Date(s).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 const flightStatusUrl = (fno: string) => `https://www.flightaware.com/live/flight/${encodeURIComponent(fno)}`;
+const flightSearchUrl = (airline: string | null | undefined, fno: string) =>
+  `https://www.google.com/search?q=${encodeURIComponent([airline, fno, 'flight status'].filter(Boolean).join(' '))}`;
 const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
+const isFilipino = passport === 'Philippines';
 ---
 
 <AppLayout title={`${trip.name} · WanderWise`}>
@@ -89,8 +100,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
       <div class="grid2">
         <div><label>Trip name</label><input name="name" value={trip.name} required placeholder="Put the name of your trip" /></div>
         <div><label>Pax (travelers)</label><input name="pax" type="number" min="1" value={trip.pax} /></div>
-        <div><label>Start date</label><input name="start_date" type="date" value={trip.start_date ?? ''} /></div>
-        <div><label>End date</label><input name="end_date" type="date" value={trip.end_date ?? ''} /></div>
+        <div style="grid-column:1/-1;"><DateRange label="Trip dates" start={trip.start_date} end={trip.end_date} /></div>
         <div><label>Currency</label>
           <select name="base_currency">
             {!currencyKnown && <option value={trip.base_currency} selected>{trip.base_currency}</option>}
@@ -112,6 +122,7 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
 
   <div class="section">
     <h2><Icon name="plane" /> Destinations &amp; flights</h2>
+    <p class="hint">Live flight status works best within about two weeks of departure, using the airline code + number (e.g. PR102). If FlightAware shows nothing yet, use the search fallback next to it.</p>
     <div class="stack">
       {legs.map((l) => (
         <details class="edit-block card">
@@ -120,58 +131,36 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
               <b>{l.destination_name}</b>
               <span class="hint">
                 {(l.airline || l.flight_no) ? [l.airline, l.flight_no].filter(Boolean).join(' ') : 'No flight yet'}
-                {l.arrival_airport ? ` · → ${l.arrival_airport}` : ''}
+                {l.has_connection && l.connection_airport ? ` · connects via ${l.connection_airport}` : ''}
                 {l.start_date ? ` · ${l.start_date}` : ''}
               </span>
-              {l.flight_no && <a class="mini" style="margin-left:8px;" href={flightStatusUrl(l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Live flight status →</a>}
+              {l.flight_no && (
+                <span style="display:inline-flex;gap:6px;margin-left:8px;">
+                  <a class="mini" href={flightStatusUrl(l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Live flight status →</a>
+                  <a class="mini" href={flightSearchUrl(l.airline, l.flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Search instead</a>
+                </span>
+              )}
+              {l.has_connection && l.connection_flight_no && (
+                <a class="mini" style="margin-left:6px;" href={flightStatusUrl(l.connection_flight_no)} target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Connecting flight status →</a>
+              )}
             </div>
             <span class="row-toggle" data-closed="Edit" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
           </summary>
-          <form method="post" action="/api/leg-save" class="rowflex" style="margin-top:14px;">
-            <input type="hidden" name="id" value={l.id} />
-            <input type="hidden" name="trip_id" value={trip.id} />
-            <div style="flex:2;min-width:170px;"><label>Destination</label>
-              <select name="destination_name" required>
-                {!destList.some((d) => d.name === l.destination_name) && <option value={l.destination_name} selected>{l.destination_name}</option>}
-                {Object.entries(destByCountry).map(([country, names]) => (
-                  <optgroup label={country}>{names.map((n) => <option value={n} selected={n === l.destination_name}>{n}</option>)}</optgroup>
-                ))}
-              </select>
-            </div>
-            <div style="width:130px;"><label>Airline</label><input name="airline" value={l.airline ?? ''} placeholder="Cebu Pacific" /></div>
-            <div style="width:110px;"><label>Flight #</label><input name="flight_no" value={l.flight_no ?? ''} placeholder="5J310" /></div>
-            <div style="width:100px;"><label>Arrive</label><input name="arrival_airport" value={l.arrival_airport ?? ''} placeholder="HKG" /></div>
-            <div style="width:100px;"><label>Depart</label><input name="departure_airport" value={l.departure_airport ?? ''} placeholder="TPE" /></div>
-            <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={l.start_date ?? ''} /></div>
-            <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={l.end_date ?? ''} /></div>
-            <button class="mini" type="submit">Save</button>
-            <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);" onclick="return confirm('Remove this destination?');" aria-label="Remove destination">✕</button>
-          </form>
+          <LegForm tripId={trip.id} leg={l} destByCountry={destByCountry} />
         </details>
       ))}
       <details class="edit-block card" style="border-style:dashed;">
         <summary>
-          <div class="read"><b>＋ Add a destination</b><span class="hint">Pick a city, add your flight — live status links automatically</span></div>
+          <div class="read"><b>＋ Add a destination</b><span class="hint">Pick a country and city, add your flight — connecting flights get their own section</span></div>
           <span class="row-toggle" data-closed="Add" data-open="Close" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
         </summary>
-        <form method="post" action="/api/leg-save" class="rowflex" style="margin-top:14px;">
-          <input type="hidden" name="trip_id" value={trip.id} />
-          <div style="flex:2;min-width:170px;"><label>Destination</label>
-            <select name="destination_name" required>
-              <option value="" disabled selected>Choose a city…</option>
-              {Object.entries(destByCountry).map(([country, names]) => (
-                <optgroup label={country}>{names.map((n) => <option value={n}>{n}</option>)}</optgroup>
-              ))}
-            </select>
-          </div>
-          <div style="width:130px;"><label>Airline</label><input name="airline" placeholder="Cebu Pacific" /></div>
-          <div style="width:110px;"><label>Flight #</label><input name="flight_no" placeholder="5J310" /></div>
-          <div style="width:100px;"><label>Arrive</label><input name="arrival_airport" placeholder="HKG" /></div>
-          <button class="btn" type="submit" style="padding:10px 16px;">Add</button>
-        </form>
+        <LegForm tripId={trip.id} destByCountry={destByCountry} isNew />
       </details>
     </div>
   </div>
+
+  <script type="application/json" id="dest-map-data" set:html={JSON.stringify(destByCountry)} />
+  <script src="../../../scripts/leg-form.js"></script>
 
   {entryCards.length > 0 && (
     <div class="section">
@@ -193,6 +182,20 @@ const currencyKnown = CURRENCIES.some((c) => c.code === trip.base_currency);
             <p class="hint" style="margin-top:8px;">Guidance checked {v.checked}. Rules change — always confirm on the official site before booking. Not legal advice.</p>
           </div>
         ))}
+      </div>
+    </div>
+  )}
+
+  {isFilipino && (
+    <div class="section">
+      <div class="card" style="border-left:4px solid var(--sun);">
+        <p style="font-weight:800;margin:0 0 6px;display:flex;align-items:center;gap:7px;"><Icon name="passport" /> {PH_ETRAVEL.headline}</p>
+        <p style="margin:0 0 8px;">{PH_ETRAVEL.detail}</p>
+        {PH_ETRAVEL.notes.map((n) => <p class="hint" style="margin:0 0 4px;">• {n}</p>)}
+        <p style="margin:8px 0 0;font-size:.85rem;">
+          {PH_ETRAVEL.official.map((o) => <a href={o.url} target="_blank" rel="noopener noreferrer">{o.label} ↗</a>)}
+        </p>
+        <p class="hint" style="margin-top:8px;">Guidance checked {PH_ETRAVEL.checked}. Rules change — always confirm on the official site before booking. Not legal advice.</p>
       </div>
     </div>
   )}

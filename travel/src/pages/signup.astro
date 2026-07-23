@@ -31,11 +31,18 @@ const confirm = Astro.url.searchParams.has('confirm');
           <div class="pw-meter" id="pwMeter"><span></span><span></span><span></span><span></span></div>
           <p class="pw-msg" id="pwMsg">{PASSWORD_RULE}</p>
         </div>
+        <div>
+          <label for="password2">Confirm password</label>
+          <input id="password2" name="password2" type="password" autocomplete="new-password" required minlength="10" />
+          <p class="pw-msg" id="pwMatch"></p>
+        </div>
         <button class="btn" type="submit">Create account</button>
       </form>
       <script is:inline>
         (function(){
           var i=document.getElementById('password'), m=document.getElementById('pwMeter'), msg=document.getElementById('pwMsg');
+          var i2=document.getElementById('password2'), match=document.getElementById('pwMatch');
+          var form=i ? i.closest('form') : null;
           if(!i) return;
           var RULE=msg.textContent;
           i.addEventListener('input',function(){
@@ -45,6 +52,18 @@ const confirm = Astro.url.searchParams.has('confirm');
             n+=Math.max(0,cl-1); n=Math.min(4,n);
             m.className='pw-meter'+(pw?' s'+n:'');
             msg.textContent = !pw ? RULE : (n<=1?'Weak — add length and variety.':n===2?'Fair — add another character type.':n===3?'Good.':'Strong.');
+            checkMatch();
+          });
+          var checkMatch=function(){
+            if(!i2.value){ match.textContent=''; i2.setCustomValidity(''); return; }
+            var ok = i2.value === i.value;
+            match.textContent = ok ? 'Passwords match.' : "Passwords don't match yet.";
+            match.style.color = ok ? 'var(--ok)' : 'var(--bad)';
+            i2.setCustomValidity(ok ? '' : "Passwords don't match.");
+          };
+          i2.addEventListener('input', checkMatch);
+          if(form) form.addEventListener('submit', function(e){
+            if(i2.value !== i.value){ e.preventDefault(); checkMatch(); i2.focus(); }
           });
         })();
       </script>

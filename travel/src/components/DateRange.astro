@@ -1,0 +1,35 @@
+---
+/*
+ * Airbnb/airline-style date range picker markup. Behavior lives in
+ * scripts/date-range.js (loaded once globally in AppLayout). Renders two
+ * hidden inputs with the given names so it drops straight into any form.
+ */
+interface Props {
+  label?: string;
+  startName?: string;
+  endName?: string;
+  start?: string | null;
+  end?: string | null;
+  /** YYYY-MM-DD — days before this are disabled. Omit to allow any date. */
+  min?: string | null;
+}
+const { label = 'Dates', startName = 'start_date', endName = 'end_date', start = null, end = null, min = null } = Astro.props;
+---
+<div class="drp" data-min={min ?? ''}>
+  <label>{label}</label>
+  <button type="button" class="drp-trigger"><span class="drp-value">Select dates</span></button>
+  <input type="hidden" name={startName} class="drp-start" value={start ?? ''} />
+  <input type="hidden" name={endName} class="drp-end" value={end ?? ''} />
+  <div class="drp-panel" hidden>
+    <div class="drp-nav-row">
+      <button type="button" class="drp-nav drp-prev" aria-label="Previous month">‹</button>
+      <span class="hint">Tap a start date, then an end date</span>
+      <button type="button" class="drp-nav drp-next" aria-label="Next month">›</button>
+    </div>
+    <div class="drp-months"></div>
+    <div class="drp-actions">
+      <button type="button" class="mini drp-clear">Clear</button>
+      <button type="button" class="btn drp-done" style="padding:8px 16px;">Done</button>
+    </div>
+  </div>
+</div>

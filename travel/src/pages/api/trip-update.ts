@@ -20,6 +20,7 @@ export const POST: APIRoute = async (context) => {
   const start_date = String(form.get('start_date') ?? '') || null;
   const end_date = String(form.get('end_date') ?? '') || null;
   if (!id || !name) return context.redirect(back + '?err=' + encodeURIComponent('Name is required.'));
+  if (start_date && end_date && end_date < start_date) return context.redirect(back + '?err=' + encodeURIComponent('End date must be on or after the start date.'));
 
   const { data: before } = await supabase.from('trips').select('pax').eq('id', id).single();
   const { error } = await supabase.from('trips')

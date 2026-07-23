@@ -1,10 +1,13 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../../lib/supabase';
+import { wikiImage } from '../../lib/images';
 
 export const prerender = false;
 
 // Server-side proxy for OpenStreetMap Nominatim (usage policy: identify the
 // app, low volume). Keeps third-party calls off the client (SRS §5.1).
+// Each result also carries a best-effort Wikipedia thumbnail so the search
+// autocomplete can show a picture, not just a name.
 export const GET: APIRoute = async (context) => {
   const supabase = createSupabaseServer(context);
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,13 +17,15 @@ export const GET: APIRoute = async (context) => {
   if (!q) return new Response(JSON.stringify({ results: [] }), { headers: { 'content-type': 'application/json' } });
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=${encodeURIComponent(q)}`,
+      `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`,
       { headers: { 'User-Agent': 'WanderWise/0.1 (roblestech.net travel planner)' } }
     );
     const j: any = await res.json();
-    const results = (Array.isArray(j) ? j : []).map((r: any) => ({
+    const raw = (Array.isArray(j) ? j : []).slice(0, 6);
+    const results = await Promise.all(raw.map(async (r: any) => ({
       display_name: r.display_name, lat: Number(r.lat), lng: Number(r.lon),
-    }));
+      img: await wikiImage(String(r.display_name).split(',')[0], 200),
+    })));
     return new Response(JSON.stringify({ results }), {
       headers: {
         'content-type': 'application/json',

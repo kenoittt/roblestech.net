@@ -53,16 +53,20 @@ create table if not exists public.trip_members (
 );
 
 create table if not exists public.trip_legs (
-  id                uuid primary key default gen_random_uuid(),
-  trip_id           uuid not null references public.trips(id) on delete cascade,
-  destination_name  text not null,
-  arrival_airport   text,
-  departure_airport text,
-  airline           text,
-  flight_no         text,
-  start_date        date,
-  end_date          date,
-  position          int not null default 0
+  id                   uuid primary key default gen_random_uuid(),
+  trip_id              uuid not null references public.trips(id) on delete cascade,
+  destination_name     text not null,
+  arrival_airport      text,   -- legacy, unused by the UI (destination implies it)
+  departure_airport    text,   -- legacy, unused by the UI
+  airline              text,
+  flight_no            text,
+  has_connection       boolean not null default false,
+  connection_airport   text,
+  connection_airline   text,
+  connection_flight_no text,
+  start_date           date,
+  end_date             date,
+  position             int not null default 0
 );
 create index if not exists trip_legs_trip_idx on public.trip_legs (trip_id, position);
 

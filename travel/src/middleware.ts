@@ -32,10 +32,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      // Leaflet/OSM tiles + auto-fetched place imagery come later; images stay https-only.
-      "img-src 'self' https: data:",
+      // Auto-fetched place imagery + map sprites; images stay https-only.
+      "img-src 'self' https: data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      // MapLibre GL fetches vector tiles/style/sprites/glyphs from OpenFreeMap
+      // (free, keyless) directly from the browser.
+      "connect-src 'self' https://tiles.openfreemap.org",
+      // MapLibre GL runs its tile-parsing worker from a blob: URL.
+      "worker-src blob:",
       "frame-ancestors 'self'",
       "object-src 'none'",
       "base-uri 'self'",

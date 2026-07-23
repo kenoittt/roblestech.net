@@ -1,9 +1,12 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
 import Icon from '../../components/Icon.astro';
+import DateRange from '../../components/DateRange.astro';
 import { createSupabaseServer } from '../../lib/supabase';
+import { CURRENCIES } from '../../lib/currencies';
 
 const supabase = createSupabaseServer(Astro);
+const todayIso = new Date().toISOString().slice(0, 10);
 type Trip = { id: string; name: string; start_date: string | null; end_date: string | null; pax: number; status: string; base_currency: string; owner_id: string };
 // RLS returns trips you own plus trips shared with you.
 const { data } = await supabase.from('trips').select('id,name,start_date,end_date,pax,status,base_currency,owner_id').order('created_at', { ascending: false });
@@ -22,11 +25,18 @@ const dates = (t: Trip) => t.start_date ? `${t.start_date}${t.end_date ? ' → '
   {ok && <div class="alert alert-ok">{decodeURIComponent(ok)}</div>}
   {err && <div class="alert alert-error">{decodeURIComponent(err)}</div>}
 
-  <form method="post" action="/api/trip-create" class="card rowflex">
-    <div style="flex:2;min-width:180px;"><label>New trip</label><input name="name" required placeholder="Put the name of your trip" /></div>
-    <div style="width:110px;"><label>Pax</label><input name="pax" type="number" min="1" value="2" /></div>
-    <div style="width:110px;"><label>Currency</label><input name="base_currency" value="USD" maxlength="3" style="text-transform:uppercase;" /></div>
-    <button class="btn" type="submit">Create</button>
+  <form method="post" action="/api/trip-create" class="card stack">
+    <div class="rowflex">
+      <div style="flex:2;min-width:180px;"><label>New trip</label><input name="name" required placeholder="Put the name of your trip" /></div>
+      <div style="width:100px;"><label>Pax</label><input name="pax" type="number" min="1" value="2" /></div>
+      <div style="width:180px;"><label>Currency</label>
+        <select name="base_currency">
+          {CURRENCIES.map((c) => <option value={c.code} selected={c.code === 'USD'}>{c.sym} · {c.code} — {c.name}</option>)}
+        </select>
+      </div>
+    </div>
+    <DateRange label="Trip dates (optional)" min={todayIso} />
+    <div class="rowflex"><button class="btn" type="submit">Create</button></div>
   </form>
 
   <div class="trip-list">

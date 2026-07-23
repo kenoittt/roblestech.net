@@ -27,10 +27,11 @@ const mapData = { tripId: id, lodgings: lodgings ?? [], items: items ?? [], plac
   </div>
 
   <form id="map-search" class="rowflex" style="margin-bottom:10px;">
-    <div style="flex:1;min-width:180px;"><input id="map-q" placeholder="Search a place to add… e.g. Big Buddha Lantau" /></div>
+    <div style="flex:1;min-width:180px;"><input id="map-q" autocomplete="off" placeholder="Search a place to add… e.g. Big Buddha Lantau" /></div>
     <button class="btn" type="submit" style="padding:11px 16px;">Search</button>
   </form>
-  <div id="map-results" style="margin-bottom:10px;"></div>
+  <div id="map-results" class="geo-results" style="margin-bottom:10px;"></div>
+  <p class="hint" style="margin-top:-4px;margin-bottom:10px;">Suggestions appear as you type, with a photo when we have one — tap one to add it.</p>
 
   <div id="map" style="height:62vh;border-radius:16px;border:1px solid var(--line);"></div>
   <p class="hint" style="margin-top:8px;">Tap anywhere on the map to drop a pin into Places to Visit. Same-day itinerary stops share a color and route line.</p>

@@ -1,0 +1,96 @@
+---
+/*
+ * One destination/flight row — used both for existing legs and the
+ * "add a destination" block. Destination is a country → city cascade;
+ * airline is a curated dropdown with a free-text "Other…" fallback; a
+ * checkbox reveals connecting-flight details only when there is one.
+ * No standalone arrival/departure airport fields — the destination city
+ * already says where they're going.
+ */
+import { AIRLINES } from '../lib/airlines';
+
+interface Leg {
+  id?: string;
+  destination_name?: string | null;
+  airline?: string | null;
+  flight_no?: string | null;
+  has_connection?: boolean | null;
+  connection_airport?: string | null;
+  connection_airline?: string | null;
+  connection_flight_no?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+}
+interface Props { tripId: string; leg?: Leg; destByCountry: Record<string, string[]>; isNew?: boolean }
+const { tripId, leg = {}, destByCountry, isNew = false } = Astro.props;
+
+const countries = Object.keys(destByCountry);
+const curCountry = countries.find((c) => destByCountry[c].includes(leg.destination_name ?? '')) || '';
+const airlineKnown = AIRLINES.some((a) => a.name === leg.airline);
+const connAirlineKnown = AIRLINES.some((a) => a.name === leg.connection_airline);
+const uid = leg.id ?? 'new';
+---
+<form method="post" action="/api/leg-save" class="stack leg-form" data-uid={uid} style="margin-top:14px;">
+  {leg.id && <input type="hidden" name="id" value={leg.id} />}
+  <input type="hidden" name="trip_id" value={tripId} />
+
+  <div class="rowflex">
+    <div style="flex:1;min-width:150px;">
+      <label>Country</label>
+      <select class="js-country" required>
+        <option value="" disabled selected={!curCountry}>Choose a country…</option>
+        {countries.map((c) => <option value={c} selected={c === curCountry}>{c}</option>)}
+      </select>
+    </div>
+    <div style="flex:1;min-width:150px;">
+      <label>City</label>
+      <select name="destination_name" class="js-city" required>
+        {!curCountry && <option value="" disabled selected>Pick a country first…</option>}
+        {curCountry && destByCountry[curCountry].map((n) => <option value={n} selected={n === leg.destination_name}>{n}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <div class="rowflex">
+    <div style="flex:1;min-width:170px;">
+      <label>Airline</label>
+      <select name="airline_sel" class="js-airline">
+        <option value="" selected={!leg.airline}>No airline yet</option>
+        {AIRLINES.map((a) => <option value={a.name} selected={leg.airline === a.name}>{a.name} ({a.iata})</option>)}
+        <option value="__other__" selected={!!leg.airline && !airlineKnown}>Other…</option>
+      </select>
+      <input type="text" name="airline_other" class="js-airline-other" placeholder="Airline name"
+        value={(!airlineKnown && leg.airline) || ''} hidden />
+    </div>
+    <div style="width:120px;"><label>Flight #</label><input name="flight_no" value={leg.flight_no ?? ''} placeholder="PR102" /></div>
+    <div style="width:150px;"><label>From</label><input name="start_date" type="date" value={leg.start_date ?? ''} /></div>
+    <div style="width:150px;"><label>To</label><input name="end_date" type="date" value={leg.end_date ?? ''} /></div>
+  </div>
+
+  <label class="rowflex" style="align-items:center;gap:8px;cursor:pointer;">
+    <input type="checkbox" name="has_connection" value="1" class="js-hasconn" checked={!!leg.has_connection} style="width:auto;" />
+    <span style="font-weight:600;font-size:.9rem;">This flight has a connecting/layover flight</span>
+  </label>
+  <div class="conn-fields rowflex" hidden={!leg.has_connection}>
+    <div style="width:120px;"><label>Connecting airport</label><input name="connection_airport" value={leg.connection_airport ?? ''} placeholder="NRT" /></div>
+    <div style="flex:1;min-width:170px;">
+      <label>Connecting airline</label>
+      <select name="connection_airline_sel" class="js-airline">
+        <option value="" selected={!leg.connection_airline}>Select…</option>
+        {AIRLINES.map((a) => <option value={a.name} selected={leg.connection_airline === a.name}>{a.name} ({a.iata})</option>)}
+        <option value="__other__" selected={!!leg.connection_airline && !connAirlineKnown}>Other…</option>
+      </select>
+      <input type="text" name="connection_airline_other" class="js-airline-other" placeholder="Airline name"
+        value={(!connAirlineKnown && leg.connection_airline) || ''} hidden />
+    </div>
+    <div style="width:120px;"><label>Connecting flight #</label><input name="connection_flight_no" value={leg.connection_flight_no ?? ''} placeholder="NH182" /></div>
+  </div>
+
+  <div class="rowflex">
+    <button class={isNew ? 'btn' : 'mini'} type="submit" style={isNew ? 'padding:10px 16px;' : ''}>{isNew ? 'Add' : 'Save'}</button>
+    {leg.id && (
+      <button class="mini" type="submit" name="op" value="delete" style="color:var(--bad);"
+        onclick="return confirm('Remove this destination?');" aria-label="Remove destination">✕</button>
+    )}
+  </div>
+</form>

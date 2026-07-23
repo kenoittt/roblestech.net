@@ -35,8 +35,8 @@ export const POST: APIRoute = async (context) => {
       const { data: rows } = await supabase.from(table).select(cols.join(',')).eq('trip_id', id);
       if (rows?.length) await supabase.from(table).insert((rows as any[]).map((r) => ({ ...r, trip_id: newId })));
     };
-    await copy('trip_legs', ['destination_name', 'arrival_airport', 'departure_airport', 'start_date', 'end_date', 'position']);
-    await copy('lodgings', ['name', 'address', 'lat', 'lng', 'check_in_at', 'check_out_at', 'cost', 'confirmation_ref', 'notes']);
+    await copy('trip_legs', ['destination_name', 'airline', 'flight_no', 'has_connection', 'connection_airport', 'connection_airline', 'connection_flight_no', 'start_date', 'end_date', 'position']);
+    await copy('lodgings', ['name', 'address', 'lat', 'lng', 'check_in_at', 'check_out_at', 'cost', 'confirmation_ref', 'booking_url', 'notes']);
     await copy('expenses', ['category', 'description', 'amount_group', 'amount_individual', 'entry_mode', 'pax_override', 'currency', 'is_actual', 'paid', 'notes', 'position']);
     await audit(user.id, 'trip.duplicate', 'trips', { from: id, to: newId });
     return context.redirect(`/trips/${newId}?ok=` + encodeURIComponent('Trip duplicated.'));

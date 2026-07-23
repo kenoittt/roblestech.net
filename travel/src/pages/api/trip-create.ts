@@ -14,10 +14,15 @@ export const POST: APIRoute = async (context) => {
   const name = String(form.get('name') ?? '').trim() || (destination ? `Trip to ${destination}` : '');
   const pax = Math.max(1, Number(form.get('pax') ?? 1) || 1);
   const base_currency = (String(form.get('base_currency') ?? 'USD').trim().toUpperCase() || 'USD').slice(0, 3);
+  const start_date = String(form.get('start_date') ?? '') || null;
+  const end_date = String(form.get('end_date') ?? '') || null;
   if (!name) return context.redirect('/trips?err=' + encodeURIComponent('Trip name is required.'));
+  const todayIso = new Date().toISOString().slice(0, 10);
+  if (start_date && start_date < todayIso) return context.redirect('/trips?err=' + encodeURIComponent('Start date cannot be in the past.'));
+  if (start_date && end_date && end_date < start_date) return context.redirect('/trips?err=' + encodeURIComponent('End date must be on or after the start date.'));
 
   const { data, error } = await supabase.from('trips')
-    .insert({ owner_id: user.id, name, pax, base_currency }).select('id').single();
+    .insert({ owner_id: user.id, name, pax, base_currency, start_date, end_date }).select('id').single();
   if (error || !data) return context.redirect('/trips?err=' + encodeURIComponent(error?.message ?? 'Could not create trip.'));
   // "Want to start a trip?" from Explore pre-fills the first destination leg.
   if (destination) await supabase.from('trip_legs').insert({ trip_id: (data as any).id, destination_name: destination });

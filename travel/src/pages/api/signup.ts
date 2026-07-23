@@ -10,9 +10,11 @@ export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
   const email = String(form.get('email') ?? '').trim();
   const password = String(form.get('password') ?? '');
+  const password2 = String(form.get('password2') ?? '');
   const display_name = String(form.get('display_name') ?? '').trim();
   const passport_country = String(form.get('passport_country') ?? '').trim();
   if (!email) return context.redirect('/signup?error=' + encodeURIComponent('Email is required.'));
+  if (password !== password2) return context.redirect('/signup?error=' + encodeURIComponent("Passwords don't match."));
   const strong = checkPassword(password, email);
   if (!strong.ok) return context.redirect('/signup?error=' + encodeURIComponent(strong.message!));
   const supabase = createSupabaseServer(context);
