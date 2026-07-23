@@ -237,3 +237,20 @@ h1{margin-bottom:8px;}
 .pw-meter.s1 span:nth-child(-n+1){background:var(--bad);}
 .pw-meter.s2 span:nth-child(-n+2){background:var(--sun);}
 .pw-msg{font-size:.75rem;margin-top:5px;color:var(--muted);}
+
+/* Checklist: tap-to-toggle + swipe-left-to-delete rows */
+.clist{display:flex;flex-direction:column;gap:8px;}
+.citem{position:relative;overflow:hidden;border-radius:11px;border:1px solid var(--glass-edge);
+  transition:height .18s ease, opacity .18s ease, margin .18s ease;}
+.citem.removing{height:0 !important;opacity:0;margin:0;border-width:0;}
+.citem .cdel{position:absolute;top:0;right:0;height:100%;width:76px;border:0;cursor:pointer;
+  background:var(--bad);color:#fff;display:flex;align-items:center;justify-content:center;}
+.citem-main{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:12px 12px;
+  background:#fffdf9;transition:transform .22s ease;touch-action:pan-y;}
+.citem.open .citem-main{transform:translateX(-76px);}
+.ccheck{background:none;border:0;cursor:pointer;line-height:0;padding:2px;color:var(--teal);flex:0 0 auto;}
+.ccheck .ic-on{display:none;} .citem.done .ccheck .ic-off{display:none;} .citem.done .ccheck .ic-on{display:block;}
+.ctext{flex:1;min-width:0;}
+.citem.done .ctext{text-decoration:line-through;color:var(--muted);}
+/* Desktop: reveal delete on hover (no swipe on a mouse) */
+@media (hover:hover){ .citem:hover .citem-main{transform:translateX(-76px);} }
