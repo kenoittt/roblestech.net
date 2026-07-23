@@ -214,6 +214,19 @@ create table if not exists public.wishlists (
   primary key (user_id, destination_id)
 );
 
+-- In-app notifications (trip membership changes, etc.) -------------------------
+create table if not exists public.notifications (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  type       text not null,
+  title      text not null,
+  body       text,
+  trip_id    uuid references public.trips(id) on delete set null,
+  read       boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create index if not exists notifications_user_idx on public.notifications (user_id, read, created_at desc);
+
 -- Audit trail (ISO 27001 evidence, NFR-10) -------------------------------------
 create table if not exists public.audit_logs (
   id        uuid primary key default gen_random_uuid(),
@@ -269,6 +282,15 @@ alter table public.wishlists                  enable row level security;
 alter table public.audit_logs                 enable row level security;
 alter table public.checklist_presets          enable row level security;
 alter table public.checklist_preset_items     enable row level security;
+alter table public.notifications              enable row level security;
+
+-- notifications: recipient reads/marks/deletes own; inserts via service role
+drop policy if exists notifications_read on public.notifications;
+create policy notifications_read on public.notifications for select using (user_id = auth.uid());
+drop policy if exists notifications_update on public.notifications;
+create policy notifications_update on public.notifications for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists notifications_delete on public.notifications;
+create policy notifications_delete on public.notifications for delete using (user_id = auth.uid());
 
 -- checklist presets: user owns their own; items flow through the parent
 drop policy if exists checklist_presets_own on public.checklist_presets;

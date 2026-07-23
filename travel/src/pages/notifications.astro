@@ -1,0 +1,62 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import Icon from '../components/Icon.astro';
+import { createSupabaseServer } from '../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+const { data: rows } = await supabase.from('notifications')
+  .select('id,type,title,body,trip_id,read,created_at')
+  .order('created_at', { ascending: false })
+  .limit(100);
+const items = (rows ?? []) as { id: string; type: string; title: string; body: string | null; trip_id: string | null; read: boolean; created_at: string }[];
+
+// Capture unread state for display, then mark everything read so the bell clears.
+const hadUnread = items.some((n) => !n.read);
+if (hadUnread) await supabase.from('notifications').update({ read: true }).eq('read', false);
+
+const ICON: Record<string, string> = { trip_added: 'share', trip_removed: 'alert', role_changed: 'user', info: 'check' };
+const rel = (iso: string) => {
+  const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+};
+---
+<AppLayout title="Notifications · WanderWise">
+  <div class="rowflex" style="justify-content:space-between;align-items:center;">
+    <div>
+      <p class="eyebrow">Notifications</p>
+      <h1 style="margin:0;">What's new</h1>
+    </div>
+    {items.length > 0 && (
+      <form method="post" action="/api/notifications-read" onsubmit="return confirm('Clear all notifications?');">
+        <input type="hidden" name="op" value="clear" />
+        <button class="mini" type="submit">Clear all</button>
+      </form>
+    )}
+  </div>
+  <p class="lede" style="margin-top:8px;">Trip invites, role changes and updates land here.</p>
+
+  {items.length === 0 && (
+    <div class="card" style="text-align:center;padding:36px;">
+      <Icon name="check" size={28} />
+      <p class="hint" style="margin-top:8px;">You're all caught up — no notifications.</p>
+    </div>
+  )}
+
+  <div class="stack">
+    {items.map((n) => (
+      <div class="card" style={`display:flex;gap:12px;align-items:flex-start;${!n.read ? 'border-left:4px solid var(--coral);' : ''}`}>
+        <span style="flex:0 0 auto;color:var(--teal);"><Icon name={ICON[n.type] ?? 'check'} size={20} /></span>
+        <div style="flex:1;min-width:0;">
+          <b>{n.title}</b>
+          {n.body && <div class="hint" style="margin-top:2px;">{n.body}</div>}
+          <div class="hint" style="margin-top:4px;font-size:.75rem;">{rel(n.created_at)}</div>
+        </div>
+        {n.trip_id && n.type !== 'trip_removed' && <a class="mini" href={`/trips/${n.trip_id}`} style="align-self:center;">View trip</a>}
+      </div>
+    ))}
+  </div>
+</AppLayout>

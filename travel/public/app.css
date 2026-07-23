@@ -222,3 +222,18 @@ h1{margin-bottom:8px;}
   .nav-open:checked ~ .nav-links .btn-sm{background:var(--teal);color:#fff !important;text-align:center;margin-top:4px;}
   .nav-open:checked ~ .nav-links form{width:100%;}
 }
+
+/* Notification bell in the nav */
+.bell{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;
+  margin-left:auto;margin-right:6px;color:var(--ink);text-decoration:none;border-radius:10px;flex:0 0 auto;}
+.bell:hover{background:rgba(255,255,255,.45);}
+.bell-badge{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+  background:var(--coral);color:#fff;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1;
+  box-shadow:0 0 0 2px var(--glass-strong);}
+/* Password strength meter */
+.pw-meter{display:flex;gap:4px;margin-top:8px;}
+.pw-meter span{flex:1;height:5px;border-radius:99px;background:rgba(28,43,43,.12);transition:background .2s;}
+.pw-meter.s1 span:nth-child(-n+1),.pw-meter.s2 span:nth-child(-n+2),.pw-meter.s3 span:nth-child(-n+3),.pw-meter.s4 span:nth-child(-n+4){background:var(--teal);}
+.pw-meter.s1 span:nth-child(-n+1){background:var(--bad);}
+.pw-meter.s2 span:nth-child(-n+2){background:var(--sun);}
+.pw-msg{font-size:.75rem;margin-top:5px;color:var(--muted);}

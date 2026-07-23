@@ -2,6 +2,7 @@
 import AppLayout from '../layouts/AppLayout.astro';
 import { createSupabaseServer } from '../lib/supabase';
 import { COUNTRIES } from '../lib/countries';
+import { PASSWORD_RULE } from '../lib/password';
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
@@ -31,9 +32,28 @@ const { data: profile } = await supabase.from('profiles')
     </form>
 
     <form method="post" action="/api/change-password" class="card stack" style="margin-top:14px;">
-      <div><label for="pw">New password</label><input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8" /></div>
-      <div><label for="pw2">Confirm</label><input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="8" /></div>
+      <div>
+        <label for="pw">New password</label>
+        <input id="pw" name="password" type="password" autocomplete="new-password" required minlength="10" />
+        <div class="pw-meter" id="pwMeter"><span></span><span></span><span></span><span></span></div>
+        <p class="pw-msg" id="pwMsg">{PASSWORD_RULE}</p>
+      </div>
+      <div><label for="pw2">Confirm</label><input id="pw2" name="confirm" type="password" autocomplete="new-password" required minlength="10" /></div>
       <button class="btn" type="submit">Update password</button>
     </form>
+    <script is:inline>
+      (function(){
+        var i=document.getElementById('pw'), m=document.getElementById('pwMeter'), msg=document.getElementById('pwMsg');
+        if(!i) return; var RULE=msg.textContent;
+        i.addEventListener('input',function(){
+          var pw=i.value, n=0;
+          if(pw.length>=10)n++; if(pw.length>=14)n++;
+          var cl=[/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/].filter(function(r){return r.test(pw)}).length;
+          n+=Math.max(0,cl-1); n=Math.min(4,n);
+          m.className='pw-meter'+(pw?' s'+n:'');
+          msg.textContent = !pw ? RULE : (n<=1?'Weak — add length and variety.':n===2?'Fair — add another character type.':n===3?'Good.':'Strong.');
+        });
+      })();
+    </script>
   </div>
 </AppLayout>

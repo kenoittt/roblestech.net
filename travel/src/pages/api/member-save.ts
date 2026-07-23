@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
+import { notify } from '../../lib/notify';
 
 export const prerender = false;
 
@@ -23,6 +24,13 @@ export const POST: APIRoute = async (context) => {
   const fail = (msg: string) => context.redirect(back + '?err=' + encodeURIComponent(msg));
   const done = (msg: string) => context.redirect(back + '?ok=' + encodeURIComponent(msg));
 
+  // Trip name + who is acting, for notification text (best-effort).
+  const adminEarly = createSupabaseAdmin();
+  const { data: tripRow } = await adminEarly.from('trips').select('name').eq('id', tripId).maybeSingle();
+  const tripName = (tripRow as any)?.name ?? 'a trip';
+  const { data: meProf } = await adminEarly.from('profiles').select('display_name').eq('id', user.id).maybeSingle();
+  const actor = (meProf as any)?.display_name || 'A trip owner';
+
   if (op === 'leave') {
     const { error } = await supabase.from('trip_members').delete()
       .eq('trip_id', tripId).eq('user_id', user.id);
@@ -35,7 +43,9 @@ export const POST: APIRoute = async (context) => {
     if (!uid) return fail('Missing member.');
     const { error } = await supabase.from('trip_members').delete()
       .eq('trip_id', tripId).eq('user_id', uid);
-    return error ? fail(error.message) : done('Member removed.');
+    if (error) return fail(error.message);
+    await notify(uid, { type: 'trip_removed', title: `Removed from “${tripName}”`, body: `${actor} removed you from this trip.` });
+    return done('Member removed.');
   }
 
   if (op === 'role') {
@@ -44,7 +54,9 @@ export const POST: APIRoute = async (context) => {
     if (!uid || !['editor', 'viewer'].includes(role)) return fail('Invalid role.');
     const { error } = await supabase.from('trip_members').update({ role })
       .eq('trip_id', tripId).eq('user_id', uid);
-    return error ? fail(error.message) : done('Role updated.');
+    if (error) return fail(error.message);
+    await notify(uid, { type: 'role_changed', title: `Your role on “${tripName}” changed`, body: `${actor} set your role to ${role}.`, trip_id: tripId });
+    return done('Role updated.');
   }
 
   // op === 'add' — invite by email
@@ -62,5 +74,6 @@ export const POST: APIRoute = async (context) => {
     .upsert({ trip_id: tripId, user_id: person.id, role }, { onConflict: 'trip_id,user_id' });
   if (error) return fail(error.code === '42501' || /security/i.test(error.message)
     ? 'Only the trip owner can invite people.' : error.message);
+  await notify(person.id, { type: 'trip_added', title: `Added to “${tripName}”`, body: `${actor} added you to this trip as ${role}.`, trip_id: tripId });
   return done(`${person.display_name || email} added as ${role}.`);
 };

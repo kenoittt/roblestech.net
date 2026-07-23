@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../../lib/supabase';
 import { audit } from '../../lib/audit';
+import { checkPassword } from '../../lib/password';
 
 export const prerender = false;
 
@@ -11,7 +12,8 @@ export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
   const password = String(form.get('password') ?? '');
   const confirm = String(form.get('confirm') ?? '');
-  if (password.length < 8) return context.redirect('/account?err=' + encodeURIComponent('Password must be 8+ characters.'));
+  const strong = checkPassword(password, user.email ?? '');
+  if (!strong.ok) return context.redirect('/account?err=' + encodeURIComponent(strong.message!));
   if (password !== confirm) return context.redirect('/account?err=' + encodeURIComponent("Passwords don't match."));
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return context.redirect('/account?err=' + encodeURIComponent(error.message));
