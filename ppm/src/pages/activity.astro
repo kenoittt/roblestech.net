@@ -18,9 +18,11 @@ if (fTask) q = q.eq('task_id', fTask);
 const { data: evData } = await q;
 let events = (evData ?? []) as any[];
 if (fType === 'completed') events = events.filter((e) => e.type === 'status_changed' && e.to_status === 'done');
+else if (fType === 'cancelled') events = events.filter((e) => e.type === 'status_changed' && e.to_status === 'cancelled');
 else if (fType === 'status') events = events.filter((e) => e.type === 'status_changed');
 else if (fType === 'assigned') events = events.filter((e) => e.type === 'assigned');
 else if (fType === 'updated') events = events.filter((e) => e.type === 'updated');
+else if (fType === 'deleted') events = events.filter((e) => e.type === 'deleted');
 
 // Lookups: task titles, people names
 const [{ data: taskRows }, { data: peopleRows }] = await Promise.all([
@@ -31,20 +33,23 @@ const titleOf = new Map((taskRows ?? []).map((t: any) => [t.id, t.title]));
 const nameOf = (id: string | null) => (id ? (peopleRows ?? []).find((p: any) => p.id === id)?.full_name || 'Someone' : 'Someone');
 const people = (peopleRows ?? []) as { id: string; full_name: string | null }[];
 
-const STATUS_LABEL: Record<string, string> = { todo: 'To Do', in_progress: 'In Progress', done: 'Done' };
+const STATUS_LABEL: Record<string, string> = { todo: 'To Do', in_progress: 'In Progress', done: 'Done', cancelled: 'Cancelled' };
 const sl = (s: string | null) => (s ? STATUS_LABEL[s] ?? s : '');
 
 // One human sentence + an icon key per event
 function describe(e: any): { icon: string; verb: string; detail: string } {
   const who = nameOf(e.actor_id);
-  const title = titleOf.get(e.task_id) ?? 'a task';
+  // Deleted tasks are gone from ppm_tasks, so their title lives in meta.
+  const title = titleOf.get(e.task_id) ?? e.meta?.title ?? 'a task';
   if (e.type === 'created') return { icon: 'plus', verb: `${who} created`, detail: title };
+  if (e.type === 'deleted') return { icon: 'trash', verb: `${who} deleted`, detail: title };
   if (e.type === 'assigned') {
     const to = e.meta?.assignee_id ? nameOf(e.meta.assignee_id) : null;
     return { icon: 'user', verb: `${who} ${to ? 'assigned' : 'unassigned'}`, detail: to ? `${title} → ${to}` : title };
   }
   if (e.type === 'status_changed') {
     if (e.to_status === 'done') return { icon: 'check', verb: `${who} completed`, detail: title };
+    if (e.to_status === 'cancelled') return { icon: 'ban', verb: `${who} cancelled`, detail: title };
     return { icon: 'move', verb: `${who} moved`, detail: `${title} · ${sl(e.from_status)} → ${sl(e.to_status)}` };
   }
   if (e.type === 'updated') {
@@ -81,6 +86,8 @@ const ICONS: Record<string, string> = {
   user: '<circle cx="12" cy="8" r="3.2"/><path d="M5 20a7 7 0 0 1 14 0"/>',
   move: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   edit: '<path d="M4 20h4L18 10l-4-4L4 16v4Z"/><path d="M14 6l4 4"/>',
+  ban: '<circle cx="12" cy="12" r="9"/><path d="m6 18 12-12"/>',
+  trash: '<path d="M4 7h16"/><path d="M10 4h4l.5 3h-5L10 4Z"/><path d="M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7"/>',
 };
 const qs = (o: Record<string, string>) => {
   const p = new URLSearchParams({ ...(fActor && { actor: fActor }), ...(fType && { type: fType }), ...(fTask && { task: fTask }), ...o });
@@ -105,9 +112,11 @@ const qs = (o: Record<string, string>) => {
       <select name="type" onchange="this.form.submit()">
         <option value="" selected={!fType}>All activity</option>
         <option value="completed" selected={fType === 'completed'}>Completions</option>
+        <option value="cancelled" selected={fType === 'cancelled'}>Cancellations</option>
         <option value="status" selected={fType === 'status'}>Status changes</option>
         <option value="updated" selected={fType === 'updated'}>Edits</option>
         <option value="assigned" selected={fType === 'assigned'}>Assignments</option>
+        <option value="deleted" selected={fType === 'deleted'}>Deletions</option>
       </select>
     </label>
     {fTask && <a class="mini-link" href={qs({ task: '' })}>Clear task filter</a>}
@@ -128,7 +137,11 @@ const qs = (o: Record<string, string>) => {
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={ICONS[d.icon]} />
               </span>
               <span class="act-text"><b>{d.verb}</b> {d.detail}</span>
-              <a class="act-time" href={`/activity?task=${e.task_id}`} title={fullDate(e.created_at)}>{rel(e.created_at)}</a>
+              {e.task_id ? (
+                <a class="act-time" href={`/activity?task=${e.task_id}`} title={fullDate(e.created_at)}>{rel(e.created_at)}</a>
+              ) : (
+                <span class="act-time" title={fullDate(e.created_at)}>{rel(e.created_at)}</span>
+              )}
             </div>
           );
         })}
@@ -146,6 +159,8 @@ const qs = (o: Record<string, string>) => {
     .act.edit .act-ic{color:var(--azure);}
     .act.user .act-ic{color:#c9b3ff;}
     .act.plus .act-ic{color:#9fb2d8;}
+    .act.ban .act-ic{color:#ffc98a;background:rgba(255,180,90,.14);}
+    .act.trash .act-ic{color:#ff9c9c;background:rgba(255,90,90,.14);}
     .act-text{flex:1;min-width:0;font-size:.92rem;line-height:1.4;}
     .act-text b{font-weight:700;}
     .act-time{flex:0 0 auto;color:var(--muted);font-size:.78rem;text-decoration:none;white-space:nowrap;}

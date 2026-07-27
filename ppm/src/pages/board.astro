@@ -1,15 +1,11 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
-import { loadPpmData, nameOf } from '../lib/queries';
+import { loadPpmData, nameOf, STATUSES } from '../lib/queries';
 
 const { tasks, people, projects, fAssignee, fProject } = await loadPpmData(Astro);
 const back = Astro.url.pathname + Astro.url.search;
 
-const cols = [
-  { key: 'todo', label: 'To do' },
-  { key: 'in_progress', label: 'In progress' },
-  { key: 'done', label: 'Done' },
-];
+const cols = STATUSES;
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
 ---
@@ -70,11 +66,20 @@ const err = Astro.url.searchParams.get('err');
 
   <div class="board" style="margin-top:14px;">
     {cols.map((c) => (
-      <div class="col">
+      <div class={`col col-${c.key}`}>
         <h3>{c.label}<span>{tasks.filter((t) => t.status === c.key).length}</span></h3>
         {tasks.filter((t) => t.status === c.key).map((t) => (
-          <div class="task">
-            <div class="t">{t.title}</div>
+          <div class={`task task-${t.status}`}>
+            <div class="t-row">
+              <div class="t">{t.title}</div>
+              <form method="post" action="/api/task-delete" class="delform js-confirm" data-confirm={`Delete "${t.title}"? This cannot be undone.`}>
+                <input type="hidden" name="id" value={t.id} />
+                <input type="hidden" name="back" value={back} />
+                <button type="submit" class="del-btn" title="Delete task" aria-label={`Delete task: ${t.title}`}>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 4h4l.5 3h-5L10 4Z"/><path d="M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </form>
+            </div>
             <div class="m">
               <span class={`pill ${t.priority}`}>{t.priority}</span>
               <span>{nameOf(people, t.assignee_id)}</span>
@@ -83,18 +88,19 @@ const err = Astro.url.searchParams.get('err');
             <form method="post" action="/api/task-update" class="statusform">
               <input type="hidden" name="id" value={t.id} />
               <input type="hidden" name="back" value={back} />
-              <select name="status" class="js-auto">
-                <option value="todo" selected={t.status === 'todo'}>To do</option>
-                <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
-                <option value="done" selected={t.status === 'done'}>Done</option>
+              <select name="status" class="js-auto" aria-label={`Status of ${t.title}`}>
+                {STATUSES.map((s) => <option value={s.key} selected={t.status === s.key}>{s.label}</option>)}
               </select>
-              <select name="assignee_id" class="js-auto">
+              <select name="assignee_id" class="js-auto" aria-label={`Assignee of ${t.title}`}>
                 <option value="">Unassigned</option>
                 {people.map((p) => <option value={p.id} selected={t.assignee_id === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
               </select>
             </form>
           </div>
         ))}
+        {tasks.filter((t) => t.status === c.key).length === 0 && (
+          <p class="col-empty">Nothing here.</p>
+        )}
       </div>
     ))}
   </div>
@@ -102,5 +108,11 @@ const err = Astro.url.searchParams.get('err');
   <script is:inline>
     document.querySelectorAll('.js-auto').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
     document.querySelectorAll('.js-filter').forEach((el) => el.addEventListener('change', (e) => e.target.closest('form').submit()));
+    // Deletes are permanent — always ask first.
+    document.querySelectorAll('form.js-confirm').forEach((f) =>
+      f.addEventListener('submit', (e) => {
+        if (!window.confirm(f.dataset.confirm || 'Delete this task? This cannot be undone.')) e.preventDefault();
+      })
+    );
   </script>
 </AppLayout>

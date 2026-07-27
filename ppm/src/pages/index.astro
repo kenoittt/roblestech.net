@@ -1,12 +1,13 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
-import { loadPpmData, nameOf } from '../lib/queries';
+import { loadPpmData, nameOf, isOpen } from '../lib/queries';
 
 const { all: tasks, people } = await loadPpmData(Astro);
 
 const todo = tasks.filter((t) => t.status === 'todo').length;
 const prog = tasks.filter((t) => t.status === 'in_progress').length;
 const done = tasks.filter((t) => t.status === 'done').length;
+const cancelled = tasks.filter((t) => t.status === 'cancelled').length;
 
 const now = new Date();
 const day = (now.getUTCDay() + 6) % 7;
@@ -28,12 +29,12 @@ const rows = people.map((p) => {
     week: mine.filter((t) => inRange(t.completed_at, monThis, new Date(now.getTime() + 86400000))).length,
   };
 });
-const unassigned = tasks.filter((t) => !t.assignee_id && t.status !== 'done').length;
-// Due soon (next 7 days, not done)
+const unassigned = tasks.filter((t) => !t.assignee_id && isOpen(t)).length;
+// Due soon (next 7 days, still open — done and cancelled don't need chasing)
 const in7 = new Date(now.getTime() + 7 * 86400000).toISOString().slice(0, 10);
 const today = now.toISOString().slice(0, 10);
 const dueSoon = tasks
-  .filter((t) => t.status !== 'done' && t.due_date && t.due_date <= in7)
+  .filter((t) => isOpen(t) && t.due_date && t.due_date <= in7)
   .sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)))
   .slice(0, 8);
 ---
@@ -49,6 +50,7 @@ const dueSoon = tasks
     <div class="stat done"><div class="n">{done}</div><div class="l">Done (all time)</div></div>
     <div class="stat week"><div class="n">{doneThisWeek}</div><div class="l">Finished this week</div></div>
     <div class="stat week"><div class="n">{doneLastWeek}</div><div class="l">Finished last week</div></div>
+    <a class="stat cancelled" href="/tasks?status=cancelled" style="text-decoration:none;"><div class="n">{cancelled}</div><div class="l">Cancelled</div></a>
   </div>
 
   <div class="dash-grid">

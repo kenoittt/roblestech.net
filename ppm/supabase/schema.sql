@@ -23,7 +23,7 @@ create table if not exists public.ppm_tasks (
   project_id   uuid references public.ppm_projects(id) on delete set null,
   title        text not null,
   description  text,
-  status       text not null default 'todo' check (status in ('todo', 'in_progress', 'done')),
+  status       text not null default 'todo' check (status in ('todo', 'in_progress', 'done', 'cancelled')),
   priority     text not null default 'medium' check (priority in ('low', 'medium', 'high')),
   due_date     date,
   assignee_id  uuid references auth.users(id) on delete set null,
@@ -31,6 +31,12 @@ create table if not exists public.ppm_tasks (
   created_at   timestamptz not null default now(),
   completed_at timestamptz
 );
+-- Widen the status check on projects created before 'cancelled' existed.
+-- (create table if not exists above is a no-op on an existing table.)
+alter table public.ppm_tasks drop constraint if exists ppm_tasks_status_check;
+alter table public.ppm_tasks
+  add constraint ppm_tasks_status_check check (status in ('todo', 'in_progress', 'done', 'cancelled'));
+
 create index if not exists ppm_tasks_status_idx on public.ppm_tasks (status);
 create index if not exists ppm_tasks_assignee_idx on public.ppm_tasks (assignee_id);
 create index if not exists ppm_tasks_completed_idx on public.ppm_tasks (completed_at);

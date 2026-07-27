@@ -8,6 +8,19 @@ export type Task = {
 export type Person = { id: string; full_name: string | null; role: string };
 export type Project = { id: string; name: string; color: string };
 
+/** The only statuses a task can have — kanban column order included. */
+export const STATUSES = [
+  { key: 'todo', label: 'To do' },
+  { key: 'in_progress', label: 'In progress' },
+  { key: 'done', label: 'Done' },
+  { key: 'cancelled', label: 'Cancelled' },
+];
+export const STATUS_KEYS = STATUSES.map((s) => s.key);
+export const STATUS_LABEL: Record<string, string> = Object.fromEntries(STATUSES.map((s) => [s.key, s.label]));
+/** Statuses that still need work — used for "open", "due soon" and reminders. */
+export const OPEN_STATUSES = ['todo', 'in_progress'];
+export const isOpen = (t: { status: string }) => OPEN_STATUSES.includes(t.status);
+
 /** Load tasks/people/projects and apply ?assignee= ?project= ?status= filters. */
 export async function loadPpmData(context: { request: Request; cookies: any; url: URL }) {
   const supabase = createSupabaseServer(context as unknown as APIContext);

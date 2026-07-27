@@ -1,6 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
-import { loadPpmData } from '../lib/queries';
+import { loadPpmData, STATUSES } from '../lib/queries';
 
 const { tasks, people, projects, fAssignee, fProject, fStatus } = await loadPpmData(Astro);
 const back = Astro.url.pathname + Astro.url.search;
@@ -35,9 +35,7 @@ const err = Astro.url.searchParams.get('err');
     <label>Status
       <select name="status" class="js-filter">
         <option value="">All</option>
-        <option value="todo" selected={fStatus === 'todo'}>To do</option>
-        <option value="in_progress" selected={fStatus === 'in_progress'}>In progress</option>
-        <option value="done" selected={fStatus === 'done'}>Done</option>
+        {STATUSES.map((s) => <option value={s.key} selected={fStatus === s.key}>{s.label}</option>)}
       </select>
     </label>
     {(fAssignee || fProject || fStatus) && <a href="/tasks" class="mini-link">Clear filters</a>}
@@ -46,14 +44,14 @@ const err = Astro.url.searchParams.get('err');
   <div class="ttable-wrap" style="margin-top:14px;">
     <table class="ttable">
       <thead>
-        <tr><th style="min-width:240px;">Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th></tr>
+        <tr><th style="min-width:240px;">Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th><th><span class="sr-only">Delete</span></th></tr>
       </thead>
       <tbody>
         {tasks.map((t) => {
           const fid = `f-${t.id}`;
           return (
-            <tr class={t.status === 'done' ? 'is-done' : ''}>
-              <td><input form={fid} name="title" value={t.title} class="cell-input js-auto" /></td>
+            <tr class={t.status === 'done' ? 'is-done' : t.status === 'cancelled' ? 'is-cancelled' : ''}>
+              <td class="c-title"><input form={fid} name="title" value={t.title} class="cell-input js-auto" /></td>
               <td>
                 <select form={fid} name="project_id" class="cell-select js-auto">
                   <option value="">—</option>
@@ -75,16 +73,19 @@ const err = Astro.url.searchParams.get('err');
               </td>
               <td>
                 <select form={fid} name="status" class={`cell-select js-auto st-${t.status}`}>
-                  <option value="todo" selected={t.status === 'todo'}>To do</option>
-                  <option value="in_progress" selected={t.status === 'in_progress'}>In progress</option>
-                  <option value="done" selected={t.status === 'done'}>Done</option>
+                  {STATUSES.map((s) => <option value={s.key} selected={t.status === s.key}>{s.label}</option>)}
                 </select>
               </td>
               <td><input form={fid} type="date" name="due_date" value={t.due_date ?? ''} class="cell-input js-auto" style="max-width:150px;" /></td>
+              <td style="text-align:right;">
+                <button form={`d-${t.id}`} type="submit" class="del-btn" title="Delete task" aria-label={`Delete task: ${t.title}`}>
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 4h4l.5 3h-5L10 4Z"/><path d="M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </td>
             </tr>
           );
         })}
-        {tasks.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:26px;">No tasks match these filters.</td></tr>}
+        {tasks.length === 0 && <tr><td colspan="7" class="muted" style="text-align:center;padding:26px;">No tasks match these filters.</td></tr>}
         <!-- Add row -->
         <tr class="addrow">
           <td><input form="f-new" name="title" required placeholder="+ New task…" class="cell-input" /></td>
@@ -102,6 +103,7 @@ const err = Astro.url.searchParams.get('err');
             <input form="f-new" type="date" name="due_date" class="cell-input" style="max-width:140px;" />
             <button form="f-new" type="submit" class="btn" style="padding:7px 14px;font-size:.8rem;">Add</button>
           </td>
+          <td></td>
         </tr>
       </tbody>
     </table>
@@ -109,10 +111,16 @@ const err = Astro.url.searchParams.get('err');
 
   <!-- Row forms (form attribute keeps table HTML valid) -->
   {tasks.map((t) => (
-    <form id={`f-${t.id}`} method="post" action="/api/task-update" hidden>
-      <input type="hidden" name="id" value={t.id} />
-      <input type="hidden" name="back" value={back} />
-    </form>
+    <>
+      <form id={`f-${t.id}`} method="post" action="/api/task-update" hidden>
+        <input type="hidden" name="id" value={t.id} />
+        <input type="hidden" name="back" value={back} />
+      </form>
+      <form id={`d-${t.id}`} method="post" action="/api/task-delete" class="js-confirm" data-confirm={`Delete "${t.title}"? This cannot be undone.`} hidden>
+        <input type="hidden" name="id" value={t.id} />
+        <input type="hidden" name="back" value={back} />
+      </form>
+    </>
   ))}
   <form id="f-new" method="post" action="/api/task-create" hidden>
     <input type="hidden" name="back" value={back} />
@@ -141,6 +149,12 @@ const err = Astro.url.searchParams.get('err');
     );
     document.querySelectorAll('.js-filter').forEach((el) =>
       el.addEventListener('change', (e) => e.target.closest('form').submit())
+    );
+    // Deletes are permanent — always ask first.
+    document.querySelectorAll('form.js-confirm').forEach((f) =>
+      f.addEventListener('submit', (e) => {
+        if (!window.confirm(f.dataset.confirm || 'Delete this task? This cannot be undone.')) e.preventDefault();
+      })
     );
   </script>
 </AppLayout>

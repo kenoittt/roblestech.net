@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { createSupabaseAdmin } from '../../../lib/supabase';
 import { sendMail, notifyHtml } from '../../../lib/email';
 import { pick, APP_URL } from '../../../lib/env';
+import { OPEN_STATUSES } from '../../../lib/queries';
 
 export const prerender = false;
 
@@ -25,7 +26,7 @@ export const GET: APIRoute = async (context) => {
   const { data: tasks, error } = await admin
     .from('ppm_tasks')
     .select('id, title, due_date, assignee_id')
-    .neq('status', 'done')
+    .in('status', OPEN_STATUSES)
     .not('assignee_id', 'is', null)
     .in('due_date', [iso(today), iso(tomorrow)]);
   if (error) return new Response(`DB error: ${error.message}`, { status: 500 });

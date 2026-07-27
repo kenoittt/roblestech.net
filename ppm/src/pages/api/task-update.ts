@@ -3,6 +3,7 @@ import { getSession, canUsePpm } from '../../lib/auth';
 import { createSupabaseAdmin } from '../../lib/supabase';
 import { sendMail, notifyHtml } from '../../lib/email';
 import { APP_URL } from '../../lib/env';
+import { STATUS_KEYS, STATUS_LABEL } from '../../lib/queries';
 
 export const prerender = false;
 
@@ -50,7 +51,7 @@ export const POST: APIRoute = async (context) => {
     if (pj !== task.project_id) { patch.project_id = pj; events.push({ task_id: id, actor_id: user.id, type: 'updated', meta: { field: 'project', to: pj } }); }
   }
   const newStatus = form.has('status') ? String(form.get('status')) : null;
-  if (newStatus && newStatus !== task.status && ['todo', 'in_progress', 'done'].includes(newStatus)) {
+  if (newStatus && newStatus !== task.status && STATUS_KEYS.includes(newStatus)) {
     patch.status = newStatus;
     patch.completed_at = newStatus === 'done' ? new Date().toISOString() : null;
     events.push({ task_id: id, actor_id: user.id, type: 'status_changed', from_status: task.status, to_status: newStatus });
@@ -76,7 +77,9 @@ export const POST: APIRoute = async (context) => {
   };
   if (patch.assignee_id) await emailFor(newAssignee!, `Task assigned: ${task.title}`, 'A task was assigned to you', [`<b>${task.title}</b>`]);
   if (patch.status) {
-    const label = newStatus === 'done' ? 'completed' : `moved to ${String(newStatus).replace('_', ' ')}`;
+    const label = newStatus === 'done' ? 'completed'
+      : newStatus === 'cancelled' ? 'cancelled'
+      : `moved to ${STATUS_LABEL[newStatus!]?.toLowerCase() ?? String(newStatus)}`;
     await emailFor(task.created_by, `Task ${label}: ${task.title}`, `Task ${label}`, [`<b>${task.title}</b>`]);
   }
 
