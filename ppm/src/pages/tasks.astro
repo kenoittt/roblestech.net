@@ -7,6 +7,18 @@ const back = Astro.url.pathname + Astro.url.search;
 
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
+
+// Sheet columns. `w` is the default width in px; users drag from here and the
+// result is kept per-browser in localStorage (see the script at the bottom).
+const COLS = [
+  { key: 'title', label: 'Task', w: 300 },
+  { key: 'project', label: 'Project', w: 150 },
+  { key: 'assignee', label: 'Assignee', w: 165 },
+  { key: 'priority', label: 'Priority', w: 120 },
+  { key: 'status', label: 'Status', w: 140 },
+  { key: 'due', label: 'Due', w: 160 },
+  { key: 'actions', label: '', w: 70 },
+];
 ---
 
 <AppLayout title="Tasks · Robles Tech PPM">
@@ -41,10 +53,28 @@ const err = Astro.url.searchParams.get('err');
     {(fAssignee || fProject || fStatus) && <a href="/tasks" class="mini-link">Clear filters</a>}
   </form>
 
-  <div class="ttable-wrap" style="margin-top:14px;">
-    <table class="ttable">
+  <div class="sheetbar">
+    <span class="hint" style="margin:0;">Drag a column edge to resize it — widths are remembered on this device.</span>
+    <button type="button" class="linkbtn" id="reset-cols">Reset column widths</button>
+  </div>
+
+  <div class="ttable-wrap">
+    <table class="ttable ttable-resize" id="task-sheet">
+      <colgroup>
+        {COLS.map((c) => <col data-col={c.key} style={`width:${c.w}px;`} />)}
+      </colgroup>
       <thead>
-        <tr><th style="min-width:240px;">Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Due</th><th><span class="sr-only">Delete</span></th></tr>
+        <tr>
+          {COLS.map((c, i) => (
+            <th>
+              {c.label ? c.label : <span class="sr-only">Delete</span>}
+              {i < COLS.length - 1 && (
+                <span class="col-resizer" data-i={i} role="separator" aria-orientation="vertical"
+                      tabindex="0" aria-label={`Resize ${c.label || 'last'} column`} title="Drag to resize (or use ← →)"></span>
+              )}
+            </th>
+          ))}
+        </tr>
       </thead>
       <tbody>
         {tasks.map((t) => {
@@ -76,7 +106,7 @@ const err = Astro.url.searchParams.get('err');
                   {STATUSES.map((s) => <option value={s.key} selected={t.status === s.key}>{s.label}</option>)}
                 </select>
               </td>
-              <td><input form={fid} type="date" name="due_date" value={t.due_date ?? ''} class="cell-input js-auto" style="max-width:150px;" /></td>
+              <td><input form={fid} type="date" name="due_date" value={t.due_date ?? ''} class="cell-input js-auto" /></td>
               <td style="text-align:right;">
                 <button form={`d-${t.id}`} type="submit" class="del-btn" title="Delete task" aria-label={`Delete task: ${t.title}`}>
                   <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 4h4l.5 3h-5L10 4Z"/><path d="M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>
@@ -99,11 +129,10 @@ const err = Astro.url.searchParams.get('err');
             <select form="f-new" name="priority" class="cell-select"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select>
           </td>
           <td class="muted" style="font-size:.8rem;">To do</td>
-          <td style="display:flex;gap:8px;align-items:center;">
-            <input form="f-new" type="date" name="due_date" class="cell-input" style="max-width:140px;" />
-            <button form="f-new" type="submit" class="btn" style="padding:7px 14px;font-size:.8rem;">Add</button>
+          <td><input form="f-new" type="date" name="due_date" class="cell-input" /></td>
+          <td style="text-align:right;">
+            <button form="f-new" type="submit" class="btn" style="padding:6px 10px;font-size:.75rem;">Add</button>
           </td>
-          <td></td>
         </tr>
       </tbody>
     </table>
@@ -156,5 +185,87 @@ const err = Astro.url.searchParams.get('err');
         if (!window.confirm(f.dataset.confirm || 'Delete this task? This cannot be undone.')) e.preventDefault();
       })
     );
+
+    // ── Resizable columns ────────────────────────────────────────────────
+    // Drag a header edge (or focus it and press ← / →). Widths live in
+    // localStorage per browser, so the sheet stays how you left it.
+    (function () {
+      var KEY = 'ppm.tasks.colWidths.v1';
+      var MIN = 56;
+      var table = document.getElementById('task-sheet');
+      if (!table) return;
+      var cols = Array.prototype.slice.call(table.querySelectorAll('colgroup col'));
+      var defaults = cols.map(function (c) { return parseInt(c.style.width, 10) || 120; });
+
+      function widths() {
+        return cols.map(function (c, i) { return parseInt(c.style.width, 10) || defaults[i]; });
+      }
+      function apply(list) {
+        list.forEach(function (w, i) { if (cols[i]) cols[i].style.width = Math.max(MIN, w) + 'px'; });
+        table.style.width = list.reduce(function (a, b) { return a + Math.max(MIN, b); }, 0) + 'px';
+      }
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(widths())); } catch (e) { /* private mode */ }
+      }
+
+      // Defaults grow the Task column so the sheet fills its card; saved widths
+      // are used exactly as the user left them.
+      function applyDefaults() {
+        var list = defaults.slice();
+        var wrap = table.parentElement;
+        var slack = (wrap ? wrap.clientWidth : 0) - list.reduce(function (a, b) { return a + b; }, 0);
+        if (slack > 0) list[0] += slack;
+        apply(list);
+      }
+
+      // Restore, ignoring a stale entry from a different column count.
+      try {
+        var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+        if (Array.isArray(saved) && saved.length === cols.length) apply(saved);
+        else applyDefaults();
+      } catch (e) { applyDefaults(); }
+
+      table.querySelectorAll('.col-resizer').forEach(function (h) {
+        var i = parseInt(h.dataset.i, 10);
+        h.addEventListener('pointerdown', function (ev) {
+          ev.preventDefault();
+          var startX = ev.clientX;
+          var start = widths()[i];
+          h.setPointerCapture(ev.pointerId);
+          h.classList.add('is-dragging');
+          function move(e) {
+            var next = widths();
+            next[i] = Math.max(MIN, start + (e.clientX - startX));
+            apply(next);
+          }
+          function up() {
+            h.classList.remove('is-dragging');
+            h.removeEventListener('pointermove', move);
+            h.removeEventListener('pointerup', up);
+            h.removeEventListener('pointercancel', up);
+            save();
+          }
+          h.addEventListener('pointermove', move);
+          h.addEventListener('pointerup', up);
+          h.addEventListener('pointercancel', up);
+        });
+        // Keyboard: same resize without a mouse.
+        h.addEventListener('keydown', function (e) {
+          var step = e.key === 'ArrowLeft' ? -16 : e.key === 'ArrowRight' ? 16 : 0;
+          if (!step) return;
+          e.preventDefault();
+          var next = widths();
+          next[i] = Math.max(MIN, next[i] + step);
+          apply(next);
+          save();
+        });
+      });
+
+      var reset = document.getElementById('reset-cols');
+      if (reset) reset.addEventListener('click', function () {
+        applyDefaults();
+        try { localStorage.removeItem(KEY); } catch (e) { /* private mode */ }
+      });
+    })();
   </script>
 </AppLayout>

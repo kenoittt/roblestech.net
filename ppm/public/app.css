@@ -87,6 +87,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .filterbar label{display:flex;flex-direction:column;gap:5px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0;}
 .filterbar select{width:auto;min-width:150px;padding:8px 10px;font-size:.85rem;}
 .mini-link{color:var(--green);font-size:.8rem;font-weight:700;text-decoration:none;padding-bottom:10px;}
+/* A button that reads as a link (sheet actions). */
+.linkbtn{font-family:inherit;color:var(--green);font-size:.8rem;font-weight:700;background:none;border:0;padding:0;cursor:pointer;}
+.linkbtn:hover{text-decoration:underline;}
 
 /* Editable sheet cells */
 .cell-input{font-family:inherit;font-size:.88rem;color:#fff;background:transparent;border:1px solid transparent;border-radius:7px;padding:6px 8px;width:100%;}
@@ -105,8 +108,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .vbtn.active{background:rgba(255,255,255,0.10);color:#fff;}
 
 /* Spreadsheet-style table view */
-.ttable-wrap{margin-top:14px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+.ttable-wrap{margin-top:14px;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:14px;overflow:auto;}
 .ttable{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem;}
+
+/* Resizable sheet: colgroup drives the widths, JS sets them from drag/keyboard. */
+.sheetbar{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px;}
+/* Width comes from the colgroup only (JS sets it), so a drag is pixel-exact —
+   no min-width here or the browser redistributes the slack. */
+.ttable-resize{table-layout:fixed;}
+/* thead th is already position:sticky, which is a containing block for the
+   absolutely positioned drag handle — don't reset it or the header unsticks. */
+.ttable-resize tbody td{overflow:hidden;}
+.ttable-resize .cell-select,.ttable-resize .cell-input{max-width:none;width:100%;}
+/* The handle must stay inside its own th: each th is a stacking context, so an
+   overhanging handle is painted under the next th and never gets the pointer. */
+.col-resizer{position:absolute;top:0;right:0;width:11px;height:100%;cursor:col-resize;
+  z-index:3;touch-action:none;}
+.col-resizer::after{content:'';position:absolute;top:20%;bottom:20%;right:0;width:2px;border-radius:2px;background:transparent;}
+.col-resizer:hover::after,.col-resizer:focus-visible::after,.col-resizer.is-dragging::after{background:var(--green);}
+.col-resizer:focus-visible{outline:none;}
 .ttable thead th{position:sticky;top:0;z-index:1;background:rgba(10,20,45,0.9);backdrop-filter:blur(8px);
   text-align:left;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;
   padding:13px 16px;border-bottom:1px solid var(--line);}
