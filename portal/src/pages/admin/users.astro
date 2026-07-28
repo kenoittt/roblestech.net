@@ -1,0 +1,294 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
+
+const supabase = createSupabaseServer(Astro);
+const admin = createSupabaseAdmin();
+const me = Astro.locals.profile;
+const isSuper = me?.role === 'super_admin';
+const back = '/admin/users';
+
+type Client = { id: string; name: string; created_at: string };
+type Prof = { id: string; full_name: string | null; role: string; client_id: string | null };
+
+const [{ data: clientRows }, { data: profRows }, { data: userList }] = await Promise.all([
+  supabase.from('clients').select('id, name, created_at').order('name'),
+  admin.from('profiles').select('id, full_name, role, client_id'),
+  admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
+]);
+const clients: Client[] = (clientRows as Client[]) ?? [];
+const profiles: Prof[] = (profRows as Prof[]) ?? [];
+const authUsers = userList?.users ?? [];
+
+const profById = new Map(profiles.map((p) => [p.id, p]));
+const clientById = new Map(clients.map((c) => [c.id, c]));
+
+// One row per real account: the auth user is the account, the profile is its role.
+// A user with no profile row exists but was never given a role — that's a
+// half-finished account, and it shows up in "waiting on us" below.
+const ROLE_RANK: Record<string, number> = { super_admin: 0, admin: 1, staff: 2, client: 3, none: 4 };
+const ROLE_LABEL: Record<string, string> = {
+  super_admin: 'Super admin', admin: 'Admin', staff: 'Staff (PPM)', client: 'Client', none: 'No role yet',
+};
+const accounts = authUsers
+  .map((u) => {
+    const p = profById.get(u.id);
+    return {
+      id: u.id,
+      email: u.email ?? '',
+      name: p?.full_name || '',
+      role: p?.role ?? 'none',
+      hasProfile: !!p,
+      client_id: p?.client_id ?? null,
+      company: p?.client_id ? clientById.get(p.client_id)?.name ?? '(deleted company)' : '',
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at ?? null,
+      confirmed: !!u.email_confirmed_at,
+    };
+  })
+  .sort((a, b) =>
+    (ROLE_RANK[a.role] ?? 9) - (ROLE_RANK[b.role] ?? 9) ||
+    (a.name || a.email).localeCompare(b.name || b.email)
+  );
+
+// ── Who's still waiting on us ───────────────────────────────────────────────
+const clientLogins = accounts.filter((a) => a.role === 'client');
+const withLogin = new Set(clientLogins.map((a) => a.client_id).filter(Boolean) as string[]);
+// Companies that exist but nobody can sign in for them yet.
+const awaitingLogin = clients.filter((c) => !withLogin.has(c.id));
+// Accounts made but never used, and accounts with no role at all.
+const neverSignedIn = accounts.filter((a) => !a.last_sign_in_at);
+const noRole = accounts.filter((a) => !a.hasProfile);
+// Client logins that exist but aren't linked to a company (dashboard disabled).
+const unlinked = clientLogins.filter((a) => !a.client_id);
+const waitingTotal = awaitingLogin.length + noRole.length + unlinked.length;
+
+const counts = {
+  total: accounts.length,
+  internal: accounts.filter((a) => ['super_admin', 'admin', 'staff'].includes(a.role)).length,
+  clients: clientLogins.length,
+  never: neverSignedIn.length,
+};
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const fmt = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
+const assignable = ['admin', 'staff', 'client'];
+// Super admins are never editable from the UI, and nobody edits their own role.
+const canManage = (a: typeof accounts[number]) => a.role !== 'super_admin' && a.id !== me?.id;
+---
+
+<PortalLayout title="Users · Robles Tech Portal">
+  <p class="eyebrow">Admin</p>
+  <h1>Users &amp; accounts</h1>
+  <p class="lede">
+    Every login that exists, what it can do, and who's still waiting on an account.
+    <a href="/admin" style="color:var(--lime);">← Back to admin</a>
+  </p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  {!isSuper && (
+    <div class="alert" style="background:rgba(57,146,255,0.12);border:1px solid rgba(57,146,255,0.4);color:#cfe2ff;">
+      You're an <b>admin</b>: you can see everything here, and role or company changes you make are
+      submitted for <b>super-admin approval</b>. Creating a brand-new login is super-admin only.
+    </div>
+  )}
+
+  <div class="ustats">
+    <div class="ustat"><div class="n">{counts.total}</div><div class="l">Accounts</div></div>
+    <div class="ustat"><div class="n" style="color:var(--sky);">{counts.internal}</div><div class="l">Robles Tech team</div></div>
+    <div class="ustat"><div class="n" style="color:var(--lime);">{counts.clients}</div><div class="l">Client logins</div></div>
+    <div class="ustat"><div class="n" style="color:#ffc98a;">{counts.never}</div><div class="l">Never signed in</div></div>
+    <div class="ustat"><div class="n" style="color:#ffc98a;">{waitingTotal}</div><div class="l">Waiting on us</div></div>
+  </div>
+
+  <!-- ── Waiting on us ─────────────────────────────────────────────────── -->
+  <div class="section-gap" style="margin-top:34px;">
+    <h2>Waiting on us <span class="hint" style="font-weight:600;">· {waitingTotal} item{waitingTotal === 1 ? '' : 's'}</span></h2>
+
+    <h3 class="section-h">Companies with no login yet <span class="hint" style="font-weight:600;">· {awaitingLogin.length}</span></h3>
+    {awaitingLogin.length === 0 ? (
+      <p class="hint" style="margin:0;">Every client company has at least one login.</p>
+    ) : (
+      awaitingLogin.map((c) => (
+        <details class="card" style="margin-bottom:10px;">
+          <summary style="cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+            <span style="font-weight:700;">{c.name}</span>
+            <span class="hint" style="margin:0;">client since {fmt(c.created_at)} · <b style="color:#ffc98a;">no login yet</b></span>
+          </summary>
+          {isSuper ? (
+            <form method="post" action="/api/create-login" class="form-grid" style="margin-top:16px;max-width:none;">
+              <input type="hidden" name="client_id" value={c.id} />
+              <input type="hidden" name="back" value={back} />
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:180px;"><label>Contact name (optional)</label><input name="full_name" type="text" placeholder="Jane Doe" /></div>
+                <div style="flex:1;min-width:200px;"><label>Email</label><input name="email" type="email" required placeholder={`jane@${c.name.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com`} /></div>
+                <div style="flex:1;min-width:180px;"><label>Password</label><input name="password" type="text" required minlength="8" placeholder="At least 8 characters" /></div>
+              </div>
+              <button class="btn" type="submit" style="align-self:start;">Create login for {c.name}</button>
+            </form>
+          ) : (
+            <p class="hint" style="margin-top:14px;">A super admin needs to create this login (passwords aren't queued for approval).</p>
+          )}
+        </details>
+      ))
+    )}
+
+    <h3 class="section-h">Client logins with no company <span class="hint" style="font-weight:600;">· {unlinked.length}</span></h3>
+    {unlinked.length === 0 ? (
+      <p class="hint" style="margin:0;">All client logins are linked to a company.</p>
+    ) : (
+      unlinked.map((a) => (
+        <form method="post" action="/api/link-client" class="card gated" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:10px;">
+          <input type="hidden" name="user_id" value={a.id} />
+          <input type="hidden" name="back" value={back} />
+          <div style="flex:1;min-width:200px;">
+            <label>{a.name || '(no name)'}</label>
+            <div class="hint" style="margin:0;">{a.email}</div>
+          </div>
+          <div style="min-width:220px;">
+            <label>Company (enables their dashboard)</label>
+            <select name="client_id">
+              <option value="">None (disabled)</option>
+              {clients.map((c) => <option value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <button class="btn" type="submit">Save</button>
+        </form>
+      ))
+    )}
+
+    <h3 class="section-h">Accounts with no role <span class="hint" style="font-weight:600;">· {noRole.length}</span></h3>
+    {noRole.length === 0 ? (
+      <p class="hint" style="margin:0;">Every account has a role.</p>
+    ) : (
+      <>
+        <p class="hint" style="margin:0 0 12px;">These logins exist but can't do anything until they're given a role.</p>
+        {noRole.map((a) => (
+          <form method="post" action="/api/set-role" class="card gated" style="display:flex;gap:14px;align-items:end;flex-wrap:wrap;margin-bottom:10px;">
+            <input type="hidden" name="user_id" value={a.id} />
+            <input type="hidden" name="back" value={back} />
+            <div style="flex:1;min-width:200px;">
+              <label>{a.name || '(no name)'}</label>
+              <div class="hint" style="margin:0;">{a.email} · created {fmt(a.created_at)}</div>
+            </div>
+            <div style="min-width:200px;">
+              <label>Role</label>
+              <select name="role" required>
+                <option value="" disabled selected>Pick a role…</option>
+                {assignable.map((r) => <option value={r}>{ROLE_LABEL[r]}</option>)}
+              </select>
+            </div>
+            <button class="btn" type="submit">Set role</button>
+          </form>
+        ))}
+      </>
+    )}
+
+    {neverSignedIn.length > 0 && (
+      <>
+        <h3 class="section-h">Created but never signed in <span class="hint" style="font-weight:600;">· {neverSignedIn.length}</span></h3>
+        <p class="hint" style="margin:0 0 10px;">Their account is ready — they just haven't used it yet. Worth a nudge with their password.</p>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+          {neverSignedIn.map((a) => (
+            <li class="badge badge-wait">{a.email || a.name || a.id.slice(0, 8)}<span class="hint" style="margin:0 0 0 6px;">· {ROLE_LABEL[a.role]}</span></li>
+          ))}
+        </ul>
+      </>
+    )}
+  </div>
+
+  <!-- ── Everyone ──────────────────────────────────────────────────────── -->
+  <div class="section-gap">
+    <h2>All accounts <span class="hint" style="font-weight:600;">· {accounts.length}</span></h2>
+    <p class="hint" style="margin-bottom:14px;">
+      Roles: <b>super admin</b> approves changes · <b>admin</b> runs the portal · <b>staff</b> is PPM-only ·
+      <b>client</b> sees one dashboard. Super-admin roles are changed directly in the database.
+    </p>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>Person</th><th>Role</th><th>Company</th><th>Created</th><th>Last sign-in</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {accounts.length === 0 && <tr><td colspan="6" class="muted" style="text-align:center;padding:24px;">No accounts yet.</td></tr>}
+          {accounts.map((a) => (
+            <tr>
+              <td>
+                <div class="c-name">{a.name || '(no name)'}{a.id === me?.id && <span class="badge badge-you">you</span>}</div>
+                <div class="hint" style="margin:2px 0 0;">{a.email || a.id.slice(0, 8)}</div>
+              </td>
+              <td>
+                {canManage(a) ? (
+                  <form method="post" action="/api/set-role" class="gated urow-form">
+                    <input type="hidden" name="user_id" value={a.id} />
+                    <input type="hidden" name="back" value={back} />
+                    <select name="role" required aria-label={`Role for ${a.email || a.name}`}>
+                      {!a.hasProfile && <option value="" disabled selected>Pick a role…</option>}
+                      {assignable.map((r) => <option value={r} selected={a.role === r}>{ROLE_LABEL[r]}</option>)}
+                    </select>
+                    <button class="mini" type="submit">Save</button>
+                  </form>
+                ) : (
+                  <span class={`badge badge-${a.role}`}>{ROLE_LABEL[a.role]}</span>
+                )}
+              </td>
+              <td>
+                {a.role === 'client' ? (
+                  <form method="post" action="/api/link-client" class="gated urow-form">
+                    <input type="hidden" name="user_id" value={a.id} />
+                    <input type="hidden" name="back" value={back} />
+                    <select name="client_id" aria-label={`Company for ${a.email || a.name}`}>
+                      <option value="">None (disabled)</option>
+                      {clients.map((c) => <option value={c.id} selected={a.client_id === c.id}>{c.name}</option>)}
+                    </select>
+                    <button class="mini" type="submit">Save</button>
+                  </form>
+                ) : (
+                  <span class="muted">—</span>
+                )}
+              </td>
+              <td class="muted">{fmt(a.created_at)}</td>
+              <td class={a.last_sign_in_at ? '' : 'muted'}>{a.last_sign_in_at ? fmt(a.last_sign_in_at) : 'never'}</td>
+              <td>
+                {!a.hasProfile ? <span class="badge badge-wait">Needs a role</span>
+                  : !a.confirmed ? <span class="badge badge-wait">Email unconfirmed</span>
+                  : a.role === 'client' && !a.client_id ? <span class="badge badge-wait">No company</span>
+                  : !a.last_sign_in_at ? <span class="badge badge-wait">Never signed in</span>
+                  : <span class="badge badge-ok">Active</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {isSuper && (
+    <div class="section-gap">
+      <h2>Add someone</h2>
+      <div class="card" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
+        <span style="flex:1;min-width:240px;">Robles Tech admin (full portal access) or a client login for a company.</span>
+        <a class="btn" href="/admin/create-admin">Create an admin →</a>
+        <a class="mini" href="/admin" style="margin:0;padding:12px 20px;">Create a client login →</a>
+      </div>
+    </div>
+  )}
+
+  <script is:inline define:vars={{ isSuper }}>
+    // Regular admins: role/company changes go to the approval queue — ask for a note.
+    if (!isSuper) {
+      document.querySelectorAll('form.gated').forEach((f) => {
+        f.addEventListener('submit', (e) => {
+          const note = window.prompt('This change needs super-admin approval.\nAdd a short note describing your request:');
+          if (note === null) { e.preventDefault(); return; }
+          let inp = f.querySelector('input[name="reason"]');
+          if (!inp) { inp = document.createElement('input'); inp.type = 'hidden'; inp.name = 'reason'; f.appendChild(inp); }
+          inp.value = note;
+        });
+      });
+    }
+  </script>
+</PortalLayout>

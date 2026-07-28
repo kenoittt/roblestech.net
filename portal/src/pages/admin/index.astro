@@ -49,6 +49,7 @@ if (isSuper) {
 const kindLabel: Record<string, string> = {
   client_create: 'Add client', client_update: 'Edit client', client_delete: 'Delete client',
   link_client: 'Change client access', save_config: 'Edit dashboard content',
+  set_role: 'Change a user’s role',
   audit_add: 'Add monthly AI-audit report', audit_delete: 'Remove monthly AI-audit report',
 };
 ---
@@ -135,22 +136,25 @@ const kindLabel: Record<string, string> = {
     )}
   </div>
 
-  {isSuper && (
   <div class="section-gap">
-    <h2>Team</h2>
+    <h2>Team &amp; accounts</h2>
     <div class="card">
-      <p style="margin:0 0 16px;">Create additional Robles Tech admin logins (full panel access).</p>
-      <a class="btn" href="/admin/create-admin">Create an admin →</a>
+      <p style="margin:0 0 16px;">
+        Every login that exists — team and clients — who's active, and who's still waiting on an account.
+      </p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <a class="btn" href="/admin/users">Users &amp; accounts →</a>
+        {isSuper && <a class="mini" href="/admin/create-admin" style="margin:0;padding:12px 20px;">Create an admin →</a>}
+      </div>
     </div>
   </div>
-  )}
 
   <div class="section-gap">
     <h2>Client access <span class="hint" style="font-weight:600;">· logins waiting to be enabled</span></h2>
     <p class="hint" style="margin-bottom:16px;">
       New client logins appear here until you link them to a company (which enables their dashboard).
-      Once assigned they drop off this list — manage everyone anytime on the
-      <a href="/admin/clients" style="color:var(--lime);">Clients page →</a>
+      Once assigned they drop off this list — see every account and who's still waiting on the
+      <a href="/admin/users" style="color:var(--lime);">Users page →</a>
     </p>
     {unassignedLogins.length === 0 && <p class="hint" style="display:inline-flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg> All client logins are assigned.</p>}
     {unassignedLogins.map((lg) => (

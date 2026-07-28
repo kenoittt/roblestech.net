@@ -147,6 +147,26 @@ input::placeholder { color: rgba(255,255,255,0.4); }
 .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .admin-col h2 { font-size: 1.2rem; margin: 0 0 16px; }
 .section-gap { margin-top: 44px; }
+
+/* Users & accounts page */
+.ustats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.ustat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+.ustat .n { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.ustat .l { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: 8px; }
+.badge {
+  display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em;
+  padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid var(--line);
+  color: #dbe4f7; white-space: nowrap;
+}
+.badge-super_admin { background: rgba(174,227,123,0.16); border-color: rgba(174,227,123,0.4); color: #e2f6cb; }
+.badge-admin { background: rgba(57,146,255,0.16); border-color: rgba(57,146,255,0.4); color: #cfe2ff; }
+.badge-ok { background: rgba(174,227,123,0.14); border-color: rgba(174,227,123,0.35); color: #e2f6cb; }
+.badge-wait { background: rgba(255,180,90,0.14); border-color: rgba(255,180,90,0.38); color: #ffddb0; }
+.badge-you { margin-left: 8px; background: rgba(255,255,255,0.12); font-size: 0.65rem; }
+.urow-form { display: flex; gap: 6px; align-items: center; margin: 0; }
+.urow-form select { width: auto; min-width: 130px; padding: 6px 8px; font-size: 0.82rem; }
+.urow-form .mini { margin: 0; }
+h3.section-h { font-size: 0.95rem; margin: 26px 0 10px; }
 textarea {
   width: 100%; min-height: 220px; font-family: ui-monospace, monospace; font-size: 0.82rem;
   color: var(--white); background: rgba(0,0,0,0.35); border: 1px solid var(--line);

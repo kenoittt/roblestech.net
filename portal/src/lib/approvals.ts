@@ -5,8 +5,12 @@ import { fetchGscData } from './gsc';
 
 export type ChangeKind =
   | 'client_create' | 'client_update' | 'client_delete'
-  | 'link_client' | 'save_config'
+  | 'link_client' | 'save_config' | 'set_role'
   | 'audit_add' | 'audit_delete';
+
+/** Roles the admin UI is allowed to hand out. super_admin is deliberately not
+ *  in here — it stays a manual database change. */
+export const ASSIGNABLE_ROLES = ['admin', 'staff', 'client'];
 
 /** Perform the actual DB mutation for a change. Returns an error message or null. */
 export async function applyChange(kind: string, payload: Record<string, any>): Promise<string | null> {
@@ -43,6 +47,20 @@ export async function applyChange(kind: string, payload: Record<string, any>): P
     ({ error } = await admin.from('clients').delete().eq('id', payload.id));
   } else if (kind === 'link_client') {
     ({ error } = await admin.from('profiles').update({ client_id: payload.client_id || null }).eq('id', payload.user_id));
+  } else if (kind === 'set_role') {
+    // Also creates the profile row for an auth user that never got one, which is
+    // how "account exists but was never set up" gets fixed from the users page.
+    if (!ASSIGNABLE_ROLES.includes(payload.role)) return `Invalid role: ${payload.role}`;
+    const { data: existing } = await admin
+      .from('profiles').select('role, client_id').eq('id', payload.user_id).maybeSingle();
+    const prev = existing as { role: string; client_id: string | null } | null;
+    if (prev?.role === 'super_admin') return 'Super-admin roles are changed directly in the database.';
+    ({ error } = await admin.from('profiles').upsert({
+      id: payload.user_id,
+      role: payload.role,
+      // Only client logins belong to a company; internal roles get unlinked.
+      client_id: payload.role === 'client' ? (prev?.client_id ?? null) : null,
+    }));
   } else if (kind === 'save_config') {
     ({ error } = await admin.from('clients').update({ gsc_property: payload.gsc_property || null, config: payload.config }).eq('id', payload.client_id));
   } else if (kind === 'audit_add') {

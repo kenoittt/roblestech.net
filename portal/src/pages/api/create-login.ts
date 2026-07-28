@@ -14,10 +14,13 @@ export const POST: APIRoute = async (context) => {
   const email = String(form.get('email') ?? '').trim().toLowerCase();
   const password = String(form.get('password') ?? '');
   const fullName = String(form.get('full_name') ?? '').trim();
+  // Logins are created from /admin and from /admin/users — come back where we started.
+  const backRaw = String(form.get('back') ?? '').split('?')[0];
+  const back = backRaw.startsWith('/') && !backRaw.startsWith('//') ? backRaw : '/admin';
 
   if (!clientId || !email || password.length < 8) {
     return context.redirect(
-      '/admin?err=' + encodeURIComponent('Client, email, and a password of at least 8 characters are required.')
+      back + '?err=' + encodeURIComponent('Client, email, and a password of at least 8 characters are required.')
     );
   }
 
@@ -30,7 +33,7 @@ export const POST: APIRoute = async (context) => {
     email_confirm: true,
   });
   if (createErr || !created.user) {
-    return context.redirect('/admin?err=' + encodeURIComponent(createErr?.message ?? 'Could not create user.'));
+    return context.redirect(back + '?err=' + encodeURIComponent(createErr?.message ?? 'Could not create user.'));
   }
 
   // Link the user to the client with the 'client' role.
@@ -43,8 +46,8 @@ export const POST: APIRoute = async (context) => {
   if (profErr) {
     // Roll back the orphaned auth user so the admin can retry cleanly.
     await admin.auth.admin.deleteUser(created.user.id);
-    return context.redirect('/admin?err=' + encodeURIComponent(profErr.message));
+    return context.redirect(back + '?err=' + encodeURIComponent(profErr.message));
   }
 
-  return context.redirect('/admin?ok=' + encodeURIComponent(`Login created for ${email}.`));
+  return context.redirect(back + '?ok=' + encodeURIComponent(`Login created for ${email}.`));
 };

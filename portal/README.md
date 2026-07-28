@@ -52,3 +52,12 @@ exact target when you add the custom domain `portal.roblestech.net`).
 2. **Create a client login** (email + password) linked to that company; share it.
 3. **Publish a monthly report** — upload the HTML file (or paste it), pick the
    month. It appears in that client's dashboard immediately.
+
+### Users & accounts (`/admin/users`)
+Every login in one place: the Robles Tech team, client logins, when each account
+was created and last used. The "Waiting on us" panel is the tracker for accounts
+that aren't finished — client companies with no login yet (create it right there),
+client logins not linked to a company, accounts with no role, and accounts that
+have never been signed into. Roles can be set from the table (`admin` / `staff` /
+`client`); regular admins' changes queue for super-admin approval, and
+`super_admin` is deliberately only grantable in SQL.
