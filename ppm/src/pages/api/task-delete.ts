@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getSession, canUsePpm } from '../../lib/auth';
 import { createSupabaseAdmin } from '../../lib/supabase';
-import { sendMail, notifyHtml } from '../../lib/email';
-import { APP_URL } from '../../lib/env';
+import { notifyUser } from '../../lib/notify';
 
 export const prerender = false;
 
@@ -54,21 +53,12 @@ export const POST: APIRoute = async (context) => {
     },
   });
 
-  // Let the assignee know their task is gone (best-effort).
-  if (task.assignee_id && task.assignee_id !== user.id) {
-    try {
-      const { data: u } = await admin.auth.admin.getUserById(task.assignee_id);
-      if (u?.user?.email) {
-        await sendMail(
-          u.user.email,
-          `Task deleted: ${task.title}`,
-          notifyHtml('A task assigned to you was deleted', [
-            `<b>${task.title}</b>`,
-            `Deleted by ${profile?.full_name || 'a team member'}.`,
-          ], `${APP_URL}/`)
-        );
-      }
-    } catch { /* email is best-effort */ }
+  // Let the assignee know their task is gone (unless it was their own doing).
+  if (task.assignee_id !== user.id) {
+    await notifyUser(admin, task.assignee_id, `Task deleted: ${task.title}`, 'A task assigned to you was deleted', [
+      `<b>${task.title}</b>`,
+      `Deleted by ${profile?.full_name || 'a team member'}.`,
+    ]);
   }
 
   return to('ok', `Deleted "${task.title}".`);

@@ -1,5 +1,6 @@
 ---
 import PortalLayout from '../../layouts/PortalLayout.astro';
+import Avatar from '../../components/Avatar.astro';
 import { createSupabaseServer, createSupabaseAdmin } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
@@ -9,11 +10,11 @@ const isSuper = me?.role === 'super_admin';
 const back = '/admin/users';
 
 type Client = { id: string; name: string; created_at: string };
-type Prof = { id: string; full_name: string | null; role: string; client_id: string | null };
+type Prof = { id: string; full_name: string | null; role: string; client_id: string | null; avatar_url: string | null };
 
 const [{ data: clientRows }, { data: profRows }, { data: userList }] = await Promise.all([
   supabase.from('clients').select('id, name, created_at').order('name'),
-  admin.from('profiles').select('id, full_name, role, client_id'),
+  admin.from('profiles').select('id, full_name, role, client_id, avatar_url'),
   admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
 ]);
 const clients: Client[] = (clientRows as Client[]) ?? [];
@@ -40,6 +41,7 @@ const accounts = authUsers
       role: p?.role ?? 'none',
       hasProfile: !!p,
       client_id: p?.client_id ?? null,
+      avatar_url: p?.avatar_url ?? null,
       company: p?.client_id ? clientById.get(p.client_id)?.name ?? '(deleted company)' : '',
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at ?? null,
@@ -217,8 +219,13 @@ const canManage = (a: typeof accounts[number]) => a.role !== 'super_admin' && a.
           {accounts.map((a) => (
             <tr>
               <td>
-                <div class="c-name">{a.name || '(no name)'}{a.id === me?.id && <span class="badge badge-you">you</span>}</div>
-                <div class="hint" style="margin:2px 0 0;">{a.email || a.id.slice(0, 8)}</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <Avatar id={a.id} name={a.name} email={a.email} path={a.avatar_url} size={32} />
+                  <div style="min-width:0;">
+                    <div class="c-name">{a.name || '(no name)'}{a.id === me?.id && <span class="badge badge-you">you</span>}</div>
+                    <div class="hint" style="margin:2px 0 0;">{a.email || a.id.slice(0, 8)}</div>
+                  </div>
+                </div>
               </td>
               <td>
                 {canManage(a) ? (

@@ -1,35 +1,30 @@
 ---
-import PortalLayout from '../layouts/PortalLayout.astro';
+import AppLayout from '../layouts/AppLayout.astro';
 import Avatar from '../components/Avatar.astro';
 import { createSupabaseServer } from '../lib/supabase';
+import { STATUS_LABEL } from '../lib/queries';
 
 const user = Astro.locals.user!;
 const supabase = createSupabaseServer(Astro);
 const { data } = await supabase
   .from('profiles')
-  .select('full_name, avatar_url, role')
+  .select('full_name, avatar_url, email_opt_out, role')
   .eq('id', user.id)
   .single();
-const me = data as { full_name: string | null; avatar_url: string | null; role: string } | null;
+const me = (data as { full_name: string | null; avatar_url: string | null; email_opt_out: boolean | null; role: string } | null);
 
 const ROLE_LABEL: Record<string, string> = {
-  super_admin: 'Super admin', admin: 'Admin', staff: 'Staff', client: 'Client',
+  super_admin: 'Super admin', admin: 'Admin', staff: 'Staff',
 };
-
-// change-password.ts posts short codes; profile-update.ts posts real sentences.
-const okRaw = Astro.url.searchParams.get('ok');
-const errRaw = Astro.url.searchParams.get('err');
-const ok = okRaw === '1' ? 'Password updated. Use it the next time you sign in.' : okRaw;
-const err =
-  errRaw === 'short' ? 'Password must be at least 8 characters.' :
-  errRaw === 'mismatch' ? "The passwords don't match." :
-  errRaw === 'failed' ? 'Could not update the password. Please try again.' : errRaw;
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+const wantsEmail = !me?.email_opt_out;
 ---
 
-<PortalLayout title="Account · Robles Tech Portal">
+<AppLayout title="My account · Robles Tech PPM">
   <p class="eyebrow">Account</p>
   <h1>My account</h1>
-  <p class="lede">Your profile and your password.</p>
+  <p class="lede">Your profile, your password, and what PPM is allowed to email you about.</p>
 
   {ok && <div class="alert alert-ok">{ok}</div>}
   {err && <div class="alert alert-error">{err}</div>}
@@ -67,7 +62,7 @@ const err =
 
         <div style="margin-top:16px;max-width:340px;">
           <label for="full_name">Display name</label>
-          <input id="full_name" name="full_name" value={me?.full_name ?? ''} placeholder="Your name" />
+          <input id="full_name" name="full_name" value={me?.full_name ?? ''} placeholder="How your name appears on tasks" />
         </div>
 
         <button class="btn" type="submit" style="margin-top:16px;">Save profile</button>
@@ -77,6 +72,28 @@ const err =
           <input type="hidden" name="remove" value="1" />
         </form>
       )}
+    </div>
+
+    <!-- Email preferences -------------------------------------------------- -->
+    <div class="card">
+      <h2 class="acct-h">Task emails</h2>
+      <p class="hint" style="margin:0 0 14px;">
+        PPM emails you when a task is assigned to you, when a task you created moves
+        ({STATUS_LABEL.done.toLowerCase()}, {STATUS_LABEL.cancelled.toLowerCase()}, and so on),
+        and the morning a task of yours is due. Turn that off here.
+      </p>
+      <form method="post" action="/api/notify-prefs">
+        <label class="checkrow">
+          <input type="checkbox" name="emails" value="1" checked={wantsEmail} />
+          <span>Email me about my tasks</span>
+        </label>
+        <p class="hint" style="margin:10px 0 0;">
+          {wantsEmail
+            ? 'Currently on.'
+            : "Currently off — you won't get task emails. Everything still shows up in the app."}
+        </p>
+        <button class="btn" type="submit" style="margin-top:16px;">Save preference</button>
+      </form>
     </div>
 
     <!-- Password ----------------------------------------------------------- -->
@@ -122,4 +139,4 @@ const err =
       });
     })();
   </script>
-</PortalLayout>
+</AppLayout>

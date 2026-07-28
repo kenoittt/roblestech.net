@@ -16,7 +16,7 @@ export async function getSession(context: APIContext) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, client_id, role, full_name')
+    .select('id, client_id, role, full_name, avatar_url')
     .eq('id', user.id)
     .single();
 

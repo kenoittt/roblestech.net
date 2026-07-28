@@ -1,9 +1,10 @@
 ---
 import AppLayout from '../../layouts/AppLayout.astro';
+import Avatar from '../../components/Avatar.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
-const { data: people } = await supabase.from('profiles').select('id, full_name, role').in('role', ['super_admin', 'admin', 'staff']).order('role');
+const { data: people } = await supabase.from('profiles').select('id, full_name, role, avatar_url').in('role', ['super_admin', 'admin', 'staff']).order('role');
 const { data: projects } = await supabase.from('ppm_projects').select('id, name, color').eq('archived', false).order('name');
 const ok = Astro.url.searchParams.get('ok');
 const err = Astro.url.searchParams.get('err');
@@ -44,7 +45,7 @@ const err = Astro.url.searchParams.get('err');
   <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:520px;">
     {(people ?? []).map((p: any) => (
       <li class="card" style="padding:12px 16px;display:flex;justify-content:space-between;">
-        <span>{p.full_name || '(no name)'}</span>
+        <span class="who"><Avatar id={p.id} name={p.full_name} path={p.avatar_url} size={26} />{p.full_name || '(no name)'}</span>
         <span class="hint" style="margin:0;text-transform:uppercase;letter-spacing:.1em;">{p.role}</span>
       </li>
     ))}

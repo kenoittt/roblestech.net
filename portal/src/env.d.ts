@@ -4,8 +4,9 @@
 type PortalProfile = {
   id: string;
   client_id: string | null;
-  role: 'super_admin' | 'admin' | 'client';
+  role: 'super_admin' | 'admin' | 'staff' | 'client';
   full_name: string | null;
+  avatar_url: string | null;
 };
 
 declare namespace App {

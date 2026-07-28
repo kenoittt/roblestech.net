@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getSession, canUsePpm } from '../../lib/auth';
 import { createSupabaseAdmin } from '../../lib/supabase';
-import { sendMail, notifyHtml } from '../../lib/email';
-import { APP_URL } from '../../lib/env';
+import { notifyUser } from '../../lib/notify';
 
 export const prerender = false;
 
@@ -38,23 +37,12 @@ export const POST: APIRoute = async (context) => {
     ...(assignee_id ? [{ task_id: taskId, actor_id: user.id, type: 'assigned', meta: { assignee_id } }] : []),
   ]);
 
-  // Notify the assignee (best-effort).
-  if (assignee_id) {
-    try {
-      const { data: u } = await admin.auth.admin.getUserById(assignee_id);
-      if (u?.user?.email) {
-        await sendMail(
-          u.user.email,
-          `New task assigned: ${title}`,
-          notifyHtml('You have a new task', [
-            `<b>${title}</b>`,
-            priority === 'high' ? 'Priority: <b>High</b>' : `Priority: ${priority}`,
-            due_date ? `Due: ${due_date}` : 'No due date',
-          ], `${APP_URL}/`)
-        );
-      }
-    } catch { /* email is best-effort */ }
-  }
+  // Notify the assignee, unless they've turned task emails off.
+  await notifyUser(admin, assignee_id, `New task assigned: ${title}`, 'You have a new task', [
+    `<b>${title}</b>`,
+    priority === 'high' ? 'Priority: <b>High</b>' : `Priority: ${priority}`,
+    due_date ? `Due: ${due_date}` : 'No due date',
+  ]);
 
   return to('ok', 'Task added.');
 };

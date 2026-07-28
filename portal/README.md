@@ -53,6 +53,14 @@ exact target when you add the custom domain `portal.roblestech.net`).
 3. **Publish a monthly report** — upload the HTML file (or paste it), pick the
    month. It appears in that client's dashboard immediately.
 
+### Your own account (`/account`)
+Anyone with a login — team or client — can set their display name and profile
+picture and change their password there. Pictures go in the private `avatars`
+bucket and are served through `/api/avatar/<user-id>`, so they stay same-origin
+and behind the session. PPM shares the same `profiles` row, so a photo set in
+one app shows up in the other; PPM's account page additionally has the opt-out
+for task notification emails.
+
 ### Users & accounts (`/admin/users`)
 Every login in one place: the Robles Tech team, client logins, when each account
 was created and last used. The "Waiting on us" panel is the tracker for accounts

@@ -5,7 +5,7 @@ export type Task = {
   id: string; title: string; description: string | null; status: string; priority: string;
   due_date: string | null; assignee_id: string | null; project_id: string | null; completed_at: string | null;
 };
-export type Person = { id: string; full_name: string | null; role: string };
+export type Person = { id: string; full_name: string | null; role: string; avatar_url: string | null };
 export type Project = { id: string; name: string; color: string };
 
 /** The only statuses a task can have — kanban column order included. */
@@ -26,7 +26,7 @@ export async function loadPpmData(context: { request: Request; cookies: any; url
   const supabase = createSupabaseServer(context as unknown as APIContext);
   const [{ data: tasksData }, { data: peopleData }, { data: projData }] = await Promise.all([
     supabase.from('ppm_tasks').select('id,title,description,status,priority,due_date,assignee_id,project_id,completed_at').order('created_at', { ascending: false }),
-    supabase.from('profiles').select('id,full_name,role').in('role', ['super_admin', 'admin', 'staff']).order('full_name'),
+    supabase.from('profiles').select('id,full_name,role,avatar_url').in('role', ['super_admin', 'admin', 'staff']).order('full_name'),
     supabase.from('ppm_projects').select('id,name,color').eq('archived', false).order('name'),
   ]);
   const all: Task[] = (tasksData as Task[]) ?? [];

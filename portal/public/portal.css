@@ -148,6 +148,20 @@ input::placeholder { color: rgba(255,255,255,0.4); }
 .admin-col h2 { font-size: 1.2rem; margin: 0 0 16px; }
 .section-gap { margin-top: 44px; }
 
+/* Avatars & account */
+.avatar { border-radius: 50%; object-fit: cover; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); vertical-align: middle; }
+.avatar-i { color: #fff; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.p-me { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem;
+  color: rgba(255,255,255,0.8); padding: 4px 8px; border-radius: 999px; border: 1px solid transparent; }
+.p-me:hover { color: #fff; background: rgba(255,255,255,0.08); border-color: var(--line); }
+.acct-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start; }
+.acct-h { font-size: 1.05rem; margin-bottom: 6px; }
+.avatar-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.avatar-row input[type=file] { font-size: 0.85rem; padding: 8px; }
+.linkbtn { font-family: inherit; color: var(--lime); font-size: 0.8rem; font-weight: 700; background: none; border: 0; padding: 0; cursor: pointer; }
+.linkbtn:hover { text-decoration: underline; }
+
 /* Users & accounts page */
 .ustats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
 .ustat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }

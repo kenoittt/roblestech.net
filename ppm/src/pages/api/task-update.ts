@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getSession, canUsePpm } from '../../lib/auth';
 import { createSupabaseAdmin } from '../../lib/supabase';
-import { sendMail, notifyHtml } from '../../lib/email';
-import { APP_URL } from '../../lib/env';
+import { notifyUser } from '../../lib/notify';
 import { STATUS_KEYS, STATUS_LABEL } from '../../lib/queries';
 
 export const prerender = false;
@@ -68,19 +67,12 @@ export const POST: APIRoute = async (context) => {
   if (error) return context.redirect(back + (back.includes('?') ? '&' : '?') + 'err=' + encodeURIComponent(error.message));
   if (events.length) await admin.from('ppm_task_events').insert(events);
 
-  const emailFor = async (uid: string | null, subject: string, title: string, lines: string[]) => {
-    if (!uid) return;
-    try {
-      const { data: u } = await admin.auth.admin.getUserById(uid);
-      if (u?.user?.email) await sendMail(u.user.email, subject, notifyHtml(title, lines, `${APP_URL}/`));
-    } catch { /* best-effort */ }
-  };
-  if (patch.assignee_id) await emailFor(newAssignee!, `Task assigned: ${task.title}`, 'A task was assigned to you', [`<b>${task.title}</b>`]);
+  if (patch.assignee_id) await notifyUser(admin, newAssignee, `Task assigned: ${task.title}`, 'A task was assigned to you', [`<b>${task.title}</b>`]);
   if (patch.status) {
     const label = newStatus === 'done' ? 'completed'
       : newStatus === 'cancelled' ? 'cancelled'
       : `moved to ${STATUS_LABEL[newStatus!]?.toLowerCase() ?? String(newStatus)}`;
-    await emailFor(task.created_by, `Task ${label}: ${task.title}`, `Task ${label}`, [`<b>${task.title}</b>`]);
+    await notifyUser(admin, task.created_by, `Task ${label}: ${task.title}`, `Task ${label}`, [`<b>${task.title}</b>`]);
   }
 
   return context.redirect(back);

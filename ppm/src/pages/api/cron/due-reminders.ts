@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseAdmin } from '../../../lib/supabase';
-import { sendMail, notifyHtml } from '../../../lib/email';
-import { pick, APP_URL } from '../../../lib/env';
+import { notifyUser } from '../../../lib/notify';
+import { pick } from '../../../lib/env';
 import { OPEN_STATUSES } from '../../../lib/queries';
 
 export const prerender = false;
@@ -31,21 +31,19 @@ export const GET: APIRoute = async (context) => {
     .in('due_date', [iso(today), iso(tomorrow)]);
   if (error) return new Response(`DB error: ${error.message}`, { status: 500 });
 
+  // notifyUser skips anyone who turned task emails off on their account page.
   let sent = 0;
   for (const t of tasks ?? []) {
     const task = t as { title: string; due_date: string; assignee_id: string };
-    try {
-      const { data: u } = await admin.auth.admin.getUserById(task.assignee_id);
-      if (u?.user?.email) {
-        const when = task.due_date === iso(today) ? 'today' : 'tomorrow';
-        await sendMail(
-          u.user.email,
-          `Reminder: "${task.title}" is due ${when}`,
-          notifyHtml('Task due soon', [`<b>${task.title}</b>`, `Due ${when} (${task.due_date}).`], `${APP_URL}/`)
-        );
-        sent++;
-      }
-    } catch { /* best-effort */ }
+    const when = task.due_date === iso(today) ? 'today' : 'tomorrow';
+    const did = await notifyUser(
+      admin,
+      task.assignee_id,
+      `Reminder: "${task.title}" is due ${when}`,
+      'Task due soon',
+      [`<b>${task.title}</b>`, `Due ${when} (${task.due_date}).`]
+    );
+    if (did) sent++;
   }
 
   return new Response(JSON.stringify({ ran: new Date().toISOString(), reminders: sent }), {

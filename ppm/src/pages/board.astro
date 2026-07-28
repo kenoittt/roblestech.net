@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import Avatar from '../components/Avatar.astro';
 import { loadPpmData, nameOf, STATUSES } from '../lib/queries';
 
 const { tasks, people, projects, fAssignee, fProject } = await loadPpmData(Astro);
@@ -82,7 +83,13 @@ const err = Astro.url.searchParams.get('err');
             </div>
             <div class="m">
               <span class={`pill ${t.priority}`}>{t.priority}</span>
-              <span>{nameOf(people, t.assignee_id)}</span>
+              <span class="who">
+                {t.assignee_id && (() => {
+                  const who = people.find((p) => p.id === t.assignee_id);
+                  return <Avatar id={t.assignee_id} name={who?.full_name} path={who?.avatar_url} size={18} />;
+                })()}
+                {nameOf(people, t.assignee_id)}
+              </span>
               {t.due_date && <span>· due {t.due_date}</span>}
             </div>
             <form method="post" action="/api/task-update" class="statusform">

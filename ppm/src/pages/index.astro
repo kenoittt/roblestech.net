@@ -1,5 +1,6 @@
 ---
 import AppLayout from '../layouts/AppLayout.astro';
+import Avatar from '../components/Avatar.astro';
 import { loadPpmData, nameOf, isOpen } from '../lib/queries';
 
 const { all: tasks, people } = await loadPpmData(Astro);
@@ -23,6 +24,7 @@ const rows = people.map((p) => {
   return {
     id: p.id,
     name: p.full_name || '(no name)',
+    avatar: p.avatar_url,
     todo: mine.filter((t) => t.status === 'todo').length,
     prog: mine.filter((t) => t.status === 'in_progress').length,
     done: mine.filter((t) => t.status === 'done').length,
@@ -61,7 +63,7 @@ const dueSoon = tasks
         <tbody>
           {rows.map((r) => (
             <tr>
-              <td class="c-title">{r.name}</td>
+              <td class="c-title"><span class="who"><Avatar id={r.id} name={r.name} path={r.avatar} size={22} />{r.name}</span></td>
               <td class="num">{r.todo}</td>
               <td class="num">{r.prog}</td>
               <td class="num">{r.done}</td>

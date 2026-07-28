@@ -146,6 +146,22 @@ a.stat:hover{border-color:rgba(57,146,255,.45);}
   .daynew-form{position:static;left:auto;right:auto;top:auto;margin-top:6px;box-shadow:none;}
 }
 
+/* ── Avatars & account ─────────────────────────────────────────────────── */
+.avatar{border-radius:50%;object-fit:cover;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);vertical-align:middle;}
+.avatar-i{color:#fff;font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1;}
+.who{display:inline-flex;align-items:center;gap:7px;min-width:0;}
+/* Nav account link */
+.p-me{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:.92rem;
+  color:rgba(255,255,255,.8);padding:4px 8px;border-radius:999px;border:1px solid transparent;}
+.p-me:hover{color:#fff;background:rgba(255,255,255,.08);border-color:var(--line);}
+.acct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;}
+.acct-h{font-size:1.05rem;margin-bottom:6px;}
+.avatar-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.avatar-row input[type=file]{font-size:.85rem;padding:8px;}
+.checkrow{display:flex;align-items:center;gap:10px;font-weight:600;font-size:.92rem;margin:0;cursor:pointer;}
+.checkrow input[type=checkbox]{width:18px;height:18px;flex:0 0 auto;accent-color:var(--green);cursor:pointer;}
+
 /* Forms */
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;}
 label{font-weight:600;font-size:.85rem;display:block;margin-bottom:6px;}

@@ -24,7 +24,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, role, full_name')
+      .select('id, role, full_name, avatar_url')
       .eq('id', user.id)
       .single();
     context.locals.profile = (profile as App.Locals['profile']) ?? null;

@@ -37,6 +37,12 @@ create table if not exists public.profiles (
   created_at  timestamptz not null default now()
 );
 
+-- Self-service profile fields (see supabase/profiles-avatar-and-prefs.sql).
+--   avatar_url    : path in the private 'avatars' bucket, not a public URL
+--   email_opt_out : user turned off PPM notification emails
+alter table public.profiles add column if not exists avatar_url    text;
+alter table public.profiles add column if not exists email_opt_out boolean not null default false;
+
 -- One row per monthly report. The HTML itself lives in private Storage;
 -- storage_path points at it. This table is what gives clients their history.
 create table if not exists public.reports (

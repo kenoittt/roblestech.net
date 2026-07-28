@@ -5,6 +5,7 @@ type PpmProfile = {
   id: string;
   role: 'super_admin' | 'admin' | 'staff' | 'client';
   full_name: string | null;
+  avatar_url: string | null;
 };
 
 declare namespace App {
