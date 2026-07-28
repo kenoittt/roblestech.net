@@ -31,6 +31,13 @@ const {
   verification = false,
   navInner = true,
 } = Astro.props;
+
+// Canonical URL. The build emits flat files (faqs.html) while every internal
+// link and the sitemap use the extensionless form (/faqs), so both resolve on
+// GitHub Pages — this tells crawlers which one counts. Normalising here covers
+// either shape of Astro.url.pathname.
+const canonicalPath = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html$/, '');
+const canonical = new URL(canonicalPath || '/', 'https://roblestech.net').href;
 ---
 
 <!DOCTYPE html>
@@ -43,6 +50,7 @@ const {
     )}
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

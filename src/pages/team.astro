@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Team — Robles Technologies Corp."
-  description="Meet the team behind Robles Technologies Corp. — co-founders Kenneth Robles and Christian Panes, plus dedicated specialists across AI, Smartsheet, technical consulting, SEO, and operations."
+  description="Meet the team behind Robles Technologies Corp. — co-founders Kenneth Robles and Christian Panes, the officers who run the company, and specialists across GEO, automation, project management, and Smartsheet development."
   active="team"
 >
   <!-- PAGE HERO -->
@@ -72,35 +72,138 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </div>
   </section>
 
+  <!-- CORPORATE OFFICERS -->
+  <section class="sec" style="background:var(--white);padding-top:0;">
+    <div class="rv" style="margin-bottom:48px;">
+      <span class="sec-tag">Leadership Team</span>
+      <h2 class="sec-h">How RTC is run</h2>
+      <p class="sec-p">Five officer positions carry the company: direction, delivery, growth, finance, and governance. Each one is filled — so decisions have a clear owner and nothing waits on a committee.</p>
+    </div>
+
+    <div class="team-grid">
+      <!-- CEO -->
+      <div class="team-member-card rv">
+        <div class="tm-avatar">CEO</div>
+        <div class="tm-name">Chief Executive Officer</div>
+        <div class="tm-role">Direction &amp; Client Outcomes</div>
+        <p class="tm-bio">Owns company direction and the standard every engagement is held to. Stays close to client work rather than above it — the person accountable when a commitment is made.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Strategy</span>
+          <span class="tm-tag">Client Delivery</span>
+          <span class="tm-tag">Partnerships</span>
+        </div>
+      </div>
+
+      <!-- COO -->
+      <div class="team-member-card rv d1">
+        <div class="tm-avatar">COO</div>
+        <div class="tm-name">Chief Operating Officer</div>
+        <div class="tm-role">Delivery &amp; Operations</div>
+        <p class="tm-bio">Runs how the work actually gets done — capacity, process, and quality across every service line. Turns a signed scope into a delivery plan with dates that hold.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Operations</span>
+          <span class="tm-tag">Resourcing</span>
+          <span class="tm-tag">Quality</span>
+        </div>
+      </div>
+
+      <!-- Director of Marketing and Sales -->
+      <div class="team-member-card rv d2">
+        <div class="tm-avatar">MS</div>
+        <div class="tm-name">Director of Marketing &amp; Sales</div>
+        <div class="tm-role">Growth &amp; Pipeline</div>
+        <p class="tm-bio">Owns demand: positioning, outbound, and the path from first conversation to signed proposal. Also the internal client for our own GEO practice — we run our playbook on ourselves first.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Positioning</span>
+          <span class="tm-tag">Outbound</span>
+          <span class="tm-tag">Proposals</span>
+        </div>
+      </div>
+
+      <!-- CFO -->
+      <div class="team-member-card rv">
+        <div class="tm-avatar">CFO</div>
+        <div class="tm-name">Chief Financial Officer</div>
+        <div class="tm-role">Finance &amp; Commercial Terms</div>
+        <p class="tm-bio">Owns pricing discipline, billing, and the fixed-price commitments we put in writing. Why a quote holds after scoping instead of drifting mid-project.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Pricing</span>
+          <span class="tm-tag">Billing</span>
+          <span class="tm-tag">Forecasting</span>
+        </div>
+      </div>
+
+      <!-- Corporate Secretary -->
+      <div class="team-member-card rv d1">
+        <div class="tm-avatar">CS</div>
+        <div class="tm-name">Corporate Secretary</div>
+        <div class="tm-role">Governance &amp; Compliance</div>
+        <p class="tm-bio">Keeps the corporation in good standing — records, resolutions, contracts, and regulatory filings. The reason enterprise procurement and vendor onboarding go smoothly.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Governance</span>
+          <span class="tm-tag">Contracts</span>
+          <span class="tm-tag">Compliance</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- SPECIALIST TEAMS -->
   <section class="sec" style="background:var(--off-white);">
     <div class="rv" style="margin-bottom:48px;">
       <span class="sec-tag">Specialist Teams</span>
       <h2 class="sec-h">The experts behind<br>every engagement</h2>
-      <p class="sec-p">Each service line is supported by dedicated specialists — so you always work with someone who knows your domain deeply, not a generalist stretched across too many projects.</p>
+      <p class="sec-p">Each service line is supported by dedicated specialists — so you always work with someone who knows your domain deeply, not a generalist stretched across too many projects. Every role below is filled today.</p>
     </div>
 
     <div class="team-grid">
-      <!-- AI Specialist -->
+      <!-- GEO Specialist -->
       <div class="team-member-card rv">
-        <div class="tm-avatar">AI</div>
-        <div class="tm-name">AI Specialist</div>
-        <div class="tm-role">AI &amp; Automation Lead</div>
-        <p class="tm-bio">Designs and implements AI-powered workflows, custom assistants, and automation pipelines. Translates complex AI capabilities into practical business tools your team can actually use.</p>
+        <div class="tm-avatar">GEO</div>
+        <div class="tm-name">GEO Specialist</div>
+        <div class="tm-role">AI Visibility &amp; Search</div>
+        <p class="tm-bio">Runs the GEO practice day to day: visibility baselines across ChatGPT, Gemini and Perplexity, citation-optimized content, schema, and the monthly scorecard that shows what moved.</p>
         <div class="tm-tags">
-          <span class="tm-tag">AI Workflow</span>
-          <span class="tm-tag">LLM Integration</span>
-          <span class="tm-tag">Automation</span>
-          <span class="tm-tag">AI SEO</span>
+          <span class="tm-tag">GEO</span>
+          <span class="tm-tag">Technical SEO</span>
+          <span class="tm-tag">Schema</span>
+          <span class="tm-tag">Reporting</span>
         </div>
       </div>
 
-      <!-- Smartsheet Consultant -->
+      <!-- Automation Engineer -->
       <div class="team-member-card rv d1">
+        <div class="tm-avatar">AE</div>
+        <div class="tm-name">Automation Engineer</div>
+        <div class="tm-role">Workflow &amp; AI Automation</div>
+        <p class="tm-bio">Builds the integrations and automations that remove manual steps — APIs between systems, AI-assisted workflows, and the glue that turns spreadsheet-driven operations into something that runs itself.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Integrations</span>
+          <span class="tm-tag">REST APIs</span>
+          <span class="tm-tag">AI Workflows</span>
+          <span class="tm-tag">Process Design</span>
+        </div>
+      </div>
+
+      <!-- Project Manager -->
+      <div class="team-member-card rv d2">
+        <div class="tm-avatar">PM</div>
+        <div class="tm-name">Project Manager</div>
+        <div class="tm-role">Scope, Schedule &amp; Comms</div>
+        <p class="tm-bio">Keeps engagements on track and clients informed — scope, milestones, and status you don't have to chase. The single point of contact from kickoff through handover.</p>
+        <div class="tm-tags">
+          <span class="tm-tag">Delivery</span>
+          <span class="tm-tag">Scoping</span>
+          <span class="tm-tag">Stakeholder Comms</span>
+        </div>
+      </div>
+
+      <!-- Smartsheet Developer -->
+      <div class="team-member-card rv">
         <div class="tm-avatar">SS</div>
-        <div class="tm-name">Smartsheet Consultant</div>
-        <div class="tm-role">Smartsheet Development Lead</div>
-        <p class="tm-bio">Certified Smartsheet expert specializing in complex sheet architecture, automated approval workflows, Control Center setup, and enterprise-grade dashboard builds.</p>
+        <div class="tm-name">Smartsheet Developer</div>
+        <div class="tm-role">Smartsheet Build &amp; Architecture</div>
+        <p class="tm-bio">Smartsheet specialist covering sheet architecture, automated approval workflows, Control Center, Data Shuttle, and enterprise-grade dashboards that stakeholders actually use.</p>
         <div class="tm-tags">
           <span class="tm-tag">Smartsheet</span>
           <span class="tm-tag">Control Center</span>
@@ -109,49 +212,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- Technical Consultant -->
-      <div class="team-member-card rv d2">
-        <div class="tm-avatar">TC</div>
-        <div class="tm-name">Technical Consultant</div>
-        <div class="tm-role">Systems &amp; Integration Architect</div>
-        <p class="tm-bio">Architects API integrations, full-stack web solutions, and cross-platform technical systems. Bridges the gap between business requirements and scalable engineering solutions.</p>
-        <div class="tm-tags">
-          <span class="tm-tag">REST APIs</span>
-          <span class="tm-tag">Web Dev</span>
-          <span class="tm-tag">App Dev</span>
-          <span class="tm-tag">Architecture</span>
-        </div>
-      </div>
-
-      <!-- SEO Specialist -->
-      <div class="team-member-card rv">
-        <div class="tm-avatar">SE</div>
-        <div class="tm-name">SEO Specialist</div>
-        <div class="tm-role">AI-Powered SEO Lead</div>
-        <p class="tm-bio">Drives organic growth through AI-enhanced keyword strategy, technical SEO audits, content optimization, and competitive analysis — turning search into a reliable revenue channel.</p>
-        <div class="tm-tags">
-          <span class="tm-tag">SEO Strategy</span>
-          <span class="tm-tag">AI Content</span>
-          <span class="tm-tag">Technical SEO</span>
-          <span class="tm-tag">Analytics</span>
-        </div>
-      </div>
-
-      <!-- Operations Specialist -->
-      <div class="team-member-card rv d1">
-        <div class="tm-avatar">OP</div>
-        <div class="tm-name">Operations Specialist</div>
-        <div class="tm-role">Workflow &amp; Process Lead</div>
-        <p class="tm-bio">Maps, optimizes, and automates business processes across departments. Specializes in turning manual, spreadsheet-driven operations into streamlined, automated systems.</p>
-        <div class="tm-tags">
-          <span class="tm-tag">Process Design</span>
-          <span class="tm-tag">Workflow Automation</span>
-          <span class="tm-tag">Onboarding Systems</span>
-        </div>
-      </div>
-
       <!-- Joining Soon -->
-      <div class="team-member-card tm-open rv d2">
+      <div class="team-member-card tm-open rv d1">
         <div class="tm-avatar">+</div>
         <div class="tm-name">Growing the Team</div>
         <div class="tm-role">Multiple Roles Open</div>

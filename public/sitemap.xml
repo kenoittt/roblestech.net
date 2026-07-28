@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- URLs are extensionless, matching every internal link and the canonical tag
+     each page emits. The build writes flat files (faqs.html) and GitHub Pages
+     serves them for /faqs, so both resolve; this file states which is canonical.
+     Keep it updated in the same commit as any page add/remove. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
     <loc>https://roblestech.net/</loc>
-    <lastmod>2026-06-09</lastmod>
+    <lastmod>2026-07-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -25,9 +29,16 @@
 
   <url>
     <loc>https://roblestech.net/team</loc>
-    <lastmod>2026-06-09</lastmod>
+    <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://roblestech.net/about</loc>
+    <lastmod>2026-07-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 
   <url>
@@ -46,27 +57,27 @@
 
   <url>
     <loc>https://roblestech.net/faqs</loc>
-    <lastmod>2026-06-09</lastmod>
+    <lastmod>2026-07-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://roblestech.net/smartsheet-vendor-data-without-sheet-access.html</loc>
+    <loc>https://roblestech.net/smartsheet-vendor-data-without-sheet-access</loc>
     <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://roblestech.net/smartsheet-automate-onboarding-workflows.html</loc>
+    <loc>https://roblestech.net/smartsheet-automate-onboarding-workflows</loc>
     <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://roblestech.net/smartsheet-field-team-photo-attachments.html</loc>
+    <loc>https://roblestech.net/smartsheet-field-team-photo-attachments</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
