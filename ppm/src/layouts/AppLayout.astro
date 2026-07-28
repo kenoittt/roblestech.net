@@ -32,6 +32,7 @@ const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
             <nav class="p-nav-links">
               <a href="/">Dashboard</a>
               <a href="/board">Board</a>
+              <a href="/calendar">Calendar</a>
               <a href="/tasks">Tasks</a>
               <a href="/activity">Activity</a>
               {isAdmin && <a href="/admin">Team</a>}

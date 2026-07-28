@@ -1,0 +1,293 @@
+---
+import AppLayout from '../layouts/AppLayout.astro';
+import { loadPpmData, nameOf, isOpen, STATUSES, type Task } from '../lib/queries';
+
+const { tasks, people, projects, fAssignee, fProject, fStatus } = await loadPpmData(Astro);
+const back = Astro.url.pathname + Astro.url.search;
+
+const ok = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+
+// ── Month maths, all in UTC so a 'YYYY-MM-DD' due_date never shifts a day ──
+const iso = (d: Date) => d.toISOString().slice(0, 10);
+const todayIso = iso(new Date());
+const monthParam = Astro.url.searchParams.get('month') ?? '';
+const valid = /^\d{4}-(0[1-9]|1[0-2])$/.test(monthParam);
+const [y, m] = valid
+  ? monthParam.split('-').map(Number)
+  : [Number(todayIso.slice(0, 4)), Number(todayIso.slice(5, 7))];
+const first = new Date(Date.UTC(y, m - 1, 1));
+const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+// Monday-first grid: how many leading days from the previous month to show.
+const lead = (first.getUTCDay() + 6) % 7;
+const weeks = Math.ceil((lead + daysInMonth) / 7);
+const gridStart = new Date(Date.UTC(y, m - 1, 1 - lead));
+
+const cells = Array.from({ length: weeks * 7 }, (_, i) => {
+  const d = new Date(gridStart.getTime() + i * 86400000);
+  const key = iso(d);
+  return {
+    key,
+    day: d.getUTCDate(),
+    outside: d.getUTCMonth() !== m - 1,
+    weekend: [0, 6].includes(d.getUTCDay()),
+    today: key === todayIso,
+  };
+});
+
+// Tasks by due date, and everything with no date at all.
+const byDay = new Map<string, Task[]>();
+for (const t of tasks) {
+  if (!t.due_date) continue;
+  const list = byDay.get(t.due_date);
+  if (list) list.push(t); else byDay.set(t.due_date, [t]);
+}
+const rank: Record<string, number> = { todo: 0, in_progress: 1, done: 2, cancelled: 3 };
+for (const list of byDay.values()) {
+  list.sort((a, b) => (rank[a.status] ?? 9) - (rank[b.status] ?? 9) || a.title.localeCompare(b.title));
+}
+const unscheduled = tasks.filter((t) => !t.due_date && isOpen(t));
+
+const monthTasks = cells.filter((c) => !c.outside).reduce((n, c) => n + (byDay.get(c.key)?.length ?? 0), 0);
+const overdue = tasks.filter((t) => isOpen(t) && t.due_date && t.due_date < todayIso).length;
+
+// Nav links keep whatever filters are active.
+const shift = (n: number) => {
+  const d = new Date(Date.UTC(y, m - 1 + n, 1));
+  const p = new URLSearchParams(Astro.url.search);
+  p.set('month', `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`);
+  return `/calendar?${p.toString()}`;
+};
+const thisMonth = () => {
+  const p = new URLSearchParams(Astro.url.search);
+  p.delete('month');
+  const s = p.toString();
+  return s ? `/calendar?${s}` : '/calendar';
+};
+const monthLabel = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const projOf = (id: string | null) => projects.find((p) => p.id === id);
+---
+
+<AppLayout title="Calendar · Robles Tech PPM">
+  <p class="eyebrow">Project Management</p>
+  <h1>Calendar</h1>
+  <p class="lede">Everything by due date. Drag a task to another day to reschedule it, or click it to edit.</p>
+
+  {ok && <div class="alert alert-ok">{ok}</div>}
+  {err && <div class="alert alert-error">{err}</div>}
+
+  <div class="cal-head">
+    <div class="cal-nav">
+      <a class="cal-btn" href={shift(-1)} aria-label="Previous month">‹</a>
+      <span class="cal-month">{monthLabel}</span>
+      <a class="cal-btn" href={shift(1)} aria-label="Next month">›</a>
+      <a class="mini-link" href={thisMonth()} style="padding:0;">Today</a>
+    </div>
+    <div class="hint" style="margin:0;">
+      {monthTasks} due this month
+      {overdue > 0 && <> · <b style="color:#ff8a8a;">{overdue} overdue</b></>}
+    </div>
+  </div>
+
+  <!-- Filters (same set as the board and the sheet) -->
+  <form method="get" class="filterbar">
+    <input type="hidden" name="month" value={`${y}-${String(m).padStart(2, '0')}`} />
+    <label>Assignee
+      <select name="assignee" class="js-filter">
+        <option value="">Everyone</option>
+        <option value="none" selected={fAssignee === 'none'}>Unassigned</option>
+        {people.map((p) => <option value={p.id} selected={fAssignee === p.id}>{p.full_name || p.id.slice(0, 8)}</option>)}
+      </select>
+    </label>
+    <label>Project
+      <select name="project" class="js-filter">
+        <option value="">All projects</option>
+        {projects.map((p) => <option value={p.id} selected={fProject === p.id}>{p.name}</option>)}
+      </select>
+    </label>
+    <label>Status
+      <select name="status" class="js-filter">
+        <option value="">All</option>
+        {STATUSES.map((s) => <option value={s.key} selected={fStatus === s.key}>{s.label}</option>)}
+      </select>
+    </label>
+    {(fAssignee || fProject || fStatus) && <a href={thisMonth()} class="mini-link">Clear filters</a>}
+  </form>
+
+  <div class="cal-dow">{DOW.map((d) => <span>{d}</span>)}</div>
+  <div class="cal">
+    {cells.map((c) => {
+      const list = byDay.get(c.key) ?? [];
+      return (
+        <div class={`cal-day${c.outside ? ' is-outside' : ''}${c.weekend ? ' is-weekend' : ''}${c.today ? ' is-today' : ''}${list.length === 0 ? ' is-empty' : ''}`} data-day={c.key}>
+          <div class="cal-daytop">
+            <span class="cal-num">
+              {/* The weekday only shows on narrow screens, where the grid
+                  becomes a vertical agenda and the column header is gone. */}
+              <span class="cal-dowlabel">{DOW[(new Date(c.key + 'T00:00:00Z').getUTCDay() + 6) % 7]} </span>{c.day}
+            </span>
+            <details class="daynew">
+              <summary title={`Add a task due ${c.key}`} aria-label={`Add a task due ${c.key}`}>+</summary>
+              <form method="post" action="/api/task-create" class="daynew-form">
+                <input type="hidden" name="due_date" value={c.key} />
+                <input type="hidden" name="back" value={back} />
+                <input name="title" required placeholder="New task…" />
+                <button class="btn" type="submit">Add</button>
+              </form>
+            </details>
+          </div>
+
+          {list.map((t) => {
+            const pj = projOf(t.project_id);
+            const late = isOpen(t) && t.due_date! < todayIso;
+            return (
+              <details class="chip-wrap">
+                <summary class={`chip st-${t.status}${late ? ' is-late' : ''}`} draggable="true" data-id={t.id} title={t.title}>
+                  <span class={`chip-dot pr-${t.priority}`} aria-hidden="true"></span>
+                  <span class="chip-t">{t.title}</span>
+                </summary>
+                <div class="chip-pop">
+                  {/* Chips truncate in a month cell, so show the whole title here. */}
+                  <div class="chip-title">{t.title}</div>
+                  <div class="chip-meta">
+                    <span class={`pill ${t.priority}`}>{t.priority}</span>
+                    <span>{nameOf(people, t.assignee_id)}</span>
+                    {pj && <span>· {pj.name}</span>}
+                    {late && <span style="color:#ff8a8a;font-weight:700;">· overdue</span>}
+                  </div>
+                  <form method="post" action="/api/task-update" class="chip-form">
+                    <input type="hidden" name="id" value={t.id} />
+                    <input type="hidden" name="back" value={back} />
+                    <label class="sr-only" for={`st-${t.id}`}>Status</label>
+                    <select id={`st-${t.id}`} name="status" class="js-auto">
+                      {STATUSES.map((s) => <option value={s.key} selected={t.status === s.key}>{s.label}</option>)}
+                    </select>
+                    <label class="sr-only" for={`dd-${t.id}`}>Due date</label>
+                    <input id={`dd-${t.id}`} type="date" name="due_date" value={t.due_date ?? ''} class="js-auto" />
+                  </form>
+                  <div class="chip-acts">
+                    <a class="mini-link" href={`/activity?task=${t.id}`}>History</a>
+                    <form method="post" action="/api/task-delete" class="js-confirm" data-confirm={`Delete "${t.title}"? This cannot be undone.`}>
+                      <input type="hidden" name="id" value={t.id} />
+                      <input type="hidden" name="back" value={back} />
+                      <button type="submit" class="del-btn" title="Delete task" aria-label={`Delete task: ${t.title}`}>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 4h4l.5 3h-5L10 4Z"/><path d="M6.5 7l1 12.5A1.5 1.5 0 0 0 9 21h6a1.5 1.5 0 0 0 1.5-1.5L17.5 7"/><path d="M10 11v6M14 11v6"/></svg>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Drop target for taking a task off the calendar, plus the backlog. -->
+  <div class="card unsched" id="unsched" style="margin-top:18px;">
+    <h2 style="font-size:1rem;margin-bottom:4px;">No due date <span class="hint" style="font-weight:600;">· {unscheduled.length} open</span></h2>
+    <p class="hint" style="margin:0 0 12px;">Pick a date to put one on the calendar — or drag a task here to clear its date.</p>
+    {unscheduled.length === 0 ? (
+      <p class="hint" style="margin:0;">Every open task has a due date.</p>
+    ) : (
+      <ul class="unsched-list">
+        {unscheduled.map((t) => (
+          <li>
+            <span class={`chip-dot pr-${t.priority}`} aria-hidden="true"></span>
+            <span class="unsched-t">{t.title}</span>
+            <span class="hint" style="margin:0;">{nameOf(people, t.assignee_id)}</span>
+            <form method="post" action="/api/task-update" class="unsched-form">
+              <input type="hidden" name="id" value={t.id} />
+              <input type="hidden" name="back" value={back} />
+              <label class="sr-only" for={`ud-${t.id}`}>Due date for {t.title}</label>
+              <input id={`ud-${t.id}`} type="date" name="due_date" class="js-auto" />
+            </form>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+
+  <!-- One form per task, submitted by drag-and-drop to move its due date. -->
+  {tasks.map((t) => (
+    <form id={`mv-${t.id}`} method="post" action="/api/task-update" hidden>
+      <input type="hidden" name="id" value={t.id} />
+      <input type="hidden" name="back" value={back} />
+      <input type="hidden" name="due_date" value={t.due_date ?? ''} />
+    </form>
+  ))}
+
+  <script is:inline>
+    document.querySelectorAll('.js-auto').forEach((el) =>
+      el.addEventListener('change', () => { if (el.form) el.form.submit(); })
+    );
+    document.querySelectorAll('.js-filter').forEach((el) =>
+      el.addEventListener('change', (e) => e.target.closest('form').submit())
+    );
+    document.querySelectorAll('form.js-confirm').forEach((f) =>
+      f.addEventListener('submit', (e) => {
+        if (!window.confirm(f.dataset.confirm || 'Delete this task? This cannot be undone.')) e.preventDefault();
+      })
+    );
+    // Only one task popover open at a time, so cells don't stack open panels.
+    document.querySelectorAll('details.chip-wrap').forEach((d) =>
+      d.addEventListener('toggle', () => {
+        if (!d.open) return;
+        document.querySelectorAll('details.chip-wrap[open]').forEach((o) => { if (o !== d) o.open = false; });
+      })
+    );
+
+    // ── Drag a task onto another day to reschedule it ───────────────────────
+    (function () {
+      var dragId = null;
+      function move(id, date) {
+        var form = document.getElementById('mv-' + id);
+        if (!form) return;
+        var input = form.querySelector('input[name="due_date"]');
+        if (!input || input.value === date) return;   // dropped where it already is
+        input.value = date;
+        form.submit();
+      }
+
+      document.querySelectorAll('.chip[draggable="true"]').forEach(function (chip) {
+        chip.addEventListener('dragstart', function (e) {
+          dragId = chip.dataset.id;
+          chip.classList.add('is-dragging');
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', dragId); } catch (err) { /* older browsers */ }
+          }
+        });
+        chip.addEventListener('dragend', function () {
+          chip.classList.remove('is-dragging');
+          dragId = null;
+          document.querySelectorAll('.is-dropping').forEach(function (n) { n.classList.remove('is-dropping'); });
+        });
+      });
+
+      function wire(el, dateFor) {
+        el.addEventListener('dragover', function (e) {
+          if (!dragId) return;
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+          el.classList.add('is-dropping');
+        });
+        el.addEventListener('dragleave', function () { el.classList.remove('is-dropping'); });
+        el.addEventListener('drop', function (e) {
+          if (!dragId) return;
+          e.preventDefault();
+          el.classList.remove('is-dropping');
+          move(dragId, dateFor());
+        });
+      }
+
+      document.querySelectorAll('.cal-day').forEach(function (cell) {
+        wire(cell, function () { return cell.dataset.day; });
+      });
+      var un = document.getElementById('unsched');
+      if (un) wire(un, function () { return ''; });   // drop here = clear the date
+    })();
+  </script>
+</AppLayout>
