@@ -1,0 +1,34 @@
+name: Feature / task
+description: Work item, ideally traceable to the SDS
+labels: [enhancement]
+body:
+  - type: input
+    id: requirement
+    attributes:
+      label: SDS requirement
+      description: e.g. FR-3.2, NFR-6. Write "new" if this is not in the spec yet.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs to exist
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Done when
+      description: Observable outcomes, not implementation steps.
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - M — must, v1
+        - S — should, v1 if time
+        - L — later
+    validations:
+      required: true

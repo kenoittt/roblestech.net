@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Native build output (managed workflow regenerates these)
+apps/mobile/ios/
+apps/mobile/android/
+
+# Env — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Supabase local stack
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# Build / cache
+*.tsbuildinfo
+.cache/
+coverage/
+
+# Editors & OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+*.log

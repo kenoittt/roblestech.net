@@ -1,0 +1,35 @@
+{
+  "name": "trailmate",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "TrailMate — two-sided hiking marketplace (Expo + Supabase + Stripe Connect)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "mobile": "npm run start --workspace @trailmate/mobile",
+    "mobile:ios": "npm run ios --workspace @trailmate/mobile",
+    "mobile:android": "npm run android --workspace @trailmate/mobile",
+    "mobile:build:dev": "npm run build:dev --workspace @trailmate/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "bash supabase/tests/run.sh",
+    "db:diff": "supabase db diff -f",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --local > apps/mobile/src/types/database.ts",
+    "functions:serve": "supabase functions serve --no-verify-jwt",
+    "functions:check": "bash supabase/functions/check.sh",
+    "functions:deploy": "supabase functions deploy"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}

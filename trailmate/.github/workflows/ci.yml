@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    name: Mobile — typecheck & lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+  functions:
+    name: Edge Functions — deno check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type-check every function
+        run: bash supabase/functions/check.sh
+
+  database:
+    name: Database — migrations, seed & lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Applies every migration in order against a clean Postgres, then the seed. A broken
+      # migration, a policy that references a missing helper, or a seed row that trips a
+      # guard trigger all fail here rather than in staging.
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Verify migrations apply from scratch
+        run: supabase db reset --debug
+
+      - name: Lint schema
+        run: supabase db lint --level warning
+
+      # Asserts the invariants that protect money and privacy — oversell guard, publish
+      # gate, refund maths, and RLS denials. See supabase/tests/README.md.
+      - name: Behavioural checks
+        run: SKIP_RESET=1 bash supabase/tests/run.sh
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop --no-backup
