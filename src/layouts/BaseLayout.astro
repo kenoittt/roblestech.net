@@ -5,6 +5,20 @@ import Footer from '../components/Footer.astro';
 // hand-written styles) + our glass + dark-theme layers built on top.
 import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 import '../styles/glass.css';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+
+// Cache-bust /styles.css with a content hash. The file lives in public/ so
+// Astro copies it verbatim and can't fingerprint it — meaning its URL never
+// changes and browsers happily serve a stale copy. That bit us once already:
+// the pre-migration site shipped a DIFFERENT /styles.css from the repo root,
+// so anyone who loaded the site while Pages was publishing that root kept the
+// old stylesheet against the new markup. Hashing the contents into the query
+// string means the URL changes whenever the CSS does, and never otherwise.
+const stylesHash = createHash('sha256')
+  .update(readFileSync(new URL('../../public/styles.css', import.meta.url)))
+  .digest('hex')
+  .slice(0, 8);
 
 // Shared HTML shell for every page: <head>, fonts, Calendly, global CSS,
 // nav, footer, and the bundled interactivity script — all in one place.
@@ -58,7 +72,7 @@ const canonical = new URL(canonicalPath || '/', 'https://roblestech.net').href;
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href={`/styles.css?v=${stylesHash}`} />
     <!-- Per-page <head> extras: JSON-LD schema, page-specific styles, form embeds -->
     <slot name="head" />
     <script is:inline>
