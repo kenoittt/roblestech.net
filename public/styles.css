@@ -1626,7 +1626,14 @@ html.preloaded .loader{ display:none; }
   display:inline-flex; align-items:center; gap:6px; margin:10px 0 4px;
   font-size:.66rem; font-weight:600; letter-spacing:.04em; color:var(--muted);
 }
-.svc-partner::before{ content:'⛓'; font-size:.8em; opacity:.7; }
+/* Link-mark for the partner credit. SVG mask rather than an emoji glyph, so it
+   inherits currentColor and renders identically across platforms. */
+.svc-partner::before{
+  content:''; flex-shrink:0; width:.95em; height:.95em; opacity:.7;
+  background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'/%3E%3C/svg%3E") center/contain no-repeat;
+}
 .svc-partner strong{ color:var(--core-blue); font-weight:800; }
 .svc-card.flagship .svc-partner{ color:rgba(255,255,255,.7); }
 .svc-card.flagship .svc-partner strong{ color:var(--green); }
@@ -1732,6 +1739,47 @@ html.preloaded .loader{ display:none; }
 }
 .svc-soon p{ color:var(--muted); font-size:var(--fs-sm); margin:0 0 20px; line-height:1.7; }
 .svc-soon strong{ color:var(--navy); }
+
+/* Services page — Managed AI Operations retainer band (Automations & AI line).
+   Same navy→steel treatment as the GEO "Gap Report" door-opener, but carrying
+   three price points, so it needs a real grid instead of inline flex. */
+.ai-retainer{
+  position:relative; overflow:hidden;
+  margin-top:32px; padding:32px 36px; border-radius:16px;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);
+  display:grid; grid-template-columns:1.15fr .85fr; gap:28px 32px; align-items:center;
+}
+.ai-retainer::after{
+  content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px;
+  border-radius:50%; background:rgba(57,146,255,.1); pointer-events:none;
+}
+.ai-retainer > *{ position:relative; z-index:1; }
+.ai-retainer-eyebrow{
+  font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--green); margin-bottom:8px;
+}
+.ai-retainer h3{
+  font-size:1.18rem; font-weight:900; color:var(--white);
+  letter-spacing:-.02em; margin:0 0 8px;
+}
+.ai-retainer p{ font-size:.85rem; color:rgba(255,255,255,.72); margin:0; line-height:1.7; }
+.ai-retainer-rates{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.ai-retainer-rates li{
+  display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  padding:11px 16px; border-radius:10px;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14);
+}
+.ai-retainer-rates span{ font-size:.8rem; font-weight:700; color:rgba(255,255,255,.82); }
+.ai-retainer-rates b{ font-size:.92rem; font-weight:900; color:var(--white); white-space:nowrap; }
+.ai-retainer-foot{
+  grid-column:1 / -1; padding-top:18px; border-top:1px solid rgba(255,255,255,.14);
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px;
+}
+.ai-retainer-foot p{ max-width:560px; }
+.ai-retainer-foot strong{ color:var(--green); }
+@media(max-width:980px){
+  .ai-retainer{ grid-template-columns:1fr; padding:28px 24px; }
+}
 
 /* Philosophy section — interactive 3D globe (Manila → offshore hubs) */
 .why-visual{ display:block !important; height:auto !important; }

@@ -81,9 +81,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         "name": "Automation & AI Integration Services",
         "provider": { "@id": "https://roblestech.net/#organization" },
         "serviceType": "Workflow Automation",
-        "description": "AI agents, workflow automation, and event-driven integration pipelines that eliminate manual handoffs between business systems.",
+        "description": "Custom AI agents and automation systems built around your workflows — agents that triage, draft and act, plus event-driven integration pipelines that eliminate manual handoffs between business systems.",
         "url": "https://roblestech.net/services#automation",
-        "areaServed": "Worldwide"
+        "areaServed": "Worldwide",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Pilot",
+            "description": "One custom AI agent or automation workflow on a single process, up to 2 integrations, single channel. Delivered in 2-3 weeks.",
+            "price": "4500",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "Offer",
+            "name": "Copilot",
+            "description": "Up to 3 AI agents working together across a full funnel, up to 5 integrations, multi-channel, knowledge-base ingestion and a performance dashboard. Delivered in 4-8 weeks.",
+            "price": "12000",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "Offer",
+            "name": "Autopilot",
+            "description": "Company-wide automation audit and a multi-agent system running sales, support and ops end to end, with human-in-the-loop approvals and custom or fine-tuned models. Delivered in 8-16 weeks.",
+            "price": "25000",
+            "priceCurrency": "USD"
+          }
+        ]
       },
       {
         "@type": "Service",
@@ -140,7 +163,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h2 class="sec-h">Operational bottlenecks slow businesses down</h2>
         <p class="sec-p">Growing businesses hit the same walls — missed timelines, unreliable support, and disconnected systems. We built RTC to solve exactly that.</p>
         <div class="pain-grid">
-          <div class="pain-card"><div class="pain-icon">⏳</div><div class="pain-title">Delayed timelines</div><p class="pain-desc">Projects stall because development resources can't keep up with business demand.</p></div>
+          <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Delayed timelines</div><p class="pain-desc">Projects stall because development resources can't keep up with business demand.</p></div>
           <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Disconnected tools</div><p class="pain-desc">Your platforms don't talk to each other, creating manual work and costly data gaps.</p></div>
           <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Unreliable offshore support</div><p class="pain-desc">Communication friction and inconsistent quality from offshore vendors hurt delivery.</p></div>
           <div class="pain-card"><div class="pain-icon"></div><div class="pain-title">Scaling without capacity</div><p class="pain-desc">You're growing fast but lack the internal tech capacity to build and maintain what you need.</p></div>
@@ -214,7 +237,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
       </div>
 
-      <!-- 3 · Automations & AI (details underway) -->
+      <!-- 3 · Automations & AI (Pilot / Copilot / Autopilot tiers) -->
       <div class="svc-flip rv d2" tabindex="0">
         <div class="svc-flip-inner">
           <div class="svc-card glass-card svc-front">
