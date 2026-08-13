@@ -306,8 +306,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
       <div>
         <div class="ss-pricing-note" style="margin:0;">
-          <strong>Note on usage costs:</strong> Build fees below are one-time. LLM and telephony usage is billed to you at cost — zero markup — and ongoing maintenance is handled through the Managed AI Operations retainer.
+          <strong>Note on third-party costs:</strong> Build fees below are one-time. The AI models, phone lines and messaging that run your agents are billed straight to accounts in your own name — we set them up and configure them, but you pay those vendors directly. We never take a cut of usage, because we never handle it.
         </div>
+      </div>
+    </div>
+
+    <!-- DOOR-OPENER -->
+    <div class="rv" style="margin-bottom:40px;">
+      <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:16px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(57,146,255,0.1);pointer-events:none;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px;">Start Here · One-Time · $2,500</div>
+          <div style="font-size:1.18rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin-bottom:8px;">Automation Audit</div>
+          <p style="font-size:.85rem;color:rgba(255,255,255,.72);max-width:520px;margin:0;line-height:1.7;">A written map of what is worth automating and what it is worth, ranked — with an honest read on where automation pays and where it does not. Go ahead with any build within 60 days and the full $2,500 comes off the price. The document is yours to keep either way.</p>
+        </div>
+        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">Book Your Audit →</a>
       </div>
     </div>
 
@@ -318,24 +331,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="ss-tier-head">
           <div class="ss-tier-label">Starter</div>
           <div class="ss-tier-name">Pilot</div>
-          <p class="ss-tier-tagline">Prove the ROI with one agent, on one process.</p>
+          <p class="ss-tier-tagline">One agent, one process. Prove it works before spending more.</p>
           <div class="ss-price">
-            <span class="ss-price-amt">$4,500</span>
-            <span class="ss-price-unit">/ project</span>
+            <span class="ss-price-amt">$5,500</span>
+            <span class="ss-price-unit">/ build</span>
           </div>
-          <div class="ss-price-note">Starting from · One-time engagement · 2–3 weeks</div>
+          <div class="ss-price-note">Starting from · One-time build · 2–3 weeks</div>
         </div>
         <div class="ss-tier-body">
           <div class="ss-incl-label">What's Included</div>
           <ul class="ss-feats">
-            <li>1 custom AI agent or automation workflow — voice receptionist, cart recovery, support agent, lead follow-up, or any process</li>
-            <li>Discovery call + workflow mapping of the target process</li>
-            <li>Up to 2 system integrations — CRM, calendar, Shopify, helpdesk</li>
+            <li>1 custom AI agent or automation workflow — voice receptionist, cart recovery, support agent, lead follow-up, or any single process</li>
+            <li>Discovery call and workflow mapping of the target process</li>
+            <li>Up to 2 system integrations</li>
             <li>Single channel — voice, email, SMS/WhatsApp, or chat</li>
             <li>Conversation design, guardrails, and human-escalation path</li>
             <li>Testing, go-live, and handover documentation</li>
-            <li>14-day post-launch support</li>
-            <li>Delivery within 2–3 weeks</li>
+            <li>2 rounds of revisions during the build</li>
+            <li>14-day post-launch support period</li>
           </ul>
           <div class="ss-excl-label">Not Included</div>
           <ul class="ss-excl">
@@ -352,24 +365,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="ss-tier-head">
           <div class="ss-tier-label">Growth</div>
           <div class="ss-tier-name">Copilot</div>
-          <p class="ss-tier-tagline">Automate an entire funnel, not just a task.</p>
+          <p class="ss-tier-tagline">A whole funnel rather than a single task.</p>
           <div class="ss-price">
-            <span class="ss-price-amt">$12,000</span>
-            <span class="ss-price-unit">/ project</span>
+            <span class="ss-price-amt">$18,500</span>
+            <span class="ss-price-unit">/ build</span>
           </div>
-          <div class="ss-price-note">Starting from · Multi-phase engagement · 4–8 weeks</div>
+          <div class="ss-price-note">Starting from · One-time build · 4–8 weeks</div>
         </div>
         <div class="ss-tier-body">
           <div class="ss-incl-label">What's Included</div>
           <ul class="ss-feats">
-            <li>Up to 3 AI agents/workflows working together — lead capture, nurture, booking, confirmation</li>
-            <li>Process audit + automation roadmap for the department</li>
-            <li>Up to 5 integrations, multi-channel — voice, SMS, email, WhatsApp</li>
-            <li>Knowledge-base ingestion — your docs, FAQs, and policies become the agent's brain</li>
+            <li>Up to 3 AI agents or workflows, orchestrated to work together — lead capture → nurture → booking → confirmation</li>
+            <li>Process audit and automation roadmap for the department</li>
+            <li>Up to 5 system integrations</li>
+            <li>Multi-channel — voice, SMS, email and WhatsApp</li>
+            <li>Knowledge-base ingestion — your docs, FAQs and policies become the agent's brain</li>
             <li>Performance dashboard — calls handled, leads qualified, carts recovered, hours saved</li>
-            <li>Team training — up to 10 people</li>
-            <li>30-day optimization period — prompts tuned against real conversations</li>
-            <li>Delivery within 4–8 weeks</li>
+            <li>Team training for up to 10 people</li>
+            <li>3 rounds of revisions during the build</li>
+            <li>30-day post-launch support period</li>
           </ul>
           <div class="ss-excl-label">Not Included</div>
           <ul class="ss-excl">
@@ -386,25 +400,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="ss-tier-head">
           <div class="ss-tier-label">Scale</div>
           <div class="ss-tier-name">Autopilot</div>
-          <p class="ss-tier-tagline">A multi-agent system running sales, support, and ops end to end.</p>
+          <p class="ss-tier-tagline">Sales, support and operations running on one connected system.</p>
           <div class="ss-price">
-            <span class="ss-price-amt">$25,000</span>
-            <span class="ss-price-unit">/ project</span>
+            <span class="ss-price-amt">$45,000</span>
+            <span class="ss-price-unit">/ build</span>
           </div>
-          <div class="ss-price-note">Starting from · Multi-phase delivery · 8–16 weeks · scoped per org</div>
+          <div class="ss-price-note">Starting from · One-time build · 8–16 weeks · scoped per org</div>
         </div>
         <div class="ss-tier-body">
           <div class="ss-incl-label">What's Included</div>
           <ul class="ss-feats">
-            <li>Company-wide automation audit with a prioritized ROI roadmap</li>
-            <li>Unlimited agents/workflows within scope, orchestrated as one system</li>
-            <li>Multi-system API integrations + human-in-the-loop approval layers</li>
+            <li>Company-wide or division-wide automation audit with a prioritized ROI roadmap</li>
+            <li>Up to 6 agents or workflows, orchestrated as a single system</li>
+            <li>Up to 10 system integrations</li>
+            <li>Multi-system API integrations with human-in-the-loop approval layers</li>
             <li>Custom or fine-tuned models where off-the-shelf falls short</li>
             <li>Executive dashboard — ROI and manual hours eliminated, quantified</li>
             <li>Dedicated project manager throughout delivery</li>
-            <li>Up to 3 training sessions — up to 20 people</li>
-            <li>90-day optimization &amp; adoption guarantee</li>
-            <li>Delivery within 8–16 weeks</li>
+            <li>3 training sessions for up to 20 people</li>
+            <li>5 revisions within the signed scope document</li>
+            <li>60-day adoption period with hands-on tuning against live conversations</li>
           </ul>
           <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
         </div>
@@ -415,17 +430,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <!-- MANAGED AI OPERATIONS RETAINER -->
     <div class="ai-retainer rv">
       <div>
-        <div class="ai-retainer-eyebrow">Ongoing · Recommended</div>
+        <div class="ai-retainer-eyebrow">Ongoing · Optional but strongly recommended</div>
         <h3>Managed AI Operations</h3>
-        <p>Agents degrade without maintenance — models update, prompts drift, edge cases emerge. Monitoring, prompt and model updates, and a monthly performance report keep yours running the way it launched.</p>
+        <p>Models get updated, prompts may need changes, and the edge cases nobody thought of tend to surface around week six. Systems that get handed over and then left alone usually break within a few months. Monitoring, prompt and model updates, cost optimization and a monthly performance report keep yours running the way it launched.</p>
       </div>
       <ul class="ai-retainer-rates">
-        <li><span>Pilot</span><b>From $750 / mo</b></li>
-        <li><span>Copilot</span><b>From $1,500 / mo</b></li>
-        <li><span>Autopilot</span><b>From $3,000 / mo</b></li>
+        <li><span>Pilot · 6-month min.</span><b>From $1,500 / mo</b></li>
+        <li><span>Copilot · 6-month min.</span><b>From $3,500 / mo</b></li>
+        <li><span>Autopilot · 12-month min.</span><b>From $7,500 / mo</b></li>
       </ul>
       <div class="ai-retainer-foot">
-        <p>LLM and telephony usage billed at cost — <strong>zero markup</strong>.</p>
+        <p>Decline it and the system is handed over as built — later work is quoted at <strong>$175/hour</strong>, subject to availability.</p>
         <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;">Talk Through a Retainer →</a>
       </div>
     </div>
@@ -435,11 +450,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h3>Enhancements &amp; Add-ons</h3>
       <p>Available across all tiers. Add what you need, when you need it.</p>
       <div class="ss-addon-grid">
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Agent</div><div class="ss-addon-price">From $3,500 per agent</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Extra Integration</div><div class="ss-addon-price">From $1,500 per system</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Extra Channel</div><div class="ss-addon-price">From $1,000 per channel</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Standalone Automation Audit</div><div class="ss-addon-price">$1,500 – $3,500 fixed fee</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Extra Training Session</div><div class="ss-addon-price">$450 per session</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Additional Agent or Workflow</div><div class="ss-addon-price">From $3,000 · built on existing infrastructure</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Additional Integration</div><div class="ss-addon-price">From $1,800 per system</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Additional Channel</div><div class="ss-addon-price">From $1,200 · voice, SMS, WhatsApp, email or chat</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Data Cleanup &amp; Deduplication</div><div class="ss-addon-price">From $1,500 · scoped to record count</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Additional Training Session</div><div class="ss-addon-price">$500 per session, up to 20 attendees</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Additional Revision Round</div><div class="ss-addon-price">$750 beyond the rounds in your tier</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Ad-hoc Work Without a Retainer</div><div class="ss-addon-price">$175 / hour · subject to availability</div></div>
+        <div class="ss-addon-item"><div class="ss-addon-name">Rush Delivery</div><div class="ss-addon-price">+25% of build fee · up to 30% faster</div></div>
       </div>
     </div>
   </section>
