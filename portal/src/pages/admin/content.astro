@@ -165,6 +165,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
        <input data-f="published" type="date" value="${esc(d.published)}" style="flex:1;">
        <button type="button" class="mini js-sop" title="Post-publish SOP checklist">SOP</button>
        <button type="button" class="mini js-del">✕</button>
+       <input data-f="url" placeholder="/blogs/post-slug — needed for GSC tracking" value="${esc(d.url)}" style="flex:1 1 100%;" title="Path or full URL. This is what the Blog performance tab matches against Search Console.">
        ${sopPanel(d.sop)}`); }
     function oiRow(d){ d=d||{}; return mk(
       `<select data-f="pri" style="width:90px;">${priOpts(d.pri)}</select>
@@ -206,7 +207,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
         Array.from(lists.pipe.el.querySelectorAll('.erow')).map((r) => {
           const o = grab(r);
           const sop = Array.from(r.querySelectorAll('[data-s]')).map((s) => s.value);
-          return { num:o.num, post:o.post, status:o.status, published:o.published, sop };
+          return { num:o.num, post:o.post, status:o.status, published:o.published, url:(o.url||'').trim(), sop };
         }).filter((x)=>x.post||x.num));
       document.getElementById('f-oi').value    = JSON.stringify(collect(lists.oi.el, (o) => ({ pri:o.pri, text:o.text })).filter((x)=>x.text));
     });

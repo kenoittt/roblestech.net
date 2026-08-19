@@ -8,7 +8,7 @@ export async function runGscRefresh(clientId?: string): Promise<RefreshResult[]>
   const admin = createSupabaseAdmin();
   let query = admin
     .from('clients')
-    .select('id, name, gsc_property')
+    .select('id, name, gsc_property, config')
     .not('gsc_property', 'is', null);
   if (clientId) query = query.eq('id', clientId);
   const { data: clients, error } = await query;
@@ -16,9 +16,16 @@ export async function runGscRefresh(clientId?: string): Promise<RefreshResult[]>
 
   const results: RefreshResult[] = [];
   for (const c of clients ?? []) {
-    const row = c as { id: string; name: string; gsc_property: string };
+    const row = c as { id: string; name: string; gsc_property: string; config: unknown };
     try {
-      const gsc = await fetchGscData(row.gsc_property);
+      // The posts we publish for this client live in config.pipeline. Any row
+      // carrying a URL gets its own GSC pull for the Blog performance tab;
+      // rows still in draft (no URL yet) are simply skipped.
+      const pipeline = (row.config as { pipeline?: unknown })?.pipeline;
+      const postUrls = (Array.isArray(pipeline) ? pipeline : [])
+        .map((p) => String((p as { url?: unknown })?.url ?? '').trim())
+        .filter(Boolean);
+      const gsc = await fetchGscData(row.gsc_property, postUrls);
       const { error: upErr } = await admin
         .from('clients')
         .update({ gsc_data: gsc, gsc_updated_at: new Date().toISOString() })

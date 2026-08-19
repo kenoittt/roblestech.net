@@ -96,6 +96,7 @@ export const GET: APIRoute = async (context) => {
   const gsc = {
     dailyLog: [], byPage: [], siteTotal: { clicks: 0, impr: 0 },
     preLogBaseline: { month: '', c: 0, i: 0 }, pullDate: '', pullRange: '',
+    posts: [], postsRange: '',
     ...rawGsc,
   };
 
