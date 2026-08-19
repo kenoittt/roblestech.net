@@ -1,0 +1,168 @@
+---
+/*
+ * Service Line 04 — Web3 & Blockchain, delivered with Quecko. Replaces the old
+ * "packaged pricing coming soon" placeholder on /services#web3.
+ *
+ * Built from the 3a design reference. Colours, type and spacing follow that
+ * file exactly; where a value already exists as a site token (--navy,
+ * --core-blue, --azure, --green) or in rtc-glass.css (--rtc-indigo-400,
+ * --rtc-gradient-mesh) the token is reused rather than redeclared. The handful
+ * that differ slightly from the site's own palette — the design's #FBFBFB
+ * off-white and #5D6481 muted text — are declared locally so the section
+ * matches the reference rather than drifting to the near-miss site values.
+ *
+ * The CTA uses the site's Calendly popup, per the brief's "link to the existing
+ * booking flow", not the reference's placeholder /contact href.
+ */
+const CAPABILITIES = [
+  { name: 'Layer 1 &amp; Layer 2 Development', icon: '<path d="M12 2l9 5-9 5-9-5 9-5z"/><path d="M3 17l9 5 9-5"/><path d="M3 12l9 5 9-5"/>' },
+  { name: 'NFT Marketplaces', icon: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>' },
+  { name: 'Smart Contract Development', icon: '<path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/>' },
+  { name: 'RWA Tokenization', icon: '<path d="M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0 -20 0"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>' },
+  { name: 'DeFi Platforms', icon: '<path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/>' },
+  { name: 'Prediction &amp; Opinion Markets', icon: '<path d="M12 20V10M18 20V4M6 20v-4"/>' },
+  { name: 'Crypto Exchanges (CEX &amp; DEX)', icon: '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>' },
+  { name: 'Coin &amp; Token Development', icon: '<path d="M6 6h12v12H6z"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M20 9h2M20 14h2M2 9h2M2 14h2"/><path d="M10 10h4v4h-4z"/>' },
+  { name: 'Crypto Wallet Development', icon: '<path d="M5 11h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>' },
+  { name: 'Web3 Enterprise Solutions', icon: '<path d="M4 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>' },
+  { name: 'Launchpads &amp; Token Sales', icon: '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>' },
+  { name: 'Crypto Banking &amp; Financial Rails', icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>' },
+];
+---
+
+<section class="w3" id="web3">
+  <div class="w3-inner">
+    <div class="w3-head rv">
+      <div class="w3-eyebrow">Service Line 04 · <span>In partnership with Quecko</span></div>
+      <h2 class="w3-h2">Web3 &amp; Blockchain</h2>
+      <p class="w3-lede">Smart contracts, wallet integrations, and dApps — plus honest guidance on where blockchain actually adds value to your business, and where it doesn't.</p>
+    </div>
+
+    <div class="w3-grid">
+      <div class="w3-cap rv">
+        <div class="w3-cap-label">What we deliver together</div>
+        <div class="w3-cap-grid">
+          {CAPABILITIES.map((c) => (
+            <div class="w3-cap-row">
+              <span class="w3-cap-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={c.icon} />
+              </span>
+              <span class="w3-cap-name" set:html={c.name} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="w3-scope rv d1">
+        <div class="w3-scope-mesh" aria-hidden="true"></div>
+        <div class="w3-scope-body">
+          <div class="w3-lockup">
+            <span class="w3-lockup-name">RTC</span>
+            <span class="w3-lockup-x">×</span>
+            <span class="w3-lockup-name">QUECKO</span>
+          </div>
+          <p class="w3-scope-p">No packaged pricing here by design — every on-chain project is scoped with Quecko first. Book a call and we'll map your project, then send a fixed-price proposal.</p>
+          <span class="w3-pill">Custom-scoped per project</span>
+          <div class="w3-scope-cta">
+            <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="w3-btn">Book a Call to Scope Web3 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Local tokens: the two values that differ from the site palette, plus the
+     partner accent. Everything else reuses global tokens. */
+  .w3 {
+    --w3-off-white: #fbfbfb;
+    --w3-muted: #5d6481;
+    --w3-body: #1a2338;
+    --w3-hairline: #e5e5e5;
+    --w3-gray-50: #f5f5f5;
+    background: var(--w3-off-white);
+    padding: 96px 32px;
+  }
+  .w3-inner { max-width: 1200px; margin: 0 auto; }
+  .w3-head { max-width: 720px; margin-bottom: 40px; }
+  .w3-eyebrow {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--w3-muted); margin-bottom: 12px;
+  }
+  .w3-eyebrow span { color: var(--rtc-indigo-400); }
+  .w3-h2 { font-weight: 800; font-size: 42px; letter-spacing: -.02em; color: var(--navy); margin: 0 0 16px; }
+  .w3-lede { font-size: 17px; line-height: 1.65; color: var(--w3-body); margin: 0; }
+
+  .w3-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: stretch; }
+
+  /* Left: capability card. Informational, so deliberately no hover lift. */
+  .w3-cap {
+    background: #fff; border: 1px solid var(--w3-hairline); border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(3,44,124,.10); padding: 32px;
+  }
+  .w3-cap-label {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--w3-muted); margin-bottom: 22px;
+  }
+  .w3-cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+  .w3-cap-row { display: flex; gap: 12px; align-items: center; }
+  .w3-cap-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--w3-gray-50); border: 1px solid var(--w3-hairline);
+    color: var(--core-blue); flex: none;
+  }
+  .w3-cap-name { font-weight: 600; font-size: 14.5px; color: var(--navy); }
+
+  /* Right: co-branded scoping card. */
+  .w3-scope {
+    position: relative; overflow: hidden; border-radius: 20px;
+    background: var(--rtc-navy-900); box-shadow: 0 8px 24px rgba(3,44,124,.14);
+    padding: 32px; display: flex; flex-direction: column;
+  }
+  .w3-scope-mesh { position: absolute; inset: 0; background: var(--rtc-gradient-mesh); opacity: .55; }
+  .w3-scope-body { position: relative; display: flex; flex-direction: column; height: 100%; }
+  .w3-lockup { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
+  .w3-lockup-name { font-weight: 800; font-size: 22px; color: #fff; }
+  .w3-lockup-x { font-weight: 300; font-size: 17px; color: rgba(255,255,255,.45); }
+  .w3-scope-p { font-size: 14.5px; line-height: 1.65; color: rgba(255,255,255,.8); margin: 0 0 18px; }
+  .w3-pill {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    display: inline-flex; align-self: flex-start;
+    font-weight: 600; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--green); background: rgba(174,227,123,.1);
+    border: 1px solid rgba(174,227,123,.3); border-radius: 999px;
+    padding: 6px 14px; margin-bottom: auto;
+  }
+  .w3-scope-cta { margin-top: 22px; }
+  .w3-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 48px; padding: 0 26px; border-radius: 14px;
+    background: var(--core-blue); color: #fff; font-weight: 700; font-size: 15px;
+    text-decoration: none;
+    transition: background 200ms cubic-bezier(.4,0,.2,1), transform 200ms cubic-bezier(.4,0,.2,1);
+  }
+  .w3-btn:hover { background: #0356bd; }
+  .w3-btn:active { transform: translateY(1px); }
+  .w3-btn:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+
+  @media (max-width: 900px) {
+    .w3 { padding: 72px 24px; }
+    .w3-grid { grid-template-columns: 1fr; }
+    .w3-h2 { font-size: 34px; }
+  }
+  @media (max-width: 640px) {
+    .w3 { padding: 56px 18px; }
+    .w3-cap, .w3-scope { padding: 24px; }
+    .w3-cap-grid { grid-template-columns: 1fr; }
+    .w3-h2 { font-size: 28px; }
+    .w3-lede { font-size: 15.5px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .w3-btn { transition: none; }
+    .w3-btn:active { transform: none; }
+  }
+</style>

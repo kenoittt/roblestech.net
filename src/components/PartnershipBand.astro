@@ -1,0 +1,106 @@
+---
+/*
+ * "Official partner" band — RTC × Quecko. Homepage, directly after the services
+ * grid. Built from the 4b design reference.
+ *
+ * Asset note: the reference calls for three white PNGs. rtc-logo-white.png maps
+ * to the site's existing /logo_white.png. The two Quecko files
+ * (quecko-white.png, quecko-mark-white.png) were never delivered as files, so
+ * the Quecko half of the lockup is typeset to match the reference's optical
+ * weight instead. Dropping quecko-white.png into public/ and swapping the
+ * .pb-quecko span for an <img> is the only change needed to reach the
+ * reference exactly — the surrounding layout already reserves the space.
+ *
+ * Quecko lime (#D2FF3B) is the one borrowed accent and appears only on the
+ * eyebrow and the divider, per the brief.
+ */
+const CHIPS = [
+  'Layer 1 & Layer 2 Development',
+  'NFT Marketplaces',
+  'Smart Contract Development',
+  'RWA Tokenization',
+  'DeFi Platforms',
+  'Prediction & Opinion Markets',
+  'Crypto Exchanges (CEX & DEX)',
+  'Coin & Token Development',
+  'Crypto Wallet Development',
+  'Web3 Enterprise Solutions',
+  'Launchpads & Token Sales',
+  'Crypto Banking & Financial Rails',
+];
+---
+
+<section class="pb">
+  <div class="pb-mesh" aria-hidden="true"></div>
+  <div class="pb-inner">
+    <div class="pb-eyebrow rv">Official partner</div>
+
+    <div class="pb-lockup rv d1">
+      <span class="pb-rtc">
+        <img src="/logo_white.png" alt="Robles Technologies Corp." class="pb-rtc-mark" width="52" height="52" loading="lazy" decoding="async" />
+        <span class="pb-rtc-word">ROBLESTECH</span>
+      </span>
+      <span class="pb-x" aria-hidden="true">×</span>
+      <span class="pb-quecko">QUECKO</span>
+    </div>
+
+    <div class="pb-divider rv d2" aria-hidden="true"></div>
+    <p class="pb-lede rv d2">We bring Web3 services in partnership with Quecko.</p>
+
+    <div class="pb-chips rv d3">
+      {CHIPS.map((c) => <span class="pb-chip">{c}</span>)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .pb {
+    --quecko-lime: #d2ff3b;
+    background: var(--rtc-navy-900);
+    position: relative;
+    overflow: hidden;
+  }
+  .pb-mesh { position: absolute; inset: 0; background: var(--rtc-gradient-mesh); opacity: .5; }
+  .pb-inner { position: relative; max-width: 1200px; margin: 0 auto; padding: 64px 32px; text-align: center; }
+
+  .pb-eyebrow {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--quecko-lime); margin-bottom: 28px;
+  }
+
+  .pb-lockup { display: flex; align-items: center; justify-content: center; gap: 36px; margin-bottom: 26px; flex-wrap: wrap; }
+  .pb-rtc { display: flex; align-items: center; gap: 12px; }
+  .pb-rtc-mark { height: 52px; width: auto; display: block; }
+  .pb-rtc-word { font-weight: 800; font-size: 24px; letter-spacing: .02em; color: #fff; }
+  .pb-x { font-weight: 300; font-size: 30px; color: rgba(255,255,255,.4); }
+  /* Stands in for quecko-white.png (88px tall in the reference) until the asset
+     lands; sized to sit at the same optical weight in the lockup. */
+  .pb-quecko { font-weight: 800; font-size: 40px; letter-spacing: .04em; color: #fff; line-height: 1; }
+
+  .pb-divider { width: 56px; height: 2px; background: var(--quecko-lime); margin: 0 auto 22px; opacity: .8; }
+  .pb-lede { font-size: 16px; line-height: 1.65; color: rgba(255,255,255,.78); max-width: 560px; margin: 0 auto 30px; }
+
+  .pb-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 860px; margin: 0 auto; }
+  .pb-chip {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(255,255,255,.85);
+    background: var(--rtc-glass-bg-dark);
+    backdrop-filter: blur(var(--rtc-glass-blur));
+    -webkit-backdrop-filter: blur(var(--rtc-glass-blur));
+    border: 1px solid var(--rtc-glass-border-dark);
+    border-radius: 999px; padding: 8px 16px; white-space: nowrap;
+  }
+
+  @media (max-width: 700px) {
+    .pb-inner { padding: 52px 20px; }
+    .pb-lockup { gap: 20px; }
+    /* Logo heights scale down ~25% on mobile, per the brief. */
+    .pb-rtc-mark { height: 39px; }
+    .pb-rtc-word { font-size: 20px; }
+    .pb-quecko { font-size: 30px; }
+    .pb-x { font-size: 24px; }
+    .pb-chip { font-size: 10px; padding: 7px 13px; }
+  }
+</style>

@@ -70,7 +70,10 @@ const canonical = new URL(canonicalPath || '/', 'https://roblestech.net').href;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://assets.calendly.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- League Spartan 600 drives the partnership sections' eyebrows/chips, and
+         Montserrat 300 the thin "×" in the RTC × Quecko lockups. Neither weight
+         was previously requested. -->
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet" />
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
     <link rel="stylesheet" href={`/styles.css?v=${stylesHash}`} />
