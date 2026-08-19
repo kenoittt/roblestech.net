@@ -1,0 +1,148 @@
+/* RTC glass + blue gradients, plus the motion utilities built on top of it.
+ *
+ * Adapted from the standalone rtcglass.css drop-in. Two changes were needed to
+ * make it safe here:
+ *
+ * 1. Every glass token is namespaced --rtc-glass-*. The drop-in names two of
+ *    them --glass-bg and --glass-border, which src/styles/glass.css already
+ *    defines at :root for the nav, menu and cards — and its --glass-bg is a
+ *    145deg gradient, not a flat fill. Importing the drop-in verbatim would
+ *    have quietly flattened the nav's glass site-wide.
+ * 2. The reveal variants are modifiers, used as `class="rv rv-l"`. site.js
+ *    observes `.rv` and toggles `.on`, so riding along with that class means
+ *    no JS change and one shared observer.
+ *
+ * Rules of use (from the drop-in, unchanged):
+ *   - .rtc-glass-dark ONLY over the mesh/imagery; .rtc-glass on light backgrounds.
+ *   - Never stack glass on glass.
+ *   - Shadows always navy-tinted rgba(3,44,124,·), never black.
+ *   - Lime accent (--rtc-green-400): one accent per viewport.
+ */
+:root {
+  /* Brand blues */
+  --rtc-navy-900: #00050f;
+  --rtc-navy-800: #010b1f;
+  --rtc-navy-700: #032c7c;   /* primary brand navy */
+  --rtc-blue-500: #0464dd;   /* action blue (buttons/links) */
+  --rtc-blue-400: #3992ff;   /* sky blue */
+  --rtc-indigo-400: #5864ff;
+  --rtc-green-400: #aee37b;  /* lime accent — use sparingly */
+
+  /* Blue gradients */
+  --rtc-gradient-brand: linear-gradient(90deg, #032c7c 0%, #00050f 100%);
+  --rtc-gradient-sky: linear-gradient(135deg, #3992ff 0%, #032c7c 100%);
+  --rtc-gradient-mesh: radial-gradient(120% 120% at 0% 0%, #3992ff 0%, transparent 55%),
+                       radial-gradient(120% 120% at 100% 0%, #5864ff 0%, transparent 50%),
+                       radial-gradient(140% 140% at 50% 120%, #032c7c 0%, #00050f 75%);
+
+  /* Navy-tinted shadows (never neutral black) */
+  --rtc-shadow-sm: 0 2px 8px rgba(3,44,124,0.10);
+  --rtc-shadow-md: 0 8px 24px rgba(3,44,124,0.14);
+  --rtc-shadow-lg: 0 16px 48px rgba(3,44,124,0.18);
+
+  /* Glass — light surfaces */
+  --rtc-glass-blur: 18px;
+  --rtc-glass-bg: rgba(255,255,255,0.55);
+  --rtc-glass-border: rgba(255,255,255,0.55);
+  --rtc-glass-highlight: inset 0 1px 0 rgba(255,255,255,0.65);
+  --rtc-glass-shadow: 0 12px 40px rgba(3,44,124,0.16);
+
+  /* Glass — dark surfaces (over navy mesh / imagery) */
+  --rtc-glass-bg-dark: rgba(12,24,58,0.45);
+  --rtc-glass-border-dark: rgba(255,255,255,0.14);
+  --rtc-glass-highlight-dark: inset 0 1px 0 rgba(255,255,255,0.18);
+  --rtc-glass-shadow-dark: 0 16px 48px rgba(0,5,15,0.5);
+
+  /* Radii + motion */
+  --rtc-radius-md: 14px;
+  --rtc-radius-lg: 20px;
+  --rtc-radius-pill: 999px;
+  --rtc-focus-ring: 0 0 0 3px rgba(57,146,255,0.45);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-base: 200ms;
+}
+
+/* The glass recipe: all four parts, always —
+   translucent fill + blur + 1px light border + (navy shadow, inner highlight) */
+.rtc-glass {
+  background: var(--rtc-glass-bg);
+  backdrop-filter: blur(var(--rtc-glass-blur));
+  -webkit-backdrop-filter: blur(var(--rtc-glass-blur));
+  border: 1px solid var(--rtc-glass-border);
+  box-shadow: var(--rtc-glass-shadow), var(--rtc-glass-highlight);
+  border-radius: var(--rtc-radius-lg);
+}
+.rtc-glass-dark {
+  background: var(--rtc-glass-bg-dark);
+  backdrop-filter: blur(var(--rtc-glass-blur));
+  -webkit-backdrop-filter: blur(var(--rtc-glass-blur));
+  border: 1px solid var(--rtc-glass-border-dark);
+  box-shadow: var(--rtc-glass-shadow-dark), var(--rtc-glass-highlight-dark);
+  border-radius: var(--rtc-radius-lg);
+}
+
+/* Backgrounds */
+.rtc-bg-mesh { background: var(--rtc-gradient-mesh); background-color: var(--rtc-navy-900); }
+.rtc-bg-sky  { background: var(--rtc-gradient-sky); }
+
+/* Interactive glass card: 4px hover lift */
+.rtc-glass-hover { transition: transform var(--dur-base) var(--ease-standard), box-shadow var(--dur-base) var(--ease-standard); }
+.rtc-glass-hover:hover { transform: translateY(-4px); box-shadow: var(--rtc-shadow-lg), var(--rtc-glass-highlight-dark); }
+
+/* ============================================================
+   MOTION UTILITIES
+   Reveal variants ride on .rv (site.js observes .rv, toggles .on),
+   so `class="rv rv-l d2"` needs no extra JS.
+   ============================================================ */
+
+/* Directional + scale reveals. .rv already handles the plain rise. */
+.rv.rv-l { transform: translateX(-28px); }
+.rv.rv-r { transform: translateX(28px); }
+.rv.rv-z { transform: scale(.94); }
+.rv.rv-blur { filter: blur(6px); transition: opacity .65s ease, transform .65s ease, filter .65s ease; }
+.rv.rv-l.on, .rv.rv-r.on, .rv.rv-z.on { transform: none; }
+.rv.rv-blur.on { filter: none; }
+
+/* Longer stagger ladder — styles.css ships .d1–.d4; card grids and FAQ
+   sections need more steps than that. */
+.d5{transition-delay:.50s} .d6{transition-delay:.60s} .d7{transition-delay:.70s} .d8{transition-delay:.80s}
+
+/* Hover lift for cards that are not glass (keeps their own background). */
+.rtc-lift { transition: transform var(--dur-base) var(--ease-standard), box-shadow var(--dur-base) var(--ease-standard); }
+.rtc-lift:hover { transform: translateY(-4px); box-shadow: var(--rtc-shadow-lg); }
+
+/* Gentle idle float — for a single focal element, not a grid of them. */
+.rtc-float { animation: rtcFloat 6s ease-in-out infinite; }
+@keyframes rtcFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* Link underline that draws in from the left. */
+.rtc-ul { position: relative; }
+.rtc-ul::after {
+  content: ""; position: absolute; left: 0; bottom: -2px; height: 2px; width: 100%;
+  background: var(--rtc-blue-500); transform: scaleX(0); transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-standard);
+}
+.rtc-ul:hover::after, .rtc-ul:focus-visible::after { transform: scaleX(1); }
+
+/* A moving sheen that crosses the element once on hover. */
+.rtc-sheen { position: relative; overflow: hidden; }
+.rtc-sheen::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.45) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 700ms var(--ease-standard);
+}
+.rtc-sheen:hover::before { transform: translateX(120%); }
+
+/* Accessibility: honour a reduced-motion preference. Reveals still resolve to
+   visible (they start at opacity:0, so they must never be left mid-animation),
+   they simply stop travelling. */
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv.rv-l, .rv.rv-r, .rv.rv-z, .rv.rv-blur { transform: none !important; filter: none !important; }
+  .rv { transition: opacity .3s ease !important; }
+  .d1,.d2,.d3,.d4,.d5,.d6,.d7,.d8 { transition-delay: 0s !important; }
+  .rtc-glass-hover:hover, .rtc-lift:hover { transform: none; }
+  .rtc-float { animation: none; }
+  .rtc-sheen::before { transition: none; }
+  .rtc-ul::after { transition: none; }
+}

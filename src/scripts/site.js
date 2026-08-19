@@ -78,11 +78,18 @@ if (faqSections.length) {
 }
 
 // --- Scroll-reveal animations (.rv -> .on) ---
-const revObs = new IntersectionObserver(
-  (entries) => entries.forEach((x) => x.isIntersecting && x.target.classList.add('on')),
-  { threshold: 0.1 }
-);
-document.querySelectorAll('.rv').forEach((el) => revObs.observe(el));
+// .rv starts at opacity:0, and page-hero headings now sit behind it, so a
+// browser without IntersectionObserver must be shown everything immediately
+// rather than left staring at a blank hero.
+if (typeof IntersectionObserver === 'undefined') {
+  document.querySelectorAll('.rv').forEach((el) => el.classList.add('on'));
+} else {
+  const revObs = new IntersectionObserver(
+    (entries) => entries.forEach((x) => x.isIntersecting && x.target.classList.add('on')),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.rv').forEach((el) => revObs.observe(el));
+}
 
 /* ---------- Services carousel ---------- */
 (function () {

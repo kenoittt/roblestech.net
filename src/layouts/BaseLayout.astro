@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 // hand-written styles) + our glass + dark-theme layers built on top.
 import 'bootstrap/dist/css/bootstrap-utilities.min.css';
 import '../styles/glass.css';
+import '../styles/rtc-glass.css';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
@@ -75,6 +76,11 @@ const canonical = new URL(canonicalPath || '/', 'https://roblestech.net').href;
     <link rel="stylesheet" href={`/styles.css?v=${stylesHash}`} />
     <!-- Per-page <head> extras: JSON-LD schema, page-specific styles, form embeds -->
     <slot name="head" />
+    <noscript>
+      <!-- Scroll-reveal elements start at opacity:0 and are revealed by JS.
+           With scripting off, show them outright — hero headings live in .rv. -->
+      <style>.rv{opacity:1 !important;transform:none !important;filter:none !important;}</style>
+    </noscript>
     <script is:inline>
       // Skip the loader after the first view of the session (no flash on nav).
       try { if (sessionStorage.getItem('rtc-loaded')) document.documentElement.classList.add('preloaded'); } catch (e) {}
