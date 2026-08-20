@@ -42,12 +42,40 @@ const err = Astro.url.searchParams.get('err');
   )}
 
   <div class="section-h">Members</div>
+  <p class="hint" style="max-width:520px;margin-top:0;">Use <b>Set password</b> when someone is locked out. It replaces their password immediately — tell them directly, and have them change it from their account page once they're in.</p>
   <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-width:520px;">
     {(people ?? []).map((p: any) => (
-      <li class="card" style="padding:12px 16px;display:flex;justify-content:space-between;">
-        <span class="who"><Avatar id={p.id} name={p.full_name} path={p.avatar_url} size={26} />{p.full_name || '(no name)'}</span>
-        <span class="hint" style="margin:0;text-transform:uppercase;letter-spacing:.1em;">{p.role}</span>
+      <li class="card" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <span class="who"><Avatar id={p.id} name={p.full_name} path={p.avatar_url} size={26} />{p.full_name || '(no name)'}</span>
+          <span style="display:flex;align-items:center;gap:10px;">
+            <span class="hint" style="margin:0;text-transform:uppercase;letter-spacing:.1em;">{p.role}</span>
+            <button type="button" class="mini js-pw" data-for={p.id}>Set password</button>
+          </span>
+        </div>
+        {/* Hidden until asked for, so the row stays clean and a password field
+            is never sitting open on screen. */}
+        <form method="post" action="/api/reset-user-password" id={`pw-${p.id}`} hidden
+              style="display:flex;gap:8px;align-items:end;border-top:1px solid var(--line);padding-top:10px;">
+          <input type="hidden" name="user_id" value={p.id} />
+          <div style="flex:1;">
+            <label>New password for {p.full_name || 'this member'}</label>
+            <input name="password" type="text" required minlength="8" autocomplete="off" placeholder="8+ characters" />
+          </div>
+          <button class="btn" type="submit" style="padding:10px 14px;">Save</button>
+        </form>
       </li>
     ))}
   </ul>
+
+  <script is:inline>
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('.js-pw');
+      if (!b) return;
+      var f = document.getElementById('pw-' + b.dataset.for);
+      if (!f) return;
+      f.hidden = !f.hidden;
+      if (!f.hidden) f.querySelector('input[name="password"]').focus();
+    });
+  </script>
 </AppLayout>
