@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+/*
+ * Salesforce Web-to-Lead return page. The form posts to Salesforce, which then
+ * redirects here via its retURL setting, so this is the first thing a visitor
+ * sees after submitting. It confirms receipt, then sends them back to the
+ * homepage after 5 seconds.
+ *
+ * noindex: this is a post-submit destination, not a page anyone should reach
+ * from search.
+ */
+const REDIRECT_SECONDS = 5;
+const REDIRECT_TO = '/';
+---
+
+<BaseLayout
+  title="Thank You — Robles Technologies Corp."
+  description="Thanks for reaching out to Robles Technologies Corp. We'll be in touch within one business day."
+  active=""
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex,nofollow" />
+    <!-- Belt-and-braces: the meta refresh fires even if scripting is off, and
+         the countdown script below handles the visible timer. -->
+    <meta http-equiv="refresh" content={`${REDIRECT_SECONDS};url=${REDIRECT_TO}`} />
+  </Fragment>
+
+  <section class="ty">
+    <div class="ty-mesh" aria-hidden="true"></div>
+    <div class="ty-inner">
+      <div class="ty-card rv">
+        <span class="ty-check" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+        <div class="ty-eyebrow">Message received</div>
+        <h1 class="ty-h1">Thank you — we've got it.</h1>
+        <p class="ty-p">Your message is with our team. We reply to every enquiry within <strong>one business day</strong>, and if you asked for a scope you'll have a fixed-price proposal within 48 hours of our call.</p>
+
+        <div class="ty-actions">
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ty-btn">Book a Call While You're Here →</a>
+          <a href="/" class="ty-btn ty-btn-ghost">Back to the site</a>
+        </div>
+
+        <p class="ty-timer">Taking you back to the homepage in <b id="tyCount">{REDIRECT_SECONDS}</b> seconds…</p>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ REDIRECT_SECONDS, REDIRECT_TO }}>
+    (function () {
+      var el = document.getElementById('tyCount');
+      var left = REDIRECT_SECONDS;
+      var t = setInterval(function () {
+        left -= 1;
+        if (el) el.textContent = String(Math.max(left, 0));
+        if (left <= 0) { clearInterval(t); window.location.href = REDIRECT_TO; }
+      }, 1000);
+      // Cancel the auto-redirect if the visitor engages with the page, so a
+      // click on "Book a Call" is never yanked away mid-action.
+      document.querySelectorAll('.ty-actions a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          clearInterval(t);
+          var p = document.querySelector('.ty-timer');
+          if (p) p.style.display = 'none';
+        });
+      });
+    })();
+  </script>
+
+  <style>
+    .ty { position: relative; overflow: hidden; background: var(--rtc-navy-900); min-height: 68vh; display: flex; }
+    .ty-mesh { position: absolute; inset: 0; background: var(--rtc-gradient-mesh); opacity: .55; }
+    .ty-inner { position: relative; width: 100%; max-width: 1200px; margin: 0 auto; padding: 96px 32px; display: flex; justify-content: center; align-items: center; }
+
+    .ty-card {
+      max-width: 620px; text-align: center; padding: 44px 40px;
+      background: var(--rtc-glass-bg-dark);
+      backdrop-filter: blur(var(--rtc-glass-blur));
+      -webkit-backdrop-filter: blur(var(--rtc-glass-blur));
+      border: 1px solid var(--rtc-glass-border-dark);
+      box-shadow: var(--rtc-glass-shadow-dark), var(--rtc-glass-highlight-dark);
+      border-radius: var(--rtc-radius-lg);
+    }
+    .ty-check {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 62px; height: 62px; border-radius: 50%; margin-bottom: 20px;
+      color: var(--green); background: rgba(174,227,123,.12); border: 1px solid rgba(174,227,123,.32);
+    }
+    .ty-eyebrow {
+      font-family: 'League Spartan', system-ui, sans-serif;
+      font-weight: 600; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--green); margin-bottom: 12px;
+    }
+    .ty-h1 { font-weight: 800; font-size: 34px; letter-spacing: -.02em; color: #fff; margin: 0 0 14px; }
+    .ty-p { font-size: 16px; line-height: 1.7; color: rgba(255,255,255,.78); margin: 0 auto 28px; max-width: 480px; }
+    .ty-p strong { color: #fff; }
+
+    .ty-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
+    .ty-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 48px; padding: 0 24px; border-radius: var(--rtc-radius-md);
+      background: var(--core-blue); color: #fff; font-weight: 700; font-size: 15px; text-decoration: none;
+      transition: background 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+    }
+    .ty-btn:hover { background: #0356bd; }
+    .ty-btn:active { transform: translateY(1px); }
+    .ty-btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,.28); }
+    .ty-btn-ghost:hover { background: rgba(255,255,255,.08); }
+    .ty-timer { font-size: 13px; color: rgba(255,255,255,.55); margin: 0; }
+    .ty-timer b { color: rgba(255,255,255,.85); }
+
+    @media (max-width: 640px) {
+      .ty-inner { padding: 64px 18px; }
+      .ty-card { padding: 34px 22px; }
+      .ty-h1 { font-size: 26px; }
+      .ty-p { font-size: 15px; }
+      .ty-actions a { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ty-btn { transition: none; }
+      .ty-btn:active { transform: none; }
+    }
+  </style>
+</BaseLayout>
