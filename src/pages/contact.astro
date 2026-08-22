@@ -10,20 +10,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   scheduleHref="#schedule"
 >
   <Fragment slot="head">
-    <!-- Salesforce Web-to-Lead: Google reCAPTCHA + the timestamp helper
-         Salesforce ships with its captcha_settings field. -->
-    <script src="https://www.google.com/recaptcha/api.js" is:inline></script>
-    <script is:inline>
-      function timestamp() {
-        var response = document.getElementById('g-recaptcha-response');
-        if (response == null || response.value.trim() == '') {
-          var elems = JSON.parse(document.getElementsByName('captcha_settings')[0].value);
-          elems['ts'] = JSON.stringify(new Date().getTime());
-          document.getElementsByName('captcha_settings')[0].value = JSON.stringify(elems);
-        }
-      }
-      setInterval(timestamp, 500);
-    </script>
     <style>
       /* Salesforce Web-to-Lead form, styled to the RTC design system:
          hairline fields at radius 14, League Spartan labels, 48px action-blue
@@ -51,13 +37,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .sf-field input:focus,
       .sf-field textarea:focus { border-color: #0464DD; box-shadow: 0 0 0 3px rgba(57,146,255,.28); }
       .sf-field input:invalid:not(:placeholder-shown) { border-color: #d2544a; }
-
-      .sf-captcha { margin-top: 2px; }
-      /* reCAPTCHA renders a fixed 304px widget — let it shrink rather than
-         push the card into horizontal scroll on small screens. */
-      @media (max-width: 380px) {
-        .sf-captcha { transform: scale(.88); transform-origin: 0 0; }
-      }
 
       .sf-submit {
         display: inline-flex; align-items: center; justify-content: center;
@@ -135,7 +114,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <p>For inquiries, questions, or if you'd like to reach us without scheduling a meeting — fill out the form below and we'll get back to you within 1 business day.</p>
 
         <form class="sf-form" action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00Dd500000JnGbl" method="POST">
-          <input type="hidden" name="captcha_settings" value={'{"keyname":"contact_form_live","fallback":"true","orgId":"00Dd500000JnGbl","ts":""}'} />
           <input type="hidden" name="oid" value="00Dd500000JnGbl" />
           {/* Salesforce redirects here after the POST — the thank-you page then
               returns the visitor to the homepage. */}
@@ -175,8 +153,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <label for="description">How can we help?</label>
             <textarea id="description" name="description" rows="5" placeholder="Tell us about your project, timeline, and what you're trying to solve."></textarea>
           </div>
-
-          <div class="g-recaptcha sf-captcha" data-sitekey="hkJ1qci5Ehz2_TuEDu7432m6q4Jg24kHiw2"></div>
 
           <button type="submit" name="submit" class="sf-submit">Send Message →</button>
           <p class="sf-note">We reply within 1 business day. Your details go straight to our team — we never share or sell them.</p>
