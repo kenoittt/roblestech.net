@@ -2,7 +2,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promix Nutrition &middot; Post Performance &amp; GEO Dashboard</title>
+<title>Post Performance &amp; GEO Dashboard &middot; Robles Tech</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 /* Chart.js 4.5.0 (bundled inline for offline/portable use) */
 /*!
@@ -22,24 +26,33 @@
 
 </script>
 <style>
+/* Robles Technologies Corp. palette. This template previously carried Promix
+   Nutrition's brand — burgundy, espresso and warm cream — which meant every
+   client's dashboard was dressed in another client's colours. The tokens below
+   are RTC's own, so the dashboard reads as our product regardless of whose
+   data it is showing. */
 :root{
   color-scheme: light;
-  --brand:#53001C;        /* Promix deep burgundy, primary (their Shop Now button) */
-  --brand-dark:#3E0016;   /* darker burgundy, hovers and table totals */
-  --accent:#34657F;       /* slate-blue secondary, used across the site */
-  --espresso:#2E1D14;     /* espresso brown, hero dark end and table headers */
-  --ink-black:#232323;    /* near-black headings */
-  --steel:#6a6058;        /* warm muted slate for secondary text */
-  --green-dark:#4e7a51;   /* pass badge text, earthy green */
-  --green:#e4efe0;        /* pass badge background */
-  --amber:#8a6300; --amber-bg:#fbf0d3;
-  --offwhite:#FDF6EB;     /* warm cream page background */
-  --cream-2:#F9EFE2;      /* alt cream */
+  --brand:#032C7C;        /* RTC navy, primary — headings, impressions series */
+  --brand-dark:#021A4D;   /* deeper navy, hovers and table totals */
+  --accent:#0464DD;       /* RTC action blue — links and controls (AA on surfaces) */
+  --chart-2:#3992FF;      /* RTC sky — second chart series. Separate from --accent
+                             so links stay AA-legible while the two lines on a
+                             chart stay easy to tell apart from the navy. */
+  --navy-deep:#00050F;    /* RTC navy 900 — hero dark end and table headers */
+  --ink-black:#1A2338;    /* near-black headings */
+  --steel:#4A5570;        /* muted slate for secondary text */
+  --green-dark:#41661E;   /* pass badge text, RTC lime family */
+  --green:#EDF7E0;        /* pass badge background */
+  --amber:#8a6300; --amber-bg:#fbf0d3;   /* semantic warning, unchanged */
+  --offwhite:#F5F6FA;     /* cool page background */
+  --surface-2:#EEF1F8;    /* alt surface */
   --card:#FFFFFF;
-  --muted:#7a736a;        /* warm muted body text */
-  --ink:#333333;          /* default text */
-  --line:#EADDCB;         /* warm beige borders */
-  --font:'Helvetica Neue','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --muted:#5D6481;        /* muted body text */
+  --ink:#1A2338;          /* default text */
+  --line:#E5E5E5;         /* hairline borders */
+  --rtc-lime:#AEE37B;     /* RTC lime — hero eyebrow, used sparingly */
+  --font:'Montserrat','Helvetica Neue','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--offwhite);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;}
@@ -48,7 +61,7 @@ a{color:var(--accent)}
 /* ---------- Hero ---------- */
 .hero{
   position:relative;
-  background:linear-gradient(120deg,var(--espresso) 0%,var(--brand-dark) 55%,var(--brand) 100%);
+  background:linear-gradient(120deg,var(--navy-deep) 0%,var(--brand-dark) 55%,var(--brand) 100%);
   color:#fff;
   padding:44px 32px 84px;
   overflow:hidden;
@@ -58,7 +71,7 @@ a{color:var(--accent)}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Ccircle cx='10' cy='10' r='1.6' fill='%23E9C9A7' fill-opacity='0.16'/%3E%3Ccircle cx='80' cy='40' r='1.2' fill='%23E9C9A7' fill-opacity='0.12'/%3E%3Ccircle cx='40' cy='90' r='1.6' fill='%23E9C9A7' fill-opacity='0.14'/%3E%3Ccircle cx='115' cy='105' r='1.2' fill='%23E9C9A7' fill-opacity='0.12'/%3E%3Cpath d='M0 120 L140 60' stroke='%23E9C9A7' stroke-opacity='0.05' stroke-width='1'/%3E%3Cpath d='M0 40 L140 110' stroke='%23E9C9A7' stroke-opacity='0.04' stroke-width='1'/%3E%3C/svg%3E");
 }
 .hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;}
-.eyebrow{color:#E9C9A7;font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;margin-bottom:10px;}
+.eyebrow{color:var(--rtc-lime);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;margin-bottom:10px;}
 .hero h1{font-size:30px;font-weight:700;letter-spacing:-.01em;margin-bottom:10px;}
 .hero .sub{color:rgba(255,255,255,.82);font-size:14px;max-width:760px;}
 
@@ -84,14 +97,14 @@ a{color:var(--accent)}
 h2{font-size:16px;color:var(--ink-black);font-weight:700;margin-bottom:12px;}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-.note{background:var(--cream-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--steel);margin-top:12px;}
+.note{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--steel);margin-top:12px;}
 
 /* ---------- Tables ---------- */
 table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th{background:var(--espresso);color:#fff;text-align:left;padding:9px 12px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;}
+th{background:var(--navy-deep);color:#fff;text-align:left;padding:9px 12px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;}
 td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
 tr:last-child td{border-bottom:none;}
-tr.total td{background:var(--cream-2);color:var(--brand);font-weight:700;border-top:2px solid var(--line);}
+tr.total td{background:var(--surface-2);color:var(--brand);font-weight:700;border-top:2px solid var(--line);}
 td.num,th.num{text-align:right;}
 .empty-row td{color:var(--muted);font-style:italic;text-align:center;padding:18px 12px;}
 .scrolly{max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;}
@@ -121,8 +134,8 @@ td.num,th.num{text-align:right;}
 .badge{display:inline-block;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;}
 .b-pass{color:var(--green-dark);background:var(--green);}
 .b-pend{color:var(--amber);background:var(--amber-bg);}
-.b-no{color:var(--brand);background:#F3E2E2;}
-.b-live{color:var(--brand);background:#F6E8EC;}
+.b-no{color:#B3261E;background:#FBE9E7;}
+.b-live{color:var(--brand);background:#E4ECFB;}
 
 /* ---------- Charts ---------- */
 .chart-box{position:relative;height:280px;}
@@ -140,10 +153,10 @@ td.num,th.num{text-align:right;}
 .pri{flex:0 0 52px;text-align:center;font-size:11px;font-weight:700;padding:3px 0;border-radius:6px;letter-spacing:.06em;}
 .p-high{color:#fff;background:var(--brand);}
 .p-med{color:var(--amber);background:var(--amber-bg);}
-.p-low{color:var(--steel);background:var(--cream-2);}
+.p-low{color:var(--steel);background:var(--surface-2);}
 
 /* ---------- AI cards ---------- */
-.ai-q{font-size:13px;color:var(--steel);background:var(--cream-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
+.ai-q{font-size:13px;color:var(--steel);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
 .ai-q b{color:var(--ink-black);}
 
 /* ---------- Footer ---------- */
@@ -999,7 +1012,7 @@ function makePerfChart(){
         { type:"bar",  label:"Impressions", data: byPage.map(function(r){return r.impr;}),
           backgroundColor: cv("--brand"), borderRadius: 4, yAxisID:"yI" },
         { type:"line", label:"Clicks", data: byPage.map(function(r){return r.clicks;}),
-          borderColor: cv("--accent"), backgroundColor: cv("--accent"), tension:.3, yAxisID:"yC" }
+          borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
@@ -1057,7 +1070,7 @@ function makeDailyChart(){
       labels: t.labels,
       datasets: [
         { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
-        { label:"Clicks", data: t.clicks, borderColor: cv("--accent"), backgroundColor: cv("--accent"), tension:.3, yAxisID:"yC" }
+        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
@@ -1224,7 +1237,7 @@ function makeBlogChart(){
       labels: t.labels,
       datasets: [
         { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
-        { label:"Clicks", data: t.clicks, borderColor: cv("--accent"), backgroundColor: cv("--accent"), tension:.3, yAxisID:"yC" }
+        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
