@@ -1196,21 +1196,28 @@ function trendBucketSpan(key, gran){
    flat. Marking them lets the chart show that rather than imply a crash. */
 function computeTrend(){
   var s = document.getElementById("trendStart").value, e = document.getElementById("trendEnd").value, gran = currentGran();
-  var rows = dailyLog.filter(function(r){ return (!s || r.d >= s) && (!e || r.d <= e); });
-  var map = {};
-  rows.forEach(function(r){ var k = trendBucketKey(r.d, gran); (map[k] = map[k] || {c:0,i:0}); map[k].c += r.c; map[k].i += r.i; });
-  var keys = Object.keys(map).sort();
 
-  // Bounds actually charted: the selected range clipped to the data we hold.
-  var ds = rows.map(function(r){ return r.d; }).sort();
+  // Bucket the WHOLE log, so every period carries its true total. Narrowing
+  // the date range must not clip days out of a period and understate it —
+  // the range picks which periods to show, not how much of each one counts.
+  var map = {};
+  dailyLog.forEach(function(r){ var k = trendBucketKey(r.d, gran); (map[k] = map[k] || {c:0,i:0}); map[k].c += r.c; map[k].i += r.i; });
+
+  // Completeness is a fact about the data, not about the selection: a period
+  // is incomplete only when Search Console has not reported all of it yet.
+  var ds = dailyLog.map(function(r){ return r.d; }).sort();
   var lo = ds.length ? ds[0] : "", hi = ds.length ? ds[ds.length-1] : "";
+
+  var keys = Object.keys(map).sort().filter(function(k){
+    var sp = trendBucketSpan(k, gran);
+    return (!s || sp.e >= s) && (!e || sp.s <= e);          // overlaps the chosen range
+  });
   var isPartial = function(k){
     var sp = trendBucketSpan(k, gran);
     return !!lo && (sp.s < lo || sp.e > hi);
   };
-  // Drop part-covered periods outright: a week holding 2 of 7 days is not a
-  // low week, it is an unfinished one, and plotting it states a number that
-  // is not true. Only whole periods are charted.
+  // A period that is not finished would understate the true number, so it is
+  // left out rather than plotted low.
   var excluded = keys.filter(isPartial);
   var full = keys.filter(function(k){ return !isPartial(k); });
 
