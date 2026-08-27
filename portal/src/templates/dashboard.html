@@ -52,6 +52,8 @@
   --ink:#1A2338;          /* default text */
   --line:#E5E5E5;         /* hairline borders */
   --rtc-lime:#AEE37B;     /* RTC lime — hero eyebrow, used sparingly */
+  --badge-no-fg:#B3261E; --badge-no-bg:#FBE9E7;   /* "no" badge */
+  --badge-live-bg:#E4ECFB;                        /* "live" badge fill */
   --font:'Montserrat','Helvetica Neue','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -150,8 +152,8 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
 .badge{display:inline-block;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;}
 .b-pass{color:var(--green-dark);background:var(--green);}
 .b-pend{color:var(--amber);background:var(--amber-bg);}
-.b-no{color:#B3261E;background:#FBE9E7;}
-.b-live{color:var(--brand);background:#E4ECFB;}
+.b-no{color:var(--badge-no-fg);background:var(--badge-no-bg);}
+.b-live{color:var(--brand);background:var(--badge-live-bg);}
 
 /* ---------- Charts ---------- */
 .chart-box{position:relative;height:280px;}
@@ -235,6 +237,7 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
 
   <!-- ============ OVERVIEW ============ -->
   <div class="panel active" id="panel-overview">
+    <div id="ovAggregate"></div>
     <div class="card">
       <h2>Content pipeline</h2>
       <table>
@@ -485,6 +488,7 @@ var SOP_FRAMEWORK = [
 ];
 var sopSteps = __C.sopSteps || []; // legacy fallback only
 var AUDITS = __DASH.audits || []; // monthly AI-audit report files uploaded via the portal
+var aiAuditHistory = __C.aiAuditHistory || []; // earlier rounds, newest first
 var CLIENT_NAME = __C.clientName || "Promix Nutrition";
 var PROPERTY_LABEL = __C.propertyLabel || "promixnutrition.com";
 /* AI Visibility Audit, Round 2, July 2026. 20 buyer questions x 4 platforms = 80 checks.
@@ -681,6 +685,95 @@ function renderLogTable(){
     tb.appendChild(tr);
   });
 }
+
+
+/* Aggregate Visibility Scorecard, built from the rounds on file rather than
+   hand-maintained. Columns are the most recent rounds oldest-to-newest, so a
+   new audit pushes the oldest column off and nobody has to remember to remove
+   June. Only rounds carrying a per-channel scorecard can be shown, since a
+   column without one would be blank. */
+function buildAggregate(maxCols){
+  var rounds = [aiAudit].concat(aiAuditHistory)               // newest first
+    .filter(function(r){ return r && r.scorecard && r.scorecard.length && r.totalChecks; })
+    .slice(0, maxCols || 2)
+    .reverse();                                              // oldest -> newest
+  if(rounds.length < 1) return null;
+
+  var label = function(r){
+    var when = r.period ? new Date(r.period + "T00:00:00Z").toLocaleDateString("en-US", { month:"long", year:"numeric", timeZone:"UTC" })
+             : (r.tested || r.round || "");
+    var qs = Math.round(r.totalChecks / Math.max(1, r.scorecard.length));
+    return (when || r.round) + (r.round && when ? " (" + r.round : " (") + (r.round && when ? " \u00b7 " : "") + qs + " Qs)";
+  };
+
+  // Union of channels across the rounds, ordered by the newest round first.
+  var channels = [];
+  rounds.slice().reverse().forEach(function(r){
+    r.scorecard.forEach(function(c){ if(channels.indexOf(c.channel) === -1) channels.push(c.channel); });
+  });
+
+  var rows = channels.map(function(ch){
+    return { channel: ch, values: rounds.map(function(r){
+      var hit = r.scorecard.filter(function(c){ return c.channel === ch; })[0];
+      return hit ? hit.visible + " of " + hit.checks : "\u2014";
+    }), note: "" };
+  });
+
+  return {
+    columns: rounds.map(label),
+    rows: rows,
+    total: { channel:"Total", values: rounds.map(function(r){
+      return r.visibleChecks + " of " + r.totalChecks + " (" + r.rate + ")";
+    }), note: "" },
+    note: "Each column is that month's full audit. Question counts grow as the audit expands, so compare rates rather than raw counts."
+  };
+}
+
+/* One aggregate card, so the Overview and the AI visibility tab cannot drift. */
+function aggregateCard(agg){
+  var headCols = agg.columns.map(function(c){ return "<th>"+esc(c)+"</th>"; }).join("");
+  var anyNote = agg.rows.some(function(r){ return r.note; }) || (agg.total && agg.total.note);
+  var noteCol = anyNote ? "<th>What changed</th>" : "";
+  var cell = function(r){
+    return "<td>"+esc(r.channel)+"</td>" + r.values.map(function(v){ return "<td>"+esc(v)+"</td>"; }).join("") +
+      (anyNote ? "<td style='font-size:12.5px;color:var(--steel)'>"+esc(r.note||"")+"</td>" : "");
+  };
+  var body = agg.rows.map(function(r){ return "<tr>"+cell(r)+"</tr>"; }).join("");
+  if(agg.total) body += "<tr class='total'>"+cell(agg.total)+"</tr>";
+  var card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = "<h2>Aggregate Visibility Scorecard</h2>" +
+    (agg.note ? '<div class="note" style="margin-top:0;margin-bottom:12px">'+esc(agg.note)+'</div>' : '') +
+    "<table><thead><tr><th>Channel</th>"+headCols+noteCol+"</tr></thead><tbody>"+body+"</tbody></table>";
+  return card;
+}
+
+/* Mirror the aggregate onto the Overview, where the headline numbers live. */
+function renderOverviewAggregate(){
+  var host = document.getElementById("ovAggregate");
+  if(!host) return;
+  var agg = buildAggregate(2) || (aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length ? aiAudit.aggregate : null);
+  host.innerHTML = "";
+  if(agg) host.appendChild(aggregateCard(agg));
+}
+
+
+/* ---------- per-client palette ----------
+   The tokens above are RTC's own. A client dashboard should wear the client's
+   brand, not ours, so any subset can be overridden per client — Promix keeps
+   its burgundy, everyone else gets the RTC set by default. Applied before the
+   charts read their colours via cv(). */
+var THEME = __DASH.theme || __C.theme || null;
+function applyTheme(){
+  if(!THEME || typeof THEME !== "object") return;
+  var root = document.documentElement;
+  Object.keys(THEME).forEach(function(k){
+    var name = k.charAt(0) === "-" ? k : "--" + k;
+    var val = THEME[k];
+    if(typeof val === "string" && val) root.style.setProperty(name, val);
+  });
+}
+applyTheme();
 
 /* ---------- pipeline ---------- */
 function badge(kind, label){
@@ -961,23 +1054,13 @@ function renderAi(){
 
   // Aggregate Visibility Scorecard: one column per audit round (full-audit
   // numbers). Falls back to the legacy June-vs-July table if no aggregate.
-  if(aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length){
-    var agg = aiAudit.aggregate;
-    var headCols = agg.columns.map(function(c){ return "<th>"+c+"</th>"; }).join("");
-    var aggRows = agg.rows.map(function(r){
-      return "<tr><td>"+r.channel+"</td>" + r.values.map(function(v){ return "<td>"+v+"</td>"; }).join("") +
-        "<td style='font-size:12.5px;color:var(--steel)'>"+(r.note||"")+"</td></tr>";
-    }).join("");
-    if(agg.total){
-      aggRows += "<tr class='total'><td>"+agg.total.channel+"</td>" + agg.total.values.map(function(v){ return "<td>"+v+"</td>"; }).join("") +
-        "<td style='font-size:12.5px'>"+(agg.total.note||"")+"</td></tr>";
-    }
-    var aggCard = document.createElement("div");
-    aggCard.className = "card";
-    aggCard.innerHTML = "<h2>Aggregate Visibility Scorecard</h2>" +
-      (agg.note ? '<div class="note" style="margin-top:0;margin-bottom:12px">'+agg.note+'</div>' : '') +
-      "<table><thead><tr><th>Channel</th>"+headCols+"<th>What changed</th></tr></thead><tbody>"+aggRows+"</tbody></table>" +
-      '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
+  var derivedAgg = buildAggregate(2)
+    || (aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length ? aiAudit.aggregate : null);
+  if(derivedAgg){
+    var aggCard = aggregateCard(derivedAgg);
+    aggCard.insertAdjacentHTML("beforeend",
+      '<div class="note">AI answers are volatile: a position held one month can vanish the next without anything being '
+      + 'done wrong. That is why the audit is re-run monthly — a brand that is not actively feeding these engines drifts out of them.</div>');
     host.appendChild(aggCard);
   } else if(aiAudit.change && aiAudit.change.length){
   var chgRows = aiAudit.change.map(function(c){
@@ -1537,6 +1620,7 @@ function initDashboard(){
   safe(renderSop, "renderSop");
   safe(renderBlogPerf, "renderBlogPerf");
   safe(renderAi, "renderAi");
+  safe(renderOverviewAggregate, "renderOverviewAggregate");
   safe(renderOpenItems, "renderOpenItems");
   safe(computeRollups, "computeRollups");
   safe(renderLogTable, "renderLogTable");
