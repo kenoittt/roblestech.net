@@ -2,6 +2,7 @@ import type { APIContext } from 'astro';
 import { createSupabaseAdmin } from './supabase';
 import { getSession } from './auth';
 import { fetchGscData } from './gsc';
+import { mergeAuditIntoConfig } from './ai-audit';
 
 export type ChangeKind =
   | 'client_create' | 'client_update' | 'client_delete'
@@ -68,6 +69,18 @@ export async function applyChange(kind: string, payload: Record<string, any>): P
     ({ error } = await admin.from('reports').insert({
       client_id: payload.client_id, title: payload.title, period: payload.period, storage_path: payload.storage_path,
     }));
+    // Point the dashboard's AI visibility figures at this round. Done here
+    // rather than at upload time so it happens when the change is actually
+    // approved, and so a queued request carries the figures with it.
+    if (!error && payload.ai_audit) {
+      const { data: row } = await admin.from('clients').select('config').eq('id', payload.client_id).single();
+      const current = ((row as { config?: unknown } | null)?.config ?? {}) as Record<string, any>;
+      const merged = mergeAuditIntoConfig(current, payload.ai_audit, payload.period);
+      const { error: cfgErr } = await admin.from('clients').update({ config: merged }).eq('id', payload.client_id);
+      // The report row is in and the file is stored; a config write failure
+      // must not read as the whole upload having failed.
+      if (cfgErr) return `Report saved, but the AI visibility figures could not be applied: ${cfgErr.message}`;
+    }
   } else if (kind === 'audit_delete') {
     const { error: delErr } = await admin.from('reports').delete().eq('id', payload.id);
     if (!delErr && payload.storage_path) await admin.storage.from('reports').remove([payload.storage_path]);
@@ -86,7 +99,9 @@ export async function gateChange(
   context: APIContext,
   kind: ChangeKind,
   payload: Record<string, any>,
-  redirectTo: string
+  redirectTo: string,
+  /** Confirmation shown on success, when "Done." is not specific enough. */
+  okMessage?: string
 ): Promise<Response> {
   const { user, profile } = await getSession(context);
   const role = profile?.role;
@@ -94,7 +109,7 @@ export async function gateChange(
 
   if (role === 'super_admin') {
     const err = await applyChange(kind, payload);
-    return context.redirect(`${redirectTo}?${err ? 'err=' + encodeURIComponent(err) : 'ok=' + encodeURIComponent('Done.')}`);
+    return context.redirect(`${redirectTo}?${err ? 'err=' + encodeURIComponent(err) : 'ok=' + encodeURIComponent(okMessage || 'Done.')}`);
   }
 
   // Regular admin → queue for approval.

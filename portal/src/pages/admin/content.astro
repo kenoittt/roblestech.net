@@ -114,6 +114,17 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     <div><label>Month</label><input type="month" name="period" required /></div>
     <div style="flex:1;min-width:220px;"><label>Report file (PDF or HTML)</label><input type="file" name="file" accept=".pdf,.html,.htm" required /></div>
     <button class="btn" type="submit">Upload report</button>
+    <p class="hint" style="flex:1 1 100%;margin:2px 0 0;">
+      The dashboard's AI visibility figures update from the uploaded audit automatically — an HTML audit is read for its
+      round, tested dates and check counts. Fill the fields below only for a PDF, or if the confirmation says the figures
+      could not be read.
+    </p>
+    <div style="flex:1 1 100%;display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
+      <div><label>Round <span class="hint" style="display:inline;margin:0;">(optional)</span></label><input name="round" placeholder="Round 3" style="width:130px;" /></div>
+      <div><label>Tested <span class="hint" style="display:inline;margin:0;">(optional)</span></label><input name="tested" placeholder="September 2-3, 2026" style="width:190px;" /></div>
+      <div><label>Checks visible</label><input name="visible_checks" type="number" min="0" placeholder="3" style="width:120px;" /></div>
+      <div><label>Checks total</label><input name="total_checks" type="number" min="1" placeholder="80" style="width:120px;" /></div>
+    </div>
   </form>
   {audits.length > 0 && (
     <div class="tbl-wrap" style="margin-bottom:10px;">
