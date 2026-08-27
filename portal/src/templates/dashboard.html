@@ -677,15 +677,38 @@ function badge(kind, label){
   var cls = { pass:"b-pass", pending:"b-pend", no:"b-no", live:"b-live" }[kind] || "b-pend";
   return '<span class="badge '+cls+'">'+label+'</span>';
 }
-var PIPE_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
   return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
 
-/* Group pipeline rows by the month they were published, newest month first,
-   with anything not yet given a publish date collected at the end — a post
-   with no date has no month to sit under, and those are the ones still in
-   flight. Each group header carries its own live/total count so a month can be
-   read at a glance without tallying rows. */
+/* Which engagement month a post belongs to — M1, M2, M3 of the content plan,
+   not the calendar month.
+   Read in priority order:
+     1. An explicit M-marker on the post id or title ("M1-3", "M2 — ...").
+        This is what the content plan uses, so it wins when present.
+     2. Failing that, derive it from the publish date against the baseline's
+        service start, so posts entered without a marker still land in the
+        right month.
+   Returns "nodate" for a post with no publish date, and "unknown" for one that
+   is dated but whose month cannot be worked out (no service start recorded) —
+   labelling a live post "not yet scheduled" would be plainly wrong. */
+function pipeMonth(p){
+  var marker = String(p.num == null ? "" : p.num) + " " + String(p.post == null ? "" : p.post);
+  var m = marker.match(/(?:^|[^a-z0-9])m\s*(\d{1,2})(?:\b|[-_ .])/i);
+  if(m) return Number(m[1]);
+
+  var d = String(p.published || "");
+  if(!/^\d{4}-\d{2}/.test(d)) return "nodate";
+  var startRaw = (baseline && baseline.serviceStart) ? String(baseline.serviceStart) : "";
+  var start = startRaw && startRaw !== "\u2014" ? new Date(startRaw) : null;
+  if(!start || isNaN(start.getTime())) return "unknown";
+  var parts = d.split("-");
+  var months = (Number(parts[0]) - start.getFullYear()) * 12 + (Number(parts[1]) - 1 - start.getMonth());
+  return months >= 0 ? months + 1 : "unknown";
+}
+
+/* Group pipeline rows into engagement months, M1 first, with anything that has
+   no month collected at the end. Each header carries its own live/total count
+   so a month reads at a glance without tallying rows. */
 function renderPipeline(){
   var tb = document.getElementById("pipelineBody");
   tb.innerHTML = "";
@@ -696,30 +719,25 @@ function renderPipeline(){
 
   var groups = {}, order = [];
   pipeline.forEach(function(p){
-    var d = String(p.published || "");
-    var key = /^\d{4}-\d{2}/.test(d) ? d.slice(0, 7) : "unscheduled";
+    var key = String(pipeMonth(p));
     if(!groups[key]){ groups[key] = []; order.push(key); }
     groups[key].push(p);
   });
-  // Dated months descending; the undated bucket always last.
+  // Engagement months ascending — M1, M2, M3 — with the unassigned bucket last.
+  // Engagement months ascending; the two catch-all buckets always last.
+  var RANK = { unknown: 1e6, nodate: 1e6 + 1 };
   order.sort(function(a, b){
-    if(a === "unscheduled") return 1;
-    if(b === "unscheduled") return -1;
-    return b.localeCompare(a);
+    return (RANK[a] || Number(a)) - (RANK[b] || Number(b));
   });
 
   order.forEach(function(key){
     var rows = groups[key];
-    var label;
-    if(key === "unscheduled"){
-      label = "Not yet scheduled";
-    } else {
-      var parts = key.split("-");
-      label = PIPE_MONTHS[Number(parts[1]) - 1] + " " + parts[0];
-    }
+    var label = key === "nodate" ? "Not yet scheduled"
+              : key === "unknown" ? "Month not assigned"
+              : "Month " + key + " (M" + key + ")";
     var live = rows.filter(function(p){ return p.status === "Live"; }).length;
     var meta = rows.length + (rows.length === 1 ? " post" : " posts")
-             + (key === "unscheduled" ? "" : " &middot; " + live + " live");
+             + (key === "nodate" ? "" : " &middot; " + live + " live");
 
     var head = document.createElement("tr");
     head.className = "grp";
