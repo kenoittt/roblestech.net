@@ -30,8 +30,13 @@ export type AiAuditFigures = {
 
 const ENGINES = ['Google', 'ChatGPT', 'Gemini', 'Perplexity', 'Claude', 'Copilot'];
 
-const pct = (visible: number, total: number) =>
-  total > 0 ? `${Math.round((visible / total) * 1000) / 10}%` : '0%';
+/* Two decimals, trailing zeros trimmed: 7/80 must read 8.75%, the figure the
+   audit itself states, not a rounded 8.8% that contradicts it. */
+const pct = (visible: number, total: number) => {
+  if (total <= 0) return '0%';
+  const v = (visible / total) * 100;
+  return `${Number(v.toFixed(2))}%`;
+};
 
 /** Strip tags so prose patterns match across markup boundaries. */
 const textOf = (html: string) =>
@@ -99,14 +104,24 @@ function fromPatterns(html: string): AiAuditFigures | null {
     [/total\s*(?:checks)?\s*[:\-]?\s*(\d[\d,]*)[\s\S]{0,60}?visible\s*[:\-]?\s*(\d[\d,]*)/i, 'total-first'],
   ];
 
+  /* Audits routinely restate the previous round for comparison — "7 of 80,
+     up from 3 of 80 in July". Taking the first match in document order picks
+     the wrong number whenever the comparison is written first, so any candidate
+     introduced as a comparison is discarded rather than trusted. */
+  const COMPARATIVE = /(?:up|down)\s+from|previous(?:ly)?|prior|last\s+(?:month|round)|was\s*$|in\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s*$/i;
   let visible = NaN, total = NaN;
   for (const [re, order] of strategies) {
-    const m = t.match(re);
-    if (!m) continue;
-    const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, ''));
-    const v = order === 'vis-first' ? a : b;
-    const n = order === 'vis-first' ? b : a;
-    if (Number.isFinite(v) && Number.isFinite(n) && n > 0 && v <= n) { visible = v; total = n; break; }
+    const g = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+    let m: RegExpExecArray | null;
+    while ((m = g.exec(t)) !== null) {
+      const before = t.slice(Math.max(0, m.index - 24), m.index);
+      if (COMPARATIVE.test(before)) continue;          // a look-back at an earlier round
+      const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, ''));
+      const v = order === 'vis-first' ? a : b;
+      const n = order === 'vis-first' ? b : a;
+      if (Number.isFinite(v) && Number.isFinite(n) && n > 0 && v <= n) { visible = v; total = n; break; }
+    }
+    if (Number.isFinite(visible)) break;
   }
   if (!Number.isFinite(visible) || !Number.isFinite(total)) return null;
 
@@ -117,9 +132,14 @@ function fromPatterns(html: string): AiAuditFigures | null {
   // Tested dates: "tested September 2-3, 2026", "Tested: Sep 2–3, 2026",
   // or a bare date range near the word tested.
   const MONTH = '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*';
+  const DATE = MONTH + '\\s+\\d{1,2}(?:\\s*[-\u2013]\\s*\\d{1,2})?,?\\s*\\d{4}';
   const tested = (
-    t.match(new RegExp('tested\\s*[:\\-]?\\s*(' + MONTH + '\\s+\\d{1,2}(?:\\s*[-\u2013]\\s*\\d{1,2})?,?\\s*\\d{4})', 'i'))
+    t.match(new RegExp('tested\\s*[:\\-]?\\s*(' + DATE + ')', 'i'))
+    // "all run on August 27, 2026" / "run on ..." / "conducted ..."
+    || t.match(new RegExp('(?:all\\s+)?(?:run|conducted|checked)\\s+on\\s+(' + DATE + ')', 'i'))
+    // A date range anywhere, then any single date as a last resort.
     || t.match(new RegExp('(' + MONTH + '\\s+\\d{1,2}\\s*[-\u2013]\\s*\\d{1,2},?\\s*\\d{4})', 'i'))
+    || t.match(new RegExp('(' + DATE + ')', 'i'))
     || []
   )[1];
 

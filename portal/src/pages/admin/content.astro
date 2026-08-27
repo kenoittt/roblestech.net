@@ -134,6 +134,27 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       read, the previous round is left in place rather than being replaced with a guess, and the confirmation says so.</p>
     </div>
   </details>
+  <div class="card gated" style="margin-bottom:14px;">
+    <div style="font-weight:800;font-size:.86rem;margin-bottom:4px;">Set AI visibility figures</div>
+    <p class="hint" style="margin:0 0 12px;">Use this for a PDF audit, or any time you want to set the numbers directly.
+    It drives the same dashboard fields as an uploaded HTML audit — KPI, headline, rate and scorecard.</p>
+    <form method="post" action="/api/set-ai-figures" class="gated" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
+      <input type="hidden" name="client_id" value={clientId} />
+      <div><label>Round</label><input name="round" placeholder="Round 3" style="width:130px;" /></div>
+      <div><label>Tested</label><input name="tested" placeholder="August 27, 2026" style="width:180px;" /></div>
+      <div><label>Month</label><input type="month" name="period" style="width:150px;" /></div>
+      <div><label>Checks visible</label><input name="visible_checks" type="number" min="0" required placeholder="7" style="width:130px;" /></div>
+      <div><label>Checks total</label><input name="total_checks" type="number" min="1" required placeholder="80" style="width:130px;" /></div>
+      <div style="flex:1 1 100%;">
+        <label>Scorecard <span class="hint" style="display:inline;margin:0;">(optional — one engine per line: name, checks, visible)</span></label>
+        <textarea name="scorecard" rows="4" placeholder={"Google 20 3\nChatGPT 20 0\nGemini 20 4\nPerplexity 20 0"} style="width:100%;font-family:ui-monospace,monospace;font-size:.8rem;"></textarea>
+      </div>
+      <button class="btn" type="submit">Save figures</button>
+      <p class="hint" style="flex:1 1 100%;margin:2px 0 0;">The scorecard must add up to the headline figures — if it
+      does not, nothing is saved and you are told the difference, rather than the dashboard showing two answers.</p>
+    </form>
+  </div>
+
   {audits.length > 0 && (
     <form method="post" action="/api/refresh-audit-figures" class="gated" style="margin-bottom:12px;">
       <input type="hidden" name="client_id" value={clientId} />
