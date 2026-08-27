@@ -487,48 +487,49 @@ var SOP_FRAMEWORK = [
 ];
 var sopSteps = __C.sopSteps || []; // legacy fallback only
 var AUDITS = __DASH.audits || []; // monthly AI-audit report files uploaded via the portal
-var aiAuditHistory = __C.aiAuditHistory || []; // earlier rounds, newest first
+/* Earlier rounds, newest first — feeds the Aggregate Visibility Scorecard's
+   comparison column. July 2026 (Round 2) is seeded so August has something to
+   be compared against; stored history wins when present. */
+var aiAuditHistory = __C.aiAuditHistory || [
+  {
+    round: "Round 2",
+    tested: "July 2-3, 2026",
+    period: "2026-07-01",
+    totalChecks: 80, visibleChecks: 3, rate: "3.75%",
+    scorecard: [
+      { channel:"Google",     checks:20, visible:0, rate:"0%" },
+      { channel:"ChatGPT",    checks:20, visible:1, rate:"5%" },
+      { channel:"Gemini",     checks:20, visible:2, rate:"10%" },
+      { channel:"Perplexity", checks:20, visible:0, rate:"0%" }
+    ]
+  }
+];
 var CLIENT_NAME = __C.clientName || "Promix Nutrition";
 var PROPERTY_LABEL = __C.propertyLabel || "promixnutrition.com";
 /* AI Visibility Audit, Round 2, July 2026. 20 buyer questions x 4 platforms = 80 checks.
    Tested word-for-word, incognito/fresh chats, never naming Promix, July 2-3 2026.
    A cell starting with "Yes" is a hit. Engines audited: Google, ChatGPT, Gemini, Perplexity (Claude not tested this round). */
+/* Current round: August 2026 (Round 3), figures from that month's audit.
+   Superseded the moment real figures are stored for the client — __C.aiAudit
+   wins — but until then this is what the dashboard shows. */
 var aiAudit = __C.aiAudit || {
-  round: "Round 2",
-  tested: "July 2-3, 2026",
-  totalChecks: 80, visibleChecks: 3, rate: "3.75%",
+  round: "Round 3",
+  tested: "August 27, 2026",
+  period: "2026-08-01",
+  totalChecks: 80, visibleChecks: 7, rate: "8.75%",
   scorecard: [
-    { channel:"Google",     checks:20, visible:0, rate:"0%" },
-    { channel:"ChatGPT",    checks:20, visible:1, rate:"5%" },
-    { channel:"Gemini",     checks:20, visible:2, rate:"10%" },
+    { channel:"Google",     checks:20, visible:3, rate:"15%" },
+    { channel:"ChatGPT",    checks:20, visible:0, rate:"0%" },
+    { channel:"Gemini",     checks:20, visible:4, rate:"20%" },
     { channel:"Perplexity", checks:20, visible:0, rate:"0%" }
   ],
   intent: [
-    { group:"Problem-aware",  visible:0, of:20 },
-    { group:"Comparison",     visible:0, of:20 },
-    { group:"How-to & safety",visible:0, of:20 },
     { group:"Buying-intent",  visible:3, of:20 }
   ],
-  change: [
-    { channel:"Google",     june:"1 of 10", july:"0 of 10", note:"Lost Q6 page-1 ranking (was 6th)" },
-    { channel:"ChatGPT",    june:"2 of 10", july:"1 of 10", note:"Lost Q4 (answer went brandless); Q3 held but demoted to passing mention" },
-    { channel:"Gemini",     june:"1 of 10", july:"2 of 10", note:"Q3 top spot held; gained Q9, first electrolyte visibility" },
-    { channel:"Perplexity", june:"1 of 10", july:"0 of 10", note:"Lost Q6 (was 3rd)" },
-    { channel:"Total",      june:"5 of 40 (12.5%)", july:"3 of 40 (7.5%)", note:"Net loss of 2, with 1 genuine gain. Like-for-like subset only; the full Round 2 audit is 3 of 80 (3.75%) across all 20 questions." }
-  ],
-  /* Aggregate Visibility Scorecard: one column per audit round, full-audit
-     numbers per channel. Add a column each month as new audits land. */
-  aggregate: {
-    columns: ["June 2026 (Round 1 · 10 Qs)", "July 2026 (Round 2 · 20 Qs)"],
-    rows: [
-      { channel:"Google",     values:["1 of 10", "0 of 20"], note:"Lost Q6 page-1 ranking (was 6th)" },
-      { channel:"ChatGPT",    values:["2 of 10", "1 of 20"], note:"Lost Q4 (answer went brandless); Q3 held but demoted to passing mention" },
-      { channel:"Gemini",     values:["1 of 10", "2 of 20"], note:"Q3 top spot held; gained Q9, first electrolyte visibility" },
-      { channel:"Perplexity", values:["1 of 10", "0 of 20"], note:"Lost Q6 (was 3rd)" }
-    ],
-    total: { channel:"Total", values:["5 of 40 (12.5%)", "3 of 80 (3.75%)"], note:"Net loss of 2 on the like-for-like questions, with 1 genuine gain" },
-    note: "Each column is that month's full audit; question counts grow as the audit expands, so compare rates, not raw counts."
-  },
+  /* Executive summary, August 2026 audit. */
+  note: "Promix now shows up for 7 of 80 checks. That is 8.75% visibility across Google and the three major AI answer engines, up from 3 of 80 (3.75%) in July \u2014 visibility more than doubled in one month. For the first time in this engagement Promix holds #1 rankings: two of them, both on the isolate-vs-concentrate question the July report flagged as a priority. This is the first round measured after Month 1 content began publishing.",
+  intentNote: "Buying-intent visibility held at 3 of 20, but every one of the three is a different check than last month.",
+  method: "20 questions \u00d7 4 platforms = 80 checks, all run on August 27, 2026. Searches were tested word for word as a shopper would type them, never naming Promix. Engines audited: Google, ChatGPT, Gemini, Perplexity.",
   wins: [
     "Q3 Gemini, top spot, held from June with richer detail. Promix's own phrase \"zero artificial anything\" survives inside Gemini's answer.",
     "Q3 ChatGPT, passing mention, held but demoted from a ranked 3rd pick to a mention.",
