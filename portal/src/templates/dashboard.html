@@ -106,6 +106,13 @@ td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
 tr:last-child td{border-bottom:none;}
 tr.total td{background:var(--surface-2);color:var(--brand);font-weight:700;border-top:2px solid var(--line);}
 td.num,th.num{text-align:right;}
+/* Month group header inside the content pipeline table. */
+tr.grp td{
+  background:var(--surface-2); border-bottom:1px solid var(--line);
+  padding:8px 12px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+}
+tr.grp .grp-name{ font-weight:700; color:var(--brand); }
+tr.grp .grp-meta{ float:right; font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; font-size:11.5px; }
 .empty-row td{color:var(--muted);font-style:italic;text-align:center;padding:18px 12px;}
 .scrolly{max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;}
 .scrolly table th{position:sticky;top:0;z-index:1;}
@@ -670,6 +677,15 @@ function badge(kind, label){
   var cls = { pass:"b-pass", pending:"b-pend", no:"b-no", live:"b-live" }[kind] || "b-pend";
   return '<span class="badge '+cls+'">'+label+'</span>';
 }
+var PIPE_MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+  return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+
+/* Group pipeline rows by the month they were published, newest month first,
+   with anything not yet given a publish date collected at the end — a post
+   with no date has no month to sit under, and those are the ones still in
+   flight. Each group header carries its own live/total count so a month can be
+   read at a glance without tallying rows. */
 function renderPipeline(){
   var tb = document.getElementById("pipelineBody");
   tb.innerHTML = "";
@@ -677,12 +693,50 @@ function renderPipeline(){
     tb.innerHTML = '<tr class="empty-row"><td colspan="7">No posts published yet, baseline pending.</td></tr>';
     return;
   }
+
+  var groups = {}, order = [];
   pipeline.forEach(function(p){
-    var tr = document.createElement("tr");
-    var sopN = sopCount(p);
-    var sopCell = sopN !== null ? sopN + "/7" : (typeof p.sop === "string" ? p.sop : "");
-    tr.innerHTML = "<td>"+(p.num||"")+"</td><td>"+p.post+"</td><td>"+badge(p.status==="Live"?"live":"pending",p.status)+"</td><td>"+(p.published||"")+"</td><td>"+sopCell+"</td><td>"+(p.schema||"")+"</td><td>"+(p.ai||"")+"</td>";
-    tb.appendChild(tr);
+    var d = String(p.published || "");
+    var key = /^\d{4}-\d{2}/.test(d) ? d.slice(0, 7) : "unscheduled";
+    if(!groups[key]){ groups[key] = []; order.push(key); }
+    groups[key].push(p);
+  });
+  // Dated months descending; the undated bucket always last.
+  order.sort(function(a, b){
+    if(a === "unscheduled") return 1;
+    if(b === "unscheduled") return -1;
+    return b.localeCompare(a);
+  });
+
+  order.forEach(function(key){
+    var rows = groups[key];
+    var label;
+    if(key === "unscheduled"){
+      label = "Not yet scheduled";
+    } else {
+      var parts = key.split("-");
+      label = PIPE_MONTHS[Number(parts[1]) - 1] + " " + parts[0];
+    }
+    var live = rows.filter(function(p){ return p.status === "Live"; }).length;
+    var meta = rows.length + (rows.length === 1 ? " post" : " posts")
+             + (key === "unscheduled" ? "" : " &middot; " + live + " live");
+
+    var head = document.createElement("tr");
+    head.className = "grp";
+    head.innerHTML = '<td colspan="7"><span class="grp-name">' + esc(label) + '</span><span class="grp-meta">' + meta + "</span></td>";
+    tb.appendChild(head);
+
+    // Within a month, order by publish date then by post number.
+    rows.slice().sort(function(a, b){
+      var c = String(a.published || "").localeCompare(String(b.published || ""));
+      return c !== 0 ? c : String(a.num || "").localeCompare(String(b.num || ""), undefined, { numeric: true });
+    }).forEach(function(p){
+      var tr = document.createElement("tr");
+      var sopN = sopCount(p);
+      var sopCell = sopN !== null ? sopN + "/7" : (typeof p.sop === "string" ? esc(p.sop) : "");
+      tr.innerHTML = "<td>"+esc(p.num)+"</td><td>"+esc(p.post)+"</td><td>"+badge(p.status==="Live"?"live":"pending",esc(p.status))+"</td><td>"+esc(p.published)+"</td><td>"+sopCell+"</td><td>"+esc(p.schema)+"</td><td>"+esc(p.ai)+"</td>";
+      tb.appendChild(tr);
+    });
   });
 }
 
