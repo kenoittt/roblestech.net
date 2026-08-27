@@ -159,6 +159,11 @@ const DELAY_MS = 8000;
 
 <style>
   .nl { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  /* Must come after the display:flex above. A class rule in author CSS beats
+     the UA stylesheet's [hidden]{display:none}, so without this the modal
+     never hides — it stays a full-viewport layer with an invisible backdrop
+     and swallows every click on the page. */
+  .nl[hidden] { display: none; }
   .nl-backdrop { position: absolute; inset: 0; background: rgba(0,5,15,.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); opacity: 0; transition: opacity 200ms var(--ease-standard); }
   .nl.nl-in .nl-backdrop { opacity: 1; }
 
