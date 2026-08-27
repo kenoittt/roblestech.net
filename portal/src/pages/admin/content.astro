@@ -109,6 +109,16 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
   <div class="section-h">AI Visibility Audit — monthly reports</div>
   <p class="hint" style="margin-bottom:12px;">One report per month from the client's start date (PDF or HTML). These are listed on the client's dashboard under AI Visibility.</p>
+  {audits.length > 0 && (
+    <form method="post" action="/api/refresh-audit-figures" class="gated" style="margin-bottom:12px;">
+      <input type="hidden" name="client_id" value={clientId} />
+      <button class="mini" type="submit">Re-read figures from latest audit</button>
+      <span class="hint" style="display:inline;margin-left:8px;">
+        Applies the newest uploaded audit's check counts to the dashboard. Use this for an audit that was uploaded
+        before figures were read automatically — no need to upload it again.
+      </span>
+    </form>
+  )}
   <form method="post" action="/api/upload-audit" enctype="multipart/form-data" class="card gated" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:14px;">
     <input type="hidden" name="client_id" value={clientId} />
     <div><label>Month</label><input type="month" name="period" required /></div>
