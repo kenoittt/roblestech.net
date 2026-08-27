@@ -1,0 +1,244 @@
+---
+/*
+ * Newsletter signup modal, shown once to a first-time visitor.
+ *
+ * Salesforce wiring: this posts to the same Web-to-Lead endpoint as the
+ * contact form, but into a hidden iframe so the visitor is never navigated
+ * away mid-browse — the modal swaps to an inline success state instead.
+ * Because the iframe response is cross-origin we cannot read it, so success is
+ * assumed once the POST is sent; that is the normal trade-off for Web-to-Lead
+ * without a server in between.
+ *
+ * Two Salesforce specifics worth keeping in mind:
+ *  - A Lead cannot be created without Company, and a newsletter form has no
+ *    sensible place to ask for one, so a fixed value is sent. Without it the
+ *    submission is silently discarded.
+ *  - lead_source is set to "Newsletter Popup" so these are separable from
+ *    contact-form leads in reporting and assignment rules.
+ */
+const SF_ENDPOINT = 'https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00Dd500000JnGbl';
+const SF_OID = '00Dd500000JnGbl';
+/** Delay before the modal appears, so it never lands on top of a first paint. */
+const DELAY_MS = 8000;
+---
+
+<div class="nl" id="nlModal" hidden role="dialog" aria-modal="true" aria-labelledby="nlTitle" aria-describedby="nlDesc">
+  <div class="nl-backdrop" data-nl-close></div>
+
+  <div class="nl-card" role="document">
+    <button type="button" class="nl-x" data-nl-close aria-label="Close">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="nl-body" id="nlForm">
+      <div class="nl-eyebrow">The RTC Brief</div>
+      <h2 class="nl-h" id="nlTitle">Get ahead of AI search.</h2>
+      <p class="nl-p" id="nlDesc">Practical GEO, automation and Smartsheet insight — what's actually working, sent occasionally. No noise, unsubscribe any time.</p>
+
+      <form class="nl-form" action={SF_ENDPOINT} method="POST" target="nl_sink" novalidate>
+        <input type="hidden" name="oid" value={SF_OID} />
+        <input type="hidden" name="lead_source" value="Newsletter Popup" />
+        {/* Salesforce rejects a Lead with no Company; a newsletter form has no
+            place to ask, so this stands in. */}
+        <input type="hidden" name="company" value="Newsletter Subscriber" />
+
+        <div class="nl-row">
+          <div class="nl-field">
+            <label for="nlFirst">First name</label>
+            <input id="nlFirst" name="first_name" type="text" maxlength="40" autocomplete="given-name" />
+          </div>
+          <div class="nl-field">
+            <label for="nlLast">Last name <span class="nl-req">*</span></label>
+            <input id="nlLast" name="last_name" type="text" maxlength="80" required autocomplete="family-name" />
+          </div>
+        </div>
+
+        <div class="nl-field">
+          <label for="nlEmail">Email <span class="nl-req">*</span></label>
+          <input id="nlEmail" name="email" type="email" maxlength="80" required autocomplete="email" placeholder="you@company.com" />
+        </div>
+
+        <p class="nl-err" id="nlErr" hidden></p>
+
+        <button type="submit" class="nl-btn">Subscribe →</button>
+        <p class="nl-fine">By subscribing you agree to receive occasional email from Robles Technologies Corp. We never share or sell your details.</p>
+      </form>
+    </div>
+
+    <div class="nl-done" id="nlDone" hidden>
+      <span class="nl-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      <h2 class="nl-h">You're on the list.</h2>
+      <p class="nl-p">Thanks — we'll be in touch. Nothing else to do right now.</p>
+      <button type="button" class="nl-btn" data-nl-close>Keep browsing</button>
+    </div>
+  </div>
+</div>
+
+{/* The POST target: keeps the visitor on the page instead of navigating to
+    Salesforce and back. */}
+<iframe name="nl_sink" title="Newsletter submission" hidden style="display:none;width:0;height:0;border:0;"></iframe>
+
+<script is:inline define:vars={{ DELAY_MS }}>
+  (function () {
+    var KEY = 'rtc-nl';                      // 'done' | 'dismissed'
+    var modal = document.getElementById('nlModal');
+    if (!modal) return;
+
+    // Never pop at someone who has just submitted a form — mark them as seen
+    // and leave them alone.
+    var onThanks = /\/thank-you(\.html)?$/.test(location.pathname);
+    function seen() { try { return localStorage.getItem(KEY); } catch (e) { return 'blocked'; } }
+    function mark(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+    if (onThanks) { mark('done'); return; }
+    if (seen()) return;
+
+    var lastFocus = null;
+    var form = document.getElementById('nlForm');
+    var done = document.getElementById('nlDone');
+    var err = document.getElementById('nlErr');
+
+    function open() {
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(function () { modal.classList.add('nl-in'); });
+      var f = modal.querySelector('input:not([type=hidden])');
+      if (f) f.focus();
+    }
+    function close(reason) {
+      modal.classList.remove('nl-in');
+      document.body.style.overflow = '';
+      setTimeout(function () { modal.hidden = true; }, 200);
+      mark(reason || 'dismissed');
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-nl-close]')) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) close();
+      // Keep tabbing inside the dialog while it is open.
+      if (e.key === 'Tab' && !modal.hidden) {
+        var f = modal.querySelectorAll('button, input, a[href]');
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    modal.querySelector('.nl-form').addEventListener('submit', function (e) {
+      var email = document.getElementById('nlEmail');
+      var last = document.getElementById('nlLast');
+      // novalidate + explicit checks: a browser bubble inside a modal is easy
+      // to miss, so errors are shown inline instead.
+      if (!last.value.trim() || !email.value.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)) {
+        e.preventDefault();
+        err.textContent = 'Please add your last name and a valid email address.';
+        err.hidden = false;
+        return;
+      }
+      err.hidden = true;
+      // The POST goes to the hidden iframe; swap to the success state and
+      // remember, so this visitor is never asked again.
+      setTimeout(function () {
+        form.hidden = true;
+        done.hidden = false;
+        mark('done');
+        var b = done.querySelector('.nl-btn');
+        if (b) b.focus();
+      }, 250);
+    });
+
+    setTimeout(open, DELAY_MS);
+  })();
+</script>
+
+<style>
+  .nl { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .nl-backdrop { position: absolute; inset: 0; background: rgba(0,5,15,.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); opacity: 0; transition: opacity 200ms var(--ease-standard); }
+  .nl.nl-in .nl-backdrop { opacity: 1; }
+
+  .nl-card {
+    position: relative; width: 100%; max-width: 460px;
+    background: var(--rtc-navy-900); border-radius: var(--rtc-radius-lg);
+    border: 1px solid var(--rtc-glass-border-dark);
+    box-shadow: var(--rtc-glass-shadow-dark), var(--rtc-glass-highlight-dark);
+    padding: 34px 32px; overflow: hidden;
+    opacity: 0; transform: translateY(12px) scale(.98);
+    transition: opacity 220ms var(--ease-standard), transform 220ms var(--ease-standard);
+  }
+  .nl-card::before { content: ""; position: absolute; inset: 0; background: var(--rtc-gradient-mesh); opacity: .5; pointer-events: none; }
+  .nl-card > * { position: relative; }
+  .nl.nl-in .nl-card { opacity: 1; transform: none; }
+
+  .nl-x {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.75); cursor: pointer; transition: background 200ms var(--ease-standard);
+  }
+  .nl-x:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+  .nl-eyebrow {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 10px;
+  }
+  .nl-h { font-weight: 800; font-size: 25px; letter-spacing: -.02em; color: #fff; margin: 0 0 10px; }
+  .nl-p { font-size: 14.5px; line-height: 1.65; color: rgba(255,255,255,.76); margin: 0 0 20px; }
+
+  .nl-form { display: flex; flex-direction: column; gap: 13px; }
+  .nl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .nl-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .nl-field label {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+  }
+  .nl-req { color: var(--green); }
+  .nl-field input {
+    font-family: 'Montserrat', system-ui, sans-serif; font-size: .88rem; color: #fff;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+    border-radius: var(--rtc-radius-md); padding: 11px 14px; width: 100%; outline: none;
+    transition: border-color 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard);
+  }
+  .nl-field input::placeholder { color: rgba(255,255,255,.38); }
+  .nl-field input:focus { border-color: var(--azure); box-shadow: var(--rtc-focus-ring); }
+
+  .nl-err { font-size: 12.5px; color: #ffb4ac; margin: 0; }
+
+  .nl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 46px; padding: 0 22px; border: none; border-radius: var(--rtc-radius-md);
+    background: var(--core-blue); color: #fff; cursor: pointer;
+    font-family: 'Montserrat', system-ui, sans-serif; font-weight: 700; font-size: 14.5px;
+    transition: background 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+  }
+  .nl-btn:hover { background: #0356bd; }
+  .nl-btn:active { transform: translateY(1px); }
+  .nl-btn:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+
+  .nl-fine { font-size: 11.5px; line-height: 1.6; color: rgba(255,255,255,.5); margin: 0; }
+
+  .nl-done { text-align: center; padding: 8px 0; }
+  .nl-check {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 54px; height: 54px; border-radius: 50%; margin-bottom: 14px;
+    color: var(--green); background: rgba(174,227,123,.12); border: 1px solid rgba(174,227,123,.32);
+  }
+
+  @media (max-width: 460px) {
+    .nl-card { padding: 28px 20px; }
+    .nl-row { grid-template-columns: 1fr; }
+    .nl-h { font-size: 21px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nl-backdrop, .nl-card, .nl-btn, .nl-x, .nl-field input { transition: none; }
+    .nl-card { transform: none; }
+    .nl-btn:active { transform: none; }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import NewsletterPopup from '../components/NewsletterPopup.astro';
 // Bootstrap utilities only (no Reboot/reset, so it won't disturb the site's
 // hand-written styles) + our glass + dark-theme layers built on top.
 import 'bootstrap/dist/css/bootstrap-utilities.min.css';
@@ -106,6 +107,8 @@ const canonical = new URL(canonicalPath || '/', 'https://roblestech.net').href;
     <slot />
 
     <Footer scheduleHref={scheduleHref} />
+
+    <NewsletterPopup />
 
     <!-- Custom cursor (activated by motion.js on fine pointers only) -->
     <div class="cursor-dot" aria-hidden="true"></div>
