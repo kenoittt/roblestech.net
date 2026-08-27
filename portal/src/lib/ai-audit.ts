@@ -81,33 +81,65 @@ function fromJsonBlock(html: string): AiAuditFigures | null {
 function fromPatterns(html: string): AiAuditFigures | null {
   const t = textOf(html);
 
-  // "3 of 80 checks" / "3 of 80 checks visible"
-  const counts = t.match(/(\d[\d,]*)\s+of\s+(\d[\d,]*)\s+checks/i);
-  if (!counts) return null;
-  const visible = Number(counts[1].replace(/,/g, ''));
-  const total = Number(counts[2].replace(/,/g, ''));
-  if (!Number.isFinite(visible) || !Number.isFinite(total) || total <= 0 || visible > total) return null;
+  /* Headline counts. Several phrasings are accepted because audits are written
+     by hand and the wording drifts; the first that yields a sane pair wins.
+     A "Total" row is tried first — when an audit carries a scorecard total it
+     is the most reliable statement of the figures in the document. */
+  const strategies: Array<[RegExp, 'vis-first' | 'total-first']> = [
+    // Scorecard total row: "Total 80 11 13.8%"
+    [/\bTotal\s+(\d[\d,]*)\s+(\d[\d,]*)\s*\d{1,3}(?:\.\d)?%/i, 'total-first'],
+    // "11 of 80 checks" / "11 out of 80 checks"
+    [/(\d[\d,]*)\s+(?:of|out of)\s+(\d[\d,]*)\s+checks/i, 'vis-first'],
+    // "checks visible: 11 of 80"
+    [/checks?[^.]{0,20}?(\d[\d,]*)\s*(?:of|out of|\/)\s*(\d[\d,]*)/i, 'vis-first'],
+    // "11/80 checks" or "11 / 80 checks"
+    [/(\d[\d,]*)\s*\/\s*(\d[\d,]*)\s+checks/i, 'vis-first'],
+    // "Checks visible 11 ... Total checks 80" (either order)
+    [/visible\s*[:\-]?\s*(\d[\d,]*)[\s\S]{0,60}?total\s*(?:checks)?\s*[:\-]?\s*(\d[\d,]*)/i, 'vis-first'],
+    [/total\s*(?:checks)?\s*[:\-]?\s*(\d[\d,]*)[\s\S]{0,60}?visible\s*[:\-]?\s*(\d[\d,]*)/i, 'total-first'],
+  ];
 
-  const round = (t.match(/\bRound\s+(\d+)\b/i) || [])[1];
-  const tested = (t.match(/tested\s+([A-Z][a-z]+\s+\d{1,2}(?:\s*[-–]\s*\d{1,2})?,\s*\d{4})/) || [])[1];
+  let visible = NaN, total = NaN;
+  for (const [re, order] of strategies) {
+    const m = t.match(re);
+    if (!m) continue;
+    const a = Number(m[1].replace(/,/g, '')), b = Number(m[2].replace(/,/g, ''));
+    const v = order === 'vis-first' ? a : b;
+    const n = order === 'vis-first' ? b : a;
+    if (Number.isFinite(v) && Number.isFinite(n) && n > 0 && v <= n) { visible = v; total = n; break; }
+  }
+  if (!Number.isFinite(visible) || !Number.isFinite(total)) return null;
 
-  // Per-engine rows: "ChatGPT 20 1 5%" in a scorecard table.
+  // Round: "Round 3", "Round three" is not attempted; "R3" and "Audit 3" are.
+  const round = (t.match(/\bRound\s+(\d+)\b/i) || t.match(/\bR(\d+)\b\s*(?:audit|visibility)/i)
+              || t.match(/\bAudit\s+(?:round\s+)?(\d+)\b/i) || [])[1];
+
+  // Tested dates: "tested September 2-3, 2026", "Tested: Sep 2–3, 2026",
+  // or a bare date range near the word tested.
+  const MONTH = '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*';
+  const tested = (
+    t.match(new RegExp('tested\\s*[:\\-]?\\s*(' + MONTH + '\\s+\\d{1,2}(?:\\s*[-\u2013]\\s*\\d{1,2})?,?\\s*\\d{4})', 'i'))
+    || t.match(new RegExp('(' + MONTH + '\\s+\\d{1,2}\\s*[-\u2013]\\s*\\d{1,2},?\\s*\\d{4})', 'i'))
+    || []
+  )[1];
+
+  // Per-engine rows: "ChatGPT 20 1" (checks then visible).
   const scorecard: AiScorecardRow[] = [];
   for (const engine of ENGINES) {
-    const re = new RegExp(engine + '\\s+(\\d[\\d,]*)\\s+(\\d[\\d,]*)', 'i');
-    const m = t.match(re);
+    const m = t.match(new RegExp(engine + '\\s+(\\d[\\d,]*)\\s+(\\d[\\d,]*)', 'i'));
     if (!m) continue;
     const checks = Number(m[1].replace(/,/g, ''));
     const vis = Number(m[2].replace(/,/g, ''));
     if (checks > 0 && vis <= checks) scorecard.push({ channel: engine, checks, visible: vis, rate: pct(vis, checks) });
   }
-  // Only trust the scorecard if it reconciles with the headline total.
-  const sum = scorecard.reduce((a, r) => a + r.checks, 0);
-  const trusted = sum === total ? scorecard : [];
+  // Keep the scorecard only if it reconciles with the headline, on both totals.
+  const sumChecks = scorecard.reduce((a, r) => a + r.checks, 0);
+  const sumVisible = scorecard.reduce((a, r) => a + r.visible, 0);
+  const trusted = (sumChecks === total && sumVisible === visible) ? scorecard : [];
 
   return {
     round: round ? `Round ${round}` : '',
-    tested: tested ? tested.replace(/\s*[-–]\s*/, '-') : '',
+    tested: tested ? tested.replace(/\s*[-\u2013]\s*/, '-').replace(/\s+/g, ' ').trim() : '',
     totalChecks: total,
     visibleChecks: visible,
     rate: pct(visible, total),

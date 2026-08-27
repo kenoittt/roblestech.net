@@ -109,6 +109,31 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
   <div class="section-h">AI Visibility Audit — monthly reports</div>
   <p class="hint" style="margin-bottom:12px;">One report per month from the client's start date (PDF or HTML). These are listed on the client's dashboard under AI Visibility.</p>
+  <details style="margin-bottom:12px;">
+    <summary style="cursor:pointer;font-size:.82rem;font-weight:700;">How the dashboard picks up an audit automatically</summary>
+    <div class="hint" style="margin-top:8px;">
+      <p style="margin:0 0 8px;">Upload an <b>HTML</b> audit and the round, tested dates and check counts are read from it
+      on the way in — the AI visibility KPI, headline, rate and scorecard all follow. These wordings are recognised:</p>
+      <ul style="margin:0 0 10px 18px;display:flex;flex-direction:column;gap:3px;">
+        <li>“11 of 80 checks” / “11 out of 80 checks” / “11/80 checks”</li>
+        <li>“Checks visible: 11” with “Total checks: 80”</li>
+        <li>A scorecard <b>Total</b> row — per-engine rows are picked up too when they add up to the total</li>
+        <li>“Round 3” and “tested September 2-3, 2026”</li>
+      </ul>
+      <p style="margin:0 0 8px;">To make it exact rather than best-effort, paste this into the audit template. It is
+      invisible on the page and always wins over the wording above:</p>
+      <pre style="white-space:pre-wrap;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:.72rem;overflow-x:auto;margin:0 0 8px;">{`<script type="application/json" id="rtc-ai-audit">
+{"round":"Round 3","tested":"September 2-3, 2026",
+ "totalChecks":80,"visibleChecks":11,
+ "scorecard":[{"channel":"Google","checks":20,"visible":2},
+              {"channel":"ChatGPT","checks":20,"visible":4},
+              {"channel":"Gemini","checks":20,"visible":3},
+              {"channel":"Perplexity","checks":20,"visible":2}]}
+</script>`}</pre>
+      <p style="margin:0;">PDFs cannot be read — use the number fields on the upload form for those. If nothing can be
+      read, the previous round is left in place rather than being replaced with a guess, and the confirmation says so.</p>
+    </div>
+  </details>
   {audits.length > 0 && (
     <form method="post" action="/api/refresh-audit-figures" class="gated" style="margin-bottom:12px;">
       <input type="hidden" name="client_id" value={clientId} />
