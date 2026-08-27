@@ -537,41 +537,41 @@ var aiAudit = __C.aiAudit || {
   ],
   groups: [
     { name:"Problem-aware questions (Q1, Q2, Q7, Q11, Q12)",
-      insight:"0 of 20. Clinics own the safety fears, but four supplement brands (Gainful, Performance Lab, Bulk, Hydrant) prove a brand can earn citations on Q11 and Q12 with plain education pages. Q11 is the most winnable question in the whole set. Q7 belongs to Examine.com because its page carries an interactive protein calculator, the same tool Promix owns but has never built an answer page around.",
+      insight:"0 of 20, unchanged in character: clinics, institutions and health media own the fear questions. Two details worth logging. On Q7, Perplexity's lead source is now MyProteinCalc, a bare calculator page \u2014 more evidence the protein-calculator play is the right answer format here. And Q11 remains the most winnable question in the set: the brands cited (Wellversed, Innermost, Nutrition Now) are far smaller than Promix, and the Promix answer page has not published yet.",
       rows:[
-        {n:1, q:"Why do I feel bloated after taking protein powder?", g:"No", c:"No", ge:"No", p:"No", won:"Healthline, Ubie Health, Reddit/Facebook threads, Premier Protein"},
-        {n:2, q:"Are artificial sweeteners in supplements bad for you?", g:"No", c:"No", ge:"No", p:"No", won:"Mayo Clinic, Cleveland Clinic, Johns Hopkins, PubMed"},
-        {n:7, q:"How much protein do I actually need per day to build muscle?", g:"No", c:"No", ge:"No", p:"No", won:"Examine.com (#1, own calculator), Healthline, Mayo Clinic"},
-        {n:11, q:"Why does pre-workout make my skin itch? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"Medical News Today, Boots, Gainful, Performance Lab, Bulk"},
-        {n:12, q:"Do I need an electrolyte powder, or can I get electrolytes from food? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"NY-Presbyterian, Harvard, heart.org, WebMD; Hydrant (Perplexity)"}
-      ]},
+        {n:1, q:"Why do I feel bloated after taking protein powder?", g:"No", c:"No", ge:"No", p:"No", won:"Premier Protein (Google and Perplexity), Grounded Shakes, Shnack, Healthline, Ubie Health, Naked Nutrition; Gemini named no brands"},
+        {n:2, q:"Are artificial sweeteners in supplements bad for you?", g:"No", c:"No", ge:"No", p:"No", won:"Johns Hopkins Medicine, Mayo Clinic, Ohio State Health & Discovery, US FDA, WHO, Healthline"},
+        {n:7, q:"How much protein do I actually need per day to build muscle?", g:"No", c:"No", ge:"No", p:"No", won:"Examine.com, Harvard, Mayo Clinic, PubMed; MyProteinCalc now leads Perplexity with its own calculator; Yazen, Verywell Health"},
+        {n:11, q:"Why does pre workout make my skin itch?", g:"No", c:"No", ge:"No", p:"No", won:"Boots, Nutrition Now, Medical News Today, Ubie, Innermost, Wellversed (Gemini and Perplexity), Acibadem International, Welltech"},
+        {n:12, q:"Do I actually need an electrolyte powder, or can I get electrolytes from food?", g:"No", c:"No", ge:"No", p:"No", won:"ZOE, Banner Health, BBC, NHS.uk, ACSM, NYIT, Science Insight; Gemini cited no sources"}
+      ] },
     { name:"Comparison questions (Q4, Q13, Q14, Q15, Q16)",
-      insight:"0 of 20, and the single biggest month-1 priority. Across all five, the AI chat answers are brandless tables, but Google page 1 and Perplexity's sources are full of competitor education pages. At least ten brands earn citations here. Promix sells both sides of three of the five comparisons, so it can publish the neutral answer almost no competitor can. And the territory moves fast: NWP Supplements' June 2026 isolate-vs-concentrate post already holds Google #1.",
+      insight:"From 0 of 20 in July to 3 of 20 in August, and the three wins are exactly where Month 1 aimed. Q15 is the headline of the whole audit: Promix now holds #1 on both Google and Gemini for isolate vs concentrate, and NWP Supplements, which held Google #1 in July, has dropped out of the top 3 entirely \u2014 a same-quarter displacement. Q14 adds a Gemini #2 on the creatine shortlist question that was invisible in all 80 prior checks. Q13, Q16 and Q4 remain open, and ChatGPT's comparison answers stayed brandless across the board.",
       rows:[
-        {n:4, q:"Grass-fed whey vs regular whey protein", g:"No", c:"No (Jun: Yes, 3rd)", ge:"No", p:"No", won:"Momentous, 1st Phorm, BarBend, Examine; ChatGPT's answer went fully brandless"},
-        {n:13, q:"Casein vs whey: which should I take at night? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"Myprotein (Google page 1); Nutrition X (Perplexity lead source)"},
-        {n:14, q:"Creatine monohydrate vs HCL: which is better? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"health.com, Gainful; Perplexity: 5 brand blogs (Transparent Labs, Myprotein, Levels, Gainful, Jinfiniti)"},
-        {n:15, q:"Whey isolate vs concentrate: which is easier on the stomach? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"NWP Supplements (#1, Jun 2026), Naked Nutrition, Healthline, Transparent Labs"},
-        {n:16, q:"Collagen vs whey protein: do I need both? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"Thorne, Optimum Nutrition, Transparent Labs; Frog Fuel, Wellbeing Nutrition, OP2 Labs (Perplexity)"}
-      ]},
-    { name:"How-to & safety questions (Q8, Q17, Q18, Q19, Q20)",
-      insight:"0 of 20, but the group splits. The creatine safety pair (Q17, Q18), together 40,000+ searches/mo, is owned by medical authorities. Honest target there is AI-answer presence and topical trust, not outranking Cleveland Clinic. Note: on Q18 every engine anchors on one paper, the 2025 randomized trial (Lak et al.), so the Promix post must cite it by name to be quotable. Q19 and Q20 are brand-winnable today: Rho Nutrition, a far smaller brand, out-cites everyone on third-party testing simply because it wrote the answer-first post.",
+        {n:4, q:"Grass-fed whey vs regular whey protein", g:"No", c:"No", ge:"No", p:"No", won:"ThatsAllProtein, BarBend (Google and Gemini), Healthfarm Nutrition, RAW Nutrition, Momentous, FeastGood, 1st Phorm; ChatGPT's answer went brandless"},
+        {n:13, q:"Casein vs whey: which should I take at night?", g:"No", c:"No", ge:"No", p:"No", won:"NIH, Nutrition X (Google and Perplexity's lead source, holding from July), ProSupps, BodyScienceReview, Tafity; ChatGPT and Gemini cited no sources"},
+        {n:14, q:"Creatine monohydrate vs HCL: which is better?", g:"No", c:"No", ge:"Yes, 2nd (NEW WIN)", p:"No", won:"Health.com, Gainful, iHerb on Google; on Gemini, Nutri Partners sits ahead of Promix and Jinfiniti behind; FitChef, Fit.Thicket, YourHealthier on Perplexity"},
+        {n:15, q:"Whey isolate vs concentrate: which is easier on the stomach?", g:"Yes, 1st (NEW WIN)", c:"No", ge:"Yes, 1st (NEW WIN)", p:"No", won:"Xwerks 2nd behind Promix on both Google and Gemini; Naked Nutrition, VPA Australia; Alibaba, PaleoPro, OreateAI on Perplexity. NWP Supplements, July's Google #1, is out of every top 3"},
+        {n:16, q:"Collagen vs whey protein: do I need both?", g:"No", c:"No", ge:"No", p:"No", won:"Naked Nutrition (Google and Perplexity), Transparent Labs (Google and Gemini), PubMed, SpringerLink, Chief Nutrition, Optimum Nutrition, Health.com"}
+      ] },
+    { name:"How-to and safety questions (Q8, Q17, Q18, Q19, Q20)",
+      insight:"1 of 20, and it is the one that matters most: Q20, the third-party-testing trust question, now names Promix 2nd on Gemini. In July, Rho Nutrition owned this question on Perplexity; in August, Rho has vanished from every top-3 list and Promix is the brand Gemini cites. Google (Harvard, NSF, GoodRx) and Perplexity (USP, NSF, USADA) still default to institutions. The creatine safety pair, Q17 and Q18, remains medical-authority territory, and Q19 is still Gainful's on Google.",
       rows:[
-        {n:8, q:"When should I take creatine for best results?", g:"No", c:"No", ge:"No", p:"No", won:"Healthline, Houston Methodist, MuscleTech, The Protein Works (Perplexity)"},
-        {n:17, q:"Does creatine make you gain weight? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"St. Vincent's Medical Center, Cleveland Clinic, AMA, Healthline"},
-        {n:18, q:"Does creatine cause hair loss? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"NIH 2025 randomized trial (#1), Cleveland Clinic, Examine.com"},
-        {n:19, q:"Is whey protein OK if I'm lactose intolerant? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"Gainful (#1 & Perplexity), BearWell, Orgain, Naked Nutrition"},
-        {n:20, q:"How do I know if a supplement is actually third-party tested? (NEW)", g:"No", c:"No", ge:"No", p:"No", won:"Harvard Health (#1), NSF.org, GoodRx; Rho Nutrition (Perplexity's most-cited source)"}
-      ]},
+        {n:8, q:"When should I take creatine for best results?", g:"No", c:"No", ge:"No", p:"No", won:"Healthline (Google and Gemini), Myprotein, Medical News Today, SpringerLink, Doctronic, Boots, All About Creatine, Transparent Labs cited on Perplexity"},
+        {n:17, q:"Does creatine make you gain weight?", g:"No", c:"No", ge:"No", p:"No", won:"Healthline, InBody USA, Ubie Health (Google and Perplexity), NIH ODS, Men's Health, Cleveland Clinic; Gemini cited no sources"},
+        {n:18, q:"Does creatine cause hair loss?", g:"No", c:"No", ge:"No", p:"No", won:"DNA Skin Clinic, Western Reserve Dermatology, NIH, PubMed (ChatGPT and Perplexity), Ubie, Vinci Hair Clinic, Cleveland Clinic, Examine.com"},
+        {n:19, q:"Is whey protein OK if I'm lactose intolerant?", g:"No", c:"No", ge:"No", p:"No", won:"Gainful still at Google #1, Bulk Nutrients, VPA Australia (Google and Gemini), BearWell, GNC; Cleveland Clinic and NIDDK on both ChatGPT and Perplexity"},
+        {n:20, q:"How do I know if a supplement is actually third party tested?", g:"No", c:"No", ge:"Yes, 2nd (NEW WIN)", p:"No", won:"GoodRx (Google, and behind Promix on Gemini), Harvard Health, NSF (cited on three engines), Vedic Nutrition ahead of Promix on Gemini, USP, USADA. Rho Nutrition, July's Perplexity leader, is gone"}
+      ] },
     { name:"Buying-intent questions (Q3, Q5, Q6, Q9, Q10)",
-      insight:"The only group with any visibility, 3 of 20, and all three hits in the whole audit live here. Promix gets named only when the search literally contains its positioning words (cleanest, no sweetener). The Q9 Gemini win is the first electrolyte visibility ever and came via The Feed, proof the PR lever works. Q10 shows Naked winning transactional searches with quotable product-page copy, which is exactly the landing-page rewrite in the Operator scope.",
+      insight:"3 of 20 again, but the composition flipped completely. Gained: Q6 is back on Google page 1 at 4th, its strongest position in this audit, plus a first-ever Gemini citation at 3rd; and Q10 delivers the first transactional-search win of the engagement at Google 3rd. Lost: Q3, the positioning query that had been Promix's most reliable win, went dark on both ChatGPT and Gemini, with Naked Nutrition now cited across all four engines; and the Q9 Gemini citation earned via The Feed in July has faded, confirming that PR-driven citations decay without reinforcement. Q5 stays locked by Thorne, Transparent Labs and Optimum Nutrition via publisher listicles.",
       rows:[
-        {n:3, q:"Cleanest protein powder with no fillers or additives", g:"No", c:"Yes, mention (Jun: ranked 3rd)", ge:"Yes, top (held)", p:"No", won:"Naked Whey, Transparent Labs, Levels, Nutricost, Truvani"},
-        {n:5, q:"Best creatine powder 2026", g:"No", c:"No", ge:"No", p:"No", won:"Thorne, Transparent Labs, Nutricost, Optimum; assembled from Forbes, Men's Health, Fortune"},
-        {n:6, q:"Best natural pre-workout without artificial dyes", g:"No (Jun: Yes, 6th)", c:"No", ge:"No", p:"No (Jun: Yes, 3rd)", won:"Legion Pulse, Transparent Labs, Naked Energy; Perplexity built on Garage Gym Reviews"},
-        {n:9, q:"Best electrolyte powder no sugar", g:"No", c:"No", ge:"Yes, 5th (NEW WIN)", p:"No", won:"LMNT, Ultima, Redmond Re-Lyte, Liquid I.V.; Promix named via The Feed's roundup"},
-        {n:10, q:"Buy non-GMO grass-fed protein powder online", g:"No", c:"No", ge:"No", p:"No", won:"Naked Nutrition (all four platforms), via its own quotable product-page copy"}
-      ]}
+        {n:3, q:"Cleanest protein powder with no fillers or additives", g:"No", c:"No (July: Yes, mention)", ge:"No (July: Yes, top)", p:"No", won:"Naked Nutrition on all four platforms; Sunwarrior UK, Transparent Labs, BulkSupplements, California Gold Nutrition, Isopure, Truvani, NOW Foods"},
+        {n:5, q:"Best creatine powder 2026", g:"No", c:"No", ge:"No", p:"No", won:"Transparent Labs (Google, Gemini, Perplexity), Thorne (ChatGPT, Gemini, Perplexity), Optimum Nutrition, Swolverine, Nutricost, Naked Nutrition, 1st Phorm"},
+        {n:6, q:"Best natural pre-workout without artificial dyes", g:"Yes, 4th (July: No)", c:"No", ge:"Yes, 3rd (NEW WIN)", p:"No", won:"Legion Athletics Pulse at Google #1 and cited on ChatGPT and Gemini; Naked Nutrition, Honey Badger, RAW Nutrition, NDS, Transparent Labs (Gemini and Perplexity), RSP"},
+        {n:9, q:"Best electrolyte powder no sugar", g:"No", c:"No", ge:"No (July: Yes, 5th via The Feed)", p:"No", won:"LMNT (Google, ChatGPT, Perplexity), Ultima, Transparent Labs (all four platforms), Thorne, Topvitamine, Everyday Health, Men's Health"},
+        {n:10, q:"Buy non-GMO grass-fed protein powder online", g:"Yes, 3rd (NEW WIN)", c:"No", ge:"No", p:"No", won:"Raw Organic Whey at Google #1 and on Gemini, Transparent Labs (Google and Perplexity), Naked Whey / Naked Nutrition, AGN Roots, Pouri, iHerb, Legion, Natural Force Organic"}
+      ] }
   ]
 };
 var openItems = __C.openItems || [
@@ -1008,6 +1008,32 @@ function renderAi(){
     mCard.innerHTML = "<h2>Monthly audit reports</h2>" +
       "<table><thead><tr><th>Month</th><th>Report</th><th class='num'></th></tr></thead><tbody>"+mrows+"</tbody></table>";
     host.appendChild(mCard);
+
+  /* Aggregate Visibility Scorecard, placed directly under the monthly reports:
+     the month-on-month comparison is the first thing worth seeing on this tab.
+     Derived from the rounds on file only — the old hand-written aggregate was
+     June-vs-July and must not resurface. */
+  var derivedAgg = buildAggregate(2);
+  if(derivedAgg){
+    var aggCard = aggregateCard(derivedAgg);
+    aggCard.insertAdjacentHTML("beforeend",
+      '<div class="note">AI answers are volatile: a position held one month can vanish the next without anything being '
+      + 'done wrong. That is why the audit is re-run monthly — a brand that is not actively feeding these engines drifts out of them.</div>');
+    host.appendChild(aggCard);
+  } else if(aiAudit.change && aiAudit.change.length){
+  var chgRows = aiAudit.change.map(function(c){
+    var cls = c.channel === "Total" ? " class='total'" : "";
+    return "<tr"+cls+"><td>"+c.channel+"</td><td>"+c.june+"</td><td>"+c.july+"</td><td style='font-size:12.5px;color:var(--steel)'>"+c.note+"</td></tr>";
+  }).join("");
+  var chgCard = document.createElement("div");
+  chgCard.className = "card";
+  chgCard.innerHTML = "<h2>June vs July, like for like (original 10 questions)</h2>" +
+    '<div class="note" style="margin-top:0;margin-bottom:12px">This table compares only the 10 questions tracked since June (10 &times; 4 engines = 40 checks), so the month-over-month movement is apples to apples. The headline figure above covers the full audit' + (aiAudit.totalChecks ? " (" + aiAudit.visibleChecks + " of " + aiAudit.totalChecks + " checks)" : "") + '.</div>' +
+    "<table><thead><tr><th>Channel</th><th>June 2026</th><th>July 2026</th><th>What changed</th></tr></thead><tbody>"+chgRows+"</tbody></table>" +
+    '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
+  host.appendChild(chgCard);
+  }
+
   }
 
   // Summary — only when audit data exists (new clients start empty).
@@ -1072,31 +1098,6 @@ function renderAi(){
       "<table><thead><tr><th>#</th><th>Question / search phrase</th><th>Google</th><th>ChatGPT</th><th>Gemini</th><th>Perplexity</th><th>Who won instead</th></tr></thead><tbody>"+rows+"</tbody></table>";
     host.appendChild(card);
   });
-
-  // Aggregate Visibility Scorecard: one column per audit round (full-audit
-  // numbers). Falls back to the legacy June-vs-July table if no aggregate.
-  // Derived from the rounds on file only. The old hand-written aggregate was
-  // June-vs-July and must not resurface.
-  var derivedAgg = buildAggregate(2);
-  if(derivedAgg){
-    var aggCard = aggregateCard(derivedAgg);
-    aggCard.insertAdjacentHTML("beforeend",
-      '<div class="note">AI answers are volatile: a position held one month can vanish the next without anything being '
-      + 'done wrong. That is why the audit is re-run monthly — a brand that is not actively feeding these engines drifts out of them.</div>');
-    host.appendChild(aggCard);
-  } else if(aiAudit.change && aiAudit.change.length){
-  var chgRows = aiAudit.change.map(function(c){
-    var cls = c.channel === "Total" ? " class='total'" : "";
-    return "<tr"+cls+"><td>"+c.channel+"</td><td>"+c.june+"</td><td>"+c.july+"</td><td style='font-size:12.5px;color:var(--steel)'>"+c.note+"</td></tr>";
-  }).join("");
-  var chgCard = document.createElement("div");
-  chgCard.className = "card";
-  chgCard.innerHTML = "<h2>June vs July, like for like (original 10 questions)</h2>" +
-    '<div class="note" style="margin-top:0;margin-bottom:12px">This table compares only the 10 questions tracked since June (10 &times; 4 engines = 40 checks), so the month-over-month movement is apples to apples. The headline figure above covers the full audit' + (aiAudit.totalChecks ? " (" + aiAudit.visibleChecks + " of " + aiAudit.totalChecks + " checks)" : "") + '.</div>' +
-    "<table><thead><tr><th>Channel</th><th>June 2026</th><th>July 2026</th><th>What changed</th></tr></thead><tbody>"+chgRows+"</tbody></table>" +
-    '<div class="note">AI answers are volatile. In one month, without anyone doing anything wrong, ' + CLIENT_NAME + ' lost three of its five June wins. This is exactly why monthly tracking is part of the engagement: a brand that is not actively feeding these engines drifts out of them.</div>';
-  host.appendChild(chgCard);
-  }
 
   // Method note
   var methodNote = (aiAudit.method !== undefined && aiAudit.method !== null)
