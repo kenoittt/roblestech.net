@@ -107,12 +107,21 @@ tr:last-child td{border-bottom:none;}
 tr.total td{background:var(--surface-2);color:var(--brand);font-weight:700;border-top:2px solid var(--line);}
 td.num,th.num{text-align:right;}
 /* Month group header inside the content pipeline table. */
-tr.grp td{
-  background:var(--surface-2); border-bottom:1px solid var(--line);
-  padding:8px 12px; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase;
+tr.grp td{ padding:0; border-bottom:1px solid var(--line); }
+/* The whole header row is the toggle, so the hit target is the full width. */
+.grp-btn{
+  width:100%; display:flex; align-items:center; gap:9px;
+  background:var(--surface-2); border:0; cursor:pointer;
+  padding:9px 12px; font:inherit; font-size:11.5px; letter-spacing:.06em;
+  text-transform:uppercase; text-align:left; color:inherit;
 }
+.grp-btn:hover{ background:#E4EAF6; }
+.grp-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.grp-chev{ display:inline-flex; color:var(--muted); transition:transform 160ms ease; flex:none; }
+.grp-btn[aria-expanded="false"] .grp-chev{ transform:rotate(-90deg); }
 tr.grp .grp-name{ font-weight:700; color:var(--brand); }
-tr.grp .grp-meta{ float:right; font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; font-size:11.5px; }
+tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-transform:none; letter-spacing:0; font-size:11.5px; }
+@media (prefers-reduced-motion: reduce){ .grp-chev{ transition:none; } }
 .empty-row td{color:var(--muted);font-style:italic;text-align:center;padding:18px 12px;}
 .scrolly{max-height:320px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;}
 .scrolly table th{position:sticky;top:0;z-index:1;}
@@ -706,6 +715,36 @@ function pipeMonth(p){
   return months >= 0 ? months + 1 : "unknown";
 }
 
+/* Which pipeline month groups the viewer has collapsed. Remembered so a
+   closed month stays closed on the next visit; every storage access is
+   guarded, since a browser blocking site data must not break the table. */
+var PIPE_KEY = "rtc-pipe-collapsed";
+function pipeCollapsedSet(){
+  try { return JSON.parse(localStorage.getItem(PIPE_KEY) || "[]"); } catch(e){ return []; }
+}
+function pipeCollapsed(key){ return pipeCollapsedSet().indexOf(String(key)) !== -1; }
+function pipeSetCollapsed(key, on){
+  try {
+    var set = pipeCollapsedSet().filter(function(k){ return k !== String(key); });
+    if(on) set.push(String(key));
+    localStorage.setItem(PIPE_KEY, JSON.stringify(set));
+  } catch(e){}
+}
+/* Delegated once on the tbody, so it survives any re-render. */
+function initPipelineToggles(){
+  var tb = document.getElementById("pipelineBody");
+  if(!tb) return;
+  tb.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-grp-toggle]");
+    if(!btn) return;
+    var key = btn.getAttribute("data-grp-toggle");
+    var open = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", open ? "false" : "true");
+    tb.querySelectorAll('[data-grp-row="' + key + '"]').forEach(function(r){ r.hidden = open; });
+    pipeSetCollapsed(key, open);
+  });
+}
+
 /* Group pipeline rows into engagement months, M1 first, with anything that has
    no month collected at the end. Each header carries its own live/total count
    so a month reads at a glance without tallying rows. */
@@ -739,9 +778,16 @@ function renderPipeline(){
     var meta = rows.length + (rows.length === 1 ? " post" : " posts")
              + (key === "nodate" ? "" : " &middot; " + live + " live");
 
+    var collapsed = pipeCollapsed(key);
     var head = document.createElement("tr");
     head.className = "grp";
-    head.innerHTML = '<td colspan="7"><span class="grp-name">' + esc(label) + '</span><span class="grp-meta">' + meta + "</span></td>";
+    head.setAttribute("data-grp", key);
+    head.innerHTML =
+      '<td colspan="7"><button type="button" class="grp-btn" data-grp-toggle="' + esc(key) + '" aria-expanded="' + (collapsed ? "false" : "true") + '">' +
+        '<span class="grp-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>' +
+        '<span class="grp-name">' + esc(label) + '</span>' +
+        '<span class="grp-meta">' + meta + '</span>' +
+      '</button></td>';
     tb.appendChild(head);
 
     // Within a month, order by publish date then by post number.
@@ -750,6 +796,8 @@ function renderPipeline(){
       return c !== 0 ? c : String(a.num || "").localeCompare(String(b.num || ""), undefined, { numeric: true });
     }).forEach(function(p){
       var tr = document.createElement("tr");
+      tr.setAttribute("data-grp-row", key);
+      tr.hidden = collapsed;
       var sopN = sopCount(p);
       var sopCell = sopN !== null ? sopN + "/7" : (typeof p.sop === "string" ? esc(p.sop) : "");
       tr.innerHTML = "<td>"+esc(p.num)+"</td><td>"+esc(p.post)+"</td><td>"+badge(p.status==="Live"?"live":"pending",esc(p.status))+"</td><td>"+esc(p.published)+"</td><td>"+sopCell+"</td><td>"+esc(p.schema)+"</td><td>"+esc(p.ai)+"</td>";
@@ -1385,6 +1433,7 @@ function initDashboard(){
   safe(initBlogControls, "initBlogControls");
   safe(renderMeta, "renderMeta");
   safe(renderPipeline, "renderPipeline");
+  safe(initPipelineToggles, "initPipelineToggles");
   safe(function(){ renderByPage("byPageBodyOverview"); }, "renderByPage overview");
   safe(function(){ renderByPage("byPageBodyFull"); }, "renderByPage full");
   safe(renderBaseline, "renderBaseline");
