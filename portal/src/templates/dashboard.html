@@ -237,7 +237,6 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
 
   <!-- ============ OVERVIEW ============ -->
   <div class="panel active" id="panel-overview">
-    <div id="ovAggregate"></div>
     <div class="card">
       <h2>Content pipeline</h2>
       <table>
@@ -712,20 +711,49 @@ function buildAggregate(maxCols){
     r.scorecard.forEach(function(c){ if(channels.indexOf(c.channel) === -1) channels.push(c.channel); });
   });
 
+  var find = function(r, ch){ return r.scorecard.filter(function(c){ return c.channel === ch; })[0]; };
+  // Movement between the first and last column, stated in checks and in
+  // percentage points. Computed, never narrated — a delta cannot go stale.
+  var delta = function(firstV, firstC, lastV, lastC){
+    if(rounds.length < 2) return "";
+    var d = lastV - firstV;
+    var pp = (firstC > 0 && lastC > 0)
+      ? Math.round(((lastV / lastC) - (firstV / firstC)) * 1000) / 10
+      : null;
+    var sign = d > 0 ? "+" : (d < 0 ? "\u2212" : "");
+    var body = d === 0 ? "no change" : sign + Math.abs(d) + (Math.abs(d) === 1 ? " check" : " checks");
+    if(pp !== null && d !== 0) body += " (" + (pp > 0 ? "+" : pp < 0 ? "\u2212" : "") + Math.abs(pp) + " pp)";
+    var cls = d > 0 ? "b-pass" : (d < 0 ? "b-no" : "b-pend");
+    return '<span class="badge ' + cls + '">' + body + "</span>";
+  };
+
   var rows = channels.map(function(ch){
-    return { channel: ch, values: rounds.map(function(r){
-      var hit = r.scorecard.filter(function(c){ return c.channel === ch; })[0];
-      return hit ? hit.visible + " of " + hit.checks : "\u2014";
-    }), note: "" };
+    var first = find(rounds[0], ch), last = find(rounds[rounds.length - 1], ch);
+    return {
+      channel: ch,
+      values: rounds.map(function(r){
+        var hit = find(r, ch);
+        return hit ? hit.visible + " of " + hit.checks : "\u2014";
+      }),
+      note: (first && last) ? delta(first.visible, first.checks, last.visible, last.checks) : "",
+      noteIsHtml: true
+    };
   });
 
+  var firstR = rounds[0], lastR = rounds[rounds.length - 1];
   return {
     columns: rounds.map(label),
     rows: rows,
-    total: { channel:"Total", values: rounds.map(function(r){
-      return r.visibleChecks + " of " + r.totalChecks + " (" + r.rate + ")";
-    }), note: "" },
-    note: "Each column is that month's full audit. Question counts grow as the audit expands, so compare rates rather than raw counts."
+    total: {
+      channel: "Total",
+      values: rounds.map(function(r){ return r.visibleChecks + " of " + r.totalChecks + " (" + r.rate + ")"; }),
+      note: delta(firstR.visibleChecks, firstR.totalChecks, lastR.visibleChecks, lastR.totalChecks),
+      noteIsHtml: true
+    },
+    changeLabel: rounds.length > 1 ? "Change" : "",
+    note: rounds.length > 1
+      ? "Both columns are full audits. Question counts can grow as the audit expands, so the change column states percentage points alongside the raw check movement."
+      : "One audit on file. The comparison column appears once a second round is added."
   };
 }
 
@@ -733,10 +761,12 @@ function buildAggregate(maxCols){
 function aggregateCard(agg){
   var headCols = agg.columns.map(function(c){ return "<th>"+esc(c)+"</th>"; }).join("");
   var anyNote = agg.rows.some(function(r){ return r.note; }) || (agg.total && agg.total.note);
-  var noteCol = anyNote ? "<th>What changed</th>" : "";
+  var noteCol = anyNote ? "<th>" + esc(agg.changeLabel || "What changed") + "</th>" : "";
   var cell = function(r){
+    // Deltas are built as markup by buildAggregate; hand-written notes are text.
+    var note = r.noteIsHtml ? (r.note || "") : esc(r.note || "");
     return "<td>"+esc(r.channel)+"</td>" + r.values.map(function(v){ return "<td>"+esc(v)+"</td>"; }).join("") +
-      (anyNote ? "<td style='font-size:12.5px;color:var(--steel)'>"+esc(r.note||"")+"</td>" : "");
+      (anyNote ? "<td style='font-size:12.5px;color:var(--steel)'>"+note+"</td>" : "");
   };
   var body = agg.rows.map(function(r){ return "<tr>"+cell(r)+"</tr>"; }).join("");
   if(agg.total) body += "<tr class='total'>"+cell(agg.total)+"</tr>";
@@ -747,16 +777,6 @@ function aggregateCard(agg){
     "<table><thead><tr><th>Channel</th>"+headCols+noteCol+"</tr></thead><tbody>"+body+"</tbody></table>";
   return card;
 }
-
-/* Mirror the aggregate onto the Overview, where the headline numbers live. */
-function renderOverviewAggregate(){
-  var host = document.getElementById("ovAggregate");
-  if(!host) return;
-  var agg = buildAggregate(2) || (aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length ? aiAudit.aggregate : null);
-  host.innerHTML = "";
-  if(agg) host.appendChild(aggregateCard(agg));
-}
-
 
 /* ---------- per-client palette ----------
    The tokens above are RTC's own. A client dashboard should wear the client's
@@ -1054,8 +1074,9 @@ function renderAi(){
 
   // Aggregate Visibility Scorecard: one column per audit round (full-audit
   // numbers). Falls back to the legacy June-vs-July table if no aggregate.
-  var derivedAgg = buildAggregate(2)
-    || (aiAudit.aggregate && aiAudit.aggregate.rows && aiAudit.aggregate.rows.length ? aiAudit.aggregate : null);
+  // Derived from the rounds on file only. The old hand-written aggregate was
+  // June-vs-July and must not resurface.
+  var derivedAgg = buildAggregate(2);
   if(derivedAgg){
     var aggCard = aggregateCard(derivedAgg);
     aggCard.insertAdjacentHTML("beforeend",
@@ -1620,7 +1641,6 @@ function initDashboard(){
   safe(renderSop, "renderSop");
   safe(renderBlogPerf, "renderBlogPerf");
   safe(renderAi, "renderAi");
-  safe(renderOverviewAggregate, "renderOverviewAggregate");
   safe(renderOpenItems, "renderOpenItems");
   safe(computeRollups, "computeRollups");
   safe(renderLogTable, "renderLogTable");
