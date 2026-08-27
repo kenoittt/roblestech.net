@@ -1204,16 +1204,21 @@ function computeTrend(){
   // Bounds actually charted: the selected range clipped to the data we hold.
   var ds = rows.map(function(r){ return r.d; }).sort();
   var lo = ds.length ? ds[0] : "", hi = ds.length ? ds[ds.length-1] : "";
-  var partial = keys.map(function(k){
+  var isPartial = function(k){
     var sp = trendBucketSpan(k, gran);
     return !!lo && (sp.s < lo || sp.e > hi);
-  });
+  };
+  // Drop part-covered periods outright: a week holding 2 of 7 days is not a
+  // low week, it is an unfinished one, and plotting it states a number that
+  // is not true. Only whole periods are charted.
+  var excluded = keys.filter(isPartial);
+  var full = keys.filter(function(k){ return !isPartial(k); });
 
   return {
-    labels: keys,
-    clicks: keys.map(function(k){return map[k].c;}),
-    impr: keys.map(function(k){return map[k].i;}),
-    partial: partial, gran: gran
+    labels: full,
+    clicks: full.map(function(k){return map[k].c;}),
+    impr: full.map(function(k){return map[k].i;}),
+    excluded: excluded, gran: gran
   };
 }
 
@@ -1221,16 +1226,16 @@ function computeTrend(){
    part-covered so a short final column is not read as a fall in traffic. */
 function trendNote(t){
   var names = { day:"day", week:"week", month:"month", quarter:"quarter", year:"year" };
-  var idx = [];
-  t.partial.forEach(function(p, i){ if(p) idx.push(i); });
-  if(!idx.length) return "Each point is that " + names[t.gran] + "'s own total, not a running total.";
-  var which = idx.map(function(i){ return t.labels[i]; }).join(" and ");
-  return "Each point is that " + names[t.gran] + "'s own total, not a running total. "
-       + (idx.length === 1 ? "The " + names[t.gran] + " beginning " : "The periods ")
-       + which + (idx.length === 1 ? " is" : " are")
-       + " only part-covered by the data (Search Console lags 2-3 days), so "
-       + (idx.length === 1 ? "that point sits" : "those points sit")
-       + " low for that reason rather than because traffic fell — shown dashed.";
+  var base = "Each point is one complete " + names[t.gran] + "'s own total, not a running total.";
+  if(!t.excluded || !t.excluded.length) return base;
+  if(!t.labels.length){
+    return "No complete " + names[t.gran] + " in this range yet — every period here is still part-covered "
+         + "(Search Console lags 2-3 days). Switch to a shorter granularity to see the data.";
+  }
+  var which = t.excluded.join(" and ");
+  return base + " " + (t.excluded.length === 1 ? "One part-covered " + names[t.gran] + " (" : "Part-covered periods (")
+       + which + ") " + (t.excluded.length === 1 ? "is" : "are")
+       + " left out, because a period that is not finished would understate the true number.";
 }
 function makeDailyChart(){
   if(typeof Chart === "undefined"){ console.error("Chart.js did not load; dailyChart skipped."); return; }
@@ -1245,19 +1250,10 @@ function makeDailyChart(){
   if(nEl) nEl.textContent = trendNote(t);
   // A part-covered bucket is drawn dashed and hollow, so a short final column
   // reads as "not finished yet" rather than as a drop.
-  var dashSeg = function(ctx){ return (t.partial[ctx.p0DataIndex] || t.partial[ctx.p1DataIndex]) ? [6,4] : undefined; };
-  var pointStyle = function(){ return t.partial.map(function(p){ return p ? 5 : 3; }); };
-  var pointFill = function(colour){ return t.partial.map(function(p){ return p ? "#fff" : colour; }); };
   if(dailyChart){
     dailyChart.data.labels = t.labels;
     dailyChart.data.datasets[0].data = t.impr;
     dailyChart.data.datasets[1].data = t.clicks;
-    dailyChart.data.datasets[0].pointRadius = pointStyle();
-    dailyChart.data.datasets[1].pointRadius = pointStyle();
-    dailyChart.data.datasets[0].pointBackgroundColor = pointFill(cv("--brand"));
-    dailyChart.data.datasets[1].pointBackgroundColor = pointFill(cv("--chart-2"));
-    dailyChart.data.datasets[0].segment = { borderDash: dashSeg };
-    dailyChart.data.datasets[1].segment = { borderDash: dashSeg };
     dailyChart.update();
     return;
   }
@@ -1267,20 +1263,13 @@ function makeDailyChart(){
     data: {
       labels: t.labels,
       datasets: [
-        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI",
-          pointRadius: pointStyle(), pointBackgroundColor: pointFill(cv("--brand")), segment: { borderDash: dashSeg } },
-        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC",
-          pointRadius: pointStyle(), pointBackgroundColor: pointFill(cv("--chart-2")), segment: { borderDash: dashSeg } }
+        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
+        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { font: { family: cv("--font") } } },
-        tooltip: { callbacks: { afterBody: function(items){
-          return (items.length && t.partial[items[0].dataIndex]) ? "Part-covered period — not a full " + t.gran + "." : "";
-        } } }
-      },
+      plugins: { legend: { labels: { font: { family: cv("--font") } } } },
       scales: {
         yI: { position:"left",  beginAtZero:true, title:{display:true,text:"Impressions"} },
         yC: { position:"right", beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true,text:"Clicks"} }
@@ -1401,15 +1390,17 @@ function bpAgg(daily, gran){
   var labels = Object.keys(acc).sort();
   var ds = daily.map(function(r){ return r.d; }).sort();
   var lo = ds.length ? ds[0] : "", hi = ds.length ? ds[ds.length-1] : "";
-  var partial = labels.map(function(k){
+  var isPartial = function(k){
     var sp = trendBucketSpan(k, gran);
     return !!lo && (sp.s < lo || sp.e > hi);
-  });
+  };
+  var excluded = labels.filter(isPartial);
+  var full = labels.filter(function(k){ return !isPartial(k); });
   return {
-    labels: labels,
-    clicks: labels.map(function(k){ return acc[k].c; }),
-    impr: labels.map(function(k){ return acc[k].i; }),
-    partial: partial, gran: gran
+    labels: full,
+    clicks: full.map(function(k){ return acc[k].c; }),
+    impr: full.map(function(k){ return acc[k].i; }),
+    excluded: excluded, gran: gran
   };
 }
 function makeBlogChart(){
@@ -1442,20 +1433,10 @@ function makeBlogChart(){
     ? trendNote(t)
     : "No Search Console rows for this selection yet. A post only appears here once it has picked up impressions.";
 
-  var dashSeg = function(ctx){ return (t.partial[ctx.p0DataIndex] || t.partial[ctx.p1DataIndex]) ? [6,4] : undefined; };
-  var pointStyle = function(){ return t.partial.map(function(p){ return p ? 5 : 3; }); };
-  var pointFill = function(colour){ return t.partial.map(function(p){ return p ? "#fff" : colour; }); };
-
   if(blogChart){
     blogChart.data.labels = t.labels;
     blogChart.data.datasets[0].data = t.impr;
     blogChart.data.datasets[1].data = t.clicks;
-    blogChart.data.datasets[0].pointRadius = pointStyle();
-    blogChart.data.datasets[1].pointRadius = pointStyle();
-    blogChart.data.datasets[0].pointBackgroundColor = pointFill(cv("--brand"));
-    blogChart.data.datasets[1].pointBackgroundColor = pointFill(cv("--chart-2"));
-    blogChart.data.datasets[0].segment = { borderDash: dashSeg };
-    blogChart.data.datasets[1].segment = { borderDash: dashSeg };
     blogChart.update();
     return;
   }
@@ -1465,20 +1446,13 @@ function makeBlogChart(){
     data: {
       labels: t.labels,
       datasets: [
-        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI",
-          pointRadius: pointStyle(), pointBackgroundColor: pointFill(cv("--brand")), segment: { borderDash: dashSeg } },
-        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC",
-          pointRadius: pointStyle(), pointBackgroundColor: pointFill(cv("--chart-2")), segment: { borderDash: dashSeg } }
+        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
+        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { font: { family: cv("--font") } } },
-        tooltip: { callbacks: { afterBody: function(items){
-          return (items.length && t.partial[items[0].dataIndex]) ? "Part-covered period — not a full " + t.gran + "." : "";
-        } } }
-      },
+      plugins: { legend: { labels: { font: { family: cv("--font") } } } },
       scales: {
         yI: { position:"left",  beginAtZero:true, title:{display:true,text:"Impressions"} },
         yC: { position:"right", beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true,text:"Clicks"} }
