@@ -990,7 +990,10 @@ function renderSop(){
 /* ---------- AI visibility audit ---------- */
 function aiCell(str){
   if(/^Yes/i.test(str)) return badge("pass", str);
-  if(/Jun:/i.test(str)) return badge("no", str);   // lost since June
+  // "n/a" means the platform surfaced no sources at all on that check. That is
+  // neither a win nor a loss, so it must not be badged red alongside the
+  // questions where the brand was genuinely passed over.
+  if(/^n\/?a$/i.test(String(str).trim())) return badge("pend", str);
   return badge("no", str);
 }
 function renderAi(){

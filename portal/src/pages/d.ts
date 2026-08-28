@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../lib/supabase';
 import templateHtml from '../templates/dashboard.html?raw';
+import { auditSeedFor } from '../lib/audit-seeds';
 
 export const prerender = false;
 
@@ -81,6 +82,11 @@ export const GET: APIRoute = async (context) => {
     openItems: [],
   };
 
+  // Seed figures for a client whose audit has not been saved into config yet,
+  // so the dashboard shows their real audit instead of zeros. Stored data
+  // always wins — the seed is spread before rawCfg, never after.
+  const seed = auditSeedFor(name);
+
   const config = isPromix
     ? { clientName: name, propertyLabel: 'promixnutrition.com', ...rawCfg }
     : {
@@ -88,7 +94,8 @@ export const GET: APIRoute = async (context) => {
         ...rawCfg,
         hero: { ...neutral.hero, ...(rawCfg.hero ?? {}) },
         baseline: { ...neutral.baseline, ...(rawCfg.baseline ?? {}) },
-        aiAudit: { ...neutral.aiAudit, ...(rawCfg.aiAudit ?? {}) },
+        aiAudit: { ...neutral.aiAudit, ...(seed?.aiAudit ?? {}), ...(rawCfg.aiAudit ?? {}) },
+        aiAuditHistory: rawCfg.aiAuditHistory ?? seed?.aiAuditHistory ?? [],
       };
 
 
@@ -127,7 +134,10 @@ export const GET: APIRoute = async (context) => {
   const hasData =
     (Array.isArray((gsc as any).dailyLog) && (gsc as any).dailyLog.length > 0) ||
     (Array.isArray((config as any).pipeline) && (config as any).pipeline.length > 0) ||
-    !!((config as any).baseline && (config as any).baseline.window);
+    !!((config as any).baseline && (config as any).baseline.window) ||
+    // A real AI visibility audit is content in its own right — a client whose
+    // audit is loaded should not be told their dashboard is still being built.
+    Number((config as any).aiAudit?.totalChecks) > 0;
   const bypass = isAdmin && context.url.searchParams.get('preview') === '1';
   if (!hasData && !bypass) {
     const waiting = `<!doctype html><html lang="en"><head>
