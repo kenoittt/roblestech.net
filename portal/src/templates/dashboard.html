@@ -1258,13 +1258,19 @@ function makePerfChart(){
     }).join("");
   }
   perfChart = new Chart(ctx, {
+    type: "line",
     data: {
       labels: labels,
+      /* Both series are lines. Bars for impressions swamped the plot and left
+         the clicks line unreadable against them; two lines on their own axes
+         keep the shapes comparable. */
       datasets: [
-        { type:"bar",  label:"Impressions", data: byPage.map(function(r){return r.impr;}),
-          backgroundColor: cv("--brand"), borderRadius: 4, yAxisID:"yI" },
+        { type:"line", label:"Impressions", data: byPage.map(function(r){return r.impr;}),
+          borderColor: cv("--brand"), backgroundColor: cv("--brand"),
+          borderWidth:2, tension:.3, pointRadius:3, pointHoverRadius:5, yAxisID:"yI" },
         { type:"line", label:"Clicks", data: byPage.map(function(r){return r.clicks;}),
-          borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
+          borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"),
+          borderWidth:2, tension:.3, pointRadius:3, pointHoverRadius:5, yAxisID:"yC" }
       ]
     },
     options: {
