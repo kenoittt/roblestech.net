@@ -1248,7 +1248,9 @@ function makePerfChart(){
     var t = String(u || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
     var slash = t.indexOf("/");
     var path = slash === -1 ? "/" : t.slice(slash);
-    return path || "/";
+    // A bare "/" in the key reads as a truncated entry rather than the
+    // homepage, so name it.
+    return (path && path !== "/") ? path : "Homepage";
   };
   var labels = byPage.map(function(_, i){ return "P" + (i + 1); });
   var keyEl = document.getElementById("perfKey");
