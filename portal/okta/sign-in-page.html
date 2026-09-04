@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <!-- Styles generated from theme -->
+    <link href="{{themedStylesUrl}}" rel="stylesheet" type="text/css">
+    <!-- Favicon from theme -->
+    <link rel="shortcut icon" href="{{faviconUrl}}" type="image/x-icon"/>
+
+    <title>{{pageTitle}}</title>
+
+    <!-- Brand typography (Montserrat + League Spartan), same as roblestech.net
+         and portal.roblestech.net. If your org's CSP blocks Google Fonts, add
+         fonts.googleapis.com and fonts.gstatic.com as Trusted Origins in Okta;
+         every rule below falls back to the system stack on its own. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=League+Spartan:wght@600;700&display=swap" rel="stylesheet">
+
+    {{{SignInWidgetResources}}}
+
+    <style nonce="{{nonceValue}}">
+        {{#useSiwGen3}}
+        html {
+            font-size: 87.5%;
+        }
+        {{/useSiwGen3}}
+
+        /* ──────────────────────────────────────────────────────────────
+           Robles Technologies Corp. — sign-in theme
+           Design tokens lifted from portal/public/portal.css so this page
+           reads as part of the client portal, not as stock Okta.
+           ────────────────────────────────────────────────────────────── */
+        :root {
+            --rtc-navy: #032c7c;
+            --rtc-deep: #010b1f;
+            --rtc-blue: #133984;
+            --rtc-lime: #aee37b;
+            --rtc-sky:  #3992ff;
+            --rtc-white: #ffffff;
+            --rtc-muted: #9aa6c7;
+            --rtc-line: rgba(255, 255, 255, 0.12);
+            --rtc-card: rgba(255, 255, 255, 0.05);
+            --rtc-font: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --rtc-display: 'League Spartan', 'Montserrat', system-ui, sans-serif;
+        }
+
+        /* Page shell — deep navy with the two brand radial washes */
+        html, body {
+            min-height: 100%;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--rtc-font);
+            color: var(--rtc-white);
+            background:
+                radial-gradient(120% 120% at 100% 0%, var(--rtc-blue) 0%, transparent 55%),
+                radial-gradient(120% 100% at 0% 100%, var(--rtc-navy) 0%, transparent 60%),
+                var(--rtc-deep);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Theme background image (if one is set) sits *under* the wash so the
+           palette stays on-brand instead of being taken over by the photo. */
+        #login-bg-image-id {
+            background-image: {{bgImageUrl}};
+            position: fixed;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.22;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Centering wrapper */
+        .rtc-shell {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 20px 28px;
+            box-sizing: border-box;
+        }
+        .rtc-eyebrow {
+            font-family: var(--rtc-display);
+            text-transform: uppercase;
+            letter-spacing: 0.24em;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--rtc-lime);
+            margin: 0 0 18px;
+            text-align: center;
+        }
+        .rtc-foot {
+            margin: 26px 0 0;
+            color: var(--rtc-muted);
+            font-size: 0.78rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .rtc-foot b { color: rgba(255, 255, 255, 0.82); font-weight: 700; }
+        .rtc-foot span { color: var(--rtc-sky); }
+        .rtc-foot em { font-style: normal; color: var(--rtc-lime); }
+
+        #okta-login-container {
+            width: 100%;
+            max-width: 424px;
+        }
+
+        /* ── Widget card (glass panel, matches .card / .p-nav treatment) ── */
+        #okta-sign-in.auth-container,
+        #okta-login-container .auth-container,
+        #okta-login-container .siw-main-view {
+            width: 100% !important;
+            max-width: 424px !important;
+            margin: 0 auto !important;
+            background: var(--rtc-card) !important;
+            border: 1px solid var(--rtc-line) !important;
+            border-radius: 18px !important;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.10) inset,
+                0 24px 60px rgba(0, 0, 0, 0.45) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            backdrop-filter: blur(24px) saturate(180%);
+            color: var(--rtc-white) !important;
+            font-family: var(--rtc-font) !important;
+            overflow: hidden;
+        }
+        #okta-login-container .auth-content,
+        #okta-login-container .siw-main-body {
+            padding: 30px 30px 26px !important;
+            max-width: none !important;
+        }
+        #okta-login-container * { font-family: var(--rtc-font) !important; }
+
+        /* ── Header / org logo ── */
+        #okta-login-container .auth-header {
+            border-bottom: 0 !important;
+            padding: 26px 30px 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
+        }
+        #okta-login-container .auth-org-logo {
+            max-height: 54px;
+            width: auto;
+            margin: 0 auto;
+        }
+        #okta-login-container .auth-beacon,
+        #okta-login-container .beacon-blank {
+            background-color: transparent !important;
+            border-color: var(--rtc-line) !important;
+        }
+
+        /* ── Titles & helper copy ── */
+        #okta-login-container .okta-form-title,
+        #okta-login-container .o-form-head,
+        #okta-login-container h1,
+        #okta-login-container h2 {
+            color: var(--rtc-white) !important;
+            font-size: 1.55rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.02em !important;
+            text-align: center;
+            margin: 4px 0 6px !important;
+        }
+        #okta-login-container .okta-form-subtitle,
+        #okta-login-container .o-form-explain,
+        #okta-login-container .auth-hint,
+        #okta-login-container p {
+            color: var(--rtc-muted) !important;
+            font-size: 0.9rem !important;
+        }
+        #okta-login-container .identifier-container,
+        #okta-login-container .identity-container {
+            color: rgba(255, 255, 255, 0.85) !important;
+        }
+
+        /* ── Fields ── */
+        #okta-login-container .o-form-fieldset { margin-bottom: 16px !important; }
+        #okta-login-container .o-form-label label,
+        #okta-login-container label {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+        }
+        #okta-login-container .okta-form-input-field,
+        #okta-login-container .o-form-control {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid var(--rtc-line) !important;
+            border-radius: 10px !important;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        #okta-login-container .okta-form-input-field.focused-input,
+        #okta-login-container .o-form-control:focus-within {
+            border-color: var(--rtc-lime) !important;
+            box-shadow: 0 0 0 3px rgba(174, 227, 123, 0.20) !important;
+        }
+        #okta-login-container input[type="text"],
+        #okta-login-container input[type="email"],
+        #okta-login-container input[type="tel"],
+        #okta-login-container input[type="number"],
+        #okta-login-container input[type="password"],
+        #okta-login-container select,
+        #okta-login-container textarea {
+            background: transparent !important;
+            border: 0 !important;
+            color: var(--rtc-white) !important;
+            height: 44px;
+            padding: 0 13px !important;
+            font-size: 1rem !important;
+            box-shadow: none !important;
+        }
+        #okta-login-container textarea { height: auto; padding: 12px 13px !important; }
+        #okta-login-container input::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
+        /* Chrome autofill would otherwise repaint the field white */
+        #okta-login-container input:-webkit-autofill,
+        #okta-login-container input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--rtc-white) !important;
+            -webkit-box-shadow: 0 0 0 1000px #0d1c3d inset !important;
+            caret-color: var(--rtc-white);
+        }
+        /* Show/hide password eye */
+        #okta-login-container .password-toggle .eyeicon,
+        #okta-login-container .icon-16 { color: var(--rtc-muted) !important; }
+
+        /* ── Buttons ── */
+        #okta-login-container .button-primary,
+        #okta-login-container input[type="submit"].button-primary,
+        #okta-login-container a.button-primary,
+        #okta-login-container button[data-type="save"] {
+            background: var(--rtc-lime) !important;
+            background-image: none !important;
+            border: 0 !important;
+            color: var(--rtc-deep) !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+            border-radius: 10px !important;
+            height: 46px !important;
+            line-height: 46px !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            transition: filter .2s ease, transform .15s ease;
+        }
+        #okta-login-container .button-primary:hover,
+        #okta-login-container button[data-type="save"]:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+        #okta-login-container .button-primary:active { transform: translateY(0) scale(0.98); }
+        #okta-login-container .button-primary[disabled],
+        #okta-login-container .button-primary.link-button-disabled { opacity: 0.5 !important; }
+
+        #okta-login-container .button:not(.button-primary),
+        #okta-login-container .social-auth-button {
+            background: rgba(255, 255, 255, 0.10) !important;
+            background-image: none !important;
+            border: 1px solid var(--rtc-line) !important;
+            color: var(--rtc-white) !important;
+            font-weight: 700 !important;
+            border-radius: 10px !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+        }
+        #okta-login-container .button:not(.button-primary):hover {
+            background: rgba(255, 255, 255, 0.18) !important;
+        }
+
+        /* ── Links ── */
+        #okta-login-container a,
+        #okta-login-container .link,
+        #okta-login-container .link:visited {
+            color: var(--rtc-lime) !important;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        #okta-login-container a:hover, #okta-login-container .link:hover { text-decoration: underline; }
+
+        /* ── Footer / help links ── */
+        #okta-login-container .auth-footer {
+            border-top: 1px solid var(--rtc-line) !important;
+            margin: 0 30px !important;
+            padding: 14px 0 22px !important;
+            text-align: center;
+        }
+
+        /* ── Alerts (mirrors .alert-error / .alert-ok) ── */
+        #okta-login-container .infobox,
+        #okta-login-container .infobox-error,
+        #okta-login-container .okta-form-infobox-error {
+            border-radius: 10px !important;
+            box-shadow: none !important;
+            font-size: 0.9rem !important;
+            padding: 12px 16px !important;
+        }
+        #okta-login-container .infobox:before,
+        #okta-login-container .infobox-error:before { display: none !important; }
+        #okta-login-container .infobox-error,
+        #okta-login-container .okta-form-infobox-error {
+            background: rgba(255, 80, 80, 0.14) !important;
+            border: 1px solid rgba(255, 80, 80, 0.4) !important;
+            color: #ffd7d7 !important;
+        }
+        #okta-login-container .infobox-error .error-16,
+        #okta-login-container .infobox-error p { color: #ffd7d7 !important; }
+        #okta-login-container .infobox-success,
+        #okta-login-container .infobox-confirm {
+            background: rgba(174, 227, 123, 0.14) !important;
+            border: 1px solid rgba(174, 227, 123, 0.4) !important;
+            color: #e8f7d5 !important;
+        }
+        #okta-login-container .infobox-warning {
+            background: rgba(255, 180, 90, 0.14) !important;
+            border: 1px solid rgba(255, 180, 90, 0.38) !important;
+            color: #ffddb0 !important;
+        }
+        #okta-login-container .o-form-input-error,
+        #okta-login-container .o-form-explain.o-form-input-error { color: #ffb4b4 !important; }
+
+        /* ── "Keep me signed in" checkbox ── */
+        #okta-login-container .custom-checkbox label:before {
+            background: rgba(255, 255, 255, 0.06) !important;
+            border: 1px solid var(--rtc-line) !important;
+            border-radius: 5px !important;
+            color: var(--rtc-deep) !important;
+        }
+        #okta-login-container .custom-checkbox input:checked + label:before {
+            background: var(--rtc-lime) !important;
+            border-color: var(--rtc-lime) !important;
+        }
+        #okta-login-container .custom-checkbox label { color: rgba(255, 255, 255, 0.85) !important; }
+
+        /* ── Authenticator / factor lists (Identity Engine) ──
+           Factor artwork is drawn dark-on-light, so it gets a light chip
+           instead of being inverted. */
+        #okta-login-container .authenticator-row,
+        #okta-login-container .factor-row,
+        #okta-login-container .select-factor-row {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid var(--rtc-line) !important;
+            border-radius: 14px !important;
+            margin-bottom: 10px !important;
+            transition: background .2s ease, border-color .2s ease;
+        }
+        #okta-login-container .authenticator-row:hover,
+        #okta-login-container .factor-row:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(174, 227, 123, 0.4) !important;
+        }
+        #okta-login-container .authenticator-icon-container,
+        #okta-login-container .factor-icon-container,
+        #okta-login-container .authenticator-icon,
+        #okta-login-container .factor-icon {
+            background-color: rgba(255, 255, 255, 0.92) !important;
+            border-radius: 10px !important;
+        }
+        #okta-login-container .authenticator-label,
+        #okta-login-container .factor-label { color: var(--rtc-white) !important; font-weight: 700 !important; }
+        #okta-login-container .authenticator-description,
+        #okta-login-container .factor-description { color: var(--rtc-muted) !important; }
+
+        /* ── Dividers, spinners, misc chrome ── */
+        #okta-login-container .auth-divider,
+        #okta-login-container .okta-form-divider {
+            border-color: var(--rtc-line) !important;
+            background: transparent !important;
+        }
+        #okta-login-container .auth-divider .auth-divider-text {
+            background: transparent !important;
+            color: var(--rtc-muted) !important;
+        }
+        #okta-login-container .okta-waiting-spinner,
+        #okta-login-container .beacon-loading { filter: brightness(2.2); }
+        #okta-login-container .qrcode-image,
+        #okta-login-container .qrcode {
+            background: #fff !important;
+            border-radius: 10px;
+            padding: 8px;
+        }
+        #okta-login-container .chzn-single,
+        #okta-login-container .chzn-drop {
+            background: #0d1c3d !important;
+            background-image: none !important;
+            border-color: var(--rtc-line) !important;
+            color: var(--rtc-white) !important;
+        }
+        #okta-login-container .chzn-results .highlighted { background: var(--rtc-blue) !important; }
+
+        /* Focus ring — same as the portal's a11y pass */
+        #okta-login-container :focus-visible {
+            outline: 3px solid var(--rtc-lime) !important;
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        ::selection { background: rgba(174, 227, 123, 0.30); color: #04210b; }
+
+        @media (max-width: 560px) {
+            .rtc-shell { padding: 28px 14px 22px; justify-content: flex-start; }
+            .rtc-eyebrow { font-size: 0.72rem; margin-bottom: 14px; }
+            #okta-login-container .auth-content,
+            #okta-login-container .siw-main-body { padding: 22px 18px 20px !important; }
+            #okta-login-container .auth-header { padding: 20px 18px 0 !important; }
+            #okta-login-container .auth-footer { margin: 0 18px !important; }
+            #okta-login-container .okta-form-title,
+            #okta-login-container .o-form-head { font-size: 1.35rem !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #okta-login-container *,
+            #okta-login-container *::before,
+            #okta-login-container *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="login-bg-image-id" class="login-bg-image tb--background"></div>
+
+    <div class="rtc-shell">
+        <p class="rtc-eyebrow">Client Portal</p>
+        <div id="okta-login-container"></div>
+        <p class="rtc-foot">
+            <b>Robles <span>Tech</span> <em>Portal</em></b><br>
+            &copy; Robles Technologies Corp. &middot; Confidential client reporting
+        </p>
+    </div>
+
+    <!--
+        "OktaUtil" defines a global OktaUtil object
+        that contains methods used to complete the Okta login flow.
+     -->
+    {{{OktaUtil}}}
+
+    <script type="text/javascript" nonce="{{nonceValue}}">
+        // "config" object contains default widget configuration
+        // with any custom overrides defined in your admin settings.
+        var config = OktaUtil.getSignInWidgetConfig();
+
+        // Render the Okta Sign-In Widget
+        var oktaSignIn = new OktaSignIn(config);
+        oktaSignIn.renderEl({ el: '#okta-login-container' },
+            OktaUtil.completeLogin,
+            function(error) {
+                // Logs errors that occur when configuring the widget.
+                // Remove or replace this with your own custom error handler.
+                console.log(error.message, error);
+            }
+        );
+    </script>
+</body>
+</html>
