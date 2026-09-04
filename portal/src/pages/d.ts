@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { createSupabaseServer } from '../lib/supabase';
 import templateHtml from '../templates/dashboard.html?raw';
 import { auditSeedFor } from '../lib/audit-seeds';
+import { clientSeedFor } from '../lib/client-seeds';
 
 export const prerender = false;
 
@@ -61,9 +62,9 @@ export const GET: APIRoute = async (context) => {
     if (Object.keys(rawCfg.hero).length === 0) delete rawCfg.hero;
   }
 
-  // The template's baked-in rich content belongs to Promix. Every other client
-  // gets neutral defaults so no Promix data or narrative ever leaks through.
-  const isPromix = /promix/i.test(name);
+  // The template ships no client's content any more — every client's own copy,
+  // baseline, audit and palette arrives here, so nothing can leak between
+  // dashboards or into the public /demo.
   const domain = String((client as any).gsc_property ?? '')
     .replace(/^sc-domain:/, '').replace(/^https?:\/\//, '').replace(/\/$/, '') || name;
 
@@ -82,45 +83,38 @@ export const GET: APIRoute = async (context) => {
     openItems: [],
   };
 
-  // Seed figures for a client whose audit has not been saved into config yet,
-  // so the dashboard shows their real audit instead of zeros. Stored data
-  // always wins — the seed is spread before rawCfg, never after.
-  const seed = auditSeedFor(name);
+  /* Seeded content for a client whose dashboard has not been fully saved into
+     config yet, so they see their real figures instead of zeros. Stored data
+     always wins — seeds are spread before rawCfg, never after. */
+  const seed = auditSeedFor(name);          // audit figures only
+  const cSeed = clientSeedFor(name);        // full dashboard content
 
-  const config = isPromix
-    ? { clientName: name, propertyLabel: 'promixnutrition.com', ...rawCfg }
-    : {
-        ...neutral,
-        ...rawCfg,
-        hero: { ...neutral.hero, ...(rawCfg.hero ?? {}) },
-        baseline: { ...neutral.baseline, ...(rawCfg.baseline ?? {}) },
-        aiAudit: { ...neutral.aiAudit, ...(seed?.aiAudit ?? {}), ...(rawCfg.aiAudit ?? {}) },
-        aiAuditHistory: rawCfg.aiAuditHistory ?? seed?.aiAuditHistory ?? [],
-      };
+  const config = {
+    ...neutral,
+    ...(cSeed?.propertyLabel ? { propertyLabel: cSeed.propertyLabel } : {}),
+    ...(cSeed?.openItems ? { openItems: cSeed.openItems } : {}),
+    ...rawCfg,
+    hero: { ...neutral.hero, ...(cSeed?.hero ?? {}), ...(rawCfg.hero ?? {}) },
+    baseline: { ...neutral.baseline, ...(cSeed?.baseline ?? {}), ...(rawCfg.baseline ?? {}) },
+    aiAudit: {
+      ...neutral.aiAudit,
+      ...(cSeed?.aiAudit ?? {}),
+      ...(seed?.aiAudit ?? {}),
+      ...(rawCfg.aiAudit ?? {}),
+    },
+    aiAuditHistory: rawCfg.aiAuditHistory ?? cSeed?.aiAuditHistory ?? seed?.aiAuditHistory ?? [],
+  };
 
 
   /* Per-client palette. The dashboard template ships RTC's own tokens, but a
-     client dashboard should wear the client's brand — Promix keeps the burgundy
-     and warm cream it has always had. A client can override any subset via
-     config.theme; anyone without one gets the RTC set from the template. */
-  const PROMIX_THEME = {
-    brand: '#53001C', 'brand-dark': '#3E0016',
-    accent: '#34657F', 'chart-2': '#34657F',
-    'navy-deep': '#2E1D14', 'ink-black': '#232323',
-    steel: '#6a6058', muted: '#7a736a', ink: '#333333',
-    'green-dark': '#4e7a51', green: '#e4efe0',
-    offwhite: '#FDF6EB', 'surface-2': '#F9EFE2', line: '#EADDCB',
-    'rtc-lime': '#E9C9A7',
-    'badge-no-fg': '#53001C', 'badge-no-bg': '#F3E2E2',
-    'badge-live-bg': '#F6E8EC',
-    font: "'Helvetica Neue','Segoe UI',system-ui,-apple-system,Arial,sans-serif",
-  };
+     client dashboard should wear the client's brand. A client can override any
+     subset via config.theme; anyone without one gets the RTC set. */
   const theme = (rawCfg as any).theme && typeof (rawCfg as any).theme === 'object'
     ? (rawCfg as any).theme
-    : (isPromix ? PROMIX_THEME : null);
+    : (cSeed?.theme ?? null);
 
-  // Seed GSC with empty (truthy) structures so the template's Promix sample
-  // numbers never render for a client that has no pull yet.
+  // Seed GSC with empty (truthy) structures so nothing sample-shaped renders
+  // for a client that has no pull yet.
   const gsc = {
     dailyLog: [], byPage: [], siteTotal: { clicks: 0, impr: 0 },
     preLogBaseline: { month: '', c: 0, i: 0 }, pullDate: '', pullRange: '',

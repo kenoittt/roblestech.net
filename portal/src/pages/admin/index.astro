@@ -95,11 +95,11 @@ const kindLabel: Record<string, string> = {
       <form method="post" action="/api/create-client" class="form-grid card gated">
         <div>
           <label for="c-name">Company name</label>
-          <input id="c-name" name="name" type="text" required placeholder="Promix Nutrition" />
+          <input id="c-name" name="name" type="text" required placeholder="Acme Supply Co." />
         </div>
         <div>
           <label for="c-gsc">GSC property</label>
-          <input id="c-gsc" name="gsc_property" type="text" placeholder="https://promixnutrition.com/" />
+          <input id="c-gsc" name="gsc_property" type="text" placeholder="https://example.com/" />
           <p class="hint">URL-prefix e.g. <code>https://site.com/</code> or domain e.g. <code>sc-domain:site.com</code>.</p>
         </div>
         <button class="btn" type="submit">Create client</button>
@@ -123,7 +123,7 @@ const kindLabel: Record<string, string> = {
         </div>
         <div>
           <label for="l-email">Email</label>
-          <input id="l-email" name="email" type="email" required placeholder="jane@promix.com" />
+          <input id="l-email" name="email" type="email" required placeholder="jane@example.com" />
         </div>
         <div>
           <label for="l-pass">Password</label>

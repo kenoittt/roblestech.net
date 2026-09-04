@@ -160,7 +160,7 @@ export const DEMO_CONFIG = {
     rate: '15%',
     note:
       'Sample figures. In this demonstration, Northwind is cited in 6 of 40 checks (15%) across Google and the three major AI answer engines, up from 1 of 40 at baseline. Two of the six are first-position citations on comparison questions the content plan targeted directly.',
-    intentNote: 'By intent group: problem-aware 1 of 10, comparison 3 of 10, how-to and safety 1 of 10, buying-intent 1 of 10.',
+    intentNote: 'By intent group: problem-aware 1 of 12, comparison 3 of 12, how-to and safety 1 of 8, buying-intent 1 of 8.',
     method:
       '10 buyer questions x 4 platforms = 40 checks, run on 21 August 2026. Questions are tested word for word as a buyer would type them, never naming the brand. Engines: Google, ChatGPT, Gemini, Perplexity. These are sample figures for demonstration.',
     scorecard: [
@@ -169,11 +169,15 @@ export const DEMO_CONFIG = {
       { channel: 'Gemini', checks: 10, visible: 3, rate: '30%' },
       { channel: 'Perplexity', checks: 10, visible: 0, rate: '0%' },
     ],
+    // 10 questions split 3 / 3 / 2 / 2 across the groups, x 4 engines = 40
+    // checks. The group totals, the scorecard and the 6-of-40 headline all
+    // reconcile against the question tables below — a demo that does not add
+    // up is worse than no demo.
     intent: [
-      { group: 'Problem-aware', visible: 1, of: 10 },
-      { group: 'Comparison', visible: 3, of: 10 },
-      { group: 'How-to & safety', visible: 1, of: 10 },
-      { group: 'Buying-intent', visible: 1, of: 10 },
+      { group: 'Problem-aware', visible: 1, of: 12 },
+      { group: 'Comparison', visible: 3, of: 12 },
+      { group: 'How-to & safety', visible: 1, of: 8 },
+      { group: 'Buying-intent', visible: 1, of: 8 },
     ],
     wins: [
       'Sample: "stainless vs galvanised fasteners" now returns Northwind 1st on both Google and Gemini — the comparison post published in Month 1.',
@@ -181,8 +185,17 @@ export const DEMO_CONFIG = {
     ],
     groups: [
       {
+        name: 'Problem-aware questions (sample)',
+        insight: 'Sample data. 1 of 12. Buyers describing a symptom rather than naming a product — the questions a specialist can answer better than a directory, and where the first Gemini citation landed.',
+        rows: [
+          { n: 'A1', q: 'How long do galvanised fasteners last outdoors?', g: 'No', c: 'No', ge: 'Yes, 2nd', p: 'No', won: 'Sample competitors: Corrosionpedia, Engineering Toolbox' },
+          { n: 'A2', q: 'Why are my outdoor bolts rusting after one winter?', g: 'No', c: 'No', ge: 'No', p: 'No', won: 'Sample competitors: Reddit r/DIY, Family Handyman' },
+          { n: 'A3', q: 'What causes galvanic corrosion between dissimilar metals?', g: 'No', c: 'No', ge: 'No', p: 'No', won: 'Sample competitors: ASM International, Corrosionpedia' },
+        ],
+      },
+      {
         name: 'Comparison questions (sample)',
-        insight: 'Sample data. 3 of 10 — the cluster the content plan targeted first, and where a specialist supplier can displace directories fastest.',
+        insight: 'Sample data. 3 of 12 — the cluster the content plan targeted first, and where a specialist supplier can displace directories fastest.',
         rows: [
           { n: 'C1', q: 'Stainless vs galvanised fasteners: which lasts longer outdoors?', g: 'Yes, 1st', c: 'No', ge: 'Yes, 1st', p: 'No', won: 'Sample competitors: Fastenal, Grainger, ThomasNet' },
           { n: 'C2', q: 'Are hot-dip galvanised bolts worth the extra cost?', g: 'No', c: 'Yes, 3rd', ge: 'No', p: 'No', won: 'Sample competitors: Bolt Depot, Engineering Toolbox' },
@@ -190,8 +203,16 @@ export const DEMO_CONFIG = {
         ],
       },
       {
+        name: 'How-to & safety questions (sample)',
+        insight: 'Sample data. 1 of 8. Procedural questions where the proof is a method, not an opinion — historically the fastest group to earn a citation once a post exists.',
+        rows: [
+          { n: 'H1', q: 'How do you torque stainless fasteners without galling?', g: 'No', c: 'No', ge: 'Yes, 3rd', p: 'No', won: 'Sample competitors: Bolt Depot, Fastenal' },
+          { n: 'H2', q: 'What torque spec for M12 structural bolts?', g: 'No', c: 'No', ge: 'No', p: 'No', won: 'Sample competitors: Engineering Toolbox, RCSC' },
+        ],
+      },
+      {
         name: 'Buying-intent questions (sample)',
-        insight: 'Sample data. 1 of 10. Directories still hold the transactional queries; the product-page rewrite is the lever here.',
+        insight: 'Sample data. 1 of 8. Directories still hold the transactional queries; the product-page rewrite is the lever here.',
         rows: [
           { n: 'B1', q: 'Buy marine-grade stainless fasteners in bulk', g: 'Yes, 4th', c: 'No', ge: 'No', p: 'No', won: 'Sample competitors: Grainger, McMaster-Carr, Amazon Business' },
           { n: 'B2', q: 'Best supplier for industrial fasteners', g: 'No', c: 'No', ge: 'No', p: 'No', won: 'Sample competitors: ThomasNet, IndustryNet' },
