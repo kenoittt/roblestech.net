@@ -58,10 +58,21 @@ const DELAY_MS = 8000;
           <input id="nlEmail" name="email" type="email" maxlength="80" required autocomplete="email" placeholder="you@company.com" />
         </div>
 
+        {/* Marketing consent is opt-in and explicit, so it gets a real
+            checkbox rather than a notice. No `name`: the box is a gate on this
+            side and Salesforce has no field to receive it, so posting it would
+            only create an unmapped value. */}
+        <label class="nl-consent" for="nlConsent">
+          <input id="nlConsent" type="checkbox" />
+          <span>I agree to receive occasional email from Robles Technologies Corp. and accept the
+            <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> and
+            <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms and Conditions</a>.</span>
+        </label>
+
         <p class="nl-err" id="nlErr" hidden></p>
 
         <button type="submit" class="nl-btn">Subscribe →</button>
-        <p class="nl-fine">By subscribing you agree to receive occasional email from Robles Technologies Corp. We never share or sell your details.</p>
+        <p class="nl-fine">Unsubscribe any time. We never share or sell your details.</p>
       </form>
     </div>
 
@@ -133,12 +144,22 @@ const DELAY_MS = 8000;
     modal.querySelector('.nl-form').addEventListener('submit', function (e) {
       var email = document.getElementById('nlEmail');
       var last = document.getElementById('nlLast');
+      var consent = document.getElementById('nlConsent');
       // novalidate + explicit checks: a browser bubble inside a modal is easy
       // to miss, so errors are shown inline instead.
       if (!last.value.trim() || !email.value.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)) {
         e.preventDefault();
         err.textContent = 'Please add your last name and a valid email address.';
         err.hidden = false;
+        return;
+      }
+      // Consent is checked last so the visitor fixes one thing at a time, and
+      // the POST never leaves without it.
+      if (consent && !consent.checked) {
+        e.preventDefault();
+        err.textContent = 'Please tick the box to confirm you agree to receive email from us.';
+        err.hidden = false;
+        consent.focus();
         return;
       }
       err.hidden = true;
@@ -213,6 +234,18 @@ const DELAY_MS = 8000;
   }
   .nl-field input::placeholder { color: rgba(255,255,255,.38); }
   .nl-field input:focus { border-color: var(--azure); box-shadow: var(--rtc-focus-ring); }
+
+  .nl-consent {
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+    font-size: 12px; line-height: 1.6; color: rgba(255,255,255,.62);
+  }
+  .nl-consent input {
+    flex: none; width: 16px; height: 16px; margin: 2px 0 0;
+    accent-color: var(--core-blue); cursor: pointer;
+  }
+  .nl-consent input:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+  .nl-consent a { color: rgba(255,255,255,.85); text-decoration: underline; text-underline-offset: 2px; }
+  .nl-consent a:hover { color: #fff; }
 
   .nl-err { font-size: 12.5px; color: #ffb4ac; margin: 0; }
 

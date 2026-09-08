@@ -51,6 +51,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       .sf-note { font-size: 0.74rem; color: #5d6481; line-height: 1.6; margin: 2px 0 0; }
 
+      /* Sits at the foot of the Calendly card, whose gradient runs to #0464DD
+         right where this text lands — dimmer white falls under 4.5:1 there, so
+         the alpha stays high and the type size does the work of keeping it
+         quieter than the card's body copy. */
+      .cal-consent {
+        font-size: 0.68rem; line-height: 1.6; color: rgba(255,255,255,.9);
+        margin: 14px 0 0; position: relative; z-index: 1;
+      }
+      .cal-consent a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+      /* The card's lime accent drops to 3.6:1 against the gradient's blue end,
+         so hover thickens the rule instead of changing the colour. */
+      .cal-consent a:hover { text-decoration-thickness: 2px; }
+
+      .sf-consent { font-size: 0.76rem; color: #5d6481; line-height: 1.6; margin: 0; }
+      .sf-consent a { color: #0464DD; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+      .sf-consent a:hover { color: #0356bd; }
+
       @media (max-width: 620px) {
         .sf-row { grid-template-columns: 1fr; }
       }
@@ -154,6 +171,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <textarea id="description" name="description" rows="5" placeholder="Tell us about your project, timeline, and what you're trying to solve."></textarea>
           </div>
 
+          {/* Consent notice sits directly above the button, where it is read
+              before the action rather than after it. */}
+          <p class="sf-consent">
+            By sending this message you agree to our <a href="/terms-and-conditions">Terms and Conditions</a>
+            and confirm you have read our <a href="/privacy-policy">Privacy Policy</a>.
+          </p>
           <button type="submit" name="submit" class="sf-submit">Send Message →</button>
           <p class="sf-note">We reply within 1 business day. Your details go straight to our team — we never share or sell them.</p>
         </form>
@@ -173,6 +196,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <li>Fixed-price proposal delivered within 48 hours</li>
           </ul>
           <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+          {/* Booking details are collected by Calendly, not by this site, so
+              say where they go before the widget opens. */}
+          <p class="cal-consent">Booking opens Calendly, who collect the details you enter there. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms</a>.</p>
         </div>
 
         <!-- WHAT HAPPENS NEXT -->

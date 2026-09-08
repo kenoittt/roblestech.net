@@ -1,0 +1,222 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+
+/*
+ * Privacy policy.
+ *
+ * Written against what this site actually does, not against a template: the
+ * data listed is the data the two forms really collect, the processors listed
+ * are the ones really loaded (Salesforce, Calendly, Google Fonts, GitHub,
+ * Vercel, Supabase), and the browser-storage section names the only two keys
+ * the site writes. Anything added to the site that collects or transmits
+ * personal data — an analytics tag, a chat widget, a new form — needs a
+ * matching edit here and a new `updated` date.
+ */
+const UPDATED = '2026-09-08';
+
+const sections = [
+  { id: 'who-we-are', title: 'Who we are' },
+  { id: 'what-we-collect', title: 'What we collect' },
+  { id: 'cookies', title: 'Cookies and browser storage' },
+  { id: 'why', title: 'Why we use it' },
+  { id: 'sharing', title: 'Who we share it with' },
+  { id: 'client-data', title: 'Client data in our portal' },
+  { id: 'retention', title: 'How long we keep it' },
+  { id: 'rights', title: 'Your rights' },
+  { id: 'transfers', title: 'International transfers' },
+  { id: 'security', title: 'How we protect it' },
+  { id: 'children', title: "Children's privacy" },
+  { id: 'changes', title: 'Changes to this policy' },
+  { id: 'contact', title: 'Contact us' },
+];
+---
+
+<LegalLayout
+  title="Privacy Policy — Robles Technologies Corp."
+  description="How Robles Technologies Corp. collects, uses, shares and protects personal information submitted through roblestech.net and our client portal."
+  heading="Privacy Policy"
+  intro="What we collect when you use this site or contact us, why we collect it, who it reaches, and what you can ask us to do with it."
+  updated={UPDATED}
+  sections={sections}
+>
+  <div class="lg-sec" id="who-we-are">
+    <h2><span class="lg-num">01</span>Who we are</h2>
+    <p>Robles Technologies Corp. ("RTC", "we", "us") is a technology consulting company based in the Philippines, delivering GEO and SEO, Smartsheet development, automation, technical consulting and Web3 services to clients worldwide.</p>
+    <p>This policy covers <strong>roblestech.net</strong> and our client portal at <strong>portal.roblestech.net</strong>. It explains how we handle personal information — anything that identifies you or could reasonably be linked to you.</p>
+    <p>For the purposes of the Philippine Data Privacy Act of 2012 (Republic Act No. 10173), RTC is the personal information controller for the data described here. Where the EU or UK GDPR applies to you, we act as the data controller for site and enquiry data, and as a processor for the client data described in section 6.</p>
+  </div>
+
+  <div class="lg-sec" id="what-we-collect">
+    <h2><span class="lg-num">02</span>What we collect</h2>
+
+    <h3>Information you give us</h3>
+    <div class="lg-table-wrap">
+      <table class="lg-table">
+        <thead>
+          <tr><th>Where</th><th>What</th><th>Required?</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Contact form</td>
+            <td>First name, last name, email address, phone number, company, and whatever you write in the message box</td>
+            <td>Last name, email and company are required; the rest is optional</td>
+          </tr>
+          <tr>
+            <td>Newsletter signup</td>
+            <td>First name, last name, email address</td>
+            <td>Last name and email are required</td>
+          </tr>
+          <tr>
+            <td>Booking a call</td>
+            <td>Name, email, and anything you add to the booking questions — collected by Calendly, not by this site</td>
+            <td>Set by Calendly</td>
+          </tr>
+          <tr>
+            <td>Email and direct contact</td>
+            <td>Whatever you send us, including attachments</td>
+            <td>Your choice</td>
+          </tr>
+          <tr>
+            <td>Client portal</td>
+            <td>Name, work email, the company you belong to, and a password you set</td>
+            <td>Required to hold an account</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>We do not ask for sensitive personal information — health, religion, political views, government ID numbers, or anything similar — through this website. Please don't send it to us in a message box.</p>
+
+    <h3>Information collected automatically</h3>
+    <p>This site is served as static files by GitHub Pages, and the client portal by Vercel. Both keep standard server logs — IP address, timestamp, page requested, browser user agent — for security and reliability. We do not use those logs to build a profile of you and we cannot look up an individual visitor in them.</p>
+    <p>We do not run Google Analytics, advertising pixels, session recording, or any other behavioural tracking on this site.</p>
+  </div>
+
+  <div class="lg-sec" id="cookies">
+    <h2><span class="lg-num">03</span>Cookies and browser storage</h2>
+    <div class="lg-note">
+      <p><strong>We set no cookies of our own.</strong> No analytics cookies, no advertising cookies, no cross-site tracking — which is why this site has no cookie banner.</p>
+    </div>
+    <p>The site does write two small values into your own browser's local storage. They stay on your device, are readable only by this site, and never reach us:</p>
+    <ul>
+      <li><strong>rtc-nl</strong> — records that you have already seen the newsletter invitation, so you are not asked twice.</li>
+      <li><strong>rtc-loaded</strong> — records that you have already seen the intro animation this session, so it is skipped as you move between pages.</li>
+    </ul>
+    <p>Clearing your browser's site data removes both. Two third parties can set their own cookies when their features load: <strong>Calendly</strong>, if you open the booking widget, and <strong>Salesforce</strong>, at the moment a form is submitted to it. Their own policies govern those.</p>
+    <p>The client portal sets a session cookie once you sign in. It is strictly necessary — it is what keeps you signed in — and it is removed when you sign out.</p>
+  </div>
+
+  <div class="lg-sec" id="why">
+    <h2><span class="lg-num">04</span>Why we use it</h2>
+    <div class="lg-table-wrap">
+      <table class="lg-table">
+        <thead>
+          <tr><th>Purpose</th><th>Basis</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Replying to your enquiry, scoping work, and sending a proposal</td>
+            <td>Steps taken at your request before entering a contract, and our legitimate interest in responding to people who contact us</td>
+          </tr>
+          <tr>
+            <td>Delivering work and running your account, including the portal</td>
+            <td>Performance of our contract with you or your company</td>
+          </tr>
+          <tr>
+            <td>Sending the newsletter</td>
+            <td>Your consent, given when you subscribe and withdrawable at any time</td>
+          </tr>
+          <tr>
+            <td>Keeping the site and portal secure and available</td>
+            <td>Our legitimate interest in preventing abuse and diagnosing faults</td>
+          </tr>
+          <tr>
+            <td>Meeting tax, accounting and other legal obligations</td>
+            <td>Compliance with a legal obligation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="lg-note">
+      <p><strong>We do not sell your personal information, and we never will.</strong> We do not share it with advertisers or data brokers, and we do not use it to train AI models.</p>
+    </div>
+  </div>
+
+  <div class="lg-sec" id="sharing">
+    <h2><span class="lg-num">05</span>Who we share it with</h2>
+    <p>We share personal information only with the service providers we need to run the business, and only for that purpose. Each is bound by its own contract with us.</p>
+    <div class="lg-table-wrap">
+      <table class="lg-table">
+        <thead>
+          <tr><th>Provider</th><th>What it handles</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Salesforce</td><td>Our CRM. Contact-form and newsletter submissions go here, and this is where we track our conversation with you.</td></tr>
+          <tr><td>Calendly</td><td>Scheduling. Handles the details you enter when booking a call.</td></tr>
+          <tr><td>Google Workspace</td><td>Our email. Any correspondence with us lives here.</td></tr>
+          <tr><td>Supabase</td><td>Database and sign-in for the client portal.</td></tr>
+          <tr><td>Vercel</td><td>Hosting for the client portal.</td></tr>
+          <tr><td>GitHub</td><td>Hosting for this website.</td></tr>
+          <tr><td>Google Fonts</td><td>Serves the typefaces this site uses. Your browser requests them directly, which means Google receives your IP address.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>We may also disclose information where the law requires it, where we need to establish or defend a legal claim, or — if RTC is ever involved in a merger or acquisition — to the party acquiring the business, who would remain bound by this policy.</p>
+  </div>
+
+  <div class="lg-sec" id="client-data">
+    <h2><span class="lg-num">06</span>Client data in our portal</h2>
+    <p>If your company is a client, we hold performance data on your behalf: Google Search Console figures for your web property, the posts we publish for you, and the AI visibility audits we run. That data belongs to you, not to us.</p>
+    <p>Access is scoped per company. Someone signed in to one company's dashboard cannot read another company's data, and our sample dashboard uses invented figures for a company that does not exist rather than any client's real numbers.</p>
+    <p>We access Google Search Console through credentials your company authorises, we use that access only to produce your reporting, and we stop when you withdraw it or the engagement ends. Where the GDPR applies, we act as your processor for this data and follow your instructions on it.</p>
+  </div>
+
+  <div class="lg-sec" id="retention">
+    <h2><span class="lg-num">07</span>How long we keep it</h2>
+    <ul>
+      <li><strong>Enquiries that don't become work</strong> — kept in our CRM for up to two years, so we have context if you come back to us, then deleted.</li>
+      <li><strong>Client records</strong> — kept for the engagement and for as long afterwards as tax and accounting rules require.</li>
+      <li><strong>Newsletter subscriptions</strong> — kept until you unsubscribe, plus a suppression record so we don't email you again by mistake.</li>
+      <li><strong>Portal accounts</strong> — kept while the engagement is active; removed on request, or within a reasonable period after it ends.</li>
+      <li><strong>Server logs</strong> — kept for the short retention window our hosting providers apply.</li>
+    </ul>
+    <p>Ask us to delete something sooner and we will, unless we are required to keep it.</p>
+  </div>
+
+  <div class="lg-sec" id="rights">
+    <h2><span class="lg-num">08</span>Your rights</h2>
+    <p>Under the Philippine Data Privacy Act you have the right to be informed, to access your data, to object to processing, to have inaccurate data corrected, to have data erased or blocked, to data portability, to damages for a violation, and to lodge a complaint with the National Privacy Commission.</p>
+    <p>If you are in the EU or UK, the GDPR gives you materially the same rights, including the right to restrict processing and to complain to your local supervisory authority. If you are a California resident, the CCPA gives you the right to know what we collect, to delete it, to correct it, and not to be discriminated against for asking — and note that we do not sell or share personal information as those terms are defined there.</p>
+    <p>To exercise any of these, email <a href="mailto:contact@roblestech.net">contact@roblestech.net</a>. We will confirm receipt and respond within the period the applicable law allows — 15 days under the Data Privacy Act, one month under the GDPR — and we may need to verify who you are first. Exercising your rights is free.</p>
+    <p>To stop the newsletter, use the unsubscribe link in any issue or email us. That takes effect regardless of anything else in this policy.</p>
+  </div>
+
+  <div class="lg-sec" id="transfers">
+    <h2><span class="lg-num">09</span>International transfers</h2>
+    <p>We are based in the Philippines and several of our providers are in the United States or the European Union, so your information may be processed outside your country. Where data is transferred out of a jurisdiction that restricts it — the EU or UK, for instance — we rely on the transfer mechanisms those providers put in place, typically the European Commission's Standard Contractual Clauses. We take reasonable steps to satisfy ourselves that a comparable level of protection travels with the data.</p>
+  </div>
+
+  <div class="lg-sec" id="security">
+    <h2><span class="lg-num">10</span>How we protect it</h2>
+    <p>The site and portal are served over HTTPS. Portal access is per-account with row-level database rules that scope every read to the company the account belongs to. Administrative functions are restricted to named RTC staff, and access to client systems is limited to the people working on that engagement.</p>
+    <p>No system is perfectly secure, and we won't claim otherwise. If a breach affects your personal information and creates a real risk to you, we will notify you and the relevant authority as the law requires.</p>
+  </div>
+
+  <div class="lg-sec" id="children">
+    <h2><span class="lg-num">11</span>Children's privacy</h2>
+    <p>This is a business-to-business website. It is not aimed at children, and we do not knowingly collect information from anyone under 18. If you believe a child has sent us personal information, email us and we will delete it.</p>
+  </div>
+
+  <div class="lg-sec" id="changes">
+    <h2><span class="lg-num">12</span>Changes to this policy</h2>
+    <p>If we change how we handle personal information, we will update this page and move the "last updated" date. If a change materially affects you — a new category of data, a new purpose, a new class of recipient — we will say so clearly rather than rely on you noticing a new date.</p>
+  </div>
+
+  <div class="lg-sec" id="contact">
+    <h2><span class="lg-num">13</span>Contact us</h2>
+    <p>Questions about this policy, or about anything we hold on you:</p>
+    <p><strong>Robles Technologies Corp.</strong><br />
+    Email: <a href="mailto:contact@roblestech.net">contact@roblestech.net</a><br />
+    Web: <a href="/contact">roblestech.net/contact</a></p>
+    <p>See also our <a href="/terms-and-conditions">Terms and Conditions</a>, which govern your use of this website.</p>
+  </div>
+</LegalLayout>

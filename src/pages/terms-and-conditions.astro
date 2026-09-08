@@ -1,0 +1,153 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+
+/*
+ * Terms and conditions for the website.
+ *
+ * Deliberately scoped to the site and to enquiries made through it. Paid work
+ * is governed by the signed proposal or statement of work for that engagement,
+ * and section 3 says so explicitly — these terms must never be read as
+ * overriding a negotiated contract.
+ */
+const UPDATED = '2026-09-08';
+
+const sections = [
+  { id: 'agreement', title: 'Agreement to these terms' },
+  { id: 'scope', title: 'What these terms cover' },
+  { id: 'engagements', title: 'Client engagements' },
+  { id: 'use', title: 'Using this website' },
+  { id: 'submissions', title: 'What you send us' },
+  { id: 'pricing', title: 'Pricing and proposals' },
+  { id: 'ip', title: 'Intellectual property' },
+  { id: 'results', title: 'Results and no guarantees' },
+  { id: 'third-party', title: 'Third-party services' },
+  { id: 'availability', title: 'Availability of the site' },
+  { id: 'liability', title: 'Limitation of liability' },
+  { id: 'indemnity', title: 'Indemnity' },
+  { id: 'privacy', title: 'Privacy' },
+  { id: 'changes', title: 'Changes to these terms' },
+  { id: 'law', title: 'Governing law' },
+  { id: 'contact', title: 'Contact us' },
+];
+---
+
+<LegalLayout
+  title="Terms and Conditions — Robles Technologies Corp."
+  description="The terms that govern your use of roblestech.net, enquiries submitted through it, and the relationship between those terms and a signed RTC engagement."
+  heading="Terms and Conditions"
+  intro="The rules for using this website and for the enquiries you send through it — and how they relate to a signed engagement with us."
+  updated={UPDATED}
+  sections={sections}
+>
+  <div class="lg-sec" id="agreement">
+    <h2><span class="lg-num">01</span>Agreement to these terms</h2>
+    <p>These Terms and Conditions are an agreement between you and <strong>Robles Technologies Corp.</strong> ("RTC", "we", "us"), a technology consulting company based in the Philippines.</p>
+    <p>By using roblestech.net, submitting a form on it, subscribing to our newsletter, or booking a call through it, you accept these terms. If you do not accept them, please don't use the site.</p>
+    <p>If you are agreeing on behalf of a company, you confirm you have the authority to bind that company, and "you" means both you and that company.</p>
+  </div>
+
+  <div class="lg-sec" id="scope">
+    <h2><span class="lg-num">02</span>What these terms cover</h2>
+    <p>They cover this website, the enquiries and subscriptions you submit through it, and access to our client portal at portal.roblestech.net.</p>
+    <p>They do not set the terms of any paid work. That is section 3.</p>
+  </div>
+
+  <div class="lg-sec" id="engagements">
+    <h2><span class="lg-num">03</span>Client engagements</h2>
+    <div class="lg-note">
+      <p>Paid work is governed by the <strong>signed proposal, statement of work or service agreement</strong> for that engagement. Where that document and these terms conflict, <strong>that document wins</strong> for everything to do with the work — scope, deliverables, fees, timelines, confidentiality, ownership of what we build, warranties and termination.</p>
+    </div>
+    <p>Nothing on this website is itself an engagement. Reading a service page, sending an enquiry or booking a call does not commit either of us to anything; work begins when a proposal is signed.</p>
+  </div>
+
+  <div class="lg-sec" id="use">
+    <h2><span class="lg-num">04</span>Using this website</h2>
+    <p>You may read the site, share links to it, and quote reasonable extracts with attribution. You agree not to:</p>
+    <ul>
+      <li>use the site for anything unlawful, or in a way that breaches someone else's rights;</li>
+      <li>attempt to gain access to any part of the site, the portal, or any account that is not yours;</li>
+      <li>probe, scan or test the security of our systems, or interfere with their operation;</li>
+      <li>scrape or harvest the site at a volume that degrades it for others;</li>
+      <li>reproduce substantial parts of our content as your own, or use it to train a machine-learning model; or</li>
+      <li>impersonate RTC or misrepresent your relationship with us.</li>
+    </ul>
+    <p>If you hold a portal account, you are responsible for keeping your password confidential and for what happens under your account. Tell us promptly if you think it has been compromised. We may suspend an account we reasonably believe is being misused.</p>
+  </div>
+
+  <div class="lg-sec" id="submissions">
+    <h2><span class="lg-num">05</span>What you send us</h2>
+    <p>When you submit a form or email us, you confirm the details you give are accurate and that you are entitled to share them. Don't submit someone else's personal information without a lawful basis for doing so.</p>
+    <p>Please treat anything you send through the contact form as <strong>not confidential</strong> until we have a confidentiality agreement or a signed engagement in place. If you need to share something sensitive before then, say so and we will put an NDA in place first.</p>
+    <p>If you send us an idea, suggestion or feedback about our services unprompted, you allow us to use it without obligation or payment. This does not apply to material shared under an NDA or during an engagement, which stays yours.</p>
+    <p>We handle the personal information in your submission as described in our <a href="/privacy-policy">Privacy Policy</a>.</p>
+  </div>
+
+  <div class="lg-sec" id="pricing">
+    <h2><span class="lg-num">06</span>Pricing and proposals</h2>
+    <p>Prices shown on this site are indicative starting points for typical scopes, published so you can gauge budget. They are not an offer, and the price for your work is the one in your proposal.</p>
+    <p>We aim to deliver a fixed-price proposal within 48 hours of a discovery call. That is our working commitment, not a contractual guarantee, and a complex scope can take longer — we will tell you if it will.</p>
+    <p>A proposal is valid for the period stated on it. Published pricing can change at any time; a change never affects a proposal already signed.</p>
+  </div>
+
+  <div class="lg-sec" id="ip">
+    <h2><span class="lg-num">07</span>Intellectual property</h2>
+    <p>The content of this site — text, design, graphics, logos, code and the arrangement of it — belongs to RTC or our licensors and is protected by copyright and trade mark law. The Robles Technologies Corp. name and logo are ours; please don't use them without written permission.</p>
+    <p>Work we produce for a client is dealt with in that client's engagement documents, which typically assign ownership of the deliverables on payment. Nothing on this page changes what a signed engagement says.</p>
+    <p>Third-party names and marks appearing on this site — Smartsheet, Salesforce, Google and others — belong to their respective owners and are used to describe what we work with. Their appearance does not imply endorsement by them, except where we state a partnership explicitly.</p>
+  </div>
+
+  <div class="lg-sec" id="results">
+    <h2><span class="lg-num">08</span>Results and no guarantees</h2>
+    <div class="lg-note">
+      <p>Search rankings, AI answer citations, traffic and revenue are determined by search engines, AI platforms, your market and your competitors — <strong>none of which we control</strong>. We do not guarantee any particular ranking, citation, position, volume of traffic, or commercial result, and you should treat any promise of guaranteed rankings, from anyone, with suspicion.</p>
+    </div>
+    <p>What we do commit to is the work itself: the scope in your proposal, delivered to a professional standard, measured honestly. Case studies, sample dashboards and figures shown on this site describe past or illustrative results and are not a prediction of yours. Our sample dashboard uses invented data for a company that does not exist, and is labelled as such.</p>
+    <p>Except as your engagement documents state, this website and its content are provided "as is", without warranties of any kind, whether express or implied, including implied warranties of merchantability, fitness for a particular purpose, accuracy or non-infringement. Nothing here is legal, financial or tax advice.</p>
+  </div>
+
+  <div class="lg-sec" id="third-party">
+    <h2><span class="lg-num">09</span>Third-party services</h2>
+    <p>This site links to and embeds services we don't run — the Calendly booking widget, the Salesforce form endpoint, and links to third-party sites. We are not responsible for their content, availability or practices, and their own terms and privacy policies apply when you use them.</p>
+  </div>
+
+  <div class="lg-sec" id="availability">
+    <h2><span class="lg-num">10</span>Availability of the site</h2>
+    <p>We aim to keep the site and portal available, but we do not promise uninterrupted access. We may change, suspend or withdraw any part of them, temporarily or permanently, without notice. Where a service level applies to your engagement, it is stated in your engagement documents, not here.</p>
+  </div>
+
+  <div class="lg-sec" id="liability">
+    <h2><span class="lg-num">11</span>Limitation of liability</h2>
+    <p>To the fullest extent the law allows, RTC is not liable for indirect, incidental, special or consequential loss, or for lost profits, lost revenue, lost business, lost goodwill or lost data, arising out of your use of this website.</p>
+    <p>Our total liability arising out of or relating to this website is limited to PHP 5,000 or the amount you have paid us in connection with the site, whichever is greater. Liability for work under a signed engagement is governed by that engagement's own liability terms, not by this section.</p>
+    <p>Nothing in these terms excludes or limits liability that cannot lawfully be excluded — including liability for death or personal injury caused by negligence, or for fraud or fraudulent misrepresentation.</p>
+  </div>
+
+  <div class="lg-sec" id="indemnity">
+    <h2><span class="lg-num">12</span>Indemnity</h2>
+    <p>You agree to indemnify RTC against claims, losses and reasonable costs arising from your breach of these terms, your misuse of the site, or your infringement of someone else's rights through material you submit to us.</p>
+  </div>
+
+  <div class="lg-sec" id="privacy">
+    <h2><span class="lg-num">13</span>Privacy</h2>
+    <p>How we handle personal information is set out in our <a href="/privacy-policy">Privacy Policy</a>, which forms part of these terms. In short: we don't sell your data, we don't run advertising trackers, and this site sets no cookies of its own.</p>
+  </div>
+
+  <div class="lg-sec" id="changes">
+    <h2><span class="lg-num">14</span>Changes to these terms</h2>
+    <p>We may update these terms as our services change. The version published here is the one that applies, and the "last updated" date shows when it changed. Continuing to use the site after a change means you accept the updated terms. A change never alters the terms of an engagement already signed.</p>
+  </div>
+
+  <div class="lg-sec" id="law">
+    <h2><span class="lg-num">15</span>Governing law</h2>
+    <p>These terms are governed by the laws of the Republic of the Philippines, and the courts of the Philippines have exclusive jurisdiction over any dispute arising from them — except that a signed engagement may specify a different governing law and forum for that engagement, in which case its choice applies to the work.</p>
+    <p>If any provision of these terms is found unenforceable, the rest stays in force. Our not enforcing a provision on one occasion is not a waiver of it.</p>
+  </div>
+
+  <div class="lg-sec" id="contact">
+    <h2><span class="lg-num">16</span>Contact us</h2>
+    <p>Questions about these terms:</p>
+    <p><strong>Robles Technologies Corp.</strong><br />
+    Email: <a href="mailto:contact@roblestech.net">contact@roblestech.net</a><br />
+    Web: <a href="/contact">roblestech.net/contact</a></p>
+  </div>
+</LegalLayout>

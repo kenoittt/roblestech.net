@@ -1,0 +1,188 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+/*
+ * Shared shell for the legal pages (privacy policy, terms and conditions).
+ *
+ * Both pages are long, section-numbered documents that people scan rather than
+ * read start to finish, so they get the same treatment as the FAQ page: a
+ * sticky contents rail on the left and readable prose on the right. The rail
+ * is built from the `sections` prop, so a page's headings and its contents
+ * list can never drift apart.
+ */
+interface Section {
+  /** Anchor id, also used as the fragment link target. */
+  id: string;
+  /** Heading text, shown in the rail and as the section title. */
+  title: string;
+}
+interface Props {
+  title: string;
+  description: string;
+  /** Page heading, e.g. "Privacy Policy". */
+  heading: string;
+  /** One-line summary under the heading. */
+  intro: string;
+  /** ISO date this document last changed, e.g. "2026-09-08". */
+  updated: string;
+  sections: Section[];
+}
+const { title, description, heading, intro, updated, sections } = Astro.props;
+
+const updatedLabel = new Date(`${updated}T00:00:00Z`).toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+});
+---
+
+<BaseLayout title={title} description={description} active="">
+  <Fragment slot="head">
+    <style>
+      .lg-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 60px;
+        max-width: 1080px;
+        margin: 0 auto;
+        align-items: start;
+      }
+
+      /* Sticky contents rail */
+      .lg-rail { position: sticky; top: 110px; }
+      .lg-rail-label {
+        font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.12em; color: var(--muted); margin-bottom: 14px;
+      }
+      .lg-nav { list-style: none; display: flex; flex-direction: column; gap: 2px; padding: 0; margin: 0; }
+      .lg-nav a {
+        display: block; padding: 8px 13px; border-radius: 8px;
+        font-size: 0.76rem; font-weight: 600; line-height: 1.4;
+        color: var(--steel); text-decoration: none;
+        transition: background 0.15s, color 0.15s;
+      }
+      .lg-nav a:hover, .lg-nav a.active { background: rgba(4,100,221,0.08); color: var(--core-blue); }
+
+      .lg-updated {
+        margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(3,44,124,.09);
+        font-size: 0.72rem; line-height: 1.6; color: var(--muted);
+      }
+      .lg-updated b { display: block; color: var(--navy); font-size: 0.74rem; margin-bottom: 2px; }
+
+      /* Document body */
+      .lg-doc { min-width: 0; }
+      .lg-sec { margin-bottom: 54px; scroll-margin-top: 110px; }
+      .lg-sec:last-child { margin-bottom: 0; }
+      .lg-sec > h2 {
+        display: flex; align-items: baseline; gap: 12px;
+        font-size: 1.12rem; font-weight: 800; color: var(--navy);
+        letter-spacing: -0.02em; margin: 0 0 16px;
+      }
+      .lg-sec > h2 .lg-num {
+        flex: none; font-size: 0.72rem; font-weight: 700; color: var(--core-blue);
+        letter-spacing: .08em; padding-top: 2px;
+      }
+      .lg-sec h3 {
+        font-size: 0.9rem; font-weight: 700; color: var(--navy);
+        margin: 26px 0 8px; letter-spacing: -0.01em;
+      }
+      .lg-sec p, .lg-sec li {
+        font-size: 0.87rem; line-height: 1.78; color: var(--steel);
+      }
+      .lg-sec p { margin: 0 0 14px; }
+      .lg-sec p:last-child, .lg-sec ul:last-child, .lg-sec table:last-child { margin-bottom: 0; }
+      .lg-sec ul { margin: 0 0 14px; padding-left: 20px; }
+      .lg-sec li { margin-bottom: 7px; }
+      .lg-sec li:last-child { margin-bottom: 0; }
+      .lg-sec strong { color: var(--navy); font-weight: 700; }
+      .lg-sec a { color: var(--core-blue); text-decoration: none; font-weight: 600; }
+      .lg-sec a:hover { text-decoration: underline; }
+
+      /* Callout for the things worth not missing */
+      .lg-note {
+        background: rgba(4,100,221,0.05);
+        border-left: 3px solid var(--core-blue);
+        border-radius: 0 10px 10px 0;
+        padding: 15px 18px; margin: 0 0 16px;
+      }
+      .lg-note p { margin: 0; font-size: 0.84rem; }
+
+      /* Data tables (what we collect, who we share with) */
+      .lg-table-wrap { overflow-x: auto; margin: 0 0 16px; }
+      .lg-table { width: 100%; border-collapse: collapse; min-width: 480px; }
+      .lg-table th, .lg-table td {
+        text-align: left; vertical-align: top; padding: 11px 14px;
+        border-bottom: 1px solid rgba(3,44,124,.09);
+        font-size: 0.82rem; line-height: 1.65;
+      }
+      .lg-table th {
+        font-family: 'League Spartan', system-ui, sans-serif;
+        font-weight: 600; font-size: 0.66rem; letter-spacing: .1em; text-transform: uppercase;
+        color: var(--muted); border-bottom-width: 1.5px;
+      }
+      .lg-table td { color: var(--steel); }
+      .lg-table td:first-child { color: var(--navy); font-weight: 600; }
+      .lg-table tr:last-child td { border-bottom: none; }
+
+      @media (max-width: 900px) {
+        .lg-layout { grid-template-columns: 1fr; gap: 34px; }
+        .lg-rail { position: static; }
+        .lg-nav { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+        .lg-nav a { background: rgba(4,100,221,0.05); font-size: 0.72rem; padding: 7px 11px; }
+        .lg-updated { margin-top: 16px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lg-nav a { transition: none; }
+      }
+    </style>
+  </Fragment>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-pat"></div>
+    <div class="breadcrumb rv"><a href="/">Home</a><span>/</span>{heading}</div>
+    <span class="sec-tag rv d1">Legal</span>
+    <h1 class="sec-h rv d2">{heading}</h1>
+    <p class="sec-p rv d3">{intro}</p>
+  </div>
+
+  <section class="sec" style="background:var(--off-white);">
+    <div class="lg-layout">
+      <aside class="lg-rail rv">
+        <div class="lg-rail-label">On this page</div>
+        <ul class="lg-nav">
+          {sections.map((s) => <li><a href={`#${s.id}`}>{s.title}</a></li>)}
+        </ul>
+        <div class="lg-updated">
+          <b>Last updated</b>
+          <time datetime={updated}>{updatedLabel}</time>
+        </div>
+      </aside>
+
+      <div class="lg-doc rv d1">
+        <slot />
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    /* Highlight the rail entry for whichever section is in view. Mirrors the
+       FAQ page's behaviour; no-ops where IntersectionObserver is unavailable. */
+    (function () {
+      if (!('IntersectionObserver' in window)) return;
+      var links = Array.prototype.slice.call(document.querySelectorAll('.lg-nav a'));
+      if (!links.length) return;
+      var byId = {};
+      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var a = byId[e.target.id];
+          if (a) a.classList.add('active');
+        });
+      }, { rootMargin: '-110px 0px -70% 0px', threshold: 0 });
+
+      document.querySelectorAll('.lg-sec[id]').forEach(function (s) { io.observe(s); });
+    })();
+  </script>
+</BaseLayout>

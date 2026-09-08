@@ -761,6 +761,10 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
   display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:9px;
 }
 .ft-bottom p { font-size:var(--fs-xs); }
+.ft-legal { display:flex; align-items:center; gap:9px; font-size:var(--fs-xs); }
+.ft-legal a { color:rgba(255,255,255,.68); text-decoration:none; transition:color .2s; }
+.ft-legal a:hover { color:var(--azure); text-decoration:underline; }
+.ft-legal span { color:rgba(255,255,255,.28); }
 .ft-tagline { font-size:var(--fs-xs); font-weight:600; color:var(--green); letter-spacing:.04em; }
 
 /* ══════════════════════════════════
