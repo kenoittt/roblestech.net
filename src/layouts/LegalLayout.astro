@@ -36,7 +36,14 @@ const updatedLabel = new Date(`${updated}T00:00:00Z`).toLocaleDateString('en-US'
 
 <BaseLayout title={title} description={description} active="">
   <Fragment slot="head">
-    <style>
+    {/* is:global is required, not stylistic. The document body is slotted in
+        from the page, so it never receives this component's scoping attribute
+        — scoped rules like `.lg-sec > h2` compile to
+        `.lg-sec[data-astro-cid-x] > h2[data-astro-cid-x]` and match nothing,
+        which left the section number butted against its heading and the whole
+        document at browser defaults. Every selector below is namespaced under
+        .lg-*, so going global costs nothing. */}
+    <style is:global>
       .lg-layout {
         display: grid;
         grid-template-columns: 240px 1fr;
