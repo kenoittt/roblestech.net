@@ -685,6 +685,19 @@ function postNo(v){
   return stripped || s;
 }
 
+/* Order two posts by their number, numerically. A plain string compare puts
+   "10" before "9", which is what pushed post 9 to the bottom of the blog
+   performance table. Posts that carry a real number sort ahead of ones that
+   don't, so an odd id never displaces the numbered sequence. */
+function postNoCmp(a, b){
+  var x = postNo(a), y = postNo(b);
+  var nx = parseInt(x, 10), ny = parseInt(y, 10);
+  var xNum = /^\d/.test(x) && !isNaN(nx), yNum = /^\d/.test(y) && !isNaN(ny);
+  if(xNum && yNum && nx !== ny) return nx - ny;
+  if(xNum !== yNum) return xNum ? -1 : 1;
+  return x.localeCompare(y, undefined, { numeric: true });
+}
+
 /* Which engagement month a post belongs to — M1, M2, M3 of the content plan,
    not the calendar month.
    Read in priority order:
@@ -789,7 +802,7 @@ function renderPipeline(){
     // Within a month, order by publish date then by post number.
     rows.slice().sort(function(a, b){
       var c = String(a.published || "").localeCompare(String(b.published || ""));
-      return c !== 0 ? c : String(a.num || "").localeCompare(String(b.num || ""), undefined, { numeric: true });
+      return c !== 0 ? c : postNoCmp(a.num, b.num);
     }).forEach(function(p){
       var tr = document.createElement("tr");
       tr.setAttribute("data-grp-row", key);
@@ -842,8 +855,15 @@ function sopStepsTable(sop){
 function renderSop(){
   var host = document.getElementById("sopList");
   host.innerHTML = "";
-  // Every post, newest first (by published date, undated last).
-  var posts = pipeline.slice().sort(function(a,b){ return String(b.published||"").localeCompare(String(a.published||"")); });
+  /* Every post in content-plan order — 1, 2, 3 — so the list reads as the
+     plan does. It used to be newest-published-first, which scattered the post
+     numbers. The newest post is still tracked separately: it drives the KPI
+     and is the card that starts expanded, which is the one worth landing on. */
+  var posts = pipeline.slice().sort(function(a,b){ return postNoCmp(a.num, b.num); });
+  var newest = pipeline.slice().sort(function(a,b){
+    return String(b.published||"").localeCompare(String(a.published||""));
+  })[0];
+  var openIdx = Math.max(0, posts.indexOf(newest));
   if(!posts.length){
     host.innerHTML = '<div class="note">No posts yet. Each post added to the content pipeline gets its own post-publish SOP checklist here.</div>';
     document.getElementById("kpiSop").textContent = "0/7";
@@ -852,7 +872,7 @@ function renderSop(){
   posts.forEach(function(p, idx){
     var n = sopCount(p) || 0;
     var det = document.createElement("details");
-    if(idx === 0) det.open = true; // newest post expanded by default
+    if(idx === openIdx) det.open = true; // newest post expanded by default
     det.style.cssText = "border:1px solid var(--line);border-radius:8px;margin-bottom:10px;background:var(--card);";
     det.innerHTML =
       '<summary style="cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;list-style:none;">' +
@@ -864,8 +884,8 @@ function renderSop(){
       '<div style="padding:0 14px 14px;">' + sopStepsTable(Array.isArray(p.sop) ? p.sop : null) + "</div>";
     host.appendChild(det);
   });
-  // KPI reflects the most recent post's progress.
-  document.getElementById("kpiSop").textContent = (sopCount(posts[0]) || 0) + "/7";
+  // KPI reflects the most recent post's progress, not the first in the list.
+  document.getElementById("kpiSop").textContent = (sopCount(newest) || 0) + "/7";
 }
 
 /* ---------- AI visibility audit ---------- */
@@ -1362,7 +1382,7 @@ function renderBlogPerf(){
   if(!rows.length){
     tb.innerHTML = '<tr class="empty-row"><td colspan="8">No posts in the content pipeline yet.</td></tr>';
   } else {
-    rows.slice().sort(function(a, b){ return b.clicks - a.clicks || String(a.num).localeCompare(String(b.num)); })
+    rows.slice().sort(function(a, b){ return b.clicks - a.clicks || postNoCmp(a.num, b.num); })
       .forEach(function(r){
         var tr = document.createElement("tr");
         if(!r.url){
