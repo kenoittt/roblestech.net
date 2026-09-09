@@ -226,7 +226,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
       </div>`;
     }
     function pipeRow(d){ d=d||{}; return mk(
-      `<input data-f="num" placeholder="#" value="${esc(d.num)}" style="width:74px;" title="Unique post ID">
+      `<input data-f="num" placeholder="#" value="${esc(d.num)}" style="width:74px;" title="Post number. Keep the engagement-month marker — &quot;M2 · 9&quot; — because the pipeline groups by it; the dashboard shows only the number.">
        <input data-f="post" placeholder="Post title" value="${esc(d.post)}" style="flex:2;">
        <select data-f="status" style="flex:1;">${statusOpts(d.status)}</select>
        <input data-f="published" type="date" value="${esc(d.published)}" style="flex:1;">

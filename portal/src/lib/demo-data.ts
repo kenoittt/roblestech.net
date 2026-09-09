@@ -44,11 +44,11 @@ const last28 = dailyLog.slice(0, 28);
 const sum = (rs: typeof dailyLog, k: 'c' | 'i') => rs.reduce((a, r) => a + r[k], 0);
 
 const POSTS = [
-  { url: '/blog/choosing-industrial-fasteners', title: 'How to Choose Industrial Fasteners for Outdoor Use', published: '2026-06-04', num: 'M1-1' },
-  { url: '/blog/stainless-vs-galvanised', title: 'Stainless vs Galvanised: Which Lasts Longer Outdoors?', published: '2026-06-18', num: 'M1-2' },
-  { url: '/blog/bulk-ordering-guide', title: 'A Buyer’s Guide to Bulk Ordering Without Overstocking', published: '2026-07-02', num: 'M2-1' },
-  { url: '/blog/lead-times-explained', title: 'Why Supplier Lead Times Slip, and How to Plan Around It', published: '2026-07-21', num: 'M2-2' },
-  { url: '/blog/iso-certification-checklist', title: 'The ISO Certification Checklist for Component Suppliers', published: '2026-08-06', num: 'M3-1' },
+  { url: '/blog/choosing-industrial-fasteners', title: 'How to Choose Industrial Fasteners for Outdoor Use', published: '2026-06-04', num: 'M1 · 1' },
+  { url: '/blog/stainless-vs-galvanised', title: 'Stainless vs Galvanised: Which Lasts Longer Outdoors?', published: '2026-06-18', num: 'M1 · 2' },
+  { url: '/blog/bulk-ordering-guide', title: 'A Buyer’s Guide to Bulk Ordering Without Overstocking', published: '2026-07-02', num: 'M2 · 3' },
+  { url: '/blog/lead-times-explained', title: 'Why Supplier Lead Times Slip, and How to Plan Around It', published: '2026-07-21', num: 'M2 · 4' },
+  { url: '/blog/iso-certification-checklist', title: 'The ISO Certification Checklist for Component Suppliers', published: '2026-08-06', num: 'M3 · 5' },
 ];
 
 /** Per-post series, newer posts naturally holding less history. */

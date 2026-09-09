@@ -672,6 +672,19 @@ function badge(kind, label){
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
   return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
 
+/* A post's number as it should be shown: "M1 · 1" reads as "1".
+   The stored id keeps its engagement-month marker, because pipeMonth() below
+   reads that marker to group the pipeline — and the group header already says
+   "Month 1", so repeating it on every row inside is noise. Strips the marker
+   for display only; a number with no marker is left exactly as it is, and a
+   marker with nothing after it falls back to the raw value rather than
+   rendering an empty cell. */
+function postNo(v){
+  var s = String(v == null ? "" : v).trim();
+  var stripped = s.replace(/^m\s*\d{1,2}\s*(?:[-–—·.:]\s*|\s+)/i, "").trim();
+  return stripped || s;
+}
+
 /* Which engagement month a post belongs to — M1, M2, M3 of the content plan,
    not the calendar month.
    Read in priority order:
@@ -783,7 +796,7 @@ function renderPipeline(){
       tr.hidden = collapsed;
       var sopN = sopCount(p);
       var sopCell = sopN !== null ? sopN + "/7" : (typeof p.sop === "string" ? esc(p.sop) : "");
-      tr.innerHTML = "<td>"+esc(p.num)+"</td><td>"+esc(p.post)+"</td><td>"+badge(p.status==="Live"?"live":"pending",esc(p.status))+"</td><td>"+esc(p.published)+"</td><td>"+sopCell+"</td><td>"+esc(p.schema)+"</td><td>"+esc(p.ai)+"</td>";
+      tr.innerHTML = "<td>"+esc(postNo(p.num))+"</td><td>"+esc(p.post)+"</td><td>"+badge(p.status==="Live"?"live":"pending",esc(p.status))+"</td><td>"+esc(p.published)+"</td><td>"+sopCell+"</td><td>"+esc(p.schema)+"</td><td>"+esc(p.ai)+"</td>";
       tb.appendChild(tr);
     });
   });
@@ -843,7 +856,7 @@ function renderSop(){
     det.style.cssText = "border:1px solid var(--line);border-radius:8px;margin-bottom:10px;background:var(--card);";
     det.innerHTML =
       '<summary style="cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;list-style:none;">' +
-        '<span style="font-weight:700;color:var(--ink-black);">' + (p.num ? "#"+p.num+" · " : "") + (p.post || "(untitled post)") + '</span>' +
+        '<span style="font-weight:700;color:var(--ink-black);">' + (p.num ? "#"+postNo(p.num)+" · " : "") + (p.post || "(untitled post)") + '</span>' +
         badge(p.status === "Live" ? "live" : "pending", p.status || "Not Started") +
         '<span style="margin-left:auto;font-weight:700;color:' + (n === 7 ? "var(--green-dark)" : "var(--steel)") + ';">' + n + "/7 steps</span>" +
         (p.published ? '<span style="font-size:12px;color:var(--muted);">' + p.published + "</span>" : "") +
@@ -1353,13 +1366,13 @@ function renderBlogPerf(){
       .forEach(function(r){
         var tr = document.createElement("tr");
         if(!r.url){
-          tr.innerHTML = "<td>" + r.num + "</td><td>" + r.title + "</td><td>" + r.published +
+          tr.innerHTML = "<td>" + postNo(r.num) + "</td><td>" + r.title + "</td><td>" + r.published +
             '</td><td colspan="5" class="note" style="margin:0;">No URL set — add one in the admin content panel to track this post.</td>';
         } else if(!r.s){
-          tr.innerHTML = "<td>" + r.num + "</td><td>" + r.title + "</td><td>" + r.published +
+          tr.innerHTML = "<td>" + postNo(r.num) + "</td><td>" + r.title + "</td><td>" + r.published +
             '</td><td colspan="5" class="note" style="margin:0;">Awaiting the next daily Search Console pull.</td>';
         } else {
-          tr.innerHTML = "<td>" + r.num + "</td>" +
+          tr.innerHTML = "<td>" + postNo(r.num) + "</td>" +
             "<td>" + r.title + '<br><span class="r-period" style="font-size:11px;">' + r.url + "</span></td>" +
             "<td>" + r.published + "</td>" +
             '<td class="num">' + fmt(r.clicks) + bpDelta(r.clicks, r.s.prev.clicks) + "</td>" +
@@ -1380,7 +1393,7 @@ function renderBlogPerf(){
   var pick = document.getElementById("bpPick");
   if(pick && !pick.options.length){
     var opts = ['<option value="__all">All tracked posts (combined)</option>'];
-    tracked.forEach(function(r){ opts.push('<option value="' + r.url + '">' + (r.num ? r.num + ". " : "") + r.title + "</option>"); });
+    tracked.forEach(function(r){ opts.push('<option value="' + r.url + '">' + (r.num ? postNo(r.num) + ". " : "") + r.title + "</option>"); });
     pick.innerHTML = opts.join("");
   }
 }
