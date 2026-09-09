@@ -342,8 +342,19 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
     </div>
 
     <div class="card">
-      <h2>Per-post detail</h2>
-      <div class="bp-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h2 style="margin:0;">Per-post detail</h2>
+        <label style="font-size:12px;color:var(--steel);font-weight:600;margin:0;">Sort by
+          <select id="bpSort" style="font-size:12px;padding:4px 6px;width:auto;">
+            <option value="num">Post number</option>
+            <option value="date">Post date (newest first)</option>
+            <option value="clicks">Clicks (high to low)</option>
+            <option value="impr">Impressions (high to low)</option>
+            <option value="pos">Avg. position (best first)</option>
+          </select>
+        </label>
+      </div>
+      <div class="bp-wrap" style="margin-top:14px;">
         <table class="bp-table">
           <thead><tr>
             <th>#</th><th>Post</th><th>Published</th>
@@ -1363,14 +1374,45 @@ function bpDelta(cur, prev){
   if(d === 0) return '<span class="badge b-pend bp-delta">0%</span>';
   return '<span class="badge ' + (d > 0 ? "b-pass" : "b-no") + ' bp-delta">' + (d > 0 ? "+" : "") + d + "%</span>";
 }
+/* Which sort the reader has chosen for the per-post table. Plan order is the
+   default: it is the only ordering that stays put as the numbers move. */
+function bpSortMode(){
+  var el = document.getElementById("bpSort");
+  return (el && el.value) || "num";
+}
+
+/* Sort the per-post rows. Post number and date apply to every row; the three
+   metric sorts only mean anything for a post we have a Search Console series
+   for, so untracked posts fall to the bottom in plan order rather than being
+   ranked as zeroes among real figures. Average position is ascending, because
+   position 3 beats position 20. */
+function bpSort(rows, mode){
+  var plan = function(a, b){ return postNoCmp(a.num, b.num); };
+  if(mode === "num") return rows.sort(plan);
+  if(mode === "date") return rows.sort(function(a, b){
+    // Newest first; a post with no date yet sits at the end, not the start.
+    var ad = String(a.published || ""), bd = String(b.published || "");
+    if(!ad !== !bd) return ad ? -1 : 1;
+    return bd.localeCompare(ad) || plan(a, b);
+  });
+
+  var metric = { clicks: function(r){ return r.clicks; },
+                 impr:   function(r){ return r.impr; },
+                 pos:    function(r){ return (r.s && r.s.totals.pos) || 0; } }[mode];
+  if(!metric) return rows.sort(plan);
+  var asc = mode === "pos";
+  return rows.sort(function(a, b){
+    var av = metric(a), bv = metric(b);
+    // No series, or no position recorded, means there is nothing to rank.
+    var aHas = !!a.s && (!asc || av > 0), bHas = !!b.s && (!asc || bv > 0);
+    if(aHas !== bHas) return aHas ? -1 : 1;
+    if(!aHas) return plan(a, b);
+    return (asc ? av - bv : bv - av) || plan(a, b);
+  });
+}
+
 function renderBlogPerf(){
-  /* Plan order, 1 upward, for everything built from these rows — the table
-     and the post picker. This used to be ranked by clicks, which scrambled
-     the numbers as soon as real data arrived; the "Best performer" KPI below
-     already answers which post is winning, so these lists exist to let you
-     find a specific post. Clicks break a tie only if two posts somehow carry
-     the same number. */
-  var rows = bpRows().sort(function(a, b){ return postNoCmp(a.num, b.num) || b.clicks - a.clicks; });
+  var rows = bpSort(bpRows(), bpSortMode());
   var tracked = rows.filter(function(r){ return r.s; });
   var clicks = tracked.reduce(function(a, r){ return a + r.clicks; }, 0);
   var impr = tracked.reduce(function(a, r){ return a + r.impr; }, 0);
@@ -1423,7 +1465,10 @@ function renderBlogPerf(){
   var pick = document.getElementById("bpPick");
   if(pick && !pick.options.length){
     var opts = ['<option value="__all">All tracked posts (combined)</option>'];
-    tracked.forEach(function(r){ opts.push('<option value="' + r.url + '">' + (r.num ? postNo(r.num) + ". " : "") + r.title + "</option>"); });
+    // Always plan order here: this control is for finding a post, so its
+    // order should not shift when the table below is re-sorted.
+    tracked.slice().sort(function(a, b){ return postNoCmp(a.num, b.num); })
+      .forEach(function(r){ opts.push('<option value="' + r.url + '">' + (r.num ? postNo(r.num) + ". " : "") + r.title + "</option>"); });
     pick.innerHTML = opts.join("");
   }
 }
@@ -1527,6 +1572,8 @@ function initBlogControls(){
   });
   var pick = document.getElementById("bpPick");
   if(pick) pick.addEventListener("change", makeBlogChart);
+  var srt = document.getElementById("bpSort");
+  if(srt) srt.addEventListener("change", renderBlogPerf);
 }
 
 function initTrendControls(){
