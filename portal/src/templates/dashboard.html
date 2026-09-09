@@ -799,10 +799,14 @@ function renderPipeline(){
       '</button></td>';
     tb.appendChild(head);
 
-    // Within a month, order by publish date then by post number.
+    /* Within a month, order by post number — this table is the content plan,
+       so it should read in plan order. Publish date used to be the primary key,
+       but an unpublished post has an empty date, which sorts before every real
+       one: that put the dated post 9 after the undated 10-16. Date is now only
+       the fallback for rows whose numbers cannot separate them. */
     rows.slice().sort(function(a, b){
-      var c = String(a.published || "").localeCompare(String(b.published || ""));
-      return c !== 0 ? c : postNoCmp(a.num, b.num);
+      var c = postNoCmp(a.num, b.num);
+      return c !== 0 ? c : String(a.published || "").localeCompare(String(b.published || ""));
     }).forEach(function(p){
       var tr = document.createElement("tr");
       tr.setAttribute("data-grp-row", key);
