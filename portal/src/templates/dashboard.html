@@ -1364,7 +1364,13 @@ function bpDelta(cur, prev){
   return '<span class="badge ' + (d > 0 ? "b-pass" : "b-no") + ' bp-delta">' + (d > 0 ? "+" : "") + d + "%</span>";
 }
 function renderBlogPerf(){
-  var rows = bpRows();
+  /* Plan order, 1 upward, for everything built from these rows — the table
+     and the post picker. This used to be ranked by clicks, which scrambled
+     the numbers as soon as real data arrived; the "Best performer" KPI below
+     already answers which post is winning, so these lists exist to let you
+     find a specific post. Clicks break a tie only if two posts somehow carry
+     the same number. */
+  var rows = bpRows().sort(function(a, b){ return postNoCmp(a.num, b.num) || b.clicks - a.clicks; });
   var tracked = rows.filter(function(r){ return r.s; });
   var clicks = tracked.reduce(function(a, r){ return a + r.clicks; }, 0);
   var impr = tracked.reduce(function(a, r){ return a + r.impr; }, 0);
@@ -1386,7 +1392,7 @@ function renderBlogPerf(){
   if(!rows.length){
     tb.innerHTML = '<tr class="empty-row"><td colspan="8">No posts in the content pipeline yet.</td></tr>';
   } else {
-    rows.slice().sort(function(a, b){ return b.clicks - a.clicks || postNoCmp(a.num, b.num); })
+    rows.slice()
       .forEach(function(r){
         var tr = document.createElement("tr");
         if(!r.url){
