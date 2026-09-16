@@ -49,12 +49,13 @@
 /* The site's .page-hero is a LIGHT section — a #eaf0fb-to-off-white gradient
    with navy headings and muted body copy. Adding .rtcs-mesh swaps the
    background to the dark mesh, so every text colour inside it has to be
-   restated or the heading renders navy-on-navy. Values are the design's own:
-   centred column, white H1, lime eyebrow, 82% white body copy. */
+   restated or the heading renders navy-on-navy. Values are the design's own.
+   Service-line heroes are left-aligned; only the hub is centred, hence the
+   .rtcs-hero-center modifier rather than centring by default. */
 /* Top padding stays at the site's 190px: the nav is a floating island, and
    less than that slides the breadcrumb under it. */
-.page-hero.rtcs-mesh { text-align: center; padding: 190px 8% 88px; }
-.page-hero.rtcs-mesh .breadcrumb { color: rgba(255, 255, 255, 0.55); justify-content: center; }
+.page-hero.rtcs-mesh { text-align: left; padding: 190px 8% 88px; }
+.page-hero.rtcs-mesh .breadcrumb { color: rgba(255, 255, 255, 0.55); }
 .page-hero.rtcs-mesh .breadcrumb a { color: rgba(255, 255, 255, 0.55); }
 .page-hero.rtcs-mesh .breadcrumb a:hover { color: #fff; }
 .page-hero.rtcs-mesh .breadcrumb span { color: rgba(255, 255, 255, 0.3); }
@@ -64,12 +65,19 @@
   color: var(--rtc-green-400);
 }
 .page-hero.rtcs-mesh .sec-h {
-  color: #fff; margin-left: auto; margin-right: auto; max-width: 760px;
-  font-size: clamp(34px, 5vw, 56px); line-height: 1.08; letter-spacing: -0.02em;
+  color: #fff; max-width: 820px; margin: 0;
+  font-size: clamp(32px, 4.5vw, 50px); line-height: 1.1; letter-spacing: -0.02em;
 }
 .page-hero.rtcs-mesh .sec-p {
-  color: rgba(255, 255, 255, 0.82); max-width: 640px; margin: 20px auto 0;
+  color: rgba(255, 255, 255, 0.82); max-width: 660px; margin: 20px 0 0;
 }
+
+/* Hub only: the one hero the design centres, at its own larger H1 size. */
+.page-hero.rtcs-mesh.rtcs-hero-center { text-align: center; }
+.rtcs-hero-center .breadcrumb { justify-content: center; }
+.rtcs-hero-center .sec-h { margin-left: auto; margin-right: auto; max-width: 760px; font-size: clamp(34px, 5vw, 56px); line-height: 1.08; }
+.rtcs-hero-center .sec-p { max-width: 640px; margin: 20px auto 0; }
+.rtcs-hero-center .rtcs-cta-row { justify-content: center; }
 /* The hero's own light-theme glows would wash out the mesh. ::before is
    contested — .page-hero::before (a radial glow) and .rtcs-mesh::before (the
    brand pattern) have equal specificity, so source order alone would decide
@@ -407,7 +415,19 @@
 }
 
 /* ───────────── dark-band CTAs ───────────── */
-.rtcs-cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.rtcs-cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+/* Primary CTA — the design system's "action" variant. This is the default
+   for every hero and most closing bands; the lime "accent" below is reserved
+   for the two free/credited offers (Gap Report, Automation Audit). */
+.rtcs-btn-action {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 13px 24px; border-radius: var(--radius-md);
+  background: var(--rtc-blue-500); color: #fff;
+  font-size: 14.5px; font-weight: 700; text-decoration: none; border: 0;
+  transition: background var(--dur-base) var(--ease-standard), transform 120ms var(--ease-standard);
+}
+.rtcs-btn-action:hover { background: var(--text-link-hover); color: #fff; }
+.rtcs-btn-action:active { transform: translateY(1px); }
 .rtcs-btn-lime {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 13px 24px; border-radius: var(--radius-md);

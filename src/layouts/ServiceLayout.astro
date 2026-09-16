@@ -35,6 +35,9 @@ interface Props {
   closingText: string;
   closingCtaLabel: string;
   closingCtaHref: string;
+  /* 'action' (blue) for everything except the two free/credited offers, which
+     the design gives the lime accent. */
+  closingCtaVariant?: 'action' | 'lime';
   /** Rendered as accordions and emitted as FAQPage schema. */
   faqs?: Faq[];
 }
@@ -43,6 +46,7 @@ const {
   title, description, eyebrow, subEyebrow, h1, intro, crumb,
   ctaLabel, ctaHref, cta2Label, cta2Href,
   closingH2, closingText, closingCtaLabel, closingCtaHref,
+  closingCtaVariant = 'action',
   faqs = [],
 } = Astro.props;
 
@@ -80,8 +84,8 @@ const faqSchema = faqs.length
       </div>
     )}
     <p class="sec-p rv d3">{intro}</p>
-    <div class="rtcs-cta-row rv d3" style="margin-top:28px;justify-content:center;">
-      <a href={ctaHref} class="rtcs-btn-lime">{ctaLabel}</a>
+    <div class="rtcs-cta-row rv d3" style="margin-top:30px;">
+      <a href={ctaHref} class="rtcs-btn-action">{ctaLabel}</a>
       {cta2Label && cta2Href && <a href={cta2Href} class="rtcs-btn-glass">{cta2Label}</a>}
     </div>
   </div>
@@ -113,7 +117,7 @@ const faqSchema = faqs.length
       <h2 class="rtcs-h2" style="color:#fff;">{closingH2}</h2>
       <p class="rtcs-lead" style="color:rgba(255,255,255,.78);">{closingText}</p>
       <div class="rtcs-cta-row" style="justify-content:center;">
-        <a href={closingCtaHref} class="rtcs-btn-lime">{closingCtaLabel}</a>
+        <a href={closingCtaHref} class={closingCtaVariant === 'lime' ? 'rtcs-btn-lime' : 'rtcs-btn-action'}>{closingCtaLabel}</a>
         <a href="/services" class="rtcs-btn-glass">See All Service Lines</a>
       </div>
     </div>
