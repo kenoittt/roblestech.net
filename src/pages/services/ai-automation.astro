@@ -80,12 +80,12 @@ const FAQS = [
   faqs={FAQS}
 >
   <!-- THE PROBLEM -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:28px;"><h2 class="svc-h2">The Problem</h2></div>
-      <div class="svc-grid-3 rv">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:28px;"><h2 class="rtcs-h2">The Problem</h2></div>
+      <div class="rtcs-grid-3 rv">
         {PROBLEMS.map((c) => (
-          <div class="svc-card">
+          <div class="rtcs-card">
             <h3 style="font-size:19px;">{c.h}</h3>
             <p style="margin-bottom:0;">{c.p}</p>
           </div>
@@ -95,32 +95,34 @@ const FAQS = [
   </section>
 
   <!-- AUTOMATION AUDIT -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-feature rv">
-        <div class="svc-eyebrow">Start Here · $2,500 · Credited Toward Any Build</div>
-        <h2 style="font-size:27px;font-weight:800;letter-spacing:-.02em;">Automation Audit</h2>
-        <p style="max-width:640px;">We map your workflows, find the handoffs worth automating, and hand you a prioritized plan with effort and payback for each. The $2,500 is credited in full toward any build within 60 days.</p>
-        <a href="/contact#schedule" class="svc-btn-lime">Book the Audit →</a>
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-feature rtcs-feature-row rv">
+        <div class="txt">
+          <div class="rtcs-eyebrow">Start Here · $2,500 · Credited Toward Any Build</div>
+          <h2 style="font-size:28px;font-weight:800;letter-spacing:-.02em;">Automation Audit</h2>
+          <p>We map your workflows, find the handoffs worth automating, and hand you a prioritized plan with effort and payback for each. The $2,500 is credited in full toward any build within 60 days.</p>
+        </div>
+        <a href="/contact#schedule" class="rtcs-btn-lime">Book the Audit →</a>
       </div>
     </div>
   </section>
 
   <!-- WHAT WE BUILD -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:34px;"><h2 class="svc-h2">What We Build</h2></div>
-      <div class="svc-tiers rv">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:34px;"><h2 class="rtcs-h2">What We Build</h2></div>
+      <div class="rtcs-tiers rv">
         {TIERS.map((t) => (
-          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
-            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
-            <div class="svc-tier-label">{t.rec ? t.sub : t.label}</div>
-            <div class="svc-tier-name">{t.name}</div>
-            <div class="svc-tier-price">
-              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+          <div class={`rtcs-tier ${t.rec ? 'rtcs-tier-rec' : ''}`}>
+            {t.rec && <div class="rtcs-tier-badge">{t.label}</div>}
+            <div class="rtcs-tier-label">{t.rec ? t.sub : t.label}</div>
+            <div class="rtcs-tier-name">{t.name}</div>
+            <div class="rtcs-tier-price">
+              <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
-            <p class="svc-tier-tag" style="margin-top:12px;">{t.tagline}</p>
-            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Discovery Call</a>
+            <p class="rtcs-tier-tag" style="margin-top:12px;">{t.tagline}</p>
+            <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Discovery Call</a>
           </div>
         ))}
       </div>
@@ -128,12 +130,12 @@ const FAQS = [
   </section>
 
   <!-- COMPARE -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:26px;"><h2 class="svc-h2">Compare the Tiers</h2></div>
-      <div class="svc-matrix-wrap rv">
-        <div class="svc-matrix">
-          <div class="svc-matrix-head">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:26px;"><h2 class="rtcs-h2">Compare the Tiers</h2></div>
+      <div class="rtcs-matrix-wrap rv">
+        <div class="rtcs-matrix">
+          <div class="rtcs-matrix-head">
             <div></div>
             {TIERS.map((t) => (
               <div class={`t ${t.rec ? 'hl' : ''}`}>
@@ -143,16 +145,16 @@ const FAQS = [
             ))}
           </div>
           {MATRIX.map((c) => (
-            <details class="svc-cat" open>
+            <details class="rtcs-cat" open>
               <summary>{c.cat}</summary>
               <div>
                 {c.rows.map((r) => (
-                  <div class="svc-row">
+                  <div class="rtcs-row">
                     <div>{r[0]}</div>
                     {[1, 2, 3].map((i) => (
                       <div class={i === 2 ? 'hl' : ''}>
-                        {r[i] === true ? <span class="svc-yes">✓</span>
-                          : r[i] === null ? <span class="svc-no">—</span> : r[i]}
+                        {r[i] === true ? <span class="rtcs-yes">✓</span>
+                          : r[i] === null ? <span class="rtcs-no">—</span> : r[i]}
                       </div>
                     ))}
                   </div>
@@ -160,10 +162,10 @@ const FAQS = [
               </div>
             </details>
           ))}
-          <div class="svc-matrix-cta">
+          <div class="rtcs-matrix-cta">
             <div></div>
             {TIERS.map((t) => (
-              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+              <div><a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Call</a></div>
             ))}
           </div>
         </div>
@@ -172,29 +174,29 @@ const FAQS = [
   </section>
 
   <!-- MANAGED AI OPERATIONS -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-panel rv" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-panel rv" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
         <div style="flex:1;min-width:280px;">
           <h3>Managed AI Operations</h3>
           <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">Monthly retainers to run, monitor and improve what we build. Scoped to your system.</p>
         </div>
-        <a href="/contact#schedule" class="svc-btn-outline">Ask About Retainers</a>
+        <a href="/contact#schedule" class="rtcs-btn-outline">Ask About Retainers</a>
       </div>
     </div>
   </section>
 
   <!-- ARCHITECTURE SHOWCASE -->
-  <section class="svc-mesh" style="padding-top:76px;">
-    <div class="svc-wrap svc-center">
-      <div class="svc-eyebrow svc-eyebrow-green">How a Build Fits Together</div>
-      <h2 class="svc-h2" style="color:#fff;">Event-Driven, Monitored, Yours</h2>
-      <p class="svc-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Every build connects the tools you already run. Events in one system trigger agents and pipelines that act in the others, with logging and human checkpoints where the stakes require them. You own the architecture and the accounts.</p>
-      <a href="/contact#schedule" class="svc-btn-lime">Start With the Automation Audit</a>
-      <div class="svc-show">
-        <div class="svc-frame">
-          <div class="svc-frame-inner">
-            <div class="svc-frame-bar">
+  <section class="rtcs-mesh" style="padding-top:76px;">
+    <div class="rtcs-wrap rtcs-center">
+      <div class="rtcs-eyebrow rtcs-eyebrow-green">How a Build Fits Together</div>
+      <h2 class="rtcs-h2" style="color:#fff;">Event-Driven, Monitored, Yours</h2>
+      <p class="rtcs-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Every build connects the tools you already run. Events in one system trigger agents and pipelines that act in the others, with logging and human checkpoints where the stakes require them. You own the architecture and the accounts.</p>
+      <a href="/contact#schedule" class="rtcs-btn-lime">Start With the Automation Audit</a>
+      <div class="rtcs-show">
+        <div class="rtcs-frame">
+          <div class="rtcs-frame-inner">
+            <div class="rtcs-frame-bar">
               <i></i><i></i><i></i><span>AI agent workflow · restaurant assistant build</span>
             </div>
             <img src="/ai-architecture.png" alt="Diagram of an event-driven AI agent workflow connecting intake, agents, tools and monitoring." loading="lazy" width="1600" height="1000" />
@@ -205,15 +207,15 @@ const FAQS = [
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:30px;">
-        <div class="svc-eyebrow">How It Works</div>
-        <h2 class="svc-h2">From Workflow Map to Running System</h2>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:30px;">
+        <div class="rtcs-eyebrow">How It Works</div>
+        <h2 class="rtcs-h2">From Workflow Map to Running System</h2>
       </div>
-      <div class="svc-grid-4 rv">
+      <div class="rtcs-grid-4 rv">
         {HOW.map((s) => (
-          <div class="svc-step-card">
+          <div class="rtcs-step-card">
             <div class="n">{s.n}</div>
             <h4>{s.h}</h4>
             <p>{s.p}</p>
@@ -224,16 +226,16 @@ const FAQS = [
   </section>
 
   <!-- RELATED READING -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-eyebrow">Related Reading</div>
-      <div class="svc-two-col rv" style="margin-top:14px;">
-        <a href="/smartsheet-automate-onboarding-workflows" class="svc-read">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-eyebrow">Related Reading</div>
+      <div class="rtcs-two-col rv" style="margin-top:14px;">
+        <a href="/smartsheet-automate-onboarding-workflows" class="rtcs-read">
           <div class="k">Automation</div>
           <h4>Automate Onboarding Workflows →</h4>
           <p>Turning a manual checklist into a self-running system.</p>
         </a>
-        <a href="/blogs" class="svc-read">
+        <a href="/blogs" class="rtcs-read">
           <div class="k">Blog</div>
           <h4>Automation posts publish here as they go live →</h4>
           <p>What we are building and what it actually removed.</p>

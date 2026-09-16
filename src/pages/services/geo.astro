@@ -213,14 +213,14 @@ const serviceSchema = {
   </Fragment>
 
   <!-- WHO WE DO THIS FOR -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:28px;">
-        <div class="svc-eyebrow">Who We Do This For</div>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:28px;">
+        <div class="rtcs-eyebrow">Who We Do This For</div>
       </div>
-      <div class="svc-grid-3 rv">
+      <div class="rtcs-grid-3 rv">
         {AUDIENCES.map((a) => (
-          <div class="svc-card">
+          <div class="rtcs-card">
             <h3 style="font-size:19px;">{a.h}</h3>
             <p style="margin-bottom:0;">{a.p}</p>
           </div>
@@ -230,14 +230,14 @@ const serviceSchema = {
   </section>
 
   <!-- WHAT GEO IS -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-two-col">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-two-col">
         <div>
-          <h2 class="svc-h2">What Generative Engine Optimization Is</h2>
-          <p class="svc-lead" style="margin-bottom:0;">Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. Each answer names three to five brands. The first brand to establish authority on a question is hard to displace, so early work compounds. We build that authority with citation-optimized content, structured data and technical SEO, then track every citation so you can see it move.</p>
+          <h2 class="rtcs-h2">What Generative Engine Optimization Is</h2>
+          <p class="rtcs-lead" style="margin-bottom:0;">Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. Each answer names three to five brands. The first brand to establish authority on a question is hard to displace, so early work compounds. We build that authority with citation-optimized content, structured data and technical SEO, then track every citation so you can see it move.</p>
         </div>
-        <div class="svc-panel">
+        <div class="rtcs-panel">
           <h3>How a citation works</h3>
           <ol>
             <li>A buyer asks ChatGPT a question in your category</li>
@@ -251,43 +251,45 @@ const serviceSchema = {
   </section>
 
   <!-- GAP REPORT -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-feature rv">
-        <div class="svc-eyebrow">Start Here · Free</div>
-        <h2 style="font-size:27px;font-weight:800;letter-spacing:-.02em;">AI Visibility Gap Report</h2>
-        <p style="max-width:640px;">A 10-query diagnostic across ChatGPT, Gemini and Perplexity, with a screenshot of every place your brand goes invisible and a clear roadmap if you decide to fix it. No sales call required to receive it. The report is yours to keep either way.</p>
-        <a href={GAP} class="svc-btn-lime">Get Your Free Gap Report →</a>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-feature rtcs-feature-row rv">
+        <div class="txt">
+          <div class="rtcs-eyebrow">Start Here · Free</div>
+          <h2 style="font-size:28px;font-weight:800;letter-spacing:-.02em;">AI Visibility Gap Report</h2>
+          <p>A 10-query diagnostic across ChatGPT, Gemini and Perplexity, with a screenshot of every place your brand goes invisible and a clear roadmap if you decide to fix it. No sales call required to receive it. The report is yours to keep either way.</p>
+        </div>
+        <a href={GAP} class="rtcs-btn-lime">Get Your Free Gap Report →</a>
       </div>
     </div>
   </section>
 
   <!-- MONTHLY PROGRAMS -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:34px;">
-        <h2 class="svc-h2">Monthly Programs</h2>
-        <p class="svc-lead" style="margin-bottom:0;">Every tier: 3-month minimum, then month-to-month. Every tier carries a "Not Included" list.</p>
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:34px;">
+        <h2 class="rtcs-h2">Monthly Programs</h2>
+        <p class="rtcs-lead" style="margin-bottom:0;">Every tier: 3-month minimum, then month-to-month. Every tier carries a "Not Included" list.</p>
       </div>
-      <div class="svc-tiers rv">
+      <div class="rtcs-tiers rv">
         {TIERS.map((t) => (
-          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
-            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
-            {!t.rec && <div class="svc-tier-label">{t.label}</div>}
-            <div class="svc-tier-name">{t.name}</div>
-            <p class="svc-tier-tag">{t.tagline}</p>
-            <div class="svc-tier-price">
-              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+          <div class={`rtcs-tier ${t.rec ? 'rtcs-tier-rec' : ''}`}>
+            {t.rec && <div class="rtcs-tier-badge">{t.label}</div>}
+            {!t.rec && <div class="rtcs-tier-label">{t.label}</div>}
+            <div class="rtcs-tier-name">{t.name}</div>
+            <p class="rtcs-tier-tag">{t.tagline}</p>
+            <div class="rtcs-tier-price">
+              <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
-            <p class="svc-tier-meta">3-month minimum, then month-to-month</p>
-            <ul class="svc-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
-            <details class="svc-more">
+            <p class="rtcs-tier-meta">3-month minimum, then month-to-month</p>
+            <ul class="rtcs-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            <details class="rtcs-more">
               <summary>What's Included and What's Not</summary>
-              <ul class="svc-ticks">{t.more.map((b) => <li>{b}</li>)}</ul>
-              <div class="svc-excl-label">Not Included</div>
-              <ul class="svc-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
+              <ul class="rtcs-ticks">{t.more.map((b) => <li>{b}</li>)}</ul>
+              <div class="rtcs-excl-label">Not Included</div>
+              <ul class="rtcs-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
             </details>
-            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Discovery Call</a>
+            <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Discovery Call</a>
           </div>
         ))}
       </div>
@@ -295,14 +297,14 @@ const serviceSchema = {
   </section>
 
   <!-- COMPARE THE TIERS -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:26px;">
-        <h2 class="svc-h2">Compare the Tiers</h2>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:26px;">
+        <h2 class="rtcs-h2">Compare the Tiers</h2>
       </div>
-      <div class="svc-matrix-wrap rv">
-        <div class="svc-matrix">
-          <div class="svc-matrix-head">
+      <div class="rtcs-matrix-wrap rv">
+        <div class="rtcs-matrix">
+          <div class="rtcs-matrix-head">
             <div></div>
             {TIERS.map((t) => (
               <div class={`t ${t.rec ? 'hl' : ''}`}>
@@ -313,18 +315,18 @@ const serviceSchema = {
           </div>
 
           {MATRIX.map((c) => (
-            <details class="svc-cat" open>
+            <details class="rtcs-cat" open>
               <summary>{c.cat}</summary>
               <div>
                 {c.rows.map((r) => (
-                  <div class="svc-row">
+                  <div class="rtcs-row">
                     <div>{r[0]}</div>
                     {[1, 2, 3].map((i) => (
                       <div class={i === 2 ? 'hl' : ''}>
                         {r[i] === true
-                          ? <span class="svc-yes">✓</span>
+                          ? <span class="rtcs-yes">✓</span>
                           : r[i] === null
-                            ? <span class="svc-no">—</span>
+                            ? <span class="rtcs-no">—</span>
                             : r[i]}
                       </div>
                     ))}
@@ -334,10 +336,10 @@ const serviceSchema = {
             </details>
           ))}
 
-          <div class="svc-matrix-cta">
+          <div class="rtcs-matrix-cta">
             <div></div>
             {TIERS.map((t) => (
-              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+              <div><a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Call</a></div>
             ))}
           </div>
         </div>
@@ -346,10 +348,10 @@ const serviceSchema = {
   </section>
 
   <!-- THE WORK BEHIND THE NUMBER -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <h2 class="svc-h2">The Work Behind the Number</h2>
-      <p class="svc-lead">Every post runs through the same ten steps before it publishes and seven more after it goes live.</p>
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <h2 class="rtcs-h2">The Work Behind the Number</h2>
+      <p class="rtcs-lead">Every post runs through the same ten steps before it publishes and seven more after it goes live.</p>
       <SopStepper eyebrow="Before Publish · 10-Step Per-Post SOP" steps={PRE_SOP} />
       <div style="height:42px;"></div>
       <SopStepper eyebrow="After It Goes Live · 7-Step Post-Publish SOP" steps={POST_SOP} />
@@ -357,16 +359,16 @@ const serviceSchema = {
   </section>
 
   <!-- DASHBOARD SHOWCASE -->
-  <section class="svc-mesh" style="padding-top:76px;">
-    <div class="svc-wrap svc-center">
-      <div class="svc-eyebrow svc-eyebrow-green">Your Dashboard</div>
-      <h2 class="svc-h2" style="color:#fff;">A Live Dashboard, Not a Monthly Mystery</h2>
-      <p class="svc-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Clicks, impressions, post performance and your citation baseline against where you stand now. Foundation gets a monthly scorecard PDF; Engine and Operator get live access, and Operator adds an executive summary.</p>
-      <a href={GAP} class="svc-btn-lime">Get Your Free Gap Report →</a>
-      <div class="svc-show">
-        <div class="svc-frame">
-          <div class="svc-frame-inner">
-            <div class="svc-frame-bar">
+  <section class="rtcs-mesh" style="padding-top:76px;">
+    <div class="rtcs-wrap rtcs-center">
+      <div class="rtcs-eyebrow rtcs-eyebrow-green">Your Dashboard</div>
+      <h2 class="rtcs-h2" style="color:#fff;">A Live Dashboard, Not a Monthly Mystery</h2>
+      <p class="rtcs-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Clicks, impressions, post performance and your citation baseline against where you stand now. Foundation gets a monthly scorecard PDF; Engine and Operator get live access, and Operator adds an executive summary.</p>
+      <a href={GAP} class="rtcs-btn-lime">Get Your Free Gap Report →</a>
+      <div class="rtcs-show">
+        <div class="rtcs-frame">
+          <div class="rtcs-frame-inner">
+            <div class="rtcs-frame-bar">
               <i></i><i></i><i></i><span>portal.roblestech.net</span>
             </div>
             <img src="/geo-dashboard.png" alt="Sample client dashboard showing clicks, impressions, per-post performance and AI visibility. Sample data, not a real client." loading="lazy" width="1600" height="1000" />
@@ -377,10 +379,10 @@ const serviceSchema = {
   </section>
 
   <!-- FOUNDER BAND -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-feature rv">
-        <div class="svc-founder">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-feature rv">
+        <div class="rtcs-founder">
           <div class="txt">
             <h2 style="font-size:24px;font-weight:800;letter-spacing:-.02em;">You Work With the People Who Built the Method</h2>
             <p style="margin-bottom:0;">Kenneth and Christian run the monthly review on Engine and join the strategy call on Operator. No account manager layer between you and the people doing the work.</p>
@@ -391,16 +393,16 @@ const serviceSchema = {
   </section>
 
   <!-- RELATED READING -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-eyebrow">Related Reading</div>
-      <div class="svc-two-col rv" style="margin-top:14px;">
-        <a href="/blogs" class="svc-read">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-eyebrow">Related Reading</div>
+      <div class="rtcs-two-col rv" style="margin-top:14px;">
+        <a href="/blogs" class="rtcs-read">
           <div class="k">GEO</div>
           <h4>GEO posts publish here as they go live →</h4>
           <p>How generative engine optimization works in practice, written up as we ship it.</p>
         </a>
-        <a href="/blogs" class="svc-read">
+        <a href="/blogs" class="rtcs-read">
           <div class="k">Blog</div>
           <h4>Read the published client work →</h4>
           <p>Posts we have produced and published under the per-post SOP on this page.</p>

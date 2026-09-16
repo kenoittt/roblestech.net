@@ -110,12 +110,12 @@ const FAQS = [
   faqs={FAQS}
 >
   <!-- THE PROBLEM -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:28px;"><h2 class="svc-h2">The Problem</h2></div>
-      <div class="svc-grid-3 rv">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:28px;"><h2 class="rtcs-h2">The Problem</h2></div>
+      <div class="rtcs-grid-3 rv">
         {PROBLEMS.map((c) => (
-          <div class="svc-card">
+          <div class="rtcs-card">
             <h3 style="font-size:19px;">{c.h}</h3>
             <p style="margin-bottom:0;">{c.p}</p>
           </div>
@@ -125,27 +125,27 @@ const FAQS = [
   </section>
 
   <!-- HOW TO ENGAGE US -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:34px;"><h2 class="svc-h2">How to Engage Us</h2></div>
-      <div class="svc-tiers rv">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:34px;"><h2 class="rtcs-h2">How to Engage Us</h2></div>
+      <div class="rtcs-tiers rv">
         {TIERS.map((t) => (
-          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
-            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
-            <div class="svc-tier-label">{t.rec ? t.sub : t.label}</div>
-            <div class="svc-tier-name">{t.name}</div>
-            <div class="svc-tier-price">
-              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+          <div class={`rtcs-tier ${t.rec ? 'rtcs-tier-rec' : ''}`}>
+            {t.rec && <div class="rtcs-tier-badge">{t.label}</div>}
+            <div class="rtcs-tier-label">{t.rec ? t.sub : t.label}</div>
+            <div class="rtcs-tier-name">{t.name}</div>
+            <div class="rtcs-tier-price">
+              <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
-            <p class="svc-tier-meta">{t.meta}</p>
-            <ul class="svc-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            <p class="rtcs-tier-meta">{t.meta}</p>
+            <ul class="rtcs-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
             {t.not.length > 0 && (
               <>
-                <div class="svc-excl-label">Not Included</div>
-                <ul class="svc-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
+                <div class="rtcs-excl-label">Not Included</div>
+                <ul class="rtcs-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
               </>
             )}
-            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>{t.cta}</a>
+            <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>{t.cta}</a>
           </div>
         ))}
       </div>
@@ -153,12 +153,12 @@ const FAQS = [
   </section>
 
   <!-- COMPARE -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:26px;"><h2 class="svc-h2">Compare the Tiers</h2></div>
-      <div class="svc-matrix-wrap rv">
-        <div class="svc-matrix">
-          <div class="svc-matrix-head">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:26px;"><h2 class="rtcs-h2">Compare the Tiers</h2></div>
+      <div class="rtcs-matrix-wrap rv">
+        <div class="rtcs-matrix">
+          <div class="rtcs-matrix-head">
             <div></div>
             {TIERS.map((t) => (
               <div class={`t ${t.rec ? 'hl' : ''}`}>
@@ -168,16 +168,16 @@ const FAQS = [
             ))}
           </div>
           {MATRIX.map((c) => (
-            <details class="svc-cat" open>
+            <details class="rtcs-cat" open>
               <summary>{c.cat}</summary>
               <div>
                 {c.rows.map((r) => (
-                  <div class="svc-row">
+                  <div class="rtcs-row">
                     <div>{r[0]}</div>
                     {[1, 2, 3].map((i) => (
                       <div class={i === 2 ? 'hl' : ''}>
-                        {r[i] === true ? <span class="svc-yes">✓</span>
-                          : r[i] === null ? <span class="svc-no">—</span> : r[i]}
+                        {r[i] === true ? <span class="rtcs-yes">✓</span>
+                          : r[i] === null ? <span class="rtcs-no">—</span> : r[i]}
                       </div>
                     ))}
                   </div>
@@ -185,10 +185,10 @@ const FAQS = [
               </div>
             </details>
           ))}
-          <div class="svc-matrix-cta">
+          <div class="rtcs-matrix-cta">
             <div></div>
             {TIERS.map((t) => (
-              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+              <div><a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Call</a></div>
             ))}
           </div>
         </div>
@@ -197,15 +197,15 @@ const FAQS = [
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:30px;">
-        <div class="svc-eyebrow">How It Works</div>
-        <h2 class="svc-h2">From Stuck Decision to Owned Roadmap</h2>
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:30px;">
+        <div class="rtcs-eyebrow">How It Works</div>
+        <h2 class="rtcs-h2">From Stuck Decision to Owned Roadmap</h2>
       </div>
-      <div class="svc-grid-4 rv">
+      <div class="rtcs-grid-4 rv">
         {HOW.map((s) => (
-          <div class="svc-step-card">
+          <div class="rtcs-step-card">
             <div class="n">{s.n}</div>
             <h4>{s.h}</h4>
             <p>{s.p}</p>

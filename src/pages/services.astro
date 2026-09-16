@@ -17,7 +17,7 @@ const LINES = [
     eyebrow: 'Service Line 01 · Flagship',
     name: 'GEO + SEO',
     href: '/services/geo',
-    flag: 'svc-card-flag',
+    flag: 'rtcs-card-flag',
     body: 'When your customers ask ChatGPT, Gemini or Perplexity which brand to buy, we make sure you are the answer. Citation-optimized content, structured data and technical SEO built for the AI-search era, with a live dashboard showing every citation gained.',
     price: 'Start with a free AI Visibility Gap Report. Monthly programs from $2,500.',
     cta: 'Explore GEO + SEO',
@@ -26,7 +26,7 @@ const LINES = [
     eyebrow: 'Service Line 02 · Founding Practice',
     name: 'Smartsheet Consulting',
     href: '/services/smartsheet',
-    flag: 'svc-card-flag svc-card-flag-navy',
+    flag: 'rtcs-card-flag rtcs-card-flag-navy',
     body: 'Your process, rebuilt as a working operations engine. Sheets, automations, dashboards and integrations designed by certified Smartsheet consultants who have shipped this for Fortune 500 operations teams.',
     price: 'Fixed-price projects from $3,500, live in 2 to 3 weeks.',
     cta: 'Explore Smartsheet',
@@ -83,27 +83,27 @@ const HOW = [
   active="services"
 >
   <!-- HERO -->
-  <div class="page-hero svc-mesh">
+  <div class="page-hero rtcs-mesh">
     <div class="breadcrumb rv"><a href="/">Home</a><span>/</span>Services</div>
     <span class="sec-tag rv d1">What We Do</span>
     <h1 class="sec-h rv d2">Six Service Lines.<br>One Embedded Team.</h1>
     <p class="sec-p rv d3">Every engagement is tied to a business result you can measure: citations gained, hours removed, systems connected. Pick the line that matches your problem. We scope it, price it and deliver it with a fixed-price proposal within 48 hours.</p>
-    <div class="svc-cta-row rv d3" style="margin-top:28px;justify-content:center;">
-      <a href="" onclick={CAL} class="svc-btn-lime">Book a Free Discovery Call</a>
+    <div class="rtcs-cta-row rv d3" style="margin-top:28px;justify-content:center;">
+      <a href="" onclick={CAL} class="rtcs-btn-lime">Book a Free Discovery Call</a>
     </div>
   </div>
 
   <!-- SIX SERVICE LINES -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-grid">
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-grid">
         {LINES.map((l) => (
-          <a href={l.href} class={`svc-card svc-card-link ${l.flag}`} style="text-decoration:none;">
-            <div class="svc-eyebrow">{l.eyebrow}</div>
+          <a href={l.href} class={`rtcs-card rtcs-card-link ${l.flag}`} style="text-decoration:none;">
+            <div class="rtcs-eyebrow">{l.eyebrow}</div>
             <h3>{l.name}</h3>
             <p>{l.body}</p>
-            <div class="svc-price-line">{l.price}</div>
-            <span class="svc-explore">{l.cta} →</span>
+            <div class="rtcs-price-line">{l.price}</div>
+            <span class="rtcs-explore">{l.cta} →</span>
           </a>
         ))}
       </div>
@@ -111,24 +111,24 @@ const HOW = [
   </section>
 
   <!-- CROSS-SELL -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap svc-center">
-      <h2 class="svc-h2">Need More Than One Line?</h2>
-      <p class="svc-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
-      <a href="" onclick={CAL} class="svc-btn-outline">Book a Call to Scope It →</a>
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap rtcs-center">
+      <h2 class="rtcs-h2">Need More Than One Line?</h2>
+      <p class="rtcs-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
+      <a href="" onclick={CAL} class="rtcs-btn-outline">Book a Call to Scope It →</a>
     </div>
   </section>
 
   <!-- HOW WE WORK -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:30px;">
-        <div class="svc-eyebrow">How We Work</div>
-        <h2 class="svc-h2">Structured Delivery From Day One</h2>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:30px;">
+        <div class="rtcs-eyebrow">How We Work</div>
+        <h2 class="rtcs-h2">Structured Delivery From Day One</h2>
       </div>
-      <div class="svc-grid-4 rv">
+      <div class="rtcs-grid-4 rv">
         {HOW.map((s) => (
-          <div class="svc-step-card">
+          <div class="rtcs-step-card">
             <div class="n">{s.n}</div>
             <h4>{s.h}</h4>
             <p>{s.p}</p>
@@ -139,14 +139,14 @@ const HOW = [
   </section>
 
   <!-- CLOSING CTA -->
-  <section class="svc-band svc-mesh">
-    <div class="svc-wrap svc-center">
-      <div class="svc-eyebrow svc-eyebrow-green">Start Building With RTC</div>
-      <h2 class="svc-h2" style="color:#fff;">Ready to Discuss Your Project?</h2>
-      <p class="svc-lead" style="color:rgba(255,255,255,.78);">Every engagement starts with a free 30-minute discovery call. Tell us the problem, and we will send a fixed-price proposal within 48 hours. No commitment required.</p>
-      <div class="svc-cta-row" style="justify-content:center;">
-        <a href="" onclick={CAL} class="svc-btn-lime">Book a Discovery Call →</a>
-        <a href="/contact" class="svc-btn-glass">Send a Message</a>
+  <section class="rtcs-band rtcs-mesh">
+    <div class="rtcs-wrap rtcs-center">
+      <div class="rtcs-eyebrow rtcs-eyebrow-green">Start Building With RTC</div>
+      <h2 class="rtcs-h2" style="color:#fff;">Ready to Discuss Your Project?</h2>
+      <p class="rtcs-lead" style="color:rgba(255,255,255,.78);">Every engagement starts with a free 30-minute discovery call. Tell us the problem, and we will send a fixed-price proposal within 48 hours. No commitment required.</p>
+      <div class="rtcs-cta-row" style="justify-content:center;">
+        <a href="" onclick={CAL} class="rtcs-btn-lime">Book a Discovery Call →</a>
+        <a href="/contact" class="rtcs-btn-glass">Send a Message</a>
       </div>
     </div>
   </section>

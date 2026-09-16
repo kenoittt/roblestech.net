@@ -72,16 +72,16 @@ const FAQS = [
   faqs={FAQS}
 >
   <!-- WHAT WE DELIVER -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:30px;">
-        <h2 class="svc-h2">What We Deliver</h2>
-        <p class="svc-lead" style="margin-bottom:0;">Twelve delivery capabilities. Every engagement scoped per project after a discovery call.</p>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:30px;">
+        <h2 class="rtcs-h2">What We Deliver</h2>
+        <p class="rtcs-lead" style="margin-bottom:0;">Twelve delivery capabilities. Every engagement scoped per project after a discovery call.</p>
       </div>
-      <div class="svc-grid-3 rv">
+      <div class="rtcs-grid-3 rv">
         {CAPS.map((c) => (
-          <div class="svc-card" style="padding:24px;">
-            <div class="svc-icon">
+          <div class="rtcs-card" style="padding:24px;">
+            <div class="rtcs-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={I[c.icon]} />
             </div>
             <h3 style="font-size:16px;margin:0;">{c.h}</h3>
@@ -92,30 +92,30 @@ const FAQS = [
   </section>
 
   <!-- REFERRAL + HONESTY PANELS -->
-  <section class="svc-band svc-band-sunken">
-    <div class="svc-wrap">
-      <div class="svc-two-col">
-        <div class="svc-panel">
+  <section class="rtcs-band rtcs-band-sunken">
+    <div class="rtcs-wrap">
+      <div class="rtcs-two-col">
+        <div class="rtcs-panel">
           <h3>How the Quecko Referral Works</h3>
           <div style="display:flex;flex-direction:column;gap:16px;margin-top:14px;">
             <div>
-              <div class="svc-eyebrow" style="margin-bottom:4px;">RTC</div>
+              <div class="rtcs-eyebrow" style="margin-bottom:4px;">RTC</div>
               <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">We qualify your idea, give you a straight answer on whether blockchain fits, and refer you to the right delivery team.</p>
             </div>
             <div>
-              <div class="svc-eyebrow" style="margin-bottom:4px;">Quecko</div>
+              <div class="rtcs-eyebrow" style="margin-bottom:4px;">Quecko</div>
               <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">Our trusted blockchain partner scopes, contracts and delivers the build directly: contracts, chains, wallets, exchanges.</p>
             </div>
             <div>
-              <div class="svc-eyebrow" style="margin-bottom:4px;">You</div>
+              <div class="rtcs-eyebrow" style="margin-bottom:4px;">You</div>
               <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">A warm introduction to a vetted team instead of a cold search, with RTC's honest read before you commit.</p>
             </div>
           </div>
         </div>
-        <div class="svc-panel">
+        <div class="rtcs-panel">
           <h3>When We Advise Against Blockchain</h3>
           <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0 0 14px;">Some problems do not need a chain. If a database, a signed audit log or a payments API solves it cheaper and simpler, we will say so in the discovery call and point you to the right build instead.</p>
-          <ul class="svc-excl">
+          <ul class="rtcs-excl">
             <li>No multi-party trust problem: use a database</li>
             <li>Compliance needs an authority: use signed records</li>
             <li>Speculative token with no utility: we will decline it</li>
@@ -126,15 +126,15 @@ const FAQS = [
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="svc-band svc-band-page">
-    <div class="svc-wrap">
-      <div class="svc-center" style="margin-bottom:30px;">
-        <div class="svc-eyebrow">How It Works</div>
-        <h2 class="svc-h2">From Idea to the Right Build Team</h2>
+  <section class="rtcs-band rtcs-band-page">
+    <div class="rtcs-wrap">
+      <div class="rtcs-center" style="margin-bottom:30px;">
+        <div class="rtcs-eyebrow">How It Works</div>
+        <h2 class="rtcs-h2">From Idea to the Right Build Team</h2>
       </div>
-      <div class="svc-grid-4 rv">
+      <div class="rtcs-grid-4 rv">
         {HOW.map((s) => (
-          <div class="svc-step-card">
+          <div class="rtcs-step-card">
             <div class="n">{s.n}</div>
             <h4>{s.h}</h4>
             <p>{s.p}</p>

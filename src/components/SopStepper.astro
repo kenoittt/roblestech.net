@@ -36,17 +36,17 @@ const ICONS: Record<string, string> = {
 ---
 
 <div class="rv">
-  <div class="svc-eyebrow">{eyebrow}</div>
-  <div class="svc-stepper">
+  <div class="rtcs-eyebrow">{eyebrow}</div>
+  <div class="rtcs-stepper">
     {steps.map((s, i) => (
       <>
         {i > 0 && <div class="conn" aria-hidden="true"></div>}
         <div class="step">
-          <div class="svc-node">
+          <div class="rtcs-node">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[s.icon] ?? ICONS.check} />
           </div>
-          <div class="svc-stepn">Step {i + 1}</div>
-          <div class="svc-steplabel">{s.label}</div>
+          <div class="rtcs-stepn">Step {i + 1}</div>
+          <div class="rtcs-steplabel">{s.label}</div>
         </div>
       </>
     ))}
