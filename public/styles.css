@@ -173,11 +173,6 @@ nav.nav-inner {
   cursor: pointer;
   border: none;
   white-space: nowrap;
-  /* The sweep runs left to right, which means background-position counts DOWN
-     on hover: raising it slides the image left and the highlight with it. The
-     highlight stop sits at 50% so that at rest (100%) it is just off the left
-     edge and on hover (0%) just off the right — a full pass, with both resting
-     states showing flat colour. */
   transition:
     background-position .45s cubic-bezier(0.2, 0, 0, 1),
     transform .2s cubic-bezier(0.2, 0, 0, 1),
@@ -195,16 +190,16 @@ nav.nav-inner {
 .btn-white,
 .rtcs-btn-lime,
 .rtcs-tier-cta-action {
-  background: linear-gradient(105deg, #AEE37B 0%, #AEE37B 44%, #D3F2A8 50%, #AEE37B 56%, #AEE37B 100%);
+  background: linear-gradient(105deg, #AEE37B 0%, #D3F2A8 45%, #AEE37B 60%);
   background-size: 230% 100%;
-  background-position: 100% 0;
+  background-position: 0% 0;
   color: #00050F;
 }
 .btn-rtc--lime:hover,
 .btn-white:hover,
 .rtcs-btn-lime:hover,
 .rtcs-tier-cta-action:hover {
-  background-position: 0% 0;
+  background-position: 95% 0;
   transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(174, 227, 123, .4), 0 2px 8px rgba(3, 44, 124, .25);
   color: #00050F;
@@ -224,9 +219,9 @@ nav.nav-inner {
 .nav-cta,
 .ty-btn,
 .nl-btn {
-  background: linear-gradient(105deg, #0464DD 0%, #0464DD 44%, #3992FF 50%, #0464DD 56%, #0464DD 100%);
+  background: linear-gradient(105deg, #0464DD 0%, #3992FF 50%, #0464DD 100%);
   background-size: 230% 100%;
-  background-position: 100% 0;
+  background-position: 0% 0;
   color: #fff;
 }
 .btn-rtc--blue:hover,
@@ -238,7 +233,7 @@ nav.nav-inner {
 .nav-cta:hover,
 .ty-btn:hover,
 .nl-btn:hover {
-  background-position: 0% 0;
+  background-position: 95% 0;
   transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(4, 100, 221, .35);
   color: #fff;
@@ -278,18 +273,18 @@ nav.nav-inner {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   font-size: 14px;
   color: #0464DD;
   text-decoration: none;
   transition: gap .2s cubic-bezier(0.2, 0, 0, 1), color .2s;
 }
-/* The spec's hover colour is #3992FF, which measures 3.02:1 on the page
-   background — under AA, and a hover colour is a resting state for as long as
-   the pointer is there. The gap animation is the signature of this link style
-   and is kept exactly; the colour deepens instead of lightening, at 6.61:1. */
+/* Reference values. #3992FF measures 3.02:1 on the page background, under the
+   4.5:1 AA floor — raised once, and the working reference confirms it as the
+   intended look, so it stands. */
 .link-rtc:hover, .rtcs-explore:hover, .svc-back-link:hover {
-  gap: 12px; color: #0356BD; text-decoration: none;
+  gap: 12px; color: #3992FF; text-decoration: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
