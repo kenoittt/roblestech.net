@@ -6,66 +6,53 @@ import '../styles/services.css';
 /*
  * Services hub.
  *
- * Replaces the old single anchored /services page: this is now a slim hub of
- * six cards, and every tier table lives on its own service-line page. Copy and
- * layout follow the Services wireframe handoff.
+ * Rebuilt from the hub-only handoff. The six lines are now plain entries on
+ * the page rather than cards: a 52px icon tile, the name, a one-liner and an
+ * "Explore more" link. No eyebrows, no price lines, no card containers — the
+ * pricing lives on each line page, which is what the hub exists to reach.
  */
 const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
 
+/* Lucide 24-grid line paths, 2px round stroke, as used in the design file. */
+const ICONS: Record<string, string> = {
+  search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  grid: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+};
+
 const LINES = [
   {
-    eyebrow: 'Service Line 01 · Flagship',
-    name: 'GEO + SEO',
-    href: '/services/geo',
-    flag: 'rtcs-card-flag',
-    body: 'When your customers ask ChatGPT, Gemini or Perplexity which brand to buy, we make sure you are the answer. Citation-optimized content, structured data and technical SEO built for the AI-search era, with a live dashboard showing every citation gained.',
-    price: 'Start with a free AI Visibility Gap Report. Monthly programs from $2,500.',
-    cta: 'Explore GEO + SEO',
+    icon: 'search', name: 'GEO + SEO', href: '/services/geo',
+    line: 'Get your brand cited inside ChatGPT, Gemini and Perplexity answers, and ranked on Google.',
+    schemaId: 'geo', serviceType: 'Search Engine Optimization',
   },
   {
-    eyebrow: 'Service Line 02 · Founding Practice',
-    name: 'Smartsheet Consulting',
-    href: '/services/smartsheet',
-    flag: 'rtcs-card-flag rtcs-card-flag-navy',
-    body: 'Your process, rebuilt as a working operations engine. Sheets, automations, dashboards and integrations designed by certified Smartsheet consultants who have shipped this for Fortune 500 operations teams.',
-    price: 'Fixed-price projects from $3,500, live in 2 to 3 weeks.',
-    cta: 'Explore Smartsheet',
+    icon: 'grid', name: 'Smartsheet Consulting', href: '/services/smartsheet',
+    line: 'Your process, rebuilt as a working operations engine by certified Smartsheet consultants.',
+    schemaId: 'smartsheet', serviceType: 'Business Process Automation',
   },
   {
-    eyebrow: 'Service Line 03',
-    name: 'Automations & AI',
-    href: '/services/ai-automation',
-    flag: '',
-    body: 'Custom AI agents and event-driven pipelines that remove the manual handoffs between your tools. Built for your workflow, not pulled off a shelf.',
-    price: 'Start with the $2,500 Automation Audit, credited in full toward any build within 60 days.',
-    cta: 'Explore Automations & AI',
+    icon: 'zap', name: 'Automations & AI', href: '/services/ai-automation',
+    line: 'Custom AI agents and pipelines that remove the manual handoffs between your tools.',
+    schemaId: 'ai-automation', serviceType: 'Business Process Automation',
   },
   {
-    eyebrow: 'Service Line 04 · With Quecko',
-    name: 'Web3 & Blockchain',
-    href: '/services/web3',
-    flag: '',
-    body: 'Smart contracts, wallets, tokenization and exchanges, delivered with our partner Quecko. Plus a straight answer on where blockchain adds value to your business and where it does not.',
-    price: 'Scoped per project after a discovery call.',
-    cta: 'Explore Web3',
+    icon: 'layers', name: 'Web3 & Blockchain', href: '/services/web3',
+    line: 'Smart contracts, wallets, tokenization and exchanges with our referral partner Quecko.',
+    schemaId: 'web3', serviceType: 'Blockchain Development',
   },
   {
-    eyebrow: 'Service Line 05',
-    name: 'Web Development & UI',
-    href: '/services/web-development',
-    flag: '',
-    body: 'Fast, accessible front-ends for marketing sites, client portals, internal tools and customer-facing products. Built for real users and engineered to grow with you.',
-    price: 'Scoped per project after a discovery call.',
-    cta: 'Explore Web Development',
+    icon: 'code', name: 'Web Development & UI', href: '/services/web-development',
+    line: 'Fast, accessible sites, portals and products built for real users and engineered to grow.',
+    schemaId: 'web-development', serviceType: 'Web Development',
   },
   {
-    eyebrow: 'Service Line 06',
-    name: 'Technical Consulting',
-    href: '/services/technical-consulting',
-    flag: '',
-    body: 'Architecture reviews, integrations and platform strategy, from a single advisory session to an embedded technical lead who acts as your CTO.',
-    price: 'Advisory from $200/hr. Retainers from $3,500/mo.',
-    cta: 'Explore Technical Consulting',
+    icon: 'compass', name: 'Technical Consulting', href: '/services/technical-consulting',
+    line: 'Architecture reviews, integrations and platform strategy, up to an embedded technical lead.',
+    schemaId: 'technical-consulting', serviceType: 'Technology Consulting',
   },
 ];
 
@@ -75,20 +62,40 @@ const HOW = [
   { n: '03', h: 'Build & Deliver', p: 'Execution with consistent communication. You stay informed at every stage, no surprises at launch.' },
   { n: '04', h: 'Support & Scale', p: 'We stay after launch. Ongoing support and iteration so solutions scale as your business grows.' },
 ];
+
+/* One Service node per line, provider pointed at the Organization @id the
+   homepage already declares — same shape as the homepage's own graph. */
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': LINES.map((l) => ({
+    '@type': 'Service',
+    '@id': `https://roblestech.net/#service-${l.schemaId}`,
+    name: l.name,
+    provider: { '@id': 'https://roblestech.net/#organization' },
+    serviceType: l.serviceType,
+    description: l.line,
+    url: `https://roblestech.net${l.href}`,
+    areaServed: 'Worldwide',
+  })),
+};
 ---
 
 <BaseLayout
   title="Services — Robles Technologies Corp."
-  description="Six service lines, one embedded team. GEO + SEO, Smartsheet consulting, automations and AI, Web3, web development and technical consulting — scoped, priced and delivered with a fixed-price proposal within 48 hours."
+  description="Six service lines, one embedded team. GEO + SEO, Smartsheet consulting, automations and AI, Web3, web development and technical consulting — each scoped, priced and delivered with a fixed-price proposal within 48 hours."
   active="services"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
   <!-- HERO -->
   <div class="page-hero rtcs-mesh rtcs-hero-center">
     <div class="breadcrumb rv"><a href="/">Home</a><span>/</span>Services</div>
     <span class="sec-tag rv d1">What We Do</span>
     <h1 class="sec-h rv d2">Six Service Lines.<br>One Embedded Team.</h1>
-    <p class="sec-p rv d3">Every engagement is tied to a business result you can measure: citations gained, hours removed, systems connected. Pick the line that matches your problem. We scope it, price it and deliver it with a fixed-price proposal within 48 hours.</p>
-    <div class="rtcs-cta-row rv d3" style="margin-top:28px;justify-content:center;">
+    <p class="sec-p rv d3">Every engagement is tied to a result you can measure. Pick the line that matches your problem; we send a fixed-price proposal within 48 hours.</p>
+    <div class="rtcs-cta-row rv d3" style="margin-top:30px;">
       <a href="" onclick={CAL} class="rtcs-btn-action">Book a Free Discovery Call</a>
     </div>
   </div>
@@ -96,14 +103,15 @@ const HOW = [
   <!-- SIX SERVICE LINES -->
   <section class="rtcs-band rtcs-band-page">
     <div class="rtcs-wrap">
-      <div class="rtcs-grid">
+      <div class="rtcs-lines rv">
         {LINES.map((l) => (
-          <a href={l.href} class={`rtcs-card rtcs-card-link ${l.flag}`} style="text-decoration:none;">
-            <div class="rtcs-eyebrow">{l.eyebrow}</div>
-            <h3>{l.name}</h3>
-            <p>{l.body}</p>
-            <div class="rtcs-price-line">{l.price}</div>
-            <span class="rtcs-explore">{l.cta} →</span>
+          <a href={l.href} class="rtcs-line">
+            <div class="rtcs-line-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[l.icon]} />
+            </div>
+            <h2>{l.name}</h2>
+            <p>{l.line}</p>
+            <span class="rtcs-explore">Explore more →</span>
           </a>
         ))}
       </div>
@@ -111,16 +119,18 @@ const HOW = [
   </section>
 
   <!-- CROSS-SELL -->
-  <section class="rtcs-band rtcs-band-sunken">
-    <div class="rtcs-wrap rtcs-center">
-      <h2 class="rtcs-h2">Need More Than One Line?</h2>
-      <p class="rtcs-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
-      <a href="" onclick={CAL} class="rtcs-btn-outline">Book a Call to Scope It →</a>
+  <section class="rtcs-band rtcs-band-page" style="padding-top:0;">
+    <div class="rtcs-wrap">
+      <div class="rtcs-crosssell rv">
+        <h2 class="rtcs-h2">Need More Than One Line?</h2>
+        <p class="rtcs-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
+        <a href="" onclick={CAL} class="rtcs-btn-outline">Book a Call to Scope It →</a>
+      </div>
     </div>
   </section>
 
   <!-- HOW WE WORK -->
-  <section class="rtcs-band rtcs-band-page">
+  <section class="rtcs-band rtcs-band-page" style="padding-top:0;">
     <div class="rtcs-wrap">
       <div class="rtcs-center" style="margin-bottom:30px;">
         <div class="rtcs-eyebrow">How We Work</div>
@@ -130,7 +140,7 @@ const HOW = [
         {HOW.map((s) => (
           <div class="rtcs-step-card">
             <div class="n">{s.n}</div>
-            <h4>{s.h}</h4>
+            <h3>{s.h}</h3>
             <p>{s.p}</p>
           </div>
         ))}

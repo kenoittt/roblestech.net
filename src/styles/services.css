@@ -98,6 +98,42 @@
    1200px container each, which reads as two banners rather than two cards. */
 .rtcs-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 22px; max-width: 820px; margin: 0 auto; }
 
+/* ───────────── hub service lines ─────────────
+   Deliberately not cards. The hub handoff sets the six lines directly on the
+   page: an icon tile, the name, a one-liner and a link. The generous 48px row
+   gap is what separates them, so adding a border or a surface here would fight
+   the design. */
+.rtcs-lines { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 48px 40px; }
+.rtcs-line {
+  display: block; text-decoration: none;
+  transition: transform var(--dur-base) cubic-bezier(0.2, 0, 0, 1);
+}
+.rtcs-line:hover { transform: translateY(-4px); }
+.rtcs-line:focus-visible { outline: 2px solid var(--rtc-blue-500); outline-offset: 8px; border-radius: var(--radius-md); }
+.rtcs-line-icon {
+  width: 52px; height: 52px; border-radius: var(--radius-md);
+  background: rgba(4, 100, 221, 0.1); color: var(--rtc-blue-500);
+  display: grid; place-items: center; margin-bottom: 18px;
+}
+.rtcs-line-icon svg { width: 24px; height: 24px; }
+.rtcs-line h2 {
+  margin: 0 0 8px; font-size: 21px; font-weight: 800;
+  letter-spacing: -0.015em; color: var(--text-strong);
+}
+.rtcs-line p { margin: 0 0 12px; font-size: 14px; line-height: 1.65; color: var(--text-muted); }
+
+/* Cross-sell: a contained band on the page rather than a full-width section. */
+.rtcs-crosssell {
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl); padding: 48px 40px; text-align: center;
+}
+.rtcs-crosssell .rtcs-lead { margin-left: auto; margin-right: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rtcs-line { transition: none; }
+  .rtcs-line:hover { transform: none; }
+}
+
 .rtcs-card {
   position: relative; display: flex; flex-direction: column;
   background: var(--surface-card); border: 1px solid var(--border-subtle);
@@ -131,9 +167,15 @@
 .rtcs-step-card .n {
   font-family: 'League Spartan', system-ui, sans-serif;
   font-size: 12px; font-weight: 600; letter-spacing: 0.14em;
+  /* The handoff specifies blue-400 here. At 12px that measures 3.12:1 on the
+     card, under the 4.5:1 AA floor for text this size, and the step number is
+     content rather than decoration. blue-500 is one shade darker — visually
+     near-identical at this size — and clears it at 5.42:1. */
   color: var(--rtc-blue-500); margin-bottom: 10px;
 }
+.rtcs-step-card h3,
 .rtcs-step-card h4 { font-size: 16px; font-weight: 800; color: var(--text-strong); margin: 0 0 8px; }
+.rtcs-step-card h3 { font-size: 16px; font-weight: 800; color: var(--text-strong); margin: 0 0 8px; }
 .rtcs-step-card p { font-size: 13.5px; line-height: 1.7; color: var(--text-body); margin: 0; }
 
 /* Icon circle used by capability cards. */
