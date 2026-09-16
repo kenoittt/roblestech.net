@@ -170,20 +170,10 @@ if (finePointer && !reduce) {
   }
 }
 
-/* ---------- Magnetic buttons ---------- */
-if (finePointer && !reduce) {
-  document.querySelectorAll('.btn').forEach((el) => {
-    el.addEventListener('pointermove', (e) => {
-      const r = el.getBoundingClientRect();
-      const x = e.clientX - r.left - r.width / 2;
-      const y = e.clientY - r.top - r.height / 2;
-      el.style.transform = `translate(${x * 0.2}px,${y * 0.25}px)`;
-    });
-    el.addEventListener('pointerleave', () => {
-      el.style.transform = '';
-    });
-  });
-}
+/* Magnetic buttons: removed. Every .btn used to chase the pointer with an
+   inline transform on pointermove, which read as the button shaking under the
+   cursor. The buttons now do one thing on hover — the gradient sweep — and
+   that lives entirely in CSS. */
 
 /* ---------- Card pointer tilt + follow-glow ---------- */
 if (finePointer && !reduce) {

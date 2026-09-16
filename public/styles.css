@@ -157,6 +157,10 @@ nav.nav-inner {
 ══════════════════════════════════ */
 .btn-rtc,
 .btn,
+.rtcs-btn-action,
+.rtcs-btn-lime,
+.rtcs-btn-glass,
+.rtcs-btn-outline,
 .rtcs-tier-cta,
 .ty-btn,
 .nl-btn,
@@ -183,7 +187,7 @@ nav.nav-inner {
 .btn-rtc--lg { font-size: 15px; padding: 14px 28px; }
 
 /* Arrow icon inside the button (inline SVG, uses currentColor) */
-.btn-rtc svg, .btn svg, .rtcs-tier-cta svg, .ty-btn svg { flex-shrink: 0; }
+.btn-rtc svg, .btn svg, [class*='rtcs-btn-'] svg, .rtcs-tier-cta svg, .ty-btn svg { flex-shrink: 0; }
 
 /* 1) PRIMARY — lime sweep (main CTAs: Book a Call, Gap Report) */
 .btn-rtc--lime,
@@ -260,7 +264,7 @@ nav.nav-inner {
 
 /* Press state — a slight inset rather than a jump, so nothing moves on the
    page. The hover effect is the sweep alone; no lift, no shake. */
-.btn-rtc:active, .btn:active, .rtcs-tier-cta:active, .ty-btn:active, .nl-btn:active {
+.btn-rtc:active, .btn:active, [class*='rtcs-btn-']:active, .rtcs-tier-cta:active, .ty-btn:active, .nl-btn:active {
   filter: brightness(.95);
 }
 
