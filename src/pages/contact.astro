@@ -115,7 +115,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="cd-icon"></div>
         <div>
           <div class="cd-label">Smartsheet Pricing</div>
-          <div class="cd-val">Launchpad $3,500 · Momentum $9,500 · Enterprise $22,000<br><a href="/services#smartsheet">See all tiers →</a></div>
+          <div class="cd-val">Launchpad $3,500 · Momentum $9,500 · Enterprise $22,000<br><a href="/services/smartsheet">See all tiers →</a></div>
         </div>
       </div>
     </div>
@@ -127,7 +127,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <!-- SALESFORCE WEB-TO-LEAD FORM -->
       <div class="embed-card rv">
-        <h2>Send Us a Message</h2>
+        <h2 id="sfHead">Send Us a Message</h2>
         <p>For inquiries, questions, or if you'd like to reach us without scheduling a meeting — fill out the form below and we'll get back to you within 1 business day.</p>
 
         <form class="sf-form" action="https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00Dd500000JnGbl" method="POST">
@@ -180,6 +180,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <button type="submit" name="submit" class="sf-submit">Send Message →</button>
           <p class="sf-note">We reply within 1 business day. Your details go straight to our team — we never share or sell them.</p>
         </form>
+
+        {/* The GEO page's Gap Report CTAs arrive here as ?request=gap-report.
+            Pre-filling the message and tagging the lead source means the
+            request is captured in Salesforce like any other enquiry, and the
+            visitor is not made to explain what they came for. */}
+        <script is:inline>
+          (function () {
+            if (!/[?&]request=gap-report\b/.test(location.search)) return;
+            var msg = document.getElementById('description');
+            var src = document.getElementById('lead_source');
+            var head = document.getElementById('sfHead');
+            if (msg && !msg.value) {
+              msg.value =
+                "I'd like the free AI Visibility Gap Report.\n\n" +
+                'Website: \n' +
+                'What we sell: ';
+            }
+            if (src) src.value = 'Gap Report';
+            if (head) head.textContent = 'Request Your Free Gap Report';
+            if (msg) {
+              // Land the caret at the end of "Website:", ready to type.
+              var at = msg.value.indexOf('Website: ') + 'Website: '.length;
+              msg.focus();
+              try { msg.setSelectionRange(at, at); } catch (e) {}
+            }
+          })();
+        </script>
       </div>
 
       <!-- SCHEDULE + INFO -->
@@ -216,19 +243,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div style="background:var(--white);border-radius:14px;padding:22px 24px;border:1.5px solid rgba(3,44,124,.07);">
           <div class="cd-label" style="margin-bottom:14px;">Explore Our Service Lines</div>
           <div style="display:flex;flex-direction:column;gap:9px;">
-            <a href="/services#seo" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+            <a href="/services/geo" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
               <span></span> Generative Engine Optimization (GEO) <span style="color:var(--core-blue);margin-left:auto;">→</span>
             </a>
-            <a href="/services#consulting" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+            <a href="/services/technical-consulting" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
               <span></span> Technical Consulting Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
             </a>
-            <a href="/services#smartsheet" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+            <a href="/services/smartsheet" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
               <span></span> Smartsheet Development Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
             </a>
-            <a href="/services#automation" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+            <a href="/services/ai-automation" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
               <span></span> Automation Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
             </a>
-            <a href="/services#web3" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
+            <a href="/services/web3" style="font-size:var(--fs-xs);color:var(--navy);text-decoration:none;display:flex;align-items:center;gap:8px;font-weight:600;">
               <span></span> Web3 Services <span style="color:var(--core-blue);margin-left:auto;">→</span>
             </a>
           </div>

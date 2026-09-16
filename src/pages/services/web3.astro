@@ -1,0 +1,146 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+/*
+ * Service Line 04 — Web3 & Blockchain.
+ *
+ * Quecko is a REFERRAL partner, not a delivery subcontractor: the client
+ * contracts with Quecko directly. Every mention on this page is framed that
+ * way deliberately, and there is no invented proof or pricing.
+ */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+
+/* Lucide 24-grid line paths, 2px round stroke. */
+const I: Record<string, string> = {
+  code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+  shield: '<path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.6 0C14.6 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  wallet: '<path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
+  grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  layers: '<path d="m12 2 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  swap: '<path d="M3 8h13l-3-3"/><path d="M21 16H8l3 3"/>',
+  image: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.6-4.6a2 2 0 0 0-2.8 0L3 21"/>',
+  trend: '<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  arrows: '<path d="m8 3-4 4 4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  compass: '<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.9 6.6-6.6 2.9 2.9-6.6z"/>',
+};
+
+const CAPS = [
+  { icon: 'code', h: 'Smart Contract Development' },
+  { icon: 'shield', h: 'Smart Contract Audits' },
+  { icon: 'wallet', h: 'Wallet Development' },
+  { icon: 'grid', h: 'dApp Development' },
+  { icon: 'layers', h: 'RWA Tokenization' },
+  { icon: 'target', h: 'Token Design and Launch' },
+  { icon: 'swap', h: 'Exchange Development' },
+  { icon: 'image', h: 'NFT Platforms' },
+  { icon: 'trend', h: 'DeFi Protocols' },
+  { icon: 'link', h: 'Chain Integrations' },
+  { icon: 'arrows', h: 'On/Off-Ramp Integration' },
+  { icon: 'compass', h: 'Web3 Advisory' },
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery Call', p: 'A free 30-minute call on your idea, and a straight answer on whether blockchain is the right fit.' },
+  { n: '02', h: 'Qualify the Fit', p: 'If a database or a simpler build solves it cheaper, we say so and point you to the right service line instead.' },
+  { n: '03', h: 'Warm Referral', p: 'We introduce you to Quecko, who scope, price and contract the build with you directly.' },
+  { n: '04', h: 'Integration Support', p: 'Where it helps, RTC stays involved to wire the build into your existing systems as a separate engagement.' },
+];
+
+const FAQS = [
+  { q: 'Who does the work, RTC or Quecko?', a: 'Quecko delivers the blockchain engineering and you contract with them directly. RTC qualifies the fit first and refers you in, and can stay involved for integration with your existing systems as a separate engagement.' },
+  { q: 'How do you price Web3 work?', a: 'Scoped and priced by Quecko per project after the referral. Chain work varies too much for published tiers to be honest.' },
+  { q: 'What if blockchain is not the right fit for our idea?', a: 'We tell you in the discovery call and, where it helps, propose the simpler build through our web development or automation lines instead.' },
+  { q: 'Which chains do you build on?', a: 'Chain choice follows the use case: EVM chains for most business applications, others where liquidity, cost or compliance requires it. We recommend, you decide.' },
+];
+---
+
+<ServiceLayout
+  title="Web3 & Blockchain, in Partnership With Quecko | Robles Technologies Corp."
+  description="Smart contracts, wallets, tokenization and exchanges delivered by our referral partner Quecko — with RTC's straight answer on where blockchain adds value first."
+  eyebrow="Service Line 04 · With Quecko"
+  h1="Web3 and Blockchain Development,<br>in Partnership With Quecko"
+  intro="Smart contracts, wallets, tokenization and exchanges, delivered by our referral partner Quecko. RTC gives you a straight answer on where blockchain adds value first, then connects you to the team that builds it."
+  crumb="Web3 & Blockchain"
+  ctaLabel="Book a Free Discovery Call"
+  ctaHref="/contact#schedule"
+  closingH2="Get a Straight Answer on Your Web3 Idea"
+  closingText="A free 30-minute call: what to build, what to skip, and a scoped proposal if it is worth building."
+  closingCtaLabel="Book a Discovery Call →"
+  closingCtaHref="/contact#schedule"
+  faqs={FAQS}
+>
+  <!-- WHAT WE DELIVER -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <h2 class="svc-h2">What We Deliver</h2>
+        <p class="svc-lead" style="margin-bottom:0;">Twelve delivery capabilities. Every engagement scoped per project after a discovery call.</p>
+      </div>
+      <div class="svc-grid-3 rv">
+        {CAPS.map((c) => (
+          <div class="svc-card" style="padding:24px;">
+            <div class="svc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={I[c.icon]} />
+            </div>
+            <h3 style="font-size:16px;margin:0;">{c.h}</h3>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- REFERRAL + HONESTY PANELS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-two-col">
+        <div class="svc-panel">
+          <h3>How the Quecko Referral Works</h3>
+          <div style="display:flex;flex-direction:column;gap:16px;margin-top:14px;">
+            <div>
+              <div class="svc-eyebrow" style="margin-bottom:4px;">RTC</div>
+              <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">We qualify your idea, give you a straight answer on whether blockchain fits, and refer you to the right delivery team.</p>
+            </div>
+            <div>
+              <div class="svc-eyebrow" style="margin-bottom:4px;">Quecko</div>
+              <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">Our trusted blockchain partner scopes, contracts and delivers the build directly: contracts, chains, wallets, exchanges.</p>
+            </div>
+            <div>
+              <div class="svc-eyebrow" style="margin-bottom:4px;">You</div>
+              <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">A warm introduction to a vetted team instead of a cold search, with RTC's honest read before you commit.</p>
+            </div>
+          </div>
+        </div>
+        <div class="svc-panel">
+          <h3>When We Advise Against Blockchain</h3>
+          <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0 0 14px;">Some problems do not need a chain. If a database, a signed audit log or a payments API solves it cheaper and simpler, we will say so in the discovery call and point you to the right build instead.</p>
+          <ul class="svc-excl">
+            <li>No multi-party trust problem: use a database</li>
+            <li>Compliance needs an authority: use signed records</li>
+            <li>Speculative token with no utility: we will decline it</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How It Works</div>
+        <h2 class="svc-h2">From Idea to the Right Build Team</h2>
+      </div>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

@@ -1,664 +1,153 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Web3ServiceSection from '../components/Web3ServiceSection.astro';
+import '../styles/service-tokens.css';
+import '../styles/services.css';
+
+/*
+ * Services hub.
+ *
+ * Replaces the old single anchored /services page: this is now a slim hub of
+ * six cards, and every tier table lives on its own service-line page. Copy and
+ * layout follow the Services wireframe handoff.
+ */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+
+const LINES = [
+  {
+    eyebrow: 'Service Line 01 · Flagship',
+    name: 'GEO + SEO',
+    href: '/services/geo',
+    flag: 'svc-card-flag',
+    body: 'When your customers ask ChatGPT, Gemini or Perplexity which brand to buy, we make sure you are the answer. Citation-optimized content, structured data and technical SEO built for the AI-search era, with a live dashboard showing every citation gained.',
+    price: 'Start with a free AI Visibility Gap Report. Monthly programs from $2,500.',
+    cta: 'Explore GEO + SEO',
+  },
+  {
+    eyebrow: 'Service Line 02 · Founding Practice',
+    name: 'Smartsheet Consulting',
+    href: '/services/smartsheet',
+    flag: 'svc-card-flag svc-card-flag-navy',
+    body: 'Your process, rebuilt as a working operations engine. Sheets, automations, dashboards and integrations designed by certified Smartsheet consultants who have shipped this for Fortune 500 operations teams.',
+    price: 'Fixed-price projects from $3,500, live in 2 to 3 weeks.',
+    cta: 'Explore Smartsheet',
+  },
+  {
+    eyebrow: 'Service Line 03',
+    name: 'Automations & AI',
+    href: '/services/ai-automation',
+    flag: '',
+    body: 'Custom AI agents and event-driven pipelines that remove the manual handoffs between your tools. Built for your workflow, not pulled off a shelf.',
+    price: 'Start with the $2,500 Automation Audit, credited in full toward any build within 60 days.',
+    cta: 'Explore Automations & AI',
+  },
+  {
+    eyebrow: 'Service Line 04 · With Quecko',
+    name: 'Web3 & Blockchain',
+    href: '/services/web3',
+    flag: '',
+    body: 'Smart contracts, wallets, tokenization and exchanges, delivered with our partner Quecko. Plus a straight answer on where blockchain adds value to your business and where it does not.',
+    price: 'Scoped per project after a discovery call.',
+    cta: 'Explore Web3',
+  },
+  {
+    eyebrow: 'Service Line 05',
+    name: 'Web Development & UI',
+    href: '/services/web-development',
+    flag: '',
+    body: 'Fast, accessible front-ends for marketing sites, client portals, internal tools and customer-facing products. Built for real users and engineered to grow with you.',
+    price: 'Scoped per project after a discovery call.',
+    cta: 'Explore Web Development',
+  },
+  {
+    eyebrow: 'Service Line 06',
+    name: 'Technical Consulting',
+    href: '/services/technical-consulting',
+    flag: '',
+    body: 'Architecture reviews, integrations and platform strategy, from a single advisory session to an embedded technical lead who acts as your CTO.',
+    price: 'Advisory from $200/hr. Retainers from $3,500/mo.',
+    cta: 'Explore Technical Consulting',
+  },
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery', p: 'We listen first. Understanding your workflows, goals and bottlenecks before proposing anything.' },
+  { n: '02', h: 'Solution Design', p: 'We map the right technical approach, scoped, documented and aligned to your business outcomes.' },
+  { n: '03', h: 'Build & Deliver', p: 'Execution with consistent communication. You stay informed at every stage, no surprises at launch.' },
+  { n: '04', h: 'Support & Scale', p: 'We stay after launch. Ongoing support and iteration so solutions scale as your business grows.' },
+];
 ---
 
 <BaseLayout
   title="Services — Robles Technologies Corp."
-  description="Six service lines, one trusted team. GEO + SEO, project management optimization, automations & AI, Web3, web development, and technical consulting — scoped, priced, and delivered with precision."
+  description="Six service lines, one embedded team. GEO + SEO, Smartsheet consulting, automations and AI, Web3, web development and technical consulting — scoped, priced and delivered with a fixed-price proposal within 48 hours."
   active="services"
 >
-  <!-- PAGE HERO -->
-  <div class="page-hero">
-    <div class="page-hero-pat"></div>
+  <!-- HERO -->
+  <div class="page-hero svc-mesh">
     <div class="breadcrumb rv"><a href="/">Home</a><span>/</span>Services</div>
     <span class="sec-tag rv d1">What We Do</span>
-    <h1 class="sec-h rv d2">Six service lines.<br>One trusted team.</h1>
-    <p class="sec-p rv d3">Every service is tied to a business result. Choose the tier that fits where you are — and we'll scope it, price it, and deliver it with precision.</p>
-    <div style="margin-top:28px;">
-      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Free Discovery Call →</a>
+    <h1 class="sec-h rv d2">Six Service Lines.<br>One Embedded Team.</h1>
+    <p class="sec-p rv d3">Every engagement is tied to a business result you can measure: citations gained, hours removed, systems connected. Pick the line that matches your problem. We scope it, price it and deliver it with a fixed-price proposal within 48 hours.</p>
+    <div class="svc-cta-row rv d3" style="margin-top:28px;justify-content:center;">
+      <a href="" onclick={CAL} class="svc-btn-lime">Book a Free Discovery Call</a>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       SERVICE LINE 1 — GEO + SEO (flagship)
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="seo">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 01 · Flagship</span>
-        <h2 class="sec-h">GEO + SEO</h2>
-        <p class="sec-p">Ranking on Google isn't enough anymore. When your customers ask ChatGPT, Gemini, or Perplexity which brand to buy — are you the answer they get? We make sure you are. Done-for-you GEO that gets your brand cited inside AI answers before competitors lock in the advantage.</p>
-      </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>What is GEO?</strong> Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. A winner-takes-most dynamic means 3–5 brands get cited per answer — whoever establishes authority first is hard to displace. The window is open. It's closing.
-        </div>
-      </div>
-    </div>
-
-    <!-- DOOR-OPENER -->
-    <div class="rv" style="margin-bottom:40px;">
-      <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:16px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(57,146,255,0.1);pointer-events:none;"></div>
-        <div style="position:relative;z-index:1;">
-          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px;">Start Here · One-Time · $1,000</div>
-          <div style="font-size:1.18rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin-bottom:8px;">AI Visibility Gap Report</div>
-          <p style="font-size:.85rem;color:rgba(255,255,255,.72);max-width:520px;margin:0;line-height:1.7;">A 20-query diagnostic across ChatGPT, Gemini &amp; Perplexity with screenshots of every place your brand goes invisible. Low-risk proof of the problem — and a clear roadmap if you decide to fix it.</p>
-        </div>
-        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">Get Your Gap Report →</a>
-      </div>
-    </div>
-
-    <div class="svc-tiers-grid">
-
-      <!-- FOUNDATION -->
-      <div class="ss-tier rv">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Starter</div>
-          <div class="ss-tier-name">Foundation</div>
-          <p class="ss-tier-tagline">Build your AI visibility baseline — tracking, content, and schema locked in.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$2,000</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum commitment</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>AI-visibility tracking — ChatGPT, Gemini, Perplexity</li>
-            <li>2 GEO + SEO posts per month, structured for citation</li>
-            <li>FAQ schema implementation</li>
-            <li>Monthly scorecard — citation appearances &amp; ranking shifts</li>
-          </ul>
-          <div class="ss-excl-label">Best For</div>
-          <ul class="ss-excl">
-            <li>Brands just starting to build AI search presence</li>
-            <li>Businesses with minimal existing content</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- ENGINE -->
-      <div class="ss-tier popular rv d1">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Recommended</div>
-          <div class="ss-tier-name">Engine</div>
-          <p class="ss-tier-tagline">Full GEO system — audit, content, schema, reporting, and async strategy.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$3,500</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum commitment</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Full AI visibility baseline audit + content plan</li>
-            <li>4 GEO + SEO posts per month — citation-optimized</li>
-            <li>FAQ schema + Google Search Console setup</li>
-            <li>Monthly reporting — citations, traffic, AI appearance tracking</li>
-            <li>Async strategy review each month</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Conversion copy review (see Operator tier)</li>
-            <li>Digital-PR / citation outreach (see Operator tier)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- OPERATOR -->
-      <div class="ss-tier rv d2">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Scale</div>
-          <div class="ss-tier-name">Operator</div>
-          <p class="ss-tier-tagline">Maximum output — conversion copy, digital PR, and priority delivery.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$6,000</span>
-            <span class="ss-price-unit">/ mo</span>
-          </div>
-          <div class="ss-price-note">3-month minimum · Everything in Engine, plus:</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Everything in Engine, plus:</li>
-            <li>6–8 GEO + SEO posts per month</li>
-            <li>Conversion-focused content — product pages &amp; landing copy</li>
-            <li>Quarterly citation / digital-PR push</li>
-            <li>Priority turnaround — faster delivery windows</li>
-            <li>Monthly strategy call (45 min)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- MID CTA STRIP -->
-  <div class="strip rv rtc-sheen">
-    <div>
-      <h3>Not sure where your brand stands in AI search?</h3>
-      <p>Start with a $1,000 Gap Report — proof of the problem before you invest in fixing it.</p>
-    </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
-  </div>
-
-  <!-- ══════════════════════════════════
-       SERVICE LINE 2 — PROJECT MANAGEMENT OPTIMIZATION (Smartsheet)
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="smartsheet">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 02</span>
-        <h2 class="sec-h">Project Management<br>Optimization</h2>
-        <p class="sec-p">Streamline how work actually gets done — powered by Smartsheet. We redesign your environment from the ground up, building the workflows, automations, dashboards, and integrations that turn your process into a real operations engine.</p>
-      </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>Note on Smartsheet subscriptions:</strong> Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your environment.
-        </div>
-      </div>
-    </div>
-
-    <div class="svc-tiers-grid">
-
-      <!-- LAUNCHPAD -->
-      <div class="ss-tier rv">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Starter</div>
-          <div class="ss-tier-name">Launchpad</div>
-          <p class="ss-tier-tagline">For small teams new to Smartsheet, getting their first system built and running.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$3,500</span>
-            <span class="ss-price-unit">/ project</span>
-          </div>
-          <div class="ss-price-note">Starting from · One-time engagement · Est. 20–40 hrs</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Up to 5 custom sheets built and configured</li>
-            <li>Basic automations — notifications, alerts, row actions</li>
-            <li>1 summary dashboard with live metrics</li>
-            <li>1 intake form with conditional logic</li>
-            <li>1 report per workspace</li>
-            <li>Handover session — walkthrough + documentation</li>
-            <li>14-day post-launch support for questions and fixes</li>
-            <li>Delivery within 2–3 weeks</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>API or third-party integrations</li>
-            <li>Multi-workspace / cross-dept rollout</li>
-            <li>Adoption sprint or training program</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- MOMENTUM -->
-      <div class="ss-tier popular rv d1">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Growth</div>
-          <div class="ss-tier-name">Momentum</div>
-          <p class="ss-tier-tagline">For growing teams that need connected workflows, reporting, and real adoption.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$9,500</span>
-            <span class="ss-price-unit">/ project</span>
-          </div>
-          <div class="ss-price-note">Starting from · Multi-phase engagement · Est. 60–100 hrs</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Up to 15 sheets across multiple workspaces</li>
-            <li>Advanced automations — conditional logic, approvals, escalation rules</li>
-            <li>Multi-view dashboards with live metrics and charts</li>
-            <li>Cross-sheet reports and summary rollups</li>
-            <li>Up to 3 intake forms with routing logic</li>
-            <li>1 third-party integration — Jira, Salesforce, Slack, etc.</li>
-            <li>Team training session — up to 10 stakeholders</li>
-            <li>30-day adoption support post go-live</li>
-            <li>Delivery within 4–6 weeks</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Control Center / PMO portfolio setup</li>
-            <li>Multi-system API architecture</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- ENTERPRISE -->
-      <div class="ss-tier rv d2">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Scale</div>
-          <div class="ss-tier-name">Enterprise</div>
-          <p class="ss-tier-tagline">For complex operations needing a full-scale build, deep integrations, and guaranteed adoption.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$22,000</span>
-            <span class="ss-price-unit">/ project</span>
-          </div>
-          <div class="ss-price-note">Starting from · Multi-phase delivery · 100+ hrs · scoped per org</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Unlimited sheets across departments and workspaces</li>
-            <li>Enterprise automations — Bridge workflows, complex logic, error monitoring</li>
-            <li>Executive dashboards — custom views per stakeholder level</li>
-            <li>Multi-system API integrations — bi-directional with monitoring and recovery</li>
-            <li>Control Center / PMO setup — portfolio-scale provisioning</li>
-            <li>Dynamic Views and WorkApps for role-based or external access</li>
-            <li>Dedicated project manager throughout delivery</li>
-            <li>Up to 3 training sessions — role-specific, up to 20 stakeholders</li>
-            <li>90-day adoption guarantee</li>
-            <li>Delivery within 8–16 weeks depending on scope</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ADD-ONS -->
-    <div class="ss-addons rv" style="margin-top:32px;">
-      <h3>Enhancements &amp; Add-ons</h3>
-      <p>Available across all tiers. Add what you need, when you need it.</p>
-      <div class="ss-addon-grid">
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional API Integration</div><div class="ss-addon-price">From $3,500 per system</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Managed Support Retainer</div><div class="ss-addon-price">From $1,500 / month</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Extra Training Session</div><div class="ss-addon-price">From $450 per session</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Dashboard Expansion</div><div class="ss-addon-price">From $600 per dashboard</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">License Health Check</div><div class="ss-addon-price">$1,500 – $3,500 fixed fee</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Smartsheet AI Enablement</div><div class="ss-addon-price">From $4,500 per engagement</div></div>
+  <!-- SIX SERVICE LINES -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-grid">
+        {LINES.map((l) => (
+          <a href={l.href} class={`svc-card svc-card-link ${l.flag}`} style="text-decoration:none;">
+            <div class="svc-eyebrow">{l.eyebrow}</div>
+            <h3>{l.name}</h3>
+            <p>{l.body}</p>
+            <div class="svc-price-line">{l.price}</div>
+            <span class="svc-explore">{l.cta} →</span>
+          </a>
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- MID CTA STRIP -->
-  <div class="strip rv rtc-sheen">
-    <div>
-      <h3>Not sure which tier fits your project?</h3>
-      <p>Book a free 30-minute call — we'll scope it and send a fixed-price proposal within 48 hours.</p>
+  <!-- CROSS-SELL -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap svc-center">
+      <h2 class="svc-h2">Need More Than One Line?</h2>
+      <p class="svc-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
+      <a href="" onclick={CAL} class="svc-btn-outline">Book a Call to Scope It →</a>
     </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
-  </div>
+  </section>
 
-  <!-- ══════════════════════════════════
-       SERVICE LINE 3 — AUTOMATIONS & AI
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="automation">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 03</span>
-        <h2 class="sec-h">Automations &amp; AI</h2>
-        <p class="sec-p">Custom AI agents and automation systems, built for your workflows — not off-the-shelf bots. Agents that triage, draft, and act on repetitive knowledge work, plus event-driven pipelines that keep every system in sync and eliminate manual handoffs.</p>
+  <!-- HOW WE WORK -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How We Work</div>
+        <h2 class="svc-h2">Structured Delivery From Day One</h2>
       </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>Note on third-party costs:</strong> Build fees below are one-time. The AI models, phone lines and messaging that run your agents are billed straight to accounts in your own name — we set them up and configure them, but you pay those vendors directly. We never take a cut of usage, because we never handle it.
-        </div>
-      </div>
-    </div>
-
-    <!-- DOOR-OPENER -->
-    <div class="rv" style="margin-bottom:40px;">
-      <div style="background:linear-gradient(135deg,var(--navy) 0%,var(--steel) 100%);border-radius:16px;padding:32px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(57,146,255,0.1);pointer-events:none;"></div>
-        <div style="position:relative;z-index:1;">
-          <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:8px;">Start Here · One-Time · $2,500</div>
-          <div style="font-size:1.18rem;font-weight:900;color:var(--white);letter-spacing:-.02em;margin-bottom:8px;">Automation Audit</div>
-          <p style="font-size:.85rem;color:rgba(255,255,255,.72);max-width:520px;margin:0;line-height:1.7;">A written map of what is worth automating and what it is worth, ranked — with an honest read on where automation pays and where it does not. Go ahead with any build within 60 days and the full $2,500 comes off the price. The document is yours to keep either way.</p>
-        </div>
-        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;position:relative;z-index:1;">Book Your Audit →</a>
-      </div>
-    </div>
-
-    <div class="svc-tiers-grid">
-
-      <!-- PILOT -->
-      <div class="ss-tier rv">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Starter</div>
-          <div class="ss-tier-name">Pilot</div>
-          <p class="ss-tier-tagline">One agent, one process. Prove it works before spending more.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$5,500</span>
-            <span class="ss-price-unit">/ build</span>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
           </div>
-          <div class="ss-price-note">Starting from · One-time build · 2–3 weeks</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>1 custom AI agent or automation workflow — voice receptionist, cart recovery, support agent, lead follow-up, or any single process</li>
-            <li>Discovery call and workflow mapping of the target process</li>
-            <li>Up to 2 system integrations</li>
-            <li>Single channel — voice, email, SMS/WhatsApp, or chat</li>
-            <li>Conversation design, guardrails, and human-escalation path</li>
-            <li>Testing, go-live, and handover documentation</li>
-            <li>2 rounds of revisions during the build</li>
-            <li>14-day post-launch support period</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Multi-agent orchestration across a full funnel</li>
-            <li>Knowledge-base ingestion and performance dashboard</li>
-            <li>Multi-channel coverage (see Copilot)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- COPILOT -->
-      <div class="ss-tier popular rv d1">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Growth</div>
-          <div class="ss-tier-name">Copilot</div>
-          <p class="ss-tier-tagline">A whole funnel rather than a single task.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$18,500</span>
-            <span class="ss-price-unit">/ build</span>
-          </div>
-          <div class="ss-price-note">Starting from · One-time build · 4–8 weeks</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Up to 3 AI agents or workflows, orchestrated to work together — lead capture → nurture → booking → confirmation</li>
-            <li>Process audit and automation roadmap for the department</li>
-            <li>Up to 5 system integrations</li>
-            <li>Multi-channel — voice, SMS, email and WhatsApp</li>
-            <li>Knowledge-base ingestion — your docs, FAQs and policies become the agent's brain</li>
-            <li>Performance dashboard — calls handled, leads qualified, carts recovered, hours saved</li>
-            <li>Team training for up to 10 people</li>
-            <li>3 rounds of revisions during the build</li>
-            <li>30-day post-launch support period</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Company-wide automation audit and ROI roadmap</li>
-            <li>Custom or fine-tuned models</li>
-            <li>Human-in-the-loop approval layers (see Autopilot)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- AUTOPILOT -->
-      <div class="ss-tier rv d2">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Scale</div>
-          <div class="ss-tier-name">Autopilot</div>
-          <p class="ss-tier-tagline">Sales, support and operations running on one connected system.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$45,000</span>
-            <span class="ss-price-unit">/ build</span>
-          </div>
-          <div class="ss-price-note">Starting from · One-time build · 8–16 weeks · scoped per org</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Company-wide or division-wide automation audit with a prioritized ROI roadmap</li>
-            <li>Up to 6 agents or workflows, orchestrated as a single system</li>
-            <li>Up to 10 system integrations</li>
-            <li>Multi-system API integrations with human-in-the-loop approval layers</li>
-            <li>Custom or fine-tuned models where off-the-shelf falls short</li>
-            <li>Executive dashboard — ROI and manual hours eliminated, quantified</li>
-            <li>Dedicated project manager throughout delivery</li>
-            <li>3 training sessions for up to 20 people</li>
-            <li>5 revisions within the signed scope document</li>
-            <li>60-day adoption period with hands-on tuning against live conversations</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- MANAGED AI OPERATIONS RETAINER -->
-    <div class="ai-retainer rv">
-      <div>
-        <div class="ai-retainer-eyebrow">Ongoing · Optional but strongly recommended</div>
-        <h3>Managed AI Operations</h3>
-        <p>Models get updated, prompts may need changes, and the edge cases nobody thought of tend to surface around week six. Systems that get handed over and then left alone usually break within a few months. Monitoring, prompt and model updates, cost optimization and a monthly performance report keep yours running the way it launched.</p>
-      </div>
-      <ul class="ai-retainer-rates">
-        <li><span>Pilot · 6-month min.</span><b>From $1,500 / mo</b></li>
-        <li><span>Copilot · 6-month min.</span><b>From $3,500 / mo</b></li>
-        <li><span>Autopilot · 12-month min.</span><b>From $7,500 / mo</b></li>
-      </ul>
-      <div class="ai-retainer-foot">
-        <p>Decline it and the system is handed over as built — later work is quoted at <strong>$175/hour</strong>, subject to availability.</p>
-        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white" style="white-space:nowrap;flex-shrink:0;">Talk Through a Retainer →</a>
-      </div>
-    </div>
-
-    <!-- ADD-ONS -->
-    <div class="ss-addons rv" style="margin-top:32px;">
-      <h3>Enhancements &amp; Add-ons</h3>
-      <p>Available across all tiers. Add what you need, when you need it.</p>
-      <div class="ss-addon-grid">
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Agent or Workflow</div><div class="ss-addon-price">From $3,000 · built on existing infrastructure</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Integration</div><div class="ss-addon-price">From $1,800 per system</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Channel</div><div class="ss-addon-price">From $1,200 · voice, SMS, WhatsApp, email or chat</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Data Cleanup &amp; Deduplication</div><div class="ss-addon-price">From $1,500 · scoped to record count</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Training Session</div><div class="ss-addon-price">$500 per session, up to 20 attendees</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Additional Revision Round</div><div class="ss-addon-price">$750 beyond the rounds in your tier</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Ad-hoc Work Without a Retainer</div><div class="ss-addon-price">$175 / hour · subject to availability</div></div>
-        <div class="ss-addon-item"><div class="ss-addon-name">Rush Delivery</div><div class="ss-addon-price">+25% of build fee · up to 30% faster</div></div>
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- MID CTA STRIP -->
-  <div class="strip rv rtc-sheen">
-    <div>
-      <h3>Not sure which agent to build first?</h3>
-      <p>Book a free 30-minute call — we'll map the process, size the ROI, and send a fixed-price proposal within 48 hours.</p>
-    </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
-  </div>
-
-  <!-- ══════════════════════════════════
-       SERVICE LINE 4 — WEB3 & BLOCKCHAIN (with Quecko · details underway)
-  ══════════════════════════════════ -->
-  <Web3ServiceSection />
-
-  <!-- ══════════════════════════════════
-       SERVICE LINE 5 — WEB DEVELOPMENT & UI
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="webdev">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 05</span>
-        <h2 class="sec-h">Web Development<br>&amp; UI</h2>
-        <p class="sec-p">Fast, accessible, beautifully designed web and app front-ends — from marketing sites to internal tools, client portals, and customer-facing products. Built for real users, engineered to grow with your business.</p>
+  <!-- CLOSING CTA -->
+  <section class="svc-band svc-mesh">
+    <div class="svc-wrap svc-center">
+      <div class="svc-eyebrow svc-eyebrow-green">Start Building With RTC</div>
+      <h2 class="svc-h2" style="color:#fff;">Ready to Discuss Your Project?</h2>
+      <p class="svc-lead" style="color:rgba(255,255,255,.78);">Every engagement starts with a free 30-minute discovery call. Tell us the problem, and we will send a fixed-price proposal within 48 hours. No commitment required.</p>
+      <div class="svc-cta-row" style="justify-content:center;">
+        <a href="" onclick={CAL} class="svc-btn-lime">Book a Discovery Call →</a>
+        <a href="/contact" class="svc-btn-glass">Send a Message</a>
       </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>Scoped per project:</strong> Web builds vary widely in scope, so we price each one after a short discovery call — from single-page sites to full product front-ends.
-        </div>
-      </div>
-    </div>
-    <div class="svc-soon rv">
-      <span class="svc-soon-badge">Custom-scoped per project</span>
-      <p>Marketing sites, client portals, internal tools, and customer-facing products.</p>
-      <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call to Scope Your Build →</a>
-    </div>
-  </section>
-
-  <!-- MID CTA STRIP -->
-  <div class="strip rv rtc-sheen">
-    <div>
-      <h3>Need a custom arrangement across service lines?</h3>
-      <p>We're flexible. Tell us what you need and we'll build the right engagement around it.</p>
-    </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
-  </div>
-
-  <!-- ══════════════════════════════════
-       SERVICE LINE 6 — TECHNICAL CONSULTING (last)
-  ══════════════════════════════════ -->
-  <section class="svc-category-section" id="consulting">
-    <div class="svc-category-head rv">
-      <div>
-        <div class="svc-category-icon"></div>
-        <span class="sec-tag">Service Line 06</span>
-        <h2 class="sec-h">Digital Transformation<br>&amp; Tech Consulting</h2>
-        <p class="sec-p">Expert technology guidance and hands-on execution — from architecture reviews and system integrations to platform strategy. We embed with your team and build what you actually need.</p>
-      </div>
-      <div>
-        <div class="ss-pricing-note" style="margin:0;">
-          <strong>Engagement flexibility:</strong> Technical consulting is available as one-time project engagements, hourly advisory sessions, or ongoing retainers. Every arrangement begins with a free discovery call to determine the right fit.
-        </div>
-      </div>
-    </div>
-
-    <div class="svc-tiers-grid">
-
-      <!-- ADVISORY -->
-      <div class="ss-tier rv">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Starter</div>
-          <div class="ss-tier-name">Advisory</div>
-          <p class="ss-tier-tagline">For teams that need expert guidance on a specific problem, architecture decision, or technical direction.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$200</span>
-            <span class="ss-price-unit">/ hr</span>
-          </div>
-          <div class="ss-price-note">Or $1,500 per strategy session · No retainer required</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Technology strategy and architecture review</li>
-            <li>Platform and tooling evaluation</li>
-            <li>Technical roadmap guidance</li>
-            <li>Code and system audit with written findings</li>
-            <li>Vendor and proposal evaluation support</li>
-            <li>Written summary of recommendations post-session</li>
-          </ul>
-          <div class="ss-excl-label">Best For</div>
-          <ul class="ss-excl">
-            <li>One-off technical questions or decisions</li>
-            <li>Pre-project planning and scoping</li>
-            <li>Second opinions on existing technical plans</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Session</a>
-        </div>
-      </div>
-
-      <!-- RETAINER -->
-      <div class="ss-tier popular rv d1">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Ongoing</div>
-          <div class="ss-tier-name">Retainer</div>
-          <p class="ss-tier-tagline">For growing businesses that need consistent technical support, oversight, and hands-on execution each month.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$3,500</span>
-            <span class="ss-price-unit">/ month</span>
-          </div>
-          <div class="ss-price-note">Starting from · Minimum 3-month commitment</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Up to 20 hours of technical consulting per month</li>
-            <li>Architecture design and system planning</li>
-            <li>API integration builds and maintenance</li>
-            <li>Web or app feature development</li>
-            <li>Code review and quality oversight</li>
-            <li>Monthly strategy and priority alignment calls</li>
-            <li>Async support via dedicated communication channel</li>
-            <li>Written monthly progress and recommendation report</li>
-          </ul>
-          <div class="ss-excl-label">Not Included</div>
-          <ul class="ss-excl">
-            <li>Full dedicated development team (see Dedicated tier)</li>
-            <li>Hours beyond the monthly allocation (billed at $175/hr)</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-      <!-- DEDICATED -->
-      <div class="ss-tier rv d2">
-        <div class="ss-tier-head">
-          <div class="ss-tier-label">Scale</div>
-          <div class="ss-tier-name">Dedicated</div>
-          <p class="ss-tier-tagline">For organizations that need a fully embedded technical partner — acting as your internal CTO or engineering lead.</p>
-          <div class="ss-price">
-            <span class="ss-price-amt">$8,000</span>
-            <span class="ss-price-unit">/ month</span>
-          </div>
-          <div class="ss-price-note">Starting from · Scoped per organization and engagement type</div>
-        </div>
-        <div class="ss-tier-body">
-          <div class="ss-incl-label">What's Included</div>
-          <ul class="ss-feats">
-            <li>Dedicated technical lead — acts as your embedded CTO</li>
-            <li>Unlimited consulting hours within scope</li>
-            <li>Full architecture ownership and roadmap management</li>
-            <li>Cross-platform integration and API development</li>
-            <li>Dedicated web and app development support</li>
-            <li>Team management and technical hiring guidance</li>
-            <li>Weekly executive alignment meetings</li>
-            <li>Priority response SLA — same business day</li>
-            <li>Custom delivery terms and milestones</li>
-          </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="ss-tier-cta">Book a Discovery Call</a>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- PROCESS -->
-  <section class="process sec" id="process" style="background:var(--off-white);">
-    <div class="proc-header rv">
-      <span class="sec-tag">How We Work</span>
-      <h2 class="sec-h">Structured delivery from day one</h2>
-      <p class="sec-p" style="margin-top:4px;">Every engagement follows a proven process — so you always know where things stand and what comes next.</p>
-    </div>
-    <div class="proc-steps">
-      <div class="proc-step rv"><div class="step-n">01</div><div class="step-t">Discovery</div><p class="step-d">We listen first. Understanding your workflows, goals, and bottlenecks before proposing anything.</p></div>
-      <div class="proc-step rv d1"><div class="step-n">02</div><div class="step-t">Solution Design</div><p class="step-d">We map the right technical approach — scoped, documented, and aligned to your actual business outcomes.</p></div>
-      <div class="proc-step rv d2"><div class="step-n">03</div><div class="step-t">Build &amp; Deliver</div><p class="step-d">Execution with consistent communication. You stay informed at every stage — no surprises at launch.</p></div>
-      <div class="proc-step rv d3"><div class="step-n">04</div><div class="step-t">Support &amp; Scale</div><p class="step-d">We don't disappear after launch. Ongoing support and iteration ensure solutions scale as your business grows.</p></div>
-    </div>
-  </section>
-
-  <!-- FINAL CTA -->
-  <section class="cta-final">
-    <div class="cta-pat"></div>
-    <div class="cta-glow"></div>
-    <div class="cta-content">
-      <span class="sec-tag" style="color:var(--green);">Start Building With RTC</span>
-      <h2 class="sec-h" style="color:var(--white);margin-top:8px;">Ready to discuss your project?</h2>
-      <p class="sec-p" style="color:rgba(255,255,255,.82);margin:0 auto 32px;">Every engagement starts with a free discovery call. Let's scope your project and get you a fixed-price proposal within 48 hours — no commitment required.</p>
-      <div class="cta-logo-wrap">
-        <img src="/logo2.png" alt="" class="cta-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="cta-logo-ph" style="display:none">Secondary Logo</div>
-      </div>
-      <div class="cta-actions">
-        <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Discovery Call →</a>
-        <a href="/contact" class="btn btn-ghost">Send a Message</a>
-      </div>
-      <p class="cta-hint" style="margin-top:16px;">Or reach us at <a href="mailto:contact@roblestech.net">contact@roblestech.net</a></p>
     </div>
   </section>
 </BaseLayout>

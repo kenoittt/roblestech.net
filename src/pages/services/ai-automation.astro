@@ -1,0 +1,244 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+/* Service Line 03 — Automations & AI. Copy and tiers per the handoff. */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+
+const PROBLEMS = [
+  { h: 'Manual Handoffs Eat Hours', p: 'Copy from the form, paste into the CRM, update the sheet, notify the channel. The same person, every day.' },
+  { h: 'Off-the-Shelf Bots Do Not Fit', p: 'Generic automation tools stop at the edge of your real workflow, so exceptions still land back on your team.' },
+  { h: 'Nobody Knows Where to Start', p: 'You know AI should be saving you time, but not which workflow to automate first or what it would return.' },
+];
+
+const TIERS = [
+  {
+    label: 'Prove It', name: 'Pilot', amt: '$5,500', unit: '/project',
+    tagline: 'One workflow, automated end to end. The fastest way to prove the value on the process that hurts most.',
+    rec: false,
+  },
+  {
+    label: 'Most Popular', name: 'Copilot', amt: '$18,500', unit: '/project',
+    tagline: 'Connected automations plus AI agents that work alongside your team: drafting, routing, triaging and escalating with a human in the loop.',
+    sub: 'Work Alongside',
+    rec: true,
+  },
+  {
+    label: 'Run Itself', name: 'Autopilot', amt: '$45,000', unit: '/project',
+    tagline: 'A production system of agents and pipelines that runs a whole function with monitoring, error recovery and audit trails.',
+    rec: false,
+  },
+];
+
+const MATRIX = [
+  {
+    cat: 'Scope and Capability',
+    rows: [
+      ['Scope', 'One workflow, end to end', 'Connected automations across tools', 'A whole function, run by the system'],
+      ['AI agents', null, true, true],
+      ['Human-in-the-loop checkpoints', true, true, 'Where stakes require'],
+      ['Monitoring and error recovery', 'Basic logging', 'Standard monitoring', 'Full monitoring, recovery, audit trails'],
+    ],
+  },
+  {
+    cat: 'Commercials and Support',
+    rows: [
+      ['Automation Audit credit', '$2,500 credited within 60 days', '$2,500 credited within 60 days', '$2,500 credited within 60 days'],
+      ['Documentation and handover', true, true, true],
+      ['Managed AI Operations retainer', 'Optional', 'Optional', 'Recommended'],
+    ],
+  },
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery', p: 'We map the workflow end to end and agree what "done" looks like before anything is built.' },
+  { n: '02', h: 'Solution Design', p: 'We design the events, agents and checkpoints, then price the build as a fixed-price proposal.' },
+  { n: '03', h: 'Build and Deliver', p: 'We build against your own accounts and tools, reviewed in stages, with logging from day one.' },
+  { n: '04', h: 'Support and Scale', p: 'Documentation and handover, or a Managed AI Operations retainer if you would rather we ran it.' },
+];
+
+const FAQS = [
+  { q: 'What does the Automation Audit include?', a: 'A mapped inventory of your workflows, the handoffs worth automating, and a prioritized plan with effort and expected payback for each. It is a deliverable you keep, whoever builds it.' },
+  { q: 'What happens to the audit fee?', a: 'The full $2,500 is credited toward any build you start within 60 days of receiving the audit.' },
+  { q: 'Which tools can you integrate?', a: 'Anything with an API: CRMs, help desks, Smartsheet, spreadsheets, email, Slack, voice, and internal databases. If a tool has no API we design around it honestly rather than promising magic.' },
+  { q: 'Do you maintain what you build?', a: 'Yes, through Managed AI Operations retainers: monitoring, error handling, model updates and improvements. Or we hand over documentation and your team runs it.' },
+];
+---
+
+<ServiceLayout
+  title="Automations & AI — Custom Agents and Pipelines | Robles Technologies Corp."
+  description="Custom AI agents and event-driven automation built for your workflow, not pulled off a shelf. Start with the $2,500 Automation Audit, credited in full toward any build within 60 days."
+  eyebrow="Service Line 03"
+  h1="Custom AI Agents and Automation,<br>Built for Your Workflows"
+  intro="Your team spends hours moving data between tools that should talk to each other. We build AI agents and event-driven pipelines that remove those handoffs, built for your workflow, not pulled off a shelf."
+  crumb="Automations & AI"
+  ctaLabel="Start With the Automation Audit"
+  ctaHref="/contact#schedule"
+  closingH2="Find Out What the Audit Would Find"
+  closingText="A 30-minute call tells you whether the Automation Audit is worth $2,500 for your workflows. No commitment."
+  closingCtaLabel="Book a Discovery Call →"
+  closingCtaHref="/contact#schedule"
+  faqs={FAQS}
+>
+  <!-- THE PROBLEM -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:28px;"><h2 class="svc-h2">The Problem</h2></div>
+      <div class="svc-grid-3 rv">
+        {PROBLEMS.map((c) => (
+          <div class="svc-card">
+            <h3 style="font-size:19px;">{c.h}</h3>
+            <p style="margin-bottom:0;">{c.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTOMATION AUDIT -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-feature rv">
+        <div class="svc-eyebrow">Start Here · $2,500 · Credited Toward Any Build</div>
+        <h2 style="font-size:27px;font-weight:800;letter-spacing:-.02em;">Automation Audit</h2>
+        <p style="max-width:640px;">We map your workflows, find the handoffs worth automating, and hand you a prioritized plan with effort and payback for each. The $2,500 is credited in full toward any build within 60 days.</p>
+        <a href="/contact#schedule" class="svc-btn-lime">Book the Audit →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE BUILD -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:34px;"><h2 class="svc-h2">What We Build</h2></div>
+      <div class="svc-tiers rv">
+        {TIERS.map((t) => (
+          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
+            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
+            <div class="svc-tier-label">{t.rec ? t.sub : t.label}</div>
+            <div class="svc-tier-name">{t.name}</div>
+            <div class="svc-tier-price">
+              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+            </div>
+            <p class="svc-tier-tag" style="margin-top:12px;">{t.tagline}</p>
+            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Discovery Call</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:26px;"><h2 class="svc-h2">Compare the Tiers</h2></div>
+      <div class="svc-matrix-wrap rv">
+        <div class="svc-matrix">
+          <div class="svc-matrix-head">
+            <div></div>
+            {TIERS.map((t) => (
+              <div class={`t ${t.rec ? 'hl' : ''}`}>
+                <div class="nm">{t.name}</div>
+                <div class="pr">{t.amt} {t.unit}</div>
+              </div>
+            ))}
+          </div>
+          {MATRIX.map((c) => (
+            <details class="svc-cat" open>
+              <summary>{c.cat}</summary>
+              <div>
+                {c.rows.map((r) => (
+                  <div class="svc-row">
+                    <div>{r[0]}</div>
+                    {[1, 2, 3].map((i) => (
+                      <div class={i === 2 ? 'hl' : ''}>
+                        {r[i] === true ? <span class="svc-yes">✓</span>
+                          : r[i] === null ? <span class="svc-no">—</span> : r[i]}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+          <div class="svc-matrix-cta">
+            <div></div>
+            {TIERS.map((t) => (
+              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANAGED AI OPERATIONS -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-panel rv" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:280px;">
+          <h3>Managed AI Operations</h3>
+          <p style="font-size:14px;line-height:1.7;color:var(--text-body);margin:0;">Monthly retainers to run, monitor and improve what we build. Scoped to your system.</p>
+        </div>
+        <a href="/contact#schedule" class="svc-btn-outline">Ask About Retainers</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE SHOWCASE -->
+  <section class="svc-mesh" style="padding-top:76px;">
+    <div class="svc-wrap svc-center">
+      <div class="svc-eyebrow svc-eyebrow-green">How a Build Fits Together</div>
+      <h2 class="svc-h2" style="color:#fff;">Event-Driven, Monitored, Yours</h2>
+      <p class="svc-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Every build connects the tools you already run. Events in one system trigger agents and pipelines that act in the others, with logging and human checkpoints where the stakes require them. You own the architecture and the accounts.</p>
+      <a href="/contact#schedule" class="svc-btn-lime">Start With the Automation Audit</a>
+      <div class="svc-show">
+        <div class="svc-frame">
+          <div class="svc-frame-inner">
+            <div class="svc-frame-bar">
+              <i></i><i></i><i></i><span>AI agent workflow · restaurant assistant build</span>
+            </div>
+            <img src="/ai-architecture.png" alt="Diagram of an event-driven AI agent workflow connecting intake, agents, tools and monitoring." loading="lazy" width="1600" height="1000" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How It Works</div>
+        <h2 class="svc-h2">From Workflow Map to Running System</h2>
+      </div>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATED READING -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-eyebrow">Related Reading</div>
+      <div class="svc-two-col rv" style="margin-top:14px;">
+        <a href="/smartsheet-automate-onboarding-workflows" class="svc-read">
+          <div class="k">Automation</div>
+          <h4>Automate Onboarding Workflows →</h4>
+          <p>Turning a manual checklist into a self-running system.</p>
+        </a>
+        <a href="/blogs" class="svc-read">
+          <div class="k">Blog</div>
+          <h4>Automation posts publish here as they go live →</h4>
+          <p>What we are building and what it actually removed.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

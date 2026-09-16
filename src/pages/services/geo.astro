@@ -1,0 +1,411 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import SopStepper from '../../components/SopStepper.astro';
+
+/*
+ * Service Line 01 — GEO + SEO. The flagship page.
+ *
+ * Pricing and the free, ungated Gap Report are shipped as specified in the
+ * Services wireframe handoff and confirmed before build. The Gap Report CTAs
+ * land on the contact form pre-filled, so the request is captured as a lead
+ * rather than disappearing into an inbox.
+ */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+const GAP = '/contact?request=gap-report#contact-main';
+
+const AUDIENCES = [
+  { h: 'DTC Supplement Brands', p: 'Your customers ask "what is the best creatine for women" and buy whichever brand the answer names.' },
+  { h: 'Fitness Brands', p: 'Buyers ask AI which equipment or program fits their goal before they ever hit your site.' },
+  { h: 'Construction & PMO Software', p: 'Ops leaders ask which platform handles their workflow. The cited vendors get the demo call.' },
+];
+
+const TIERS = [
+  {
+    label: 'Starter', name: 'Foundation', amt: '$2,500', unit: '/mo',
+    tagline: 'Build your AI visibility baseline — tracking, content and schema locked in.',
+    ticks: [
+      '10 questions tracked across ChatGPT, Perplexity, Gemini and Google',
+      'Standard AI visibility audit',
+      '2 posts/mo with keyword brief, evidence map and QA report',
+      'FAQ schema',
+      'Monthly scorecard PDF',
+    ],
+    more: [
+      'Google Search Console setup and verification',
+      'Sitemap submitted once',
+      'Async strategy Q&A',
+      'Standard turnaround',
+      '3-month minimum, then month-to-month',
+    ],
+    not: [
+      'LLMs.txt and internal linking / cluster wiring',
+      '7-step post-publish QA',
+      'Live dashboard (scorecard PDF instead)',
+      'Digital PR and founder strategy call',
+    ],
+    rec: false,
+  },
+  {
+    label: 'Recommended', name: 'Engine', amt: '$4,500', unit: '/mo',
+    tagline: 'The full GEO system.',
+    ticks: [
+      '15 questions tracked across ChatGPT, Perplexity, Gemini and Google',
+      'Full AI visibility + technical SEO audit',
+      '4 posts/mo + client review document for sign-off',
+      'FAQ + Article + Organization schema, LLMs.txt',
+      'Live dashboard access',
+    ],
+    more: [
+      '7-step post-publish QA on every post',
+      'Internal linking / cluster wiring',
+      'GSC setup + monthly management, per-post indexing requests',
+      'Monthly report: citations, traffic, AI appearances',
+      'Async monthly strategy review',
+      '3-month minimum, then month-to-month',
+    ],
+    not: [
+      'Competitor citation map',
+      'Product, HowTo and entity schema',
+      'Executive summary and quarterly business review',
+      'Digital PR, founder call, priority turnaround',
+    ],
+    rec: true,
+  },
+  {
+    label: 'Scale', name: 'Operator', amt: '$7,500', unit: '/mo',
+    tagline: 'Maximum coverage, founder access and a quarterly PR push.',
+    ticks: [
+      '20 questions tracked across ChatGPT, Perplexity, Gemini and Google',
+      'Full audit + competitor citation map',
+      '6–8 posts/mo with priority queue',
+      'Adds Product, HowTo and entity schema',
+      '45-minute monthly call with a founder',
+    ],
+    more: [
+      'Everything in Engine',
+      'Full GSC management + weekly indexing checks',
+      'Live dashboard + executive summary',
+      'Monthly report + quarterly business review',
+      'Quarterly digital PR / citation outreach push',
+      'Priority turnaround',
+      '3-month minimum, then month-to-month',
+    ],
+    not: [
+      'Paid advertising or media buying',
+      'Guaranteed AI citations, no one can promise that',
+    ],
+    rec: false,
+  },
+];
+
+/* Comparison matrix. `true` renders a blue ✓, `null` a muted em dash. */
+const MATRIX = [
+  {
+    cat: 'Tracking and Reporting',
+    rows: [
+      ['AI-visibility tracking', '10 questions across ChatGPT, Perplexity, Gemini, Google', '15 questions across ChatGPT, Perplexity, Gemini, Google', '20 questions across ChatGPT, Perplexity, Gemini, Google'],
+      ['Baseline audit', 'Standard AI visibility', 'Full AI visibility + technical SEO audit', 'Full audit + competitor citation map'],
+      ['Client dashboard', 'Monthly scorecard PDF', 'Live dashboard access', 'Live dashboard + executive summary'],
+      ['Reporting', 'Monthly scorecard', 'Monthly report: citations, traffic, AI appearances', 'Monthly + quarterly business review'],
+    ],
+  },
+  {
+    cat: 'Content and Publishing',
+    rows: [
+      ['Content', '2 posts/mo', '4 posts/mo', '6–8 posts/mo'],
+      ['Per-post process', 'Keyword brief, evidence map, QA report', 'Same + client review document for sign-off', 'Same + priority queue'],
+      ['Post-publish QA (7-step SOP)', null, true, true],
+      ['Turnaround', 'Standard', 'Standard', 'Priority'],
+    ],
+  },
+  {
+    cat: 'Technical and Schema',
+    rows: [
+      ['Schema', 'FAQ', 'FAQ + Article + Organization', 'Adds Product, HowTo, entity markup'],
+      ['LLMs.txt', null, true, true],
+      ['Google Search Console', 'Setup and verification', 'Setup + monthly management', 'Full management + weekly indexing checks'],
+      ['Sitemap and indexing', 'Submit once', 'Per-post indexing request', 'Per-post + monitoring'],
+      ['Internal linking / cluster wiring', null, true, true],
+    ],
+  },
+  {
+    cat: 'Strategy and Support',
+    rows: [
+      ['Strategy', 'Async Q&A', 'Async monthly review', '45-minute monthly call with a founder'],
+      ['Digital PR / citation outreach', null, null, 'Quarterly push'],
+      ['Commitment', '3-month min, then month-to-month', '3-month min, then month-to-month', '3-month min, then month-to-month'],
+    ],
+  },
+];
+
+const PRE_SOP = [
+  { label: 'Keyword brief', icon: 'brief' },
+  { label: 'Evidence map', icon: 'map' },
+  { label: 'Outline', icon: 'list' },
+  { label: 'Draft', icon: 'pen' },
+  { label: 'Citation structuring', icon: 'quote' },
+  { label: 'Schema markup', icon: 'code' },
+  { label: 'Internal links', icon: 'link' },
+  { label: 'QA report', icon: 'clipboard' },
+  { label: 'Client review', icon: 'eye' },
+  { label: 'Publish', icon: 'send' },
+];
+
+const POST_SOP = [
+  { label: 'Raw-source verification', icon: 'search' },
+  { label: 'Cluster wiring', icon: 'share' },
+  { label: 'Sitemap update', icon: 'map' },
+  { label: 'GSC indexing request', icon: 'refresh' },
+  { label: 'Schema validation', icon: 'check' },
+  { label: 'GEO / AI checks', icon: 'bot' },
+  { label: 'Dashboard registration', icon: 'dashboard' },
+];
+
+const FAQS = [
+  { q: 'What is the difference between GEO and SEO?', a: 'SEO earns rankings on search results pages. GEO earns citations inside AI-generated answers. They share foundations, technical health, structured data, authoritative content, but GEO optimizes for being named in the answer, not linked below it.' },
+  { q: 'How long before we see citations?', a: 'Most engagements see first citation movement within the 3-month minimum. Your baseline is tracked from day one, so you see exactly when and where movement happens.' },
+  { q: 'Which AI engines do you track?', a: 'ChatGPT, Perplexity, Gemini and Google on every tier. Tiers differ in how many questions we track: 10 on Foundation, 15 on Engine, 20 on Operator.' },
+  { q: 'Who owns the content and the dashboard if we leave?', a: 'You do. Every post publishes on your domain, and your dashboard data exports with you. No lock-in.' },
+  { q: 'What happens after the 3-month minimum?', a: 'Month-to-month. Stay because the citations are moving, not because a contract says so.' },
+  { q: 'Do you work with brands outside supplements and fitness?', a: 'Yes. The method applies anywhere buyers ask AI a category question, including B2B software and construction/PMO tools, where we also work today.' },
+];
+
+/* Service schema — this page describes a priced, purchasable offering, so it
+   carries Service + Offer alongside the FAQPage the layout emits. */
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'GEO + SEO — Generative Engine Optimization',
+  serviceType: 'Generative Engine Optimization and Search Engine Optimization',
+  provider: { '@type': 'Organization', name: 'Robles Technologies Corp.', url: 'https://roblestech.net' },
+  areaServed: 'Worldwide',
+  description: 'Citation-optimized content, structured data and technical SEO that get your brand named inside AI-generated answers on ChatGPT, Gemini, Perplexity and Google.',
+  offers: TIERS.map((t) => ({
+    '@type': 'Offer',
+    name: t.name,
+    price: t.amt.replace(/[$,]/g, ''),
+    priceCurrency: 'USD',
+    description: t.tagline,
+    url: 'https://roblestech.net/services/geo',
+  })),
+};
+---
+
+<ServiceLayout
+  title="GEO + SEO — Get Cited Inside AI Search | Robles Technologies Corp."
+  description="Generative Engine Optimization that gets your brand named when buyers ask ChatGPT, Gemini or Perplexity which brand to buy. Free AI Visibility Gap Report; monthly programs from $2,500."
+  eyebrow="Service Line 01 · Flagship"
+  h1="GEO + SEO: Get Your Brand Cited<br>Inside AI Search"
+  intro="Ranking on Google is no longer the whole game. When your customers ask ChatGPT, Gemini or Perplexity which brand to buy, three to five brands get named in the answer. We make sure you are one of them."
+  crumb="GEO + SEO"
+  ctaLabel="Get Your Free Gap Report →"
+  ctaHref={GAP}
+  cta2Label="Book a Discovery Call"
+  cta2Href="/contact#schedule"
+  closingH2="See Where Your Brand Goes Invisible"
+  closingText="The Gap Report is free, no sales call required, and yours to keep either way."
+  closingCtaLabel="Get Your Free Gap Report →"
+  closingCtaHref={GAP}
+  faqs={FAQS}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} />
+  </Fragment>
+
+  <!-- WHO WE DO THIS FOR -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:28px;">
+        <div class="svc-eyebrow">Who We Do This For</div>
+      </div>
+      <div class="svc-grid-3 rv">
+        {AUDIENCES.map((a) => (
+          <div class="svc-card">
+            <h3 style="font-size:19px;">{a.h}</h3>
+            <p style="margin-bottom:0;">{a.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT GEO IS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-two-col">
+        <div>
+          <h2 class="svc-h2">What Generative Engine Optimization Is</h2>
+          <p class="svc-lead" style="margin-bottom:0;">Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category. Each answer names three to five brands. The first brand to establish authority on a question is hard to displace, so early work compounds. We build that authority with citation-optimized content, structured data and technical SEO, then track every citation so you can see it move.</p>
+        </div>
+        <div class="svc-panel">
+          <h3>How a citation works</h3>
+          <ol>
+            <li>A buyer asks ChatGPT a question in your category</li>
+            <li>The model assembles an answer naming 3–5 brands</li>
+            <li>Structured, well-evidenced content decides which brands get named</li>
+            <li>We track every appearance so the gain is visible</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAP REPORT -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-feature rv">
+        <div class="svc-eyebrow">Start Here · Free</div>
+        <h2 style="font-size:27px;font-weight:800;letter-spacing:-.02em;">AI Visibility Gap Report</h2>
+        <p style="max-width:640px;">A 10-query diagnostic across ChatGPT, Gemini and Perplexity, with a screenshot of every place your brand goes invisible and a clear roadmap if you decide to fix it. No sales call required to receive it. The report is yours to keep either way.</p>
+        <a href={GAP} class="svc-btn-lime">Get Your Free Gap Report →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONTHLY PROGRAMS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:34px;">
+        <h2 class="svc-h2">Monthly Programs</h2>
+        <p class="svc-lead" style="margin-bottom:0;">Every tier: 3-month minimum, then month-to-month. Every tier carries a "Not Included" list.</p>
+      </div>
+      <div class="svc-tiers rv">
+        {TIERS.map((t) => (
+          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
+            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
+            {!t.rec && <div class="svc-tier-label">{t.label}</div>}
+            <div class="svc-tier-name">{t.name}</div>
+            <p class="svc-tier-tag">{t.tagline}</p>
+            <div class="svc-tier-price">
+              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+            </div>
+            <p class="svc-tier-meta">3-month minimum, then month-to-month</p>
+            <ul class="svc-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            <details class="svc-more">
+              <summary>What's Included and What's Not</summary>
+              <ul class="svc-ticks">{t.more.map((b) => <li>{b}</li>)}</ul>
+              <div class="svc-excl-label">Not Included</div>
+              <ul class="svc-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
+            </details>
+            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Discovery Call</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE THE TIERS -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:26px;">
+        <h2 class="svc-h2">Compare the Tiers</h2>
+      </div>
+      <div class="svc-matrix-wrap rv">
+        <div class="svc-matrix">
+          <div class="svc-matrix-head">
+            <div></div>
+            {TIERS.map((t) => (
+              <div class={`t ${t.rec ? 'hl' : ''}`}>
+                <div class="nm">{t.name}</div>
+                <div class="pr">{t.amt} {t.unit}</div>
+              </div>
+            ))}
+          </div>
+
+          {MATRIX.map((c) => (
+            <details class="svc-cat" open>
+              <summary>{c.cat}</summary>
+              <div>
+                {c.rows.map((r) => (
+                  <div class="svc-row">
+                    <div>{r[0]}</div>
+                    {[1, 2, 3].map((i) => (
+                      <div class={i === 2 ? 'hl' : ''}>
+                        {r[i] === true
+                          ? <span class="svc-yes">✓</span>
+                          : r[i] === null
+                            ? <span class="svc-no">—</span>
+                            : r[i]}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+
+          <div class="svc-matrix-cta">
+            <div></div>
+            {TIERS.map((t) => (
+              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE WORK BEHIND THE NUMBER -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <h2 class="svc-h2">The Work Behind the Number</h2>
+      <p class="svc-lead">Every post runs through the same ten steps before it publishes and seven more after it goes live.</p>
+      <SopStepper eyebrow="Before Publish · 10-Step Per-Post SOP" steps={PRE_SOP} />
+      <div style="height:42px;"></div>
+      <SopStepper eyebrow="After It Goes Live · 7-Step Post-Publish SOP" steps={POST_SOP} />
+    </div>
+  </section>
+
+  <!-- DASHBOARD SHOWCASE -->
+  <section class="svc-mesh" style="padding-top:76px;">
+    <div class="svc-wrap svc-center">
+      <div class="svc-eyebrow svc-eyebrow-green">Your Dashboard</div>
+      <h2 class="svc-h2" style="color:#fff;">A Live Dashboard, Not a Monthly Mystery</h2>
+      <p class="svc-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Clicks, impressions, post performance and your citation baseline against where you stand now. Foundation gets a monthly scorecard PDF; Engine and Operator get live access, and Operator adds an executive summary.</p>
+      <a href={GAP} class="svc-btn-lime">Get Your Free Gap Report →</a>
+      <div class="svc-show">
+        <div class="svc-frame">
+          <div class="svc-frame-inner">
+            <div class="svc-frame-bar">
+              <i></i><i></i><i></i><span>portal.roblestech.net</span>
+            </div>
+            <img src="/geo-dashboard.png" alt="Sample client dashboard showing clicks, impressions, per-post performance and AI visibility. Sample data, not a real client." loading="lazy" width="1600" height="1000" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER BAND -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-feature rv">
+        <div class="svc-founder">
+          <div class="txt">
+            <h2 style="font-size:24px;font-weight:800;letter-spacing:-.02em;">You Work With the People Who Built the Method</h2>
+            <p style="margin-bottom:0;">Kenneth and Christian run the monthly review on Engine and join the strategy call on Operator. No account manager layer between you and the people doing the work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATED READING -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-eyebrow">Related Reading</div>
+      <div class="svc-two-col rv" style="margin-top:14px;">
+        <a href="/blogs" class="svc-read">
+          <div class="k">GEO</div>
+          <h4>GEO posts publish here as they go live →</h4>
+          <p>How generative engine optimization works in practice, written up as we ship it.</p>
+        </a>
+        <a href="/blogs" class="svc-read">
+          <div class="k">Blog</div>
+          <h4>Read the published client work →</h4>
+          <p>Posts we have produced and published under the per-post SOP on this page.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

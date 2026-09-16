@@ -1,0 +1,287 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+/* Service Line 02 — Smartsheet Consulting. Copy and tiers per the handoff. */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+
+const PROBLEMS = [
+  { h: "Status Lives in People's Heads", p: 'Your team answers the same "where are we on this" question in meetings instead of a dashboard answering it for them.' },
+  { h: 'Handoffs Happen by Email', p: 'Intake, approvals and escalations move through inboxes, so work stalls whenever one person is out.' },
+  { h: 'Smartsheet Is There, Underused', p: 'You pay for the platform, but without automations, rollups and integrations it is just an expensive grid.' },
+];
+
+const TIERS = [
+  {
+    label: 'Starter', name: 'Launchpad', amt: '$3,500', unit: '/project',
+    meta: 'Starting from · Delivery in 2 to 3 weeks',
+    ticks: [
+      'Up to 5 custom sheets built and configured',
+      'Basic automations: notifications, alerts, row actions',
+      '1 summary dashboard with live metrics',
+      '1 intake form with conditional logic',
+      'Handover session and 14-day post-launch support',
+    ],
+    not: ['API or third-party integrations', 'Multi-workspace rollout', 'Adoption sprint or training program'],
+    rec: false,
+  },
+  {
+    label: 'Most Popular', name: 'Momentum', amt: '$9,500', unit: '/project',
+    meta: 'Starting from · Delivery in 4 to 6 weeks',
+    ticks: [
+      'Up to 15 sheets across multiple workspaces',
+      'Advanced automations: approvals, escalation rules',
+      'Multi-view dashboards and cross-sheet reports',
+      '1 third-party integration: Jira, Salesforce, Slack',
+      'Team training plus 30-day adoption support',
+    ],
+    not: ['Control Center / PMO portfolio setup', 'Multi-system API architecture'],
+    rec: true,
+  },
+  {
+    label: 'Scale', name: 'Enterprise', amt: '$22,000', unit: '/project',
+    meta: 'Starting from · Delivery in 8 to 16 weeks',
+    ticks: [
+      'Unlimited sheets across departments',
+      'Bridge workflows, complex logic, error monitoring',
+      'Executive dashboards per stakeholder level',
+      'Multi-system bi-directional API integrations',
+      'Control Center / PMO setup, Dynamic Views, WorkApps',
+      'Dedicated project manager and 90-day adoption guarantee',
+    ],
+    not: ['Smartsheet licenses (billed by Smartsheet)'],
+    rec: false,
+  },
+];
+
+const MATRIX = [
+  {
+    cat: 'Build Scope',
+    rows: [
+      ['Custom sheets', 'Up to 5', 'Up to 15, multi-workspace', 'Unlimited, across departments'],
+      ['Automations', 'Notifications, alerts, row actions', 'Approvals + escalation rules', 'Bridge workflows, complex logic, error monitoring'],
+      ['Dashboards', '1 summary dashboard', 'Multi-view + cross-sheet reports', 'Executive dashboards per stakeholder level'],
+      ['Intake forms', '1 with conditional logic', true, true],
+    ],
+  },
+  {
+    cat: 'Integrations and Advanced',
+    rows: [
+      ['Third-party integrations', null, '1 (Jira, Salesforce, Slack)', 'Multi-system bi-directional APIs'],
+      ['Control Center / PMO setup', null, null, true],
+      ['Dynamic Views and WorkApps', null, null, true],
+    ],
+  },
+  {
+    cat: 'Delivery and Support',
+    rows: [
+      ['Delivery', '2–3 weeks', '4–6 weeks', '8–16 weeks'],
+      ['Training', 'Handover session', 'Team training', 'Dedicated project manager'],
+      ['Post-launch support', '14 days', '30-day adoption support', '90-day adoption guarantee'],
+    ],
+  },
+];
+
+const ADDONS = [
+  { h: 'Additional API Integration', p: 'From $3,500 per system' },
+  { h: 'Managed Support Retainer', p: 'From $1,500 / month' },
+  { h: 'Extra Training Session', p: 'From $450 per session' },
+  { h: 'Dashboard Expansion', p: 'From $600 per dashboard' },
+  { h: 'License Health Check', p: '$1,500 to $3,500 fixed fee' },
+  { h: 'Smartsheet AI Enablement', p: 'From $4,500 per engagement' },
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery', p: 'We map how work actually moves today — intake, approvals, escalations and the reporting your leadership asks for.' },
+  { n: '02', h: 'Solution Design', p: 'We design the sheet architecture, automations and dashboards, and price the build as a fixed-price proposal.' },
+  { n: '03', h: 'Build and Deliver', p: 'We build in your Smartsheet environment, review in stages, and hand over with documentation.' },
+  { n: '04', h: 'Support and Scale', p: 'Post-launch support, then optional retainer as the system grows with your team.' },
+];
+
+const FAQS = [
+  { q: 'Do we need a Smartsheet license first?', a: 'Yes, your plan (Pro, Business or Enterprise) is billed directly by Smartsheet to your organization. Our fees cover the consulting, build and support work inside your environment. We can advise on the right plan during discovery.' },
+  { q: 'How fast can we go live?', a: 'Launchpad delivers in 2 to 3 weeks, Momentum in 4 to 6, Enterprise in 8 to 16 depending on scope. Every project ships with a handover session and post-launch support.' },
+  { q: 'Can you fix an existing Smartsheet build?', a: 'Yes. Many engagements start with a health check of what you already have, then rebuild the parts that are slowing your team down instead of starting from zero.' },
+  { q: 'Who owns the environment when the project ends?', a: 'You do. Everything is built in your Smartsheet account, documented, and handed over with training so your team can run it without us.' },
+];
+---
+
+<ServiceLayout
+  title="Smartsheet Consulting — Fixed-Price Builds | Robles Technologies Corp."
+  description="Certified Smartsheet consultants who rebuild your process as a working operations engine: sheets, automations, dashboards and integrations. Fixed-price projects from $3,500, live in 2 to 3 weeks."
+  eyebrow="Service Line 02 · Founding Practice"
+  subEyebrow="Project Management Optimization, Powered by Smartsheet"
+  h1="Smartsheet Consulting That Turns Your Process Into an Operations Engine"
+  intro="Your process lives in scattered sheets, inboxes and status meetings. We rebuild it as a working system: sheets, automations, dashboards and integrations designed by certified Smartsheet consultants."
+  crumb="Smartsheet"
+  ctaLabel="Book a Free Discovery Call"
+  ctaHref=""
+  closingH2="Tell Us the Process That Is Slowing You Down"
+  closingText="Free 30-minute discovery call. Fixed-price proposal within 48 hours."
+  closingCtaLabel="Book a Discovery Call →"
+  closingCtaHref="/contact#schedule"
+  faqs={FAQS}
+>
+  <!-- THE PROBLEM -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:28px;"><h2 class="svc-h2">The Problem</h2></div>
+      <div class="svc-grid-3 rv">
+        {PROBLEMS.map((c) => (
+          <div class="svc-card">
+            <h3 style="font-size:19px;">{c.h}</h3>
+            <p style="margin-bottom:0;">{c.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE BUILD -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:34px;">
+        <h2 class="svc-h2">What We Build</h2>
+        <p class="svc-lead" style="margin-bottom:0;">Fixed-price projects. Your Smartsheet plan is billed by Smartsheet; our fees cover consulting, build and support.</p>
+      </div>
+      <div class="svc-tiers rv">
+        {TIERS.map((t) => (
+          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
+            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
+            {!t.rec && <div class="svc-tier-label">{t.label}</div>}
+            <div class="svc-tier-name">{t.name}</div>
+            <div class="svc-tier-price">
+              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+            </div>
+            <p class="svc-tier-meta">{t.meta}</p>
+            <ul class="svc-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            <div class="svc-excl-label">Not Included</div>
+            <ul class="svc-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
+            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Discovery Call</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:26px;"><h2 class="svc-h2">Compare the Tiers</h2></div>
+      <div class="svc-matrix-wrap rv">
+        <div class="svc-matrix">
+          <div class="svc-matrix-head">
+            <div></div>
+            {TIERS.map((t) => (
+              <div class={`t ${t.rec ? 'hl' : ''}`}>
+                <div class="nm">{t.name}</div>
+                <div class="pr">{t.amt} {t.unit}</div>
+              </div>
+            ))}
+          </div>
+          {MATRIX.map((c) => (
+            <details class="svc-cat" open>
+              <summary>{c.cat}</summary>
+              <div>
+                {c.rows.map((r) => (
+                  <div class="svc-row">
+                    <div>{r[0]}</div>
+                    {[1, 2, 3].map((i) => (
+                      <div class={i === 2 ? 'hl' : ''}>
+                        {r[i] === true ? <span class="svc-yes">✓</span>
+                          : r[i] === null ? <span class="svc-no">—</span> : r[i]}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+          <div class="svc-matrix-cta">
+            <div></div>
+            {TIERS.map((t) => (
+              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADD-ONS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:26px;">
+        <div class="svc-eyebrow">Enhancements and Add-Ons</div>
+        <h2 class="svc-h2">Extend the Build When You Need To</h2>
+      </div>
+      <div class="svc-grid-3 rv">
+        {ADDONS.map((a) => (
+          <div class="svc-card">
+            <h3 style="font-size:17px;margin-bottom:6px;">{a.h}</h3>
+            <p style="margin-bottom:0;font-weight:600;color:var(--text-muted);">{a.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-eyebrow">Proof</div>
+      <h2 class="svc-h2">Built and Shipped, Not Theorized</h2>
+      <div class="svc-two-col rv" style="margin-top:18px;">
+        <a href="/smartsheet-vendor-data-without-sheet-access" class="svc-read">
+          <div class="k">Case Study</div>
+          <h4>Vendor Data Intake Without Sheet Access</h4>
+          <p>How we collect structured vendor data at scale without handing out licenses. Read the case study →</p>
+        </a>
+        <a href="/smartsheet-automate-onboarding-workflows" class="svc-read">
+          <div class="k">Case Study</div>
+          <h4>Automated Onboarding Workflows</h4>
+          <p>Turning a manual onboarding checklist into a self-running Smartsheet system. Read the case study →</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How It Works</div>
+        <h2 class="svc-h2">From First Call to Live System</h2>
+      </div>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATED READING -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-eyebrow">Related Reading</div>
+      <div class="svc-grid-3 rv" style="margin-top:14px;">
+        <a href="/smartsheet-vendor-data-without-sheet-access" class="svc-read">
+          <div class="k">Smartsheet</div>
+          <h4>Collect Vendor Data Without Giving Sheet Access →</h4>
+        </a>
+        <a href="/smartsheet-automate-onboarding-workflows" class="svc-read">
+          <div class="k">Smartsheet</div>
+          <h4>Automate Onboarding Workflows →</h4>
+        </a>
+        <a href="/smartsheet-field-team-photo-attachments" class="svc-read">
+          <div class="k">Smartsheet</div>
+          <h4>Field Team Photo Attachments →</h4>
+        </a>
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

@@ -1,0 +1,116 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+/* Service Line 05 — Web Development & UI. No tiers: scoped per project. */
+const BUILDS = [
+  { h: 'Marketing Sites', p: 'A services firm site that loads fast, reads clean and books calls. Like the one you are on.' },
+  { h: 'Client Portals', p: 'A branded portal where your clients see project status, deliverables and reports without emailing you.' },
+  { h: 'Internal Tools', p: 'An operations dashboard that replaces the spreadsheet three teams fight over.' },
+  { h: 'Customer Products', p: 'A customer-facing app front-end, from first prototype to production, with your backend or ours.' },
+  { h: 'Landing Pages', p: 'A single page with one job: convert the traffic from your campaign, launch or ad spend.' },
+  { h: 'Custom Websites', p: 'A fully custom site designed around your brand and content, no template underneath.' },
+];
+
+const STANDARDS = [
+  'Performance budgets: fast first paint on real devices and networks',
+  'Accessibility: keyboard navigable, screen-reader tested, WCAG-conscious contrast',
+  'Responsive from phone to desktop, not desktop shrunk down',
+  'SEO-ready markup: semantic HTML, structured data, clean URLs',
+  'Documented handover: your team can maintain what we ship',
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery', p: 'A free 30-minute call on what the site or product needs to do, for whom, and by when.' },
+  { n: '02', h: 'Design', p: 'Wireframes and a visual direction you approve before any code is written. Fixed-price proposal within 48 hours.' },
+  { n: '03', h: 'Build and Launch', p: 'Staged builds you can click through as they progress, tested on real devices, launched on your domain.' },
+  { n: '04', h: 'Support and Scale', p: 'Documented handover your team can run, or an ongoing retainer as the site grows.' },
+];
+
+const FAQS = [
+  { q: 'Do you redesign existing sites or only build new?', a: 'Both. Redesigns start with an audit of what is working, so you keep the equity you have built and fix what is costing you speed or conversions.' },
+  { q: 'What do projects cost?', a: 'Scoped per project after a free 30-minute call, with a fixed-price proposal within 48 hours. Scope varies too much across the six build types for honest published tiers.' },
+  { q: 'Who maintains the site after launch?', a: 'Your choice: a documented handover your team runs, or an ongoing support retainer through our technical consulting line.' },
+  { q: 'How does web work pair with GEO?', a: 'AI engines favor fast, well-structured sites. The schema, speed and semantic markup we ship as standard are the technical half of a GEO program.' },
+];
+---
+
+<ServiceLayout
+  title="Web Development and UI — Sites, Portals and Products | Robles Technologies Corp."
+  description="Fast, accessible front-ends for marketing sites, client portals, internal tools, landing pages and customer-facing products. Scoped per project with a fixed-price proposal within 48 hours."
+  eyebrow="Service Line 05"
+  h1="Web Development and UI for Sites, Portals and Products"
+  intro="Fast, accessible front-ends for marketing sites, client portals, internal tools and customer-facing products. Built for real users and engineered to grow with you."
+  crumb="Web Development & UI"
+  ctaLabel="Book a Free Discovery Call"
+  ctaHref="/contact#schedule"
+  closingH2="Tell Us What You Need Built"
+  closingText="A free 30-minute call, then a fixed-price proposal within 48 hours."
+  closingCtaLabel="Book a Discovery Call →"
+  closingCtaHref="/contact#schedule"
+  faqs={FAQS}
+>
+  <!-- WHAT WE BUILD -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <h2 class="svc-h2">What We Build</h2>
+        <p class="svc-lead" style="margin-bottom:0;">Six build types. Every engagement scoped per project after a free 30-minute call.</p>
+      </div>
+      <div class="svc-grid-3 rv">
+        {BUILDS.map((b) => (
+          <div class="svc-card">
+            <h3 style="font-size:18px;">{b.h}</h3>
+            <p style="margin-bottom:0;">{b.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- STANDARDS + PAIRING -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-two-col">
+        <div class="svc-panel">
+          <h3>The Standards Every Build Ships With</h3>
+          <ul class="svc-ticks" style="margin:14px 0 0;">
+            {STANDARDS.map((s) => <li>{s}</li>)}
+          </ul>
+        </div>
+        <div class="svc-feature">
+          <h3 style="font-size:20px;font-weight:800;letter-spacing:-.02em;">Built to Pair With the Other Lines</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;margin:18px 0 22px;">
+            <div>
+              <div class="svc-eyebrow" style="margin-bottom:4px;">GEO</div>
+              <p style="margin:0;">Site speed, schema and technical SEO are half the GEO battle. Web work makes the citations easier to win.</p>
+            </div>
+            <div>
+              <div class="svc-eyebrow" style="margin-bottom:4px;">Smartsheet</div>
+              <p style="margin:0;">Portals and WorkApps that put Smartsheet data in front of clients and field teams cleanly.</p>
+            </div>
+          </div>
+          <a href="/services/geo" class="svc-btn-lime">Explore GEO + SEO →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How It Works</div>
+        <h2 class="svc-h2">From First Call to Launch</h2>
+      </div>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

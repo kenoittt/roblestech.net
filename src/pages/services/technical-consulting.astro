@@ -1,0 +1,217 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+/* Service Line 06 — Technical Consulting. Copy and tiers per the handoff. */
+const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
+
+const PROBLEMS = [
+  { h: 'Decisions Without a Technical Voice', p: 'Platform and vendor choices get made by whoever pitched last, and unwinding a wrong one costs far more than deciding it well.' },
+  { h: 'Systems That Do Not Talk', p: 'Every tool works alone; your team is the integration layer, re-keying data between them.' },
+  { h: 'Too Small for a Full-Time CTO', p: 'You need senior technical ownership, but not a $300K hire. The middle option rarely exists.' },
+];
+
+const TIERS = [
+  {
+    label: 'Starter', name: 'Advisory', amt: '$200', unit: '/hr',
+    meta: 'Or $1,500 per strategy session · No retainer required',
+    ticks: [
+      'Technology strategy and architecture review',
+      'Platform and tooling evaluation',
+      'Code and system audit with written findings',
+      'Vendor and proposal evaluation support',
+      'Written recommendations after every session',
+    ],
+    not: ['Hands-on build work (see Retainer)'],
+    cta: 'Book a Session',
+    rec: false,
+  },
+  {
+    label: 'Most Popular', name: 'Retainer', amt: '$3,500', unit: '/mo',
+    sub: 'Ongoing',
+    meta: 'Starting from · 3-month minimum',
+    ticks: [
+      'Up to 20 hours of consulting per month',
+      'Architecture design and system planning',
+      'API integration builds and maintenance',
+      'Code review and quality oversight',
+      'Monthly strategy calls plus async support channel',
+      'Written monthly progress report',
+    ],
+    not: ['Full dedicated team (see Dedicated)', 'Hours beyond allocation, billed at $175/hr'],
+    cta: 'Book a Discovery Call',
+    rec: true,
+  },
+  {
+    label: 'Scale', name: 'Dedicated', amt: '$8,000', unit: '/mo',
+    meta: 'Starting from · Scoped per organization',
+    ticks: [
+      'Embedded technical lead, acts as your CTO',
+      'Unlimited consulting hours within scope',
+      'Full architecture ownership and roadmap',
+      'Dedicated web and app development support',
+      'Team management and hiring guidance',
+      'Weekly executive alignment, same-day SLA',
+    ],
+    not: [],
+    cta: 'Book a Discovery Call',
+    rec: false,
+  },
+];
+
+const MATRIX = [
+  {
+    cat: 'Engagement',
+    rows: [
+      ['Hours', 'Per session ($1,500/session)', 'Up to 20 hrs/mo', 'Unlimited within scope'],
+      ['Architecture', 'Review with written findings', 'Design and system planning', 'Full ownership + roadmap'],
+      ['Hands-on build work', null, 'API integrations + maintenance', 'Dedicated web and app dev support'],
+      ['Code review', 'Audit-based', 'Monthly oversight', 'Continuous'],
+    ],
+  },
+  {
+    cat: 'Cadence and Terms',
+    rows: [
+      ['Strategy cadence', 'Written recs per session', 'Monthly calls + async channel', 'Weekly executive alignment'],
+      ['Response SLA', null, 'Async support channel', 'Same-day'],
+      ['Commitment', 'None', '3-month minimum', 'Scoped per organization'],
+      ['Overage', 'n/a', '$175/hr beyond allocation', 'n/a'],
+    ],
+  },
+];
+
+const HOW = [
+  { n: '01', h: 'Discovery', p: 'A free 30-minute call on the decision or system that is stuck, and which engagement fits.' },
+  { n: '02', h: 'Map the Architecture', p: 'First deliverable: a plain-language map of your systems, what talks to what, and where the risk sits.' },
+  { n: '03', h: 'Advise and Build', p: 'Decisions get made against the map: written recommendations, integrations and reviews on your cadence.' },
+  { n: '04', h: 'Scale or Step Back', p: 'Move between Advisory, Retainer and Dedicated as the work ramps up or winds down.' },
+];
+
+const FAQS = [
+  { q: 'Advisory or Retainer, which do we need?', a: 'Advisory is for a decision: an architecture question, a vendor evaluation, a second opinion. Retainer is for ongoing execution: someone senior building and reviewing every month.' },
+  { q: 'What does a $1,500 strategy session include?', a: 'A focused working session on one problem, preparation on our side beforehand, and a written summary of recommendations afterward. No retainer required.' },
+  { q: 'Can we move between tiers?', a: 'Yes. Many clients start with a session, move to a retainer when execution ramps up, and scale to Dedicated when they need embedded ownership.' },
+  { q: 'What makes Dedicated different from hiring a CTO?', a: 'You get senior technical ownership with weekly executive alignment and a same-day SLA, at a fraction of a full-time executive hire, and you can scale it down when the heavy lifting is done.' },
+];
+---
+
+<ServiceLayout
+  title="Technical Consulting and Digital Transformation | Robles Technologies Corp."
+  description="Architecture reviews, integrations and platform strategy — from a single $1,500 advisory session to an embedded technical lead acting as your CTO. Advisory from $200/hr, retainers from $3,500/mo."
+  eyebrow="Service Line 06"
+  h1="Digital Transformation and Technical Consulting"
+  intro="Architecture reviews, integrations and platform strategy, from a single advisory session to an embedded technical lead who acts as your CTO."
+  crumb="Technical Consulting"
+  ctaLabel="Book a Free Discovery Call"
+  ctaHref="/contact#schedule"
+  closingH2="Bring Us the Decision You Are Stuck On"
+  closingText="A free 30-minute call. If one session solves it, that is what we will recommend."
+  closingCtaLabel="Book a Discovery Call →"
+  closingCtaHref="/contact#schedule"
+  faqs={FAQS}
+>
+  <!-- THE PROBLEM -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:28px;"><h2 class="svc-h2">The Problem</h2></div>
+      <div class="svc-grid-3 rv">
+        {PROBLEMS.map((c) => (
+          <div class="svc-card">
+            <h3 style="font-size:19px;">{c.h}</h3>
+            <p style="margin-bottom:0;">{c.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO ENGAGE US -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:34px;"><h2 class="svc-h2">How to Engage Us</h2></div>
+      <div class="svc-tiers rv">
+        {TIERS.map((t) => (
+          <div class={`svc-tier ${t.rec ? 'svc-tier-rec' : ''}`}>
+            {t.rec && <div class="svc-tier-badge">{t.label}</div>}
+            <div class="svc-tier-label">{t.rec ? t.sub : t.label}</div>
+            <div class="svc-tier-name">{t.name}</div>
+            <div class="svc-tier-price">
+              <span class="svc-tier-amt">{t.amt}</span><span class="svc-tier-unit">{t.unit}</span>
+            </div>
+            <p class="svc-tier-meta">{t.meta}</p>
+            <ul class="svc-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            {t.not.length > 0 && (
+              <>
+                <div class="svc-excl-label">Not Included</div>
+                <ul class="svc-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
+              </>
+            )}
+            <a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>{t.cta}</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="svc-band svc-band-page">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:26px;"><h2 class="svc-h2">Compare the Tiers</h2></div>
+      <div class="svc-matrix-wrap rv">
+        <div class="svc-matrix">
+          <div class="svc-matrix-head">
+            <div></div>
+            {TIERS.map((t) => (
+              <div class={`t ${t.rec ? 'hl' : ''}`}>
+                <div class="nm">{t.name}</div>
+                <div class="pr">{t.amt} {t.unit}</div>
+              </div>
+            ))}
+          </div>
+          {MATRIX.map((c) => (
+            <details class="svc-cat" open>
+              <summary>{c.cat}</summary>
+              <div>
+                {c.rows.map((r) => (
+                  <div class="svc-row">
+                    <div>{r[0]}</div>
+                    {[1, 2, 3].map((i) => (
+                      <div class={i === 2 ? 'hl' : ''}>
+                        {r[i] === true ? <span class="svc-yes">✓</span>
+                          : r[i] === null ? <span class="svc-no">—</span> : r[i]}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+          <div class="svc-matrix-cta">
+            <div></div>
+            {TIERS.map((t) => (
+              <div><a href="" onclick={CAL} class={`svc-tier-cta ${t.rec ? 'svc-tier-cta-action' : ''}`}>Book a Call</a></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="svc-band svc-band-sunken">
+    <div class="svc-wrap">
+      <div class="svc-center" style="margin-bottom:30px;">
+        <div class="svc-eyebrow">How It Works</div>
+        <h2 class="svc-h2">From Stuck Decision to Owned Roadmap</h2>
+      </div>
+      <div class="svc-grid-4 rv">
+        {HOW.map((s) => (
+          <div class="svc-step-card">
+            <div class="n">{s.n}</div>
+            <h4>{s.h}</h4>
+            <p>{s.p}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</ServiceLayout>

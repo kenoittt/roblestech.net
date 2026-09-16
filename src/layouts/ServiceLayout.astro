@@ -1,0 +1,121 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import '../styles/service-tokens.css';
+import '../styles/services.css';
+
+/*
+ * Shell for the six service-line pages.
+ *
+ * Carries what every line page shares — the mesh hero with the brand pattern,
+ * the breadcrumb back to the hub, the closing CTA band, and the FAQPage
+ * JSON-LD — so a page file holds only its own sections. The nav and footer
+ * come from BaseLayout unchanged.
+ */
+export interface Faq { q: string; a: string }
+
+interface Props {
+  title: string;
+  description: string;
+  /** Small label above the H1, e.g. "Service Line 01 · Flagship". */
+  eyebrow: string;
+  /** Second, quieter eyebrow under the H1 (Smartsheet uses one). */
+  subEyebrow?: string;
+  h1: string;
+  intro: string;
+  /** Breadcrumb leaf, e.g. "GEO + SEO". */
+  crumb: string;
+  /** Primary hero CTA. */
+  ctaLabel: string;
+  ctaHref: string;
+  /** Optional second hero CTA, rendered as the glass variant. */
+  cta2Label?: string;
+  cta2Href?: string;
+  /** Closing band. */
+  closingH2: string;
+  closingText: string;
+  closingCtaLabel: string;
+  closingCtaHref: string;
+  /** Rendered as accordions and emitted as FAQPage schema. */
+  faqs?: Faq[];
+}
+
+const {
+  title, description, eyebrow, subEyebrow, h1, intro, crumb,
+  ctaLabel, ctaHref, cta2Label, cta2Href,
+  closingH2, closingText, closingCtaLabel, closingCtaHref,
+  faqs = [],
+} = Astro.props;
+
+// FAQPage schema. Emitted only when the page actually shows the questions, so
+// the markup and the structured data can never disagree.
+const faqSchema = faqs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
+---
+
+<BaseLayout title={title} description={description} active="services">
+  <Fragment slot="head">
+    {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+    <slot name="head" />
+  </Fragment>
+
+  <!-- HERO -->
+  <div class="page-hero svc-mesh">
+    <div class="breadcrumb rv">
+      <a href="/">Home</a><span>/</span><a href="/services">Services</a><span>/</span>{crumb}
+    </div>
+    <span class="sec-tag rv d1">{eyebrow}</span>
+    <h1 class="sec-h rv d2" set:html={h1} />
+    {subEyebrow && (
+      <div class="rv d2" style="font-family:'League Spartan',system-ui,sans-serif;font-weight:600;text-transform:uppercase;font-size:11.5px;letter-spacing:.16em;color:var(--rtc-green-400);margin:-6px 0 14px;">
+        {subEyebrow}
+      </div>
+    )}
+    <p class="sec-p rv d3">{intro}</p>
+    <div class="svc-cta-row rv d3" style="margin-top:28px;justify-content:center;">
+      <a href={ctaHref} class="svc-btn-lime">{ctaLabel}</a>
+      {cta2Label && cta2Href && <a href={cta2Href} class="svc-btn-glass">{cta2Label}</a>}
+    </div>
+  </div>
+
+  <slot />
+
+  {faqs.length > 0 && (
+    <section class="svc-band svc-band-page">
+      <div class="svc-wrap">
+        <div class="svc-center" style="margin-bottom:26px;">
+          <div class="svc-eyebrow">Questions</div>
+          <h2 class="svc-h2">Frequently Asked</h2>
+        </div>
+        <div class="svc-faq rv">
+          {faqs.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <div class="a"><p>{f.a}</p></div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CLOSING CTA -->
+  <section class="svc-band svc-mesh">
+    <div class="svc-wrap svc-center">
+      <h2 class="svc-h2" style="color:#fff;">{closingH2}</h2>
+      <p class="svc-lead" style="color:rgba(255,255,255,.78);">{closingText}</p>
+      <div class="svc-cta-row" style="justify-content:center;">
+        <a href={closingCtaHref} class="svc-btn-lime">{closingCtaLabel}</a>
+        <a href="/services" class="svc-btn-glass">See All Service Lines</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
