@@ -22,19 +22,16 @@ const TIERS = [
   {
     label: 'Starter', name: 'Foundation', amt: '$2,500', unit: '/mo',
     tagline: 'Build your AI visibility baseline — tracking, content and schema locked in.',
-    ticks: [
+    included: [
       '10 questions tracked across ChatGPT, Perplexity, Gemini and Google',
       'Standard AI visibility audit',
       '2 posts/mo with keyword brief, evidence map and QA report',
       'FAQ schema',
       'Monthly scorecard PDF',
-    ],
-    more: [
       'Google Search Console setup and verification',
       'Sitemap submitted once',
       'Async strategy Q&A',
       'Standard turnaround',
-      '3-month minimum, then month-to-month',
     ],
     not: [
       'LLMs.txt and internal linking / cluster wiring',
@@ -47,20 +44,18 @@ const TIERS = [
   {
     label: 'Recommended', name: 'Engine', amt: '$4,500', unit: '/mo',
     tagline: 'The full GEO system.',
-    ticks: [
+    inherits: 'Foundation',
+    included: [
       '15 questions tracked across ChatGPT, Perplexity, Gemini and Google',
       'Full AI visibility + technical SEO audit',
       '4 posts/mo + client review document for sign-off',
       'FAQ + Article + Organization schema, LLMs.txt',
       'Live dashboard access',
-    ],
-    more: [
       '7-step post-publish QA on every post',
       'Internal linking / cluster wiring',
       'GSC setup + monthly management, per-post indexing requests',
       'Monthly report: citations, traffic, AI appearances',
       'Async monthly strategy review',
-      '3-month minimum, then month-to-month',
     ],
     not: [
       'Competitor citation map',
@@ -73,21 +68,18 @@ const TIERS = [
   {
     label: 'Scale', name: 'Operator', amt: '$7,500', unit: '/mo',
     tagline: 'Maximum coverage, founder access and a quarterly PR push.',
-    ticks: [
+    inherits: 'Engine',
+    included: [
       '20 questions tracked across ChatGPT, Perplexity, Gemini and Google',
       'Full audit + competitor citation map',
       '6–8 posts/mo with priority queue',
       'Adds Product, HowTo and entity schema',
       '45-minute monthly call with a founder',
-    ],
-    more: [
-      'Everything in Engine',
       'Full GSC management + weekly indexing checks',
       'Live dashboard + executive summary',
       'Monthly report + quarterly business review',
       'Quarterly digital PR / citation outreach push',
       'Priority turnaround',
-      '3-month minimum, then month-to-month',
     ],
     not: [
       'Paid advertising or media buying',
@@ -282,13 +274,17 @@ const serviceSchema = {
               <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
             <p class="rtcs-tier-meta">3-month minimum, then month-to-month</p>
-            <ul class="rtcs-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
-            <details class="rtcs-more">
-              <summary>What's Included and What's Not</summary>
-              <ul class="rtcs-ticks">{t.more.map((b) => <li>{b}</li>)}</ul>
-              <div class="rtcs-excl-label">Not Included</div>
-              <ul class="rtcs-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
-            </details>
+            <ul class="rtcs-ticks">
+              {t.inherits && <li class="rtcs-inherits">Everything in {t.inherits}</li>}
+              {t.included.map((b) => <li>{b}</li>)}
+            </ul>
+            {t.not.length > 0 && (
+              <details class="rtcs-more">
+                <summary>What's Not Included</summary>
+                <div class="rtcs-excl-label">Not Included</div>
+                <ul class="rtcs-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
+              </details>
+            )}
             <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Discovery Call</a>
           </div>
         ))}
@@ -365,16 +361,21 @@ const serviceSchema = {
       <h2 class="rtcs-h2" style="color:#fff;">A Live Dashboard, Not a Monthly Mystery</h2>
       <p class="rtcs-lead" style="color:rgba(255,255,255,.78);margin-bottom:24px;">Clicks, impressions, post performance and your citation baseline against where you stand now. Foundation gets a monthly scorecard PDF; Engine and Operator get live access, and Operator adds an executive summary.</p>
       <a href={GAP} class="rtcs-btn-lime">Get Your Free Gap Report →</a>
-      <div class="rtcs-show">
+      {/* The screenshot is the live sample dashboard, so it opens it. New tab:
+          the visitor is mid-page on a sales flow and should come back to it. */}
+      <a class="rtcs-show rtcs-show-link" href="https://portal.roblestech.net/demo"
+         target="_blank" rel="noopener"
+         aria-label="Open the live sample dashboard at portal.roblestech.net/demo">
         <div class="rtcs-frame">
           <div class="rtcs-frame-inner">
             <div class="rtcs-frame-bar">
-              <i></i><i></i><i></i><span>portal.roblestech.net</span>
+              <i></i><i></i><i></i><span>portal.roblestech.net/demo</span>
             </div>
             <img src="/geo-dashboard.png" alt="Sample client dashboard showing clicks, impressions, per-post performance and AI visibility. Sample data, not a real client." loading="lazy" width="1600" height="1000" />
           </div>
         </div>
-      </div>
+        <span class="rtcs-show-cue">Open the live sample dashboard →</span>
+      </a>
     </div>
   </section>
 

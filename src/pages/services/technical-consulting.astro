@@ -14,7 +14,7 @@ const TIERS = [
   {
     label: 'Starter', name: 'Advisory', amt: '$200', unit: '/hr',
     meta: 'Or $1,500 per strategy session · No retainer required',
-    ticks: [
+    included: [
       'Technology strategy and architecture review',
       'Platform and tooling evaluation',
       'Code and system audit with written findings',
@@ -29,7 +29,8 @@ const TIERS = [
     label: 'Most Popular', name: 'Retainer', amt: '$3,500', unit: '/mo',
     sub: 'Ongoing',
     meta: 'Starting from · 3-month minimum',
-    ticks: [
+    inherits: 'Advisory',
+    included: [
       'Up to 20 hours of consulting per month',
       'Architecture design and system planning',
       'API integration builds and maintenance',
@@ -44,7 +45,8 @@ const TIERS = [
   {
     label: 'Scale', name: 'Dedicated', amt: '$8,000', unit: '/mo',
     meta: 'Starting from · Scoped per organization',
-    ticks: [
+    inherits: 'Retainer',
+    included: [
       'Embedded technical lead, acts as your CTO',
       'Unlimited consulting hours within scope',
       'Full architecture ownership and roadmap',
@@ -138,12 +140,16 @@ const FAQS = [
               <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
             <p class="rtcs-tier-meta">{t.meta}</p>
-            <ul class="rtcs-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
+            <ul class="rtcs-ticks">
+              {t.inherits && <li class="rtcs-inherits">Everything in {t.inherits}</li>}
+              {t.included.map((b) => <li>{b}</li>)}
+            </ul>
             {t.not.length > 0 && (
-              <>
+              <details class="rtcs-more">
+                <summary>What's Not Included</summary>
                 <div class="rtcs-excl-label">Not Included</div>
-                <ul class="rtcs-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
-              </>
+                <ul class="rtcs-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
+              </details>
             )}
             <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>{t.cta}</a>
           </div>

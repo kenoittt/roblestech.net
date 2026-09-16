@@ -14,7 +14,7 @@ const TIERS = [
   {
     label: 'Starter', name: 'Launchpad', amt: '$3,500', unit: '/project',
     meta: 'Starting from · Delivery in 2 to 3 weeks',
-    ticks: [
+    included: [
       'Up to 5 custom sheets built and configured',
       'Basic automations: notifications, alerts, row actions',
       '1 summary dashboard with live metrics',
@@ -27,7 +27,8 @@ const TIERS = [
   {
     label: 'Most Popular', name: 'Momentum', amt: '$9,500', unit: '/project',
     meta: 'Starting from · Delivery in 4 to 6 weeks',
-    ticks: [
+    inherits: 'Launchpad',
+    included: [
       'Up to 15 sheets across multiple workspaces',
       'Advanced automations: approvals, escalation rules',
       'Multi-view dashboards and cross-sheet reports',
@@ -40,7 +41,8 @@ const TIERS = [
   {
     label: 'Scale', name: 'Enterprise', amt: '$22,000', unit: '/project',
     meta: 'Starting from · Delivery in 8 to 16 weeks',
-    ticks: [
+    inherits: 'Momentum',
+    included: [
       'Unlimited sheets across departments',
       'Bridge workflows, complex logic, error monitoring',
       'Executive dashboards per stakeholder level',
@@ -153,9 +155,17 @@ const FAQS = [
               <span class="rtcs-tier-amt">{t.amt}</span><span class="rtcs-tier-unit">{t.unit}</span>
             </div>
             <p class="rtcs-tier-meta">{t.meta}</p>
-            <ul class="rtcs-ticks">{t.ticks.map((b) => <li>{b}</li>)}</ul>
-            <div class="rtcs-excl-label">Not Included</div>
-            <ul class="rtcs-excl" style="margin-bottom:20px;">{t.not.map((b) => <li>{b}</li>)}</ul>
+            <ul class="rtcs-ticks">
+              {t.inherits && <li class="rtcs-inherits">Everything in {t.inherits}</li>}
+              {t.included.map((b) => <li>{b}</li>)}
+            </ul>
+            {t.not.length > 0 && (
+              <details class="rtcs-more">
+                <summary>What's Not Included</summary>
+                <div class="rtcs-excl-label">Not Included</div>
+                <ul class="rtcs-excl">{t.not.map((b) => <li>{b}</li>)}</ul>
+              </details>
+            )}
             <a href="" onclick={CAL} class={`rtcs-tier-cta ${t.rec ? 'rtcs-tier-cta-action' : ''}`}>Book a Discovery Call</a>
           </div>
         ))}

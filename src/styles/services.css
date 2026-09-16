@@ -213,7 +213,18 @@
   color: var(--rtc-blue-500); font-weight: 800;
 }
 
-/* "What's Included and What's Not" expander. */
+/* The "Everything in <lower tier>" line that opens a higher tier's list. It
+   carries the whole tier below it, so it reads heavier than the bullets and
+   sits above its own rule. */
+.rtcs-ticks li.rtcs-inherits {
+  font-weight: 700; color: var(--text-strong);
+  padding-bottom: 12px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.rtcs-ticks li.rtcs-inherits::before { content: "＋"; font-size: 12px; top: 1px; }
+
+/* Exclusions disclosure. Included items are always visible now; only the
+   "not included" list is folded away, so the summary says exactly that. */
 .rtcs-more { border-top: 1px solid var(--border-subtle); margin-bottom: 18px; }
 .rtcs-more > summary {
   cursor: pointer; list-style: none; padding: 14px 0 12px;
@@ -324,6 +335,25 @@
 
 /* ───────────── showcase frame ───────────── */
 .rtcs-show { max-width: 960px; margin: 34px auto 0; position: relative; }
+/* The showcase is clickable on GEO — it opens the live sample dashboard — so
+   it needs to look it: a pointer, a lift on hover, and a cue underneath for
+   anyone who would not think to click a screenshot. */
+.rtcs-show-link { display: block; text-decoration: none; cursor: pointer; }
+.rtcs-show-link .rtcs-frame {
+  transition: transform var(--dur-base) cubic-bezier(0.2, 0, 0, 1);
+}
+.rtcs-show-link:hover .rtcs-frame { transform: translateY(-4px); }
+.rtcs-show-link:focus-visible { outline: 2px solid var(--rtc-green-400); outline-offset: 6px; border-radius: var(--radius-lg); }
+.rtcs-show-cue {
+  display: block; margin-top: 14px;
+  font-size: 13px; font-weight: 700; color: var(--rtc-green-400);
+  opacity: .85; transition: opacity var(--dur-base) var(--ease-standard);
+}
+.rtcs-show-link:hover .rtcs-show-cue { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .rtcs-show-link .rtcs-frame, .rtcs-show-cue { transition: none; }
+  .rtcs-show-link:hover .rtcs-frame { transform: none; }
+}
 /* Sky glow behind the frame, so the screenshot sits in light rather than on
    a flat band. */
 .rtcs-show::before {
