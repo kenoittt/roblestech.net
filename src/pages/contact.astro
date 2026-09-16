@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Arrow from '../components/Arrow.astro';
 ---
 
 <BaseLayout
@@ -38,15 +39,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .sf-field textarea:focus { border-color: #0464DD; box-shadow: 0 0 0 3px rgba(57,146,255,.28); }
       .sf-field input:invalid:not(:placeholder-shown) { border-color: #d2544a; }
 
-      .sf-submit {
-        display: inline-flex; align-items: center; justify-content: center;
-        height: 48px; padding: 0 26px; border: none; border-radius: 14px;
-        background: #0464DD; color: #fff; cursor: pointer;
-        font-family: 'Montserrat', system-ui, sans-serif; font-weight: 700; font-size: 15px;
-        transition: background 200ms cubic-bezier(.4,0,.2,1), transform 200ms cubic-bezier(.4,0,.2,1);
-      }
-      .sf-submit:hover { background: #0356bd; }
-      .sf-submit:active { transform: translateY(1px); }
+      /* The submit button now takes the site-wide .btn-rtc--blue treatment;
+         only the focus ring is kept here, since the form needs a visible one. */
+      .sf-submit { align-self: flex-start; }
       .sf-submit:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(57,146,255,.45); }
 
       .sf-note { font-size: 0.74rem; color: #5d6481; line-height: 1.6; margin: 2px 0 0; }
@@ -177,7 +172,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             By sending this message you agree to our <a href="/terms-and-conditions">Terms and Conditions</a>
             and confirm you have read our <a href="/privacy-policy">Privacy Policy</a>.
           </p>
-          <button type="submit" name="submit" class="sf-submit">Send Message →</button>
+          <button type="submit" name="submit" class="sf-submit btn-rtc btn-rtc--blue btn-rtc--lg">Send Message<Arrow /></button>
           <p class="sf-note">We reply within 1 business day. Your details go straight to our team — we never share or sell them.</p>
         </form>
 
@@ -222,7 +217,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <li>Walk away with a clear scope and next steps</li>
             <li>Fixed-price proposal delivered within 48 hours</li>
           </ul>
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+          </a>
           {/* Booking details are collected by Calendly, not by this site, so
               say where they go before the widget opens. */}
           <p class="cal-consent">Booking opens Calendly, who collect the details you enter there. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms</a>.</p>
@@ -271,6 +268,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h3>Prefer a quick chat over a form?</h3>
       <p>Skip the inbox — book a 30-minute call and get answers immediately.</p>
     </div>
-    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call →</a>
+    <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-white">Book a Call
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+          </a>
   </div>
 </BaseLayout>

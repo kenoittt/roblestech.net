@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Arrow from '../components/Arrow.astro';
 import '../styles/service-tokens.css';
 import '../styles/services.css';
 
@@ -111,7 +112,7 @@ const schema = {
             </div>
             <h2>{l.name}</h2>
             <p>{l.line}</p>
-            <span class="rtcs-explore">Explore more →</span>
+            <span class="rtcs-explore">Explore more<Arrow size={15} /></span>
           </a>
         ))}
       </div>
@@ -124,7 +125,9 @@ const schema = {
       <div class="rtcs-crosssell rv">
         <h2 class="rtcs-h2">Need More Than One Line?</h2>
         <p class="rtcs-lead">Most clients start with one problem and find the next one behind it. A GEO client needs a faster site. A Smartsheet client needs an integration. We build the engagement around what you actually need, so you work with one embedded partner instead of five vendors.</p>
-        <a href="" onclick={CAL} class="rtcs-btn-outline">Book a Call to Scope It →</a>
+        <a href="" onclick={CAL} class="rtcs-btn-outline">Book a Call to Scope It
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+          </a>
       </div>
     </div>
   </section>
@@ -155,7 +158,9 @@ const schema = {
       <h2 class="rtcs-h2" style="color:#fff;">Ready to Discuss Your Project?</h2>
       <p class="rtcs-lead" style="color:rgba(255,255,255,.78);">Every engagement starts with a free 30-minute discovery call. Tell us the problem, and we will send a fixed-price proposal within 48 hours. No commitment required.</p>
       <div class="rtcs-cta-row" style="justify-content:center;">
-        <a href="" onclick={CAL} class="rtcs-btn-action">Book a Discovery Call →</a>
+        <a href="" onclick={CAL} class="rtcs-btn-action">Book a Discovery Call
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+          </a>
         <a href="/contact" class="rtcs-btn-glass">Send a Message</a>
       </div>
     </div>

@@ -146,22 +146,151 @@ nav.nav-inner {
 .rv.on { opacity:1; transform:none; }
 .d1{transition-delay:.10s} .d2{transition-delay:.20s} .d3{transition-delay:.30s} .d4{transition-delay:.40s}
 
-/* buttons */
-.btn {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:13px 30px; border-radius:8px;
-  font-size:var(--fs-sm); font-weight:700; text-decoration:none;
-  transition:all .25s; cursor:pointer; border:2px solid transparent;
-  white-space:nowrap;
+/* ══════════════════════════════════
+   BUTTONS — RTC graphic hover buttons
+   One system, three variants, applied by class. The legacy .btn-* names are
+   grouped onto the variants rather than deleted, so every button on the site
+   picks up the new styling whether or not its markup has been touched:
+     .btn-white / recommended tier CTA  -> lime   (the one primary per band)
+     .btn-blue / .btn-dark / other CTAs -> blue   (secondary on light)
+     .btn-ghost / nav CTA               -> glass  (on dark and mesh)
+══════════════════════════════════ */
+.btn-rtc,
+.btn,
+.rtcs-tier-cta,
+.ty-btn,
+.nl-btn,
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 24px;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  transition:
+    background-position .45s cubic-bezier(0.2, 0, 0, 1),
+    transform .2s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow .2s cubic-bezier(0.2, 0, 0, 1),
+    background-color .2s,
+    border-color .2s;
 }
-.btn-blue  { background:var(--core-blue); color:var(--white); border-color:var(--core-blue); }
-.btn-blue:hover  { background:var(--navy); border-color:var(--navy); transform:translateY(-2px); box-shadow:0 8px 20px rgba(4,100,221,.28); }
-.btn-dark  { background:transparent; color:var(--navy); border-color:var(--navy); }
-.btn-dark:hover  { background:var(--navy); color:var(--white); transform:translateY(-2px); }
-.btn-white { background:var(--white); color:var(--navy); }
-.btn-white:hover { background:var(--green); transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.13); }
-.btn-ghost { background:transparent; color:var(--white); border:2px solid rgba(255,255,255,.42); }
-.btn-ghost:hover { border-color:var(--white); background:rgba(255,255,255,.10); transform:translateY(-2px); }
+.btn-rtc--lg { font-size: 15px; padding: 14px 28px; }
+
+/* Arrow icon inside the button (inline SVG, uses currentColor) */
+.btn-rtc svg, .btn svg, .rtcs-tier-cta svg, .ty-btn svg { flex-shrink: 0; }
+
+/* 1) PRIMARY — lime sweep (main CTAs: Book a Call, Gap Report) */
+.btn-rtc--lime,
+.btn-white,
+.rtcs-btn-lime,
+.rtcs-tier-cta-action {
+  background: linear-gradient(105deg, #AEE37B 0%, #D3F2A8 45%, #AEE37B 60%);
+  background-size: 230% 100%;
+  background-position: 0% 0;
+  color: #00050F;
+}
+.btn-rtc--lime:hover,
+.btn-white:hover,
+.rtcs-btn-lime:hover,
+.rtcs-tier-cta-action:hover {
+  background-position: 95% 0;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(174, 227, 123, .4), 0 2px 8px rgba(3, 44, 124, .25);
+  color: #00050F;
+}
+
+/* 2) BLUE — action sweep (secondary CTAs on light backgrounds) */
+.btn-rtc--blue,
+.btn-blue,
+.btn-dark,
+.rtcs-btn-action,
+.rtcs-btn-outline,
+.rtcs-tier-cta,
+/* The spec maps the nav CTA to glass. That assumes the dark nav in its design
+   file; this site's nav is a LIGHT glass island (rgba(245,246,250,.55)), where
+   glass + white text measures 1.93:1 over a light hero. Blue keeps it legible
+   at 5.42:1 and still reads as the nav's one primary action. */
+.nav-cta,
+.ty-btn,
+.nl-btn {
+  background: linear-gradient(105deg, #0464DD 0%, #3992FF 50%, #0464DD 100%);
+  background-size: 230% 100%;
+  background-position: 0% 0;
+  color: #fff;
+}
+.btn-rtc--blue:hover,
+.btn-blue:hover,
+.btn-dark:hover,
+.rtcs-btn-action:hover,
+.rtcs-btn-outline:hover,
+.rtcs-tier-cta:hover,
+.nav-cta:hover,
+.ty-btn:hover,
+.nl-btn:hover {
+  background-position: 95% 0;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(4, 100, 221, .35);
+  color: #fff;
+}
+
+/* 3) GLASS — on dark/mesh backgrounds (nav, paired secondary CTAs) */
+.btn-rtc--glass,
+.btn-ghost,
+.rtcs-btn-glass,
+.ty-btn-ghost {
+  background: rgba(3, 44, 124, .28);
+  border: 1px solid rgba(255, 255, 255, .22);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: #fff;
+}
+.btn-rtc--glass:hover,
+.btn-ghost:hover,
+.rtcs-btn-glass:hover,
+.ty-btn-ghost:hover {
+  background: rgba(255, 255, 255, .16);
+  border-color: rgba(255, 255, 255, .45);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(3, 44, 124, .45);
+  color: #fff;
+}
+
+/* Press state — all variants */
+.btn-rtc:active, .btn:active, .rtcs-tier-cta:active, .ty-btn:active, .nl-btn:active {
+  transform: translateY(-1px) scale(.99);
+}
+
+/* 4) TEXT LINK — "Explore more" style arrow links */
+.link-rtc,
+.rtcs-explore,
+.svc-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0464DD;
+  text-decoration: none;
+  transition: gap .2s cubic-bezier(0.2, 0, 0, 1), color .2s;
+}
+/* The spec's hover colour is #3992FF, which measures 3.02:1 on the page
+   background — under AA, and a hover colour is a resting state for as long as
+   the pointer is there. The gap animation is the signature of this link style
+   and is kept exactly; the colour deepens instead of lightening, at 6.61:1. */
+.link-rtc:hover, .rtcs-explore:hover, .svc-back-link:hover {
+  gap: 12px; color: #0356BD; text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-rtc, .btn, .rtcs-tier-cta, .ty-btn, .nl-btn, .link-rtc, .rtcs-explore { transition: none; }
+  .btn-rtc:hover, .btn:hover, .rtcs-tier-cta:hover, .ty-btn:hover, .nl-btn:hover { transform: none; }
+}
 
 /* section padding */
 .sec { padding:96px 8%; }
