@@ -300,16 +300,12 @@
 }
 .rtcs-excl li::before { content: "✕"; position: absolute; left: 2px; top: 0; color: var(--color-danger); font-weight: 700; font-size: 11px; }
 
+/* Colour, radius and hover come from the global button system in styles.css;
+   only the card-specific layout lives here. Redeclaring background or radius
+   would override that system, since this file loads after it. */
 .rtcs-tier-cta {
-  margin-top: auto; display: block; text-align: center;
-  padding: 13px 20px; border-radius: var(--radius-md);
-  font-size: 14px; font-weight: 700; text-decoration: none;
-  border: 1.5px solid var(--rtc-blue-500); color: var(--rtc-blue-500); background: transparent;
-  transition: background var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
+  margin-top: auto; justify-content: center; width: 100%; text-align: center;
 }
-.rtcs-tier-cta:hover { background: rgba(4, 100, 221, 0.07); color: var(--text-link-hover); }
-.rtcs-tier-cta-action { background: var(--rtc-blue-500); color: #fff; }
-.rtcs-tier-cta-action:hover { background: var(--text-link-hover); color: #fff; }
 
 /* ───────────── comparison matrix ───────────── */
 .rtcs-matrix-wrap { overflow-x: auto; }
@@ -498,44 +494,10 @@
 
 /* ───────────── dark-band CTAs ───────────── */
 .rtcs-cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
-/* Primary CTA — the design system's "action" variant. This is the default
-   for every hero and most closing bands; the lime "accent" below is reserved
-   for the two free/credited offers (Gap Report, Automation Audit). */
-.rtcs-btn-action {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 24px; border-radius: var(--radius-md);
-  background: var(--rtc-blue-500); color: #fff;
-  font-size: 14.5px; font-weight: 700; text-decoration: none; border: 0;
-  transition: background var(--dur-base) var(--ease-standard), transform 120ms var(--ease-standard);
-}
-.rtcs-btn-action:hover { background: var(--text-link-hover); color: #fff; }
-.rtcs-btn-action:active { transform: translateY(1px); }
-.rtcs-btn-lime {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 24px; border-radius: var(--radius-md);
-  background: var(--rtc-green-400); color: var(--rtc-navy-900);
-  font-size: 14.5px; font-weight: 700; text-decoration: none; border: 0;
-  transition: filter var(--dur-base) var(--ease-standard), transform 120ms var(--ease-standard);
-}
-.rtcs-btn-lime:hover { filter: brightness(1.06); color: var(--rtc-navy-900); }
-.rtcs-btn-lime:active { transform: translateY(1px); }
-.rtcs-btn-glass {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 24px; border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.08); color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  font-size: 14.5px; font-weight: 700; text-decoration: none;
-  transition: background var(--dur-base) var(--ease-standard);
-}
-.rtcs-btn-glass:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
-.rtcs-btn-outline {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 13px 24px; border-radius: var(--radius-md);
-  border: 1.5px solid var(--rtc-blue-500); color: var(--rtc-blue-500);
-  font-size: 14.5px; font-weight: 700; text-decoration: none; background: transparent;
-  transition: background var(--dur-base) var(--ease-standard);
-}
-.rtcs-btn-outline:hover { background: rgba(4, 100, 221, 0.07); color: var(--text-link-hover); }
+/* The four variants are defined once, globally, in styles.css. Nothing is
+   restated here: this file loads after the global sheet, so any background,
+   radius or padding declared at the same specificity would silently beat it —
+   which is exactly why these pages kept the old flat buttons. */
 
 /* ───────────── responsive ───────────── */
 @media (max-width: 900px) {
@@ -552,7 +514,7 @@
   .rtcs-stepper .step { flex: 0 0 33.33%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rtcs-card, .rtcs-read, .rtcs-node, .rtcs-tier-cta, .rtcs-btn-lime, .rtcs-btn-glass, .rtcs-btn-outline { transition: none; }
+  .rtcs-card, .rtcs-read, .rtcs-node { transition: none; }
   .rtcs-card-link:hover, .rtcs-read:hover { transform: none; }
   .rtcs-stepper .step:hover .rtcs-node { transform: none; }
   .rtcs-frame::before { animation: none; }

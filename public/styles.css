@@ -175,8 +175,8 @@ nav.nav-inner {
   white-space: nowrap;
   transition:
     background-position .45s cubic-bezier(0.2, 0, 0, 1),
-    transform .2s cubic-bezier(0.2, 0, 0, 1),
     box-shadow .2s cubic-bezier(0.2, 0, 0, 1),
+    filter .2s cubic-bezier(0.2, 0, 0, 1),
     background-color .2s,
     border-color .2s;
 }
@@ -200,7 +200,6 @@ nav.nav-inner {
 .rtcs-btn-lime:hover,
 .rtcs-tier-cta-action:hover {
   background-position: 95% 0;
-  transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(174, 227, 123, .4), 0 2px 8px rgba(3, 44, 124, .25);
   color: #00050F;
 }
@@ -234,7 +233,6 @@ nav.nav-inner {
 .ty-btn:hover,
 .nl-btn:hover {
   background-position: 95% 0;
-  transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(4, 100, 221, .35);
   color: #fff;
 }
@@ -256,14 +254,14 @@ nav.nav-inner {
 .ty-btn-ghost:hover {
   background: rgba(255, 255, 255, .16);
   border-color: rgba(255, 255, 255, .45);
-  transform: translateY(-3px);
   box-shadow: 0 10px 28px rgba(3, 44, 124, .45);
   color: #fff;
 }
 
-/* Press state — all variants */
+/* Press state — a slight inset rather than a jump, so nothing moves on the
+   page. The hover effect is the sweep alone; no lift, no shake. */
 .btn-rtc:active, .btn:active, .rtcs-tier-cta:active, .ty-btn:active, .nl-btn:active {
-  transform: translateY(-1px) scale(.99);
+  filter: brightness(.95);
 }
 
 /* 4) TEXT LINK — "Explore more" style arrow links */
@@ -289,7 +287,7 @@ nav.nav-inner {
 
 @media (prefers-reduced-motion: reduce) {
   .btn-rtc, .btn, .rtcs-tier-cta, .ty-btn, .nl-btn, .link-rtc, .rtcs-explore { transition: none; }
-  .btn-rtc:hover, .btn:hover, .rtcs-tier-cta:hover, .ty-btn:hover, .nl-btn:hover { transform: none; }
+  .btn-rtc:active, .btn:active, .rtcs-tier-cta:active { filter: none; }
 }
 
 /* section padding */
