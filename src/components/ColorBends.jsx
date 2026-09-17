@@ -5,8 +5,8 @@ import './ColorBends.css';
 /*
  * ColorBends — from React Bits (reactbits.dev), JavaScript + CSS variant.
  *
- * The shader and uniform plumbing are the published source, unchanged. Two
- * additions for this site, both marked below:
+ * The shader and uniform plumbing are the published source, unchanged. Three
+ * additions for this site, each marked below:
  *
  *   1. `pointerSource="window"`. The source listens for pointermove on its own
  *      container. As a full-bleed hero background the container sits behind the
@@ -20,6 +20,11 @@ import './ColorBends.css';
  *      requestAnimationFrame forever. Every other animation on this site
  *      honours that setting, and an endless GPU loop is the last thing someone
  *      who asked for less motion wants.
+ *
+ *   3. Creating the WebGL renderer is wrapped in try/catch. Without it, a
+ *      visitor whose browser has no WebGL gets an uncaught error on the
+ *      homepage — verified by running the page with WebGL switched off. The
+ *      hero's own CSS gradient is the background in that case.
  */
 
 const MAX_COLORS = 8;
@@ -194,11 +199,23 @@ export default function ColorBends({
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: false,
-      powerPreference: 'high-performance',
-      alpha: true
-    });
+    /* No WebGL — an older device, a GPU blocklist, a hardened browser — must
+       not throw. The published source lets THREE.WebGLRenderer's failure
+       escape, which surfaced as an uncaught error on the homepage; the hero
+       then falls back to its own CSS gradient, so there is nothing to recover,
+       only something to stop. */
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        powerPreference: 'high-performance',
+        alpha: true
+      });
+    } catch {
+      geometry.dispose();
+      material.dispose();
+      return;
+    }
     rendererRef.current = renderer;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));

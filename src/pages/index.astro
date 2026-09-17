@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PartnershipBand from '../components/PartnershipBand.astro';
+import ColorBends from '../components/ColorBends.jsx';
 ---
 
 <BaseLayout
@@ -126,7 +127,35 @@ import PartnershipBand from '../components/PartnershipBand.astro';
 
   <!-- HERO — motion only -->
   <section class="hero hero-motion" id="home">
-    <canvas id="hero-fluid" aria-hidden="true"></canvas>
+    {/* Hero background. The bands are drawn with alpha over the hero's own
+        static gradient, so the surface stays light and the published headline
+        keeps its contrast. client:idle rather than client:load: this is
+        decoration, and the hero must not wait on React + three to paint. Until
+        it hydrates — and if WebGL is unavailable — the CSS gradient underneath
+        is what shows, which is why that gradient is a finished background in
+        its own right rather than a placeholder. */}
+    <ColorBends
+      client:idle
+      className="hero-bends"
+      colors={['#3992FF', '#AEE37B', '#7FB4FF']}
+      rotation={102}
+      speed={0.13}
+      scale={1.6}
+      frequency={1}
+      warpStrength={1}
+      iterations={2}
+      {/* Band coverage is 1 - exp(-bandWidth / exp(bandWidth * m)). At the
+          default 6 that is ~0.01 once m reaches 1, so the bands only appear in
+          small pockets and the hero read as flat. Around 3 spreads them into
+          something visible without turning the surface dark. */}
+      bandWidth={3.2}
+      intensity={1.15}
+      noise={0.04}
+      mouseInfluence={0.35}
+      parallax={0.35}
+      pointerSource="window"
+      transparent
+    />
     <div class="hero-motion-grid">
       <div class="hero-left">
         <span class="hero-eyebrow">GEO · Technical Consulting · Smartsheet · Automations · Web3</span>

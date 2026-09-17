@@ -1533,7 +1533,33 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    ============================================================ */
 
 /* WebGL fluid canvas inside .hero (sits above ::before glows, below content) */
-#hero-fluid { position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+/* Hero background layer (the ColorBends island). pointer-events:none so the
+   headline and buttons above it stay clickable — the effect tracks the pointer
+   on the window instead.
+
+   Two classes on purpose. The component's own .color-bends-container sets
+   position:relative at one class, and its stylesheet is bundled into an
+   /_astro chunk that loads after this file — so a one-class rule here ties on
+   specificity and loses on source order. It shipped that way once: the canvas
+   stayed in flow as a flex item and rendered as an inset grey rectangle
+   instead of filling the hero. */
+.color-bends-container.hero-bends{
+  position:absolute; inset:0; width:100%; height:100%;
+  z-index:0; pointer-events:none;
+  /* The bands stay full strength across the empty top and bottom of the hero
+     and fade back through the middle, where the headline and the aside sit.
+     At full strength everywhere they cost the eyebrow 1.3 and the paragraph
+     2.0 of contrast ratio and put both under AA — measured, not guessed. This
+     keeps the colour where there is nothing to read. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,1) 0%, rgba(0,0,0,1) 24%,
+    rgba(0,0,0,.06) 36%, rgba(0,0,0,.06) 82%,
+    rgba(0,0,0,1) 94%);
+  mask-image: linear-gradient(to bottom,
+    rgba(0,0,0,1) 0%, rgba(0,0,0,1) 24%,
+    rgba(0,0,0,.06) 36%, rgba(0,0,0,.06) 82%,
+    rgba(0,0,0,1) 94%);
+}
 
 /* Headline line reveal — JS adds .anim (so no-JS keeps text visible), then .in */
 .reveal-lines { animation:none; }
@@ -1679,10 +1705,20 @@ html.preloaded .loader{ display:none; }
    ============================================================ */
 .hero.hero-motion{
   display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
-  grid-template-columns:none; padding:130px 8% 90px; background:var(--off-white);
+  grid-template-columns:none; padding:130px 8% 90px;
+  /* This is the hero's real background, not a placeholder. The ColorBends
+     island draws with alpha on top of it, so it is what shows before the
+     island hydrates, if WebGL is unavailable, and through the bends everywhere
+     their coverage is low. Keeping the base pale is what preserves the
+     published headline's contrast. */
+  background:
+    radial-gradient(72% 58% at 16% 16%, rgba(57,146,255,.17) 0%, transparent 62%),
+    radial-gradient(62% 52% at 84% 10%, rgba(4,100,221,.12) 0%, transparent 65%),
+    radial-gradient(58% 48% at 64% 94%, rgba(174,227,123,.17) 0%, transparent 66%),
+    var(--off-white);
 }
 .hero.hero-motion::before, .hero.hero-motion::after{ display:none; } /* drop the radial glows */
-#hero-fluid{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
 .hero.hero-motion .hero-left{ position:relative; z-index:2; padding-right:0; max-width:min(940px,94%); }
 .hero.hero-motion .hero-h1{
   font-size:clamp(2.9rem,9vw,7.5rem); line-height:.92; font-weight:900; letter-spacing:-.05em;
