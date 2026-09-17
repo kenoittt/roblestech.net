@@ -588,6 +588,29 @@
 .rtcs-founder { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .rtcs-founder .txt { flex: 1; min-width: 260px; }
 
+/* The two founders the copy names. The circles overlap slightly so they read
+   as a pair rather than two unrelated avatars. .rtcs-face-mono stands in for a
+   founder whose photo has not arrived — the band stays balanced either way,
+   which is why it is built as a pair rather than a single portrait. */
+.rtcs-founder-faces { display: flex; align-items: center; flex-shrink: 0; }
+.rtcs-face {
+  width: 78px; height: 78px; border-radius: 50%; object-fit: cover; display: block;
+  border: 3px solid var(--surface-card);
+  box-shadow: var(--shadow-sm);
+}
+.rtcs-face + .rtcs-face { margin-left: -18px; }
+/* The band sits on .rtcs-feature, which is the dark brand gradient. A solid
+   blue monogram there was brighter than the real photograph next to it and
+   pulled the eye to the placeholder; translucent white sits back where a
+   stand-in belongs. */
+.rtcs-face-mono {
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800; font-size: 1.05rem; letter-spacing: .05em;
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
 /* ───────────── related reading ───────────── */
 .rtcs-read {
   display: block; background: var(--surface-card); border: 1px solid var(--border-subtle);

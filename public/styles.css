@@ -1248,6 +1248,24 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 .about-visual-card::after { content: ''; position: absolute; inset: 0; background-image: var(--bg-pattern); background-size: 190px auto; background-repeat: repeat; opacity: .04; }
 .about-visual-card h3 { font-size: 1.4rem; font-weight: 900; color: var(--white); letter-spacing: -.02em; margin-bottom: 14px; position: relative; z-index: 1; }
 .about-visual-card p { font-size: var(--fs-xs); color: rgba(255,255,255,.80); line-height: var(--lh); position: relative; z-index: 1; margin-bottom: 0; }
+/* Founder portraits on the navy bio cards. The card paints a glow and a
+   pattern through ::before/::after, so anything inside it needs z-index 1 to
+   sit above them. .leader-photo-mono is the stand-in for a founder whose photo
+   has not arrived yet — same circle, initials instead of a face, so the two
+   cards stay symmetrical either way. */
+.leader-photo {
+  width: 132px; height: 132px; border-radius: 50%; overflow: hidden;
+  margin-bottom: 24px; position: relative; z-index: 1;
+  border: 3px solid rgba(255,255,255,.22);
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+}
+.leader-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.leader-photo-mono {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--core-blue), var(--azure));
+  color: var(--white); font-weight: 800; font-size: 2rem; letter-spacing: .04em;
+}
+
 .about-stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; position: relative; z-index: 1; margin-top: 24px; }
 .about-stat-box { text-align: center; }
 .about-stat-num { font-size: 1.6rem; font-weight: 900; color: var(--white); letter-spacing: -.02em; line-height: 1; }
@@ -1537,6 +1555,12 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    headline and buttons above it stay clickable — the effect tracks the pointer
    on the window instead.
 
+   The bands run at full strength across the whole hero. They used to be masked
+   back through the middle to protect the text, which was necessary when the
+   hero was near-white and the copy was navy. On the dark mesh the copy is
+   white and green, so the bright bands raise its contrast rather than eat it —
+   measured, not assumed.
+
    Two classes on purpose. The component's own .color-bends-container sets
    position:relative at one class, and its stylesheet is bundled into an
    /_astro chunk that loads after this file — so a one-class rule here ties on
@@ -1546,19 +1570,6 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 .color-bends-container.hero-bends{
   position:absolute; inset:0; width:100%; height:100%;
   z-index:0; pointer-events:none;
-  /* The bands stay full strength across the empty top and bottom of the hero
-     and fade back through the middle, where the headline and the aside sit.
-     At full strength everywhere they cost the eyebrow 1.3 and the paragraph
-     2.0 of contrast ratio and put both under AA — measured, not guessed. This
-     keeps the colour where there is nothing to read. */
-  -webkit-mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,1) 0%, rgba(0,0,0,1) 24%,
-    rgba(0,0,0,.06) 36%, rgba(0,0,0,.06) 82%,
-    rgba(0,0,0,1) 94%);
-  mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,1) 0%, rgba(0,0,0,1) 24%,
-    rgba(0,0,0,.06) 36%, rgba(0,0,0,.06) 82%,
-    rgba(0,0,0,1) 94%);
 }
 
 /* Headline line reveal — JS adds .anim (so no-JS keeps text visible), then .in */
@@ -1848,7 +1859,15 @@ html.preloaded .loader{ display:none; }
    its first and last letters. These stops keep the same left-to-right sweep
    but in the light half of the brand ramp. */
 .hero-motion .hero-h1 .ln > span{
-  background-image:linear-gradient(100deg,#ffffff 0%,#cfe2ff 26%,var(--azure) 46%,#cfe2ff 66%,#ffffff 100%);
+  background-image:linear-gradient(100deg,#ffffff 0%,#e4efff 26%,#a9d0ff 46%,#e4efff 66%,#ffffff 100%);
+  /* The bands now run at full strength behind the headline. Two things keep it
+     readable: the gradient's darkest stop is a light tint rather than azure —
+     azure measured 1.00:1 against a band of almost exactly its own luminance,
+     which made those letters disappear — and the drop-shadow gives every glyph
+     an edge against whatever passes behind it. drop-shadow rather than
+     text-shadow because the fill is transparent for background-clip, and a
+     text-shadow would show through the letters instead of haloing them. */
+  filter:drop-shadow(0 2px 12px rgba(0,5,15,.55));
   background-size:230% auto; background-position:0% center;
   -webkit-background-clip:text; background-clip:text;
   -webkit-text-fill-color:transparent; color:transparent;
@@ -1856,7 +1875,7 @@ html.preloaded .loader{ display:none; }
   transform-origin:top center; will-change:transform, background-position, translate;
 }
 .hero-motion .hero-h1 .ln > span.ac{
-  background-image:linear-gradient(100deg,var(--azure) 0%,#bfe8ff 30%,var(--green) 52%,#bfe8ff 72%,var(--azure) 100%);
+  background-image:linear-gradient(100deg,#bfe0ff 0%,#dff4ff 30%,var(--green) 52%,#dff4ff 72%,#bfe0ff 100%);
 }
 /* richer entrance: rise + 3D flip + blur */
 .reveal-lines.anim .ln > span{ transform:translateY(114%) rotateX(-50deg); filter:blur(5px); }

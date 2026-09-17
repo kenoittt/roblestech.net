@@ -149,7 +149,12 @@ import GradualBlur from '../components/GradualBlur.jsx';
           small pockets and the hero read as flat. Around 3 spreads them into
           something visible. */}
       bandWidth={3.2}
-      intensity={1.15}
+      {/* The bands run over the headline rather than being masked away from
+          it, so their peak brightness is what decides whether the type stays
+          readable. Measured across a sweep: at 0.92 a band reached the
+          headline's own luminance and those letters vanished (1.00:1), 0.70
+          still failed, 0.55 clears AA on all four runs with margin. */}
+      intensity={0.55}
       noise={0.04}
       mouseInfluence={0.35}
       parallax={0.35}
