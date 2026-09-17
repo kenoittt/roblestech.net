@@ -24,11 +24,19 @@ const ICONS: Record<string, string> = {
   compass: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
 };
 
-const LINES = [
+type Line = {
+  icon: string; name: string; href: string; line: string;
+  schemaId: string; serviceType: string;
+  /* Set only where a partner badge belongs beside the icon. */
+  partner?: boolean;
+};
+
+const LINES: Line[] = [
   {
     icon: 'search', name: 'GEO + SEO', href: '/services/geo',
     line: 'Get your brand cited inside ChatGPT, Gemini and Perplexity answers, and ranked on Google.',
     schemaId: 'geo', serviceType: 'Search Engine Optimization',
+    partner: true,
   },
   {
     icon: 'grid', name: 'Smartsheet Consulting', href: '/services/smartsheet',
@@ -107,8 +115,16 @@ const schema = {
       <div class="rtcs-lines rv">
         {LINES.map((l) => (
           <a href={l.href} class="rtcs-line">
-            <div class="rtcs-line-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[l.icon]} />
+            <div class="rtcs-line-head">
+              <div class="rtcs-line-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[l.icon]} />
+              </div>
+              {l.partner && (
+                <div class="rtcs-partner-pill">
+                  <img src="/semrush-icon.png" alt="" width="22" height="14" />
+                  <span>Semrush Agency Partner</span>
+                </div>
+              )}
             </div>
             <h2>{l.name}</h2>
             <p>{l.line}</p>

@@ -141,6 +141,75 @@
   .rtcs-line:hover { transform: none; }
 }
 
+/* ───────────── Semrush Agency Partner ─────────────
+   Two placements from the partner handoff: a full band below the GEO hero, and
+   a pill beside the GEO + SEO icon on the hub. The icon carries alt="" in both
+   — the word "Semrush" is already in the adjacent text, so a real alt would
+   make a screen reader say it twice. */
+
+/* The band's own vertical rhythm: the handoff sets 56px above and only 8px
+   below, because the next band already opens with its own 76px. */
+.rtcs-partner { padding: 56px 0 8px; }
+.rtcs-partner-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px; align-items: center;
+}
+.rtcs-partner-copy h2 {
+  margin: 0 0 12px; font-size: 26px; font-weight: 800;
+  letter-spacing: -0.02em; color: var(--text-strong);
+}
+.rtcs-partner-copy p {
+  margin: 0 0 16px; font-size: 14.5px; line-height: 1.7; color: var(--text-body);
+}
+/* A real list, with the check as a generated marker so it is decoration rather
+   than a "check mark" announced before every point. */
+.rtcs-partner-points {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  font-size: 13.5px; line-height: 1.6; color: var(--text-body);
+}
+.rtcs-partner-points li { display: flex; gap: 10px; }
+.rtcs-partner-points li::before {
+  content: "✓"; color: var(--rtc-blue-500); font-weight: 800; flex-shrink: 0;
+}
+
+.rtcs-partner-cardwrap { justify-self: center; width: 100%; max-width: 380px; }
+.rtcs-partner-card {
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-md); padding: 40px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  text-align: center;
+}
+.rtcs-partner-card img { width: 96px; height: auto; }
+.rtcs-partner-name { font-size: 17px; font-weight: 800; color: var(--text-strong); }
+.rtcs-partner-role {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--rtc-blue-500); margin-top: 4px;
+}
+/* The rule is only as wide as the text it sits under — the card centres a
+   shrink-to-fit column, which is what the design shows. */
+.rtcs-partner-verified {
+  border-top: 1px solid var(--border-subtle); padding-top: 16px;
+  font-size: 12.5px; line-height: 1.6; color: var(--text-muted);
+}
+
+/* Hub: the icon tile and the partner pill share a row above the line title.
+   The 18px that used to sit under the tile moves to the row. */
+.rtcs-line-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.rtcs-line-head .rtcs-line-icon { margin-bottom: 0; }
+.rtcs-partner-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill); padding: 6px 14px 6px 8px;
+}
+.rtcs-partner-pill img { width: 22px; height: auto; }
+.rtcs-partner-pill span {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-body);
+}
+
 .rtcs-card {
   position: relative; display: flex; flex-direction: column;
   background: var(--surface-card); border: 1px solid var(--border-subtle);
