@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PartnershipBand from '../components/PartnershipBand.astro';
 import ColorBends from '../components/ColorBends.jsx';
+import GradualBlur from '../components/GradualBlur.jsx';
 ---
 
 <BaseLayout
@@ -128,16 +129,15 @@ import ColorBends from '../components/ColorBends.jsx';
   <!-- HERO — motion only -->
   <section class="hero hero-motion" id="home">
     {/* Hero background. The bands are drawn with alpha over the hero's own
-        static gradient, so the surface stays light and the published headline
-        keeps its contrast. client:idle rather than client:load: this is
+        dark brand mesh. client:idle rather than client:load: this is
         decoration, and the hero must not wait on React + three to paint. Until
-        it hydrates — and if WebGL is unavailable — the CSS gradient underneath
-        is what shows, which is why that gradient is a finished background in
-        its own right rather than a placeholder. */}
+        it hydrates — and if WebGL is unavailable — the mesh underneath is what
+        shows, which is why it is a finished background in its own right rather
+        than a placeholder. */}
     <ColorBends
       client:idle
       className="hero-bends"
-      colors={['#3992FF', '#AEE37B', '#7FB4FF']}
+      colors={['#3992FF', '#AEE37B', '#5864FF']}
       rotation={102}
       speed={0.13}
       scale={1.6}
@@ -147,7 +147,7 @@ import ColorBends from '../components/ColorBends.jsx';
       {/* Band coverage is 1 - exp(-bandWidth / exp(bandWidth * m)). At the
           default 6 that is ~0.01 once m reaches 1, so the bands only appear in
           small pockets and the hero read as flat. Around 3 spreads them into
-          something visible without turning the surface dark. */}
+          something visible. */}
       bandWidth={3.2}
       intensity={1.15}
       noise={0.04}
@@ -177,6 +177,27 @@ import ColorBends from '../components/ColorBends.jsx';
       </div>
     </div>
   </section>
+
+  {/* Scroll blur: a fixed band at the bottom of the viewport that softens
+      whatever is scrolling under it. target="page" makes it fixed, so its
+      place in the markup does not affect layout — it sits here, right after
+      the hero, only because that is where the scroll starts.
+
+      zIndex 1000 becomes 1100 for a page target. That is above the nav (100)
+      but the band is at the bottom, so they never meet; it stays below the
+      newsletter modal (9998) and the loader (100000), which is what keeps
+      those from being blurred while they are open. */}
+  <GradualBlur
+    client:idle
+    target="page"
+    position="bottom"
+    height="5.5rem"
+    strength={2}
+    divCount={5}
+    curve="bezier"
+    exponential
+    opacity={1}
+  />
 
   <!-- STATS -->
   <div class="stats-bar">

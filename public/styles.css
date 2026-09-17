@@ -1706,17 +1706,23 @@ html.preloaded .loader{ display:none; }
 .hero.hero-motion{
   display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
   grid-template-columns:none; padding:130px 8% 90px;
-  /* This is the hero's real background, not a placeholder. The ColorBends
-     island draws with alpha on top of it, so it is what shows before the
-     island hydrates, if WebGL is unavailable, and through the bends everywhere
-     their coverage is low. Keeping the base pale is what preserves the
-     published headline's contrast. */
-  background:
-    radial-gradient(72% 58% at 16% 16%, rgba(57,146,255,.17) 0%, transparent 62%),
-    radial-gradient(62% 52% at 84% 10%, rgba(4,100,221,.12) 0%, transparent 65%),
-    radial-gradient(58% 48% at 64% 94%, rgba(174,227,123,.17) 0%, transparent 66%),
-    var(--off-white);
+  /* The hero's real background, not a placeholder: the brand mesh the service
+     heroes already use. ColorBends draws with alpha on top of it, so this is
+     what shows before the island hydrates, when WebGL is unavailable, and
+     through the bends wherever their coverage is low. */
+  background:var(--rtc-gradient-mesh);
+  background-color:#00050f;
 }
+
+/* Going dark means every published text colour in this hero has to be
+   restated — they were all chosen for a near-white surface, and navy body copy
+   on navy is invisible. These are the same values the service-line heroes use
+   on the same mesh, so the two now match. */
+.hero.hero-motion .hero-eyebrow{ color:var(--rtc-green-400); }
+.hero.hero-motion .hero-eyebrow::before{ background:var(--rtc-green-400); }
+.hero.hero-motion .hero-sub1{ color:#fff; }
+.hero.hero-motion .hero-p{ color:rgba(255,255,255,.82); }
+.hero.hero-motion .hero-scroll{ color:rgba(255,255,255,.6); }
 .hero.hero-motion::before, .hero.hero-motion::after{ display:none; } /* drop the radial glows */
 
 .hero.hero-motion .hero-left{ position:relative; z-index:2; padding-right:0; max-width:min(940px,94%); }
@@ -1837,8 +1843,12 @@ html.preloaded .loader{ display:none; }
 /* ============================================================
    HERO HEADLINE — extra motion (gradient sheen + float + 3D entrance)
    ============================================================ */
+/* The headline is a clipped gradient. Its published stops run navy to azure,
+   which on the dark mesh is navy-on-navy at both ends — the word would lose
+   its first and last letters. These stops keep the same left-to-right sweep
+   but in the light half of the brand ramp. */
 .hero-motion .hero-h1 .ln > span{
-  background-image:linear-gradient(100deg,var(--navy) 0%,var(--core-blue) 30%,var(--azure) 46%,var(--core-blue) 60%,var(--navy) 100%);
+  background-image:linear-gradient(100deg,#ffffff 0%,#cfe2ff 26%,var(--azure) 46%,#cfe2ff 66%,#ffffff 100%);
   background-size:230% auto; background-position:0% center;
   -webkit-background-clip:text; background-clip:text;
   -webkit-text-fill-color:transparent; color:transparent;
@@ -1846,7 +1856,7 @@ html.preloaded .loader{ display:none; }
   transform-origin:top center; will-change:transform, background-position, translate;
 }
 .hero-motion .hero-h1 .ln > span.ac{
-  background-image:linear-gradient(100deg,var(--core-blue) 0%,var(--azure) 34%,var(--green) 52%,var(--azure) 70%,var(--core-blue) 100%);
+  background-image:linear-gradient(100deg,var(--azure) 0%,#bfe8ff 30%,var(--green) 52%,#bfe8ff 72%,var(--azure) 100%);
 }
 /* richer entrance: rise + 3D flip + blur */
 .reveal-lines.anim .ln > span{ transform:translateY(114%) rotateX(-50deg); filter:blur(5px); }
