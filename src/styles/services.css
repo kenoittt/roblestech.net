@@ -223,6 +223,30 @@
   color: var(--text-body);
 }
 
+/* ───────────── sticker band (GEO, bottom-most) ─────────────
+   The stage is the sticker's drag bounds. It must generate a box and have a
+   real height, because .draggable is absolutely positioned — with an auto
+   height the stage would collapse and there would be nowhere to drag. */
+.rtcs-sticker-band { padding: 64px 0 76px; }
+.rtcs-sticker-stage {
+  position: relative; height: 320px; margin-top: 24px;
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(4, 100, 221, 0.07), transparent 70%),
+    var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+/* The sticker starts near the middle rather than pinned to the stage's
+   top-left corner, which is where an absolutely positioned box with auto
+   offsets would otherwise sit. */
+.rtcs-sticker-stage .sticker-draggable { top: 58px; left: calc(50% - 85px); }
+
+@media (max-width: 640px) {
+  .rtcs-sticker-stage { height: 270px; }
+  .rtcs-sticker-stage .sticker-draggable { top: 44px; }
+}
+
 .rtcs-card {
   position: relative; display: flex; flex-direction: column;
   background: var(--surface-card); border: 1px solid var(--border-subtle);

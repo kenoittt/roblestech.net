@@ -19,6 +19,7 @@
   "dependencies": {
     "@astrojs/react": "^6.0.6",
     "bootstrap": "^5.3.8",
+    "gsap": "^3.15.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.185.1"

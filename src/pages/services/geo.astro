@@ -1,6 +1,7 @@
 ---
 import ServiceLayout from '../../layouts/ServiceLayout.astro';
 import SopStepper from '../../components/SopStepper.astro';
+import StickerPeel from '../../components/StickerPeel.jsx';
 
 /*
  * Service Line 01 — GEO + SEO. The flagship page.
@@ -440,6 +441,32 @@ const serviceSchema = {
           <h4>Read the published client work →</h4>
           <p>Posts we have produced and published under the per-post SOP on this page.</p>
         </a>
+      </div>
+    </div>
+  </section>
+
+  {/* Bottom-most band: a draggable RTC sticker. The island is client:visible,
+      so React and GSAP only download once someone scrolls this far — the rest
+      of the page, and every other page, still ships no JavaScript for it.
+      .rtcs-sticker-stage is the drag bounds: it is the nearest ancestor of the
+      sticker that generates a box, and it has an explicit height so there is
+      somewhere to drag to. */}
+  <section class="rtcs-band-page rtcs-sticker-band" slot="bottom">
+    <div class="rtcs-wrap rtcs-center">
+      <div class="rtcs-eyebrow">One More Thing</div>
+      <h2 class="rtcs-h2">Peel It. Drag It. Keep It.</h2>
+      <p class="rtcs-lead" style="margin-left:auto;margin-right:auto;">The same attention we put into a citation goes into everything else. Go on, pick it up.</p>
+      <div class="rtcs-sticker-stage">
+        <StickerPeel
+          client:visible
+          imageSrc="/rtc-sticker.png"
+          width={170}
+          rotate={12}
+          peelBackHoverPct={22}
+          peelBackActivePct={38}
+          shadowIntensity={0.5}
+          lightingIntensity={0.12}
+        />
       </div>
     </div>
   </section>
