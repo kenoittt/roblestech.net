@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PartnershipBand from '../components/PartnershipBand.astro';
 import ColorBends from '../components/ColorBends.jsx';
 import GradualBlur from '../components/GradualBlur.jsx';
+import GradientText from '../components/GradientText.jsx';
 ---
 
 <BaseLayout
@@ -164,11 +165,31 @@ import GradualBlur from '../components/GradualBlur.jsx';
     <div class="hero-motion-grid">
       <div class="hero-left">
         <span class="hero-eyebrow">GEO · Technical Consulting · Smartsheet · Automations · Web3</span>
-        <p class="hero-h1 reveal-lines">
-          <span class="ln"><span>REDESIGN.</span></span>
-          <span class="ln"><span class="ac">REINVENT.</span></span>
-          <span class="ln"><span>REFOCUS.</span></span>
-        </p>
+        {/* The tagline's colour is now one animated gradient swept across all
+            three lines by GradientText, rather than three separately clipped
+            gradients with a CSS sheen. It is a <div>, not the <p> it was:
+            GradientText renders a div, and a div inside a p is invalid markup
+            that browsers fix by closing the p early — which would have broken
+            the whole block. The <h1> for this page is the visually-hidden one
+            above, so nothing semantic is lost.
+
+            One island, not three: the three .ln spans are passed in as
+            children, so the gradient is continuous across the tagline and the
+            per-line reveal still works on the spans inside. */}
+        <div class="hero-h1 reveal-lines">
+          <GradientText
+            client:load
+            className="hero-h1-grad"
+            colors={['#ffffff', '#bfe0ff', '#AEE37B', '#bfe0ff', '#ffffff']}
+            animationSpeed={9}
+            direction="horizontal"
+            yoyo={false}
+          >
+            <span class="ln"><span>REDESIGN.</span></span>
+            <span class="ln"><span class="ac">REINVENT.</span></span>
+            <span class="ln"><span>REFOCUS.</span></span>
+          </GradientText>
+        </div>
       </div>
       <div class="hero-aside">
         <p class="hero-sub1">Build Faster. Scale Smarter.</p>

@@ -1854,39 +1854,55 @@ html.preloaded .loader{ display:none; }
 /* ============================================================
    HERO HEADLINE — extra motion (gradient sheen + float + 3D entrance)
    ============================================================ */
-/* The headline is a clipped gradient. Its published stops run navy to azure,
-   which on the dark mesh is navy-on-navy at both ends — the word would lose
-   its first and last letters. These stops keep the same left-to-right sweep
-   but in the light half of the brand ramp. */
-.hero-motion .hero-h1 .ln > span{
-  background-image:linear-gradient(100deg,#ffffff 0%,#e4efff 26%,#a9d0ff 46%,#e4efff 66%,#ffffff 100%);
-  /* The bands now run at full strength behind the headline. Two things keep it
-     readable: the gradient's darkest stop is a light tint rather than azure —
-     azure measured 1.00:1 against a band of almost exactly its own luminance,
-     which made those letters disappear — and the drop-shadow gives every glyph
-     an edge against whatever passes behind it. drop-shadow rather than
-     text-shadow because the fill is transparent for background-clip, and a
-     text-shadow would show through the letters instead of haloing them. */
-  filter:drop-shadow(0 2px 12px rgba(0,5,15,.55));
-  background-size:230% auto; background-position:0% center;
-  -webkit-background-clip:text; background-clip:text;
-  -webkit-text-fill-color:transparent; color:transparent;
-  transition:transform .95s cubic-bezier(.16,1,.3,1), filter .8s ease, scale .3s ease;
-  transform-origin:top center; will-change:transform, background-position, translate;
+/* The tagline's colour comes from the GradientText island now: one gradient
+   clipped to all three lines and swept horizontally. What stays here is
+   everything the component does not do — the line-by-line entrance, and the
+   drop-shadow that keeps the type readable where a band passes behind it.
+
+   The component's own stylesheet shapes a small pill badge: centred,
+   fit-content, rounded, backdrop-blurred, pointer cursor, font-weight 500,
+   overflow hidden. Every one of those is wrong for a hero headline, and
+   overflow:hidden in particular would clip the entrance animation. They are
+   overridden here rather than by editing the component, so it stays reusable
+   as published. */
+.hero-h1-grad.animated-gradient-text{
+  margin:0; max-width:none; display:block;
+  border-radius:0; font-weight:inherit;
+  backdrop-filter:none; -webkit-backdrop-filter:none;
+  overflow:visible; cursor:inherit;
 }
+/* The readability halo lives on .text-content, the same element that owns the
+   clipped gradient, so the filter applies to the already-clipped result. It
+   cannot live on the line spans: a filter there promotes each span to its own
+   layer and the ancestor's text clip stops reaching it — the tagline rendered
+   completely invisible, 0% ink. */
+.hero-h1-grad .text-content{
+  display:block;
+  filter:drop-shadow(0 2px 12px rgba(0,5,15,.55));
+}
+/* No will-change here. It was the first thing that broke the clip: promoting
+   the spans to their own layers left nothing for the ancestor's gradient to
+   paint through. The entrance runs once, so there is nothing to hint anyway. */
+.hero-motion .hero-h1 .ln > span{
+  display:inline-block;
+  transition:transform .95s cubic-bezier(.16,1,.3,1), filter .8s ease, scale .3s ease;
+  transform-origin:top center;
+}
+/* The accent line used to paint solid core-blue. Under the shared gradient
+   that colour covered the sweep on REINVENT and, on the dark hero, sat at poor
+   contrast — it inherits the transparent fill now so the gradient shows. */
 .hero-motion .hero-h1 .ln > span.ac{
-  background-image:linear-gradient(100deg,#bfe0ff 0%,#dff4ff 30%,var(--green) 52%,#dff4ff 72%,#bfe0ff 100%);
+  color:inherit; -webkit-text-fill-color:inherit; background-image:none;
 }
 /* richer entrance: rise + 3D flip + blur */
 .reveal-lines.anim .ln > span{ transform:translateY(114%) rotateX(-50deg); filter:blur(5px); }
-.reveal-lines.anim.in .ln > span{ transform:none; filter:blur(0); }
-/* continuous sheen sweep + gentle float once revealed */
-/* Colour sheen only — no idle floating (keeps the periods from being clipped) */
-.reveal-lines.in .ln > span{ animation:heroSheen 7s linear infinite; }
+.reveal-lines.anim.in .ln > span{ transform:none; filter:none; }
 .hero-motion .hero-h1 .ln > span:hover{ scale:1.05; }
-@keyframes heroSheen{ from{ background-position:0% center; } to{ background-position:230% center; } }
+/* heroSheen removed with the CSS sheen it drove — GradientText sweeps the
+   tagline's gradient now. */
 @media (prefers-reduced-motion:reduce){
-  .reveal-lines.in .ln > span{ animation:none !important; }
+  /* The tagline's sweep is paused by GradientText itself under reduced
+     motion; there is no CSS animation left here to cancel. */
 }
 
 /* ============================================================
