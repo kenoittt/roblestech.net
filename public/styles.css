@@ -1558,6 +1558,12 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    reusable as published. */
 .nav-cta-star.star-border-container{
   border-radius:999px; text-decoration:none; line-height:1; flex-shrink:0;
+  /* The ring needs its own dark base. Left transparent it shows the light
+     glass nav through it, and a highlight travelling over a near-white rim has
+     nothing to contrast with — it read as a pale haze at the corners rather
+     than a moving star. Navy is the same rim the component gets from its own
+     #000/#222 defaults, in the site's palette. */
+  background:var(--navy);
 }
 .nav-cta-star .inner-content{
   border-radius:999px; padding:10px 22px;
@@ -1565,12 +1571,31 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
   border-width:1px; border-style:solid;
   white-space:nowrap;
 }
-/* The sweep is a radial highlight that rides along the top and bottom edges.
-   The component sizes it at 300% width and parks it off to one side; at the
-   nav's much smaller pill that reads as a bright smear rather than a moving
-   star, so it is toned down here. */
+/* The highlight can only show in the gap between the container and the inner
+   surface — that is what `thickness` buys. At thickness 1 that gap is a single
+   pixel, and a 1px lime line on a blue fill is invisible at normal viewing
+   distance no matter how bright it is. The ring is 3px now, and the glow runs
+   at full opacity and full height so it actually fills it. An earlier version
+   dimmed it to .55 on the strength of how a still screenshot looked, which was
+   exactly the wrong read. */
+/* height stays at the component's 50%. Raising it to 100% moved the
+   gradient's centre — the only part that is solid colour — down behind the
+   opaque button surface, and the ring went back to showing nothing but the
+   faint outer falloff. The offsets below aim that centre at the 3px ring
+   instead of at the much taller button the component was drawn for. */
 .nav-cta-star .border-gradient-top,
-.nav-cta-star .border-gradient-bottom{ opacity:.55; height:70%; }
+.nav-cta-star .border-gradient-bottom{ opacity:1; }
+.nav-cta-star .border-gradient-top{ top:-8px; }
+.nav-cta-star .border-gradient-bottom{ bottom:-8px; }
+/* The glow is an ellipse 300% of the button's width whose gradient is solid
+   only for its first 10% — on a 136px pill that lime core is a spot barely
+   20px across inside a 409px shape, which is why the sweep read as a haze
+   rather than a star. Scaling the ellipse down to roughly the button's own
+   width makes the same 10% core large enough to see. The offsets move with it:
+   each one parks the ellipse just outside one edge so the keyframes still
+   carry it all the way across. */
+.nav-cta-star .border-gradient-top{ width:140%; left:-120%; }
+.nav-cta-star .border-gradient-bottom{ width:140%; right:-120%; }
 
 /* Hero background layer (the ColorBends island). pointer-events:none so the
    headline and buttons above it stay clickable — the effect tracks the pointer
@@ -1918,7 +1943,12 @@ html.preloaded .loader{ display:none; }
 /* richer entrance: rise + 3D flip + blur */
 .reveal-lines.anim .ln > span{ transform:translateY(114%) rotateX(-50deg); filter:blur(5px); }
 .reveal-lines.anim.in .ln > span{ transform:none; filter:none; }
-.hero-motion .hero-h1 .ln > span:hover{ scale:1.05; }
+/* No hover scale. `scale` is a transform, and a transform on these spans
+   promotes each one to its own layer — at which point the ancestor's
+   background-clip:text no longer reaches it and the word vanishes under the
+   cursor. Same mechanism as the will-change that made the whole tagline
+   invisible. The gradient sweep is the tagline's motion now; it does not need
+   a hover effect, and it cannot have this one. */
 /* heroSheen removed with the CSS sheen it drove — GradientText sweeps the
    tagline's gradient now. */
 @media (prefers-reduced-motion:reduce){
