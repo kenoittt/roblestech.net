@@ -223,28 +223,41 @@
   color: var(--text-body);
 }
 
-/* ───────────── sticker band (GEO, bottom-most) ─────────────
-   The stage is the sticker's drag bounds. It must generate a box and have a
-   real height, because .draggable is absolutely positioned — with an auto
-   height the stage would collapse and there would be nowhere to drag. */
-.rtcs-sticker-band { padding: 64px 0 76px; }
-.rtcs-sticker-stage {
-  position: relative; height: 320px; margin-top: 24px;
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(60% 80% at 50% 0%, rgba(4, 100, 221, 0.07), transparent 70%),
-    var(--surface-sunken);
-  border: 1px solid var(--border-subtle);
-  overflow: hidden;
-}
-/* The sticker starts near the middle rather than pinned to the stage's
-   top-left corner, which is where an absolutely positioned box with auto
-   offsets would otherwise sit. */
-.rtcs-sticker-stage .sticker-draggable { top: 58px; left: calc(50% - 85px); }
+/* ───────────── GEO sticker ─────────────
+   Sits on the left of the closing band and can be dragged anywhere on the
+   page. Three things have to line up for that:
 
-@media (max-width: 640px) {
-  .rtcs-sticker-stage { height: 270px; }
-  .rtcs-sticker-stage .sticker-draggable { top: 44px; }
+   1. The band stops clipping. .rtcs-mesh sets overflow:hidden, which would
+      shear the sticker off the moment it left the band. The ::before pattern
+      is inset:0, so it never overflowed and nothing else needed the clip.
+   2. The selector carries two classes. .rtcs-mesh > * sets position:relative
+      and z-index:1 at one class — a single-class rule here would tie and lose
+      on source order, and the sticker would stop being absolutely positioned.
+   3. Placement is top/left only, never transform. GSAP owns the transform
+      while dragging and would overwrite it. */
+.rtcs-mesh.rtcs-closing-open { overflow: visible; }
+.sticker-draggable.rtcs-geo-sticker {
+  position: absolute;
+  top: calc(50% - 95px);
+  left: 6%;
+  z-index: 40;
+}
+
+/* Narrow screens: the band's centred text and its two stacked CTAs use the
+   full width, so there is no free corner to tuck into — the sticker landed on
+   top of the "See All Service Lines" button. The band gets extra bottom
+   padding on this page only, and the sticker sits in that new space at a
+   smaller size.
+
+   Both selectors carry two classes deliberately. The responsive
+   `.rtcs-band { padding: 58px 0 }` further down this file would otherwise tie
+   on specificity and win on source order, taking the extra padding away; and
+   the component sizes its art from a one-class rule. */
+@media (max-width: 900px) {
+  .rtcs-band.rtcs-closing-open { padding-bottom: 170px; }
+  .sticker-draggable.rtcs-geo-sticker { top: auto; bottom: 16px; left: 16px; }
+  .rtcs-geo-sticker .sticker-image,
+  .rtcs-geo-sticker .sticker-flap-image { width: 96px; }
 }
 
 .rtcs-card {

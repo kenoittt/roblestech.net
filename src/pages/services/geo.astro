@@ -445,29 +445,21 @@ const serviceSchema = {
     </div>
   </section>
 
-  {/* Bottom-most band: a draggable RTC sticker. The island is client:visible,
-      so React and GSAP only download once someone scrolls this far — the rest
-      of the page, and every other page, still ships no JavaScript for it.
-      .rtcs-sticker-stage is the drag bounds: it is the nearest ancestor of the
-      sticker that generates a box, and it has an explicit height so there is
-      somewhere to drag to. */}
-  <section class="rtcs-band-page rtcs-sticker-band" slot="bottom">
-    <div class="rtcs-wrap rtcs-center">
-      <div class="rtcs-eyebrow">One More Thing</div>
-      <h2 class="rtcs-h2">Peel It. Drag It. Keep It.</h2>
-      <p class="rtcs-lead" style="margin-left:auto;margin-right:auto;">The same attention we put into a citation goes into everything else. Go on, pick it up.</p>
-      <div class="rtcs-sticker-stage">
-        <StickerPeel
-          client:visible
-          imageSrc="/rtc-sticker.png"
-          width={170}
-          rotate={12}
-          peelBackHoverPct={22}
-          peelBackActivePct={38}
-          shadowIntensity={0.5}
-          lightingIntensity={0.12}
-        />
-      </div>
-    </div>
-  </section>
+  {/* A draggable RTC sticker stuck to the left of the closing band. It is
+      absolutely positioned inside that band, but its drag bounds are the whole
+      document, so it can be carried anywhere on the page. client:visible means
+      React and GSAP only download once the band is scrolled into view. */}
+  <StickerPeel
+    slot="closing-extra"
+    client:visible
+    className="rtcs-geo-sticker"
+    bounds="page"
+    imageSrc="/rtc-sticker.png"
+    width={150}
+    rotate={-8}
+    peelBackHoverPct={22}
+    peelBackActivePct={38}
+    shadowIntensity={0.5}
+    lightingIntensity={0.12}
+  />
 </ServiceLayout>

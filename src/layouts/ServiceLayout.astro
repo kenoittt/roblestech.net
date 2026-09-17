@@ -109,7 +109,11 @@ const faqSchema = faqs.length
   )}
 
   <!-- CLOSING CTA -->
-  <section class="rtcs-band rtcs-mesh">
+  {/* A page putting something in `closing-extra` is overlaying the band with
+      an absolutely positioned element, so the band must stop clipping — the
+      overflow:hidden it inherits from .rtcs-mesh would cut it off. */}
+  <section class={`rtcs-band rtcs-mesh${Astro.slots.has('closing-extra') ? ' rtcs-closing-open' : ''}`}>
+    <slot name="closing-extra" />
     <div class="rtcs-wrap rtcs-center">
       <h2 class="rtcs-h2" style="color:#fff;">{closingH2}</h2>
       <p class="rtcs-lead" style="color:rgba(255,255,255,.78);">{closingText}</p>
@@ -119,7 +123,4 @@ const faqSchema = faqs.length
       </div>
     </div>
   </section>
-
-  <!-- Anything a page wants below the closing CTA, above the footer. -->
-  <slot name="bottom" />
 </BaseLayout>

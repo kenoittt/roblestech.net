@@ -21,7 +21,16 @@ import './StickerPeel.css';
  *      an element that generates no box, so its getBoundingClientRect is not a
  *      usable bounding area and Draggable would confine the sticker to nothing.
  *      boundsFor() walks up to the nearest ancestor that actually generates a
- *      box, which is the real section either way.
+ *      box, which is the real section either way. Passing bounds="page" instead
+ *      confines it to the whole document.
+ *
+ *      "page" computes explicit min/max numbers rather than handing Draggable
+ *      document.body. Given the body element, Draggable resolved the bounds
+ *      against the sticker's offsetParent and clamped it to translateY(-6909)
+ *      on init — it teleported to the top of the document the moment it
+ *      hydrated. The numbers below are measured from the document directly and
+ *      are subtracted from the element's untranslated origin, so recomputing
+ *      them mid-drag does not shift anything.
  *
  *   3. Its two unprefixed class names, .draggable and .flap, are now
  *      .sticker-draggable and .sticker-flap. Vite bundles this stylesheet into
@@ -42,6 +51,25 @@ const boundsFor = (el) => {
   return p || el.parentElement;
 };
 
+/* Explicit drag limits covering the whole document, in the element's own
+   translate space. The current translate is backed out first so the element's
+   untranslated origin is what the limits are measured from — otherwise every
+   recomputation would drift by however far it had already been dragged. */
+const pageBounds = (el) => {
+  const r = el.getBoundingClientRect();
+  const doc = document.documentElement;
+  const x = Number(gsap.getProperty(el, 'x')) || 0;
+  const y = Number(gsap.getProperty(el, 'y')) || 0;
+  const originLeft = r.left + window.scrollX - x;
+  const originTop = r.top + window.scrollY - y;
+  return {
+    minX: -originLeft,
+    maxX: doc.scrollWidth - originLeft - r.width,
+    minY: -originTop,
+    maxY: doc.scrollHeight - originTop - r.height
+  };
+};
+
 const StickerPeel = ({
   imageSrc,
   rotate = 30,
@@ -54,6 +82,7 @@ const StickerPeel = ({
   lightingIntensity = 0.1,
   initialPosition = 'center',
   peelDirection = 0,
+  bounds = '',
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -85,11 +114,11 @@ const StickerPeel = ({
 
   useEffect(() => {
     const target = dragTargetRef.current;
-    const boundsEl = boundsFor(target);
+    const usePage = bounds === 'page';
 
     draggableInstanceRef.current = Draggable.create(target, {
       type: 'x,y',
-      bounds: boundsEl,
+      bounds: usePage ? pageBounds(target) : boundsFor(target),
       inertia: true,
       onDrag() {
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
@@ -102,31 +131,16 @@ const StickerPeel = ({
       }
     })[0];
 
+    /* Re-measure on resize. The published version clamped x and y to >= 0,
+       which assumes the bounds start at the element's own origin; with page
+       bounds the minimums are negative, so that clamp would yank the sticker
+       back toward the band on any resize. Handing Draggable fresh bounds lets
+       it do the clamping correctly in both modes. */
     const handleResize = () => {
-      if (draggableInstanceRef.current) {
-        draggableInstanceRef.current.update();
-
-        const currentX = gsap.getProperty(target, 'x');
-        const currentY = gsap.getProperty(target, 'y');
-
-        const boundsRect = boundsEl.getBoundingClientRect();
-        const targetRect = target.getBoundingClientRect();
-
-        const maxX = boundsRect.width - targetRect.width;
-        const maxY = boundsRect.height - targetRect.height;
-
-        const newX = Math.max(0, Math.min(currentX, maxX));
-        const newY = Math.max(0, Math.min(currentY, maxY));
-
-        if (newX !== currentX || newY !== currentY) {
-          gsap.to(target, {
-            x: newX,
-            y: newY,
-            duration: 0.3,
-            ease: 'power2.out'
-          });
-        }
-      }
+      const d = draggableInstanceRef.current;
+      if (!d) return;
+      if (usePage) d.applyBounds(pageBounds(target));
+      else d.update(true);
     };
 
     window.addEventListener('resize', handleResize);
@@ -139,7 +153,7 @@ const StickerPeel = ({
         draggableInstanceRef.current.kill();
       }
     };
-  }, []);
+  }, [bounds]);
 
   useEffect(() => {
     const updateLight = e => {
