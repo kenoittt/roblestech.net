@@ -51,23 +51,43 @@ const boundsFor = (el) => {
   return p || el.parentElement;
 };
 
-/* Explicit drag limits covering the whole document, in the element's own
-   translate space. The current translate is backed out first so the element's
-   untranslated origin is what the limits are measured from — otherwise every
-   recomputation would drift by however far it had already been dragged. */
-const pageBounds = (el) => {
+/* Keep the element inside the document, measured in document coordinates.
+ *
+ * Draggable's own `bounds` is not used for this. Two forms were tried against
+ * the real page and neither landed where its documentation implies: passing
+ * document.body pinned the sticker to translateY(-6909) on init, and passing
+ * {top,left,width,height} in the offsetParent's space clamped a consistent
+ * 462px lower than asked — recomputing on press did not change it, so it was
+ * not a layout-timing problem but a coordinate space I could not pin down.
+ *
+ * Clamping here instead costs a getBoundingClientRect per drag frame and every
+ * number in it can be checked: the element's document position against the
+ * document's own scroll size. topInset holds a strip at the top out of reach so
+ * the sticker cannot be parked under the floating nav and show through its
+ * glass; it still scrolls past the nav like any other page content.
+ */
+const clampToPage = (el, topInset = 0) => {
   const r = el.getBoundingClientRect();
   const doc = document.documentElement;
-  const x = Number(gsap.getProperty(el, 'x')) || 0;
-  const y = Number(gsap.getProperty(el, 'y')) || 0;
-  const originLeft = r.left + window.scrollX - x;
-  const originTop = r.top + window.scrollY - y;
-  return {
-    minX: -originLeft,
-    maxX: doc.scrollWidth - originLeft - r.width,
-    minY: -originTop,
-    maxY: doc.scrollHeight - originTop - r.height
-  };
+  const top = r.top + window.scrollY;
+  const left = r.left + window.scrollX;
+  const maxTop = Math.max(topInset, doc.scrollHeight - r.height);
+  const maxLeft = Math.max(0, doc.scrollWidth - r.width);
+
+  let dy = 0;
+  if (top < topInset) dy = topInset - top;
+  else if (top > maxTop) dy = maxTop - top;
+
+  let dx = 0;
+  if (left < 0) dx = -left;
+  else if (left > maxLeft) dx = maxLeft - left;
+
+  if (dx || dy) {
+    gsap.set(el, {
+      x: (Number(gsap.getProperty(el, 'x')) || 0) + dx,
+      y: (Number(gsap.getProperty(el, 'y')) || 0) + dy
+    });
+  }
 };
 
 const StickerPeel = ({
@@ -83,6 +103,7 @@ const StickerPeel = ({
   initialPosition = 'center',
   peelDirection = 0,
   bounds = '',
+  topInset = 0,
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -118,11 +139,15 @@ const StickerPeel = ({
 
     draggableInstanceRef.current = Draggable.create(target, {
       type: 'x,y',
-      bounds: usePage ? pageBounds(target) : boundsFor(target),
+      bounds: usePage ? undefined : boundsFor(target),
       inertia: true,
       onDrag() {
+        if (usePage) clampToPage(target, topInset);
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
         gsap.to(target, { rotation: rot, duration: 0.15, ease: 'power1.out' });
+      },
+      onThrowUpdate() {
+        if (usePage) clampToPage(target, topInset);
       },
       onDragEnd() {
         const rotationEase = 'power2.out';
@@ -139,7 +164,7 @@ const StickerPeel = ({
     const handleResize = () => {
       const d = draggableInstanceRef.current;
       if (!d) return;
-      if (usePage) d.applyBounds(pageBounds(target));
+      if (usePage) clampToPage(target, topInset);
       else d.update(true);
     };
 
@@ -153,7 +178,7 @@ const StickerPeel = ({
         draggableInstanceRef.current.kill();
       }
     };
-  }, [bounds]);
+  }, [bounds, topInset]);
 
   useEffect(() => {
     const updateLight = e => {
