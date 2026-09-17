@@ -79,11 +79,7 @@ const faqSchema = faqs.length
     </div>
     <span class="sec-tag rv d1">{eyebrow}</span>
     <h1 class="sec-h rv d2" set:html={h1} />
-    {subEyebrow && (
-      <div class="rv d2" style="font-family:'League Spartan',system-ui,sans-serif;font-weight:600;text-transform:uppercase;font-size:11.5px;letter-spacing:.16em;color:var(--rtc-green-400);margin:-6px 0 14px;">
-        {subEyebrow}
-      </div>
-    )}
+    {subEyebrow && <div class="rtcs-hero-sub rv d2">{subEyebrow}</div>}
     <p class="sec-p rv d3">{intro}</p>
     <div class="rtcs-cta-row rv d3" style="margin-top:30px;">
       <a href={ctaHref} class="rtcs-btn-action">{ctaLabel}<Arrow /></a>

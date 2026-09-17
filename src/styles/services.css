@@ -71,6 +71,19 @@
 .page-hero.rtcs-mesh .sec-p {
   color: rgba(255, 255, 255, 0.82); max-width: 660px; margin: 20px 0 0;
 }
+/* The second, quieter eyebrow that sits UNDER the H1 — only Smartsheet's hero
+   uses one. This was an inline style in ServiceLayout carrying margin:-6px,
+   which pulled the label's box 6px up into the H1's. .sec-h runs line-height
+   1.1, so the heading's descenders already reach the bottom of its box, and
+   the label ended up touching the "p" and "g" of "Operations Engine". 14px is
+   the gap the eyebrow above the H1 uses, so the two now read as a pair. */
+.rtcs-hero-sub {
+  font-family: 'League Spartan', system-ui, sans-serif;
+  font-weight: 600; text-transform: uppercase;
+  font-size: 11.5px; letter-spacing: 0.16em;
+  color: var(--rtc-green-400);
+  margin: 14px 0;
+}
 
 /* Hub only: the one hero the design centres, at its own larger H1 size.
    These carry the full .page-hero.rtcs-mesh prefix on purpose. The left-aligned
