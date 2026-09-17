@@ -1551,6 +1551,27 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    ============================================================ */
 
 /* WebGL fluid canvas inside .hero (sits above ::before glows, below content) */
+/* Header CTA (StarBorder). The component's stylesheet shapes a large dark
+   20px-radius button, 16px type, 16px/26px padding. The nav needs the site's
+   pill: 999px radius, the nav's own type scale, and the compact padding the
+   old .nav-cta used. Overridden here rather than in the component so it stays
+   reusable as published. */
+.nav-cta-star.star-border-container{
+  border-radius:999px; text-decoration:none; line-height:1; flex-shrink:0;
+}
+.nav-cta-star .inner-content{
+  border-radius:999px; padding:10px 22px;
+  font-size:0.82rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  border-width:1px; border-style:solid;
+  white-space:nowrap;
+}
+/* The sweep is a radial highlight that rides along the top and bottom edges.
+   The component sizes it at 300% width and parks it off to one side; at the
+   nav's much smaller pill that reads as a bright smear rather than a moving
+   star, so it is toned down here. */
+.nav-cta-star .border-gradient-top,
+.nav-cta-star .border-gradient-bottom{ opacity:.55; height:70%; }
+
 /* Hero background layer (the ColorBends island). pointer-events:none so the
    headline and buttons above it stay clickable — the effect tracks the pointer
    on the window instead.
