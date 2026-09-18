@@ -1551,51 +1551,62 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    ============================================================ */
 
 /* WebGL fluid canvas inside .hero (sits above ::before glows, below content) */
-/* Header CTA (StarBorder). The component's stylesheet shapes a large dark
-   20px-radius button, 16px type, 16px/26px padding. The nav needs the site's
-   pill: 999px radius, the nav's own type scale, and the compact padding the
-   old .nav-cta used. Overridden here rather than in the component so it stays
-   reusable as published. */
-.nav-cta-star.star-border-container{
+/* Star-border buttons — the nav CTA and the two hero CTAs.
+ *
+ * Seamless: the ring carries the SAME fill as the button surface and the inner
+ * border is removed, so there is no bezel. The button reads as one solid pill
+ * and the only thing the ring shows is the highlight travelling over it. An
+ * earlier version gave the ring a contrasting navy base, which made it read as
+ * a chunky dark outline around the button rather than part of it.
+ *
+ * The highlight is white, not the brand lime. It has to show over the button's
+ * own blue now that the ring is no longer a dark strip, and lime on blue is
+ * too close in luminance to register.
+ *
+ * The component's stylesheet shapes a large dark 20px-radius button with 16px
+ * type. All of that is overridden here rather than in the component, so it
+ * stays reusable as published. */
+.rtc-star.star-border-container{
   border-radius:999px; text-decoration:none; line-height:1; flex-shrink:0;
-  /* The ring needs its own dark base. Left transparent it shows the light
-     glass nav through it, and a highlight travelling over a near-white rim has
-     nothing to contrast with — it read as a pale haze at the corners rather
-     than a moving star. Navy is the same rim the component gets from its own
-     #000/#222 defaults, in the site's palette. */
-  background:var(--navy);
+  font-family:'Montserrat',sans-serif;
+  /* The ring's fill is set here, NOT through the component's `style` prop.
+     StarBorder spreads {...rest} AFTER its own style attribute, so any `style`
+     passed in replaces the merged object and takes the `padding: <thickness>px 0`
+     with it — the ring silently collapses to nothing. Verified in the built
+     HTML: the anchor came out with a background and no padding at all. */
+  background:linear-gradient(105deg,#0464DD 0%,#3992FF 50%,#0464DD 100%);
 }
-.nav-cta-star .inner-content{
-  border-radius:999px; padding:10px 22px;
-  font-size:0.82rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
-  border-width:1px; border-style:solid;
+/* The Contact page's darker CTA, the same thing contactSolid has always meant. */
+.nav-cta-star--solid.star-border-container{ background:var(--navy); }
+.rtc-star .inner-content{
+  border-radius:999px; border:0;
+  display:inline-flex; align-items:center; gap:10px;
   white-space:nowrap;
 }
-/* The highlight can only show in the gap between the container and the inner
-   surface — that is what `thickness` buys. At thickness 1 that gap is a single
-   pixel, and a 1px lime line on a blue fill is invisible at normal viewing
-   distance no matter how bright it is. The ring is 3px now, and the glow runs
-   at full opacity and full height so it actually fills it. An earlier version
-   dimmed it to .55 on the strength of how a still screenshot looked, which was
-   exactly the wrong read. */
-/* height stays at the component's 50%. Raising it to 100% moved the
-   gradient's centre — the only part that is solid colour — down behind the
-   opaque button surface, and the ring went back to showing nothing but the
-   faint outer falloff. The offsets below aim that centre at the 3px ring
-   instead of at the much taller button the component was drawn for. */
-.nav-cta-star .border-gradient-top,
-.nav-cta-star .border-gradient-bottom{ opacity:1; }
-.nav-cta-star .border-gradient-top{ top:-8px; }
-.nav-cta-star .border-gradient-bottom{ bottom:-8px; }
 /* The glow is an ellipse 300% of the button's width whose gradient is solid
-   only for its first 10% — on a 136px pill that lime core is a spot barely
-   20px across inside a 409px shape, which is why the sweep read as a haze
-   rather than a star. Scaling the ellipse down to roughly the button's own
-   width makes the same 10% core large enough to see. The offsets move with it:
-   each one parks the ellipse just outside one edge so the keyframes still
-   carry it all the way across. */
-.nav-cta-star .border-gradient-top{ width:140%; left:-120%; }
-.nav-cta-star .border-gradient-bottom{ width:140%; right:-120%; }
+   for only its first 10% — on a pill this size that core is a spot roughly
+   20px across inside a 400px shape, which is why the sweep first read as a
+   haze. Scaling the ellipse to about the button's own width makes the same
+   10% core large enough to see, and the offsets aim its centre at the ring
+   rather than at the much taller button the component was drawn for. Height
+   stays at the component's 50%: raising it moved the core down behind the
+   opaque surface. */
+.rtc-star .border-gradient-top,
+.rtc-star .border-gradient-bottom{ opacity:1; }
+.rtc-star .border-gradient-top{ width:140%; left:-120%; top:-8px; }
+.rtc-star .border-gradient-bottom{ width:140%; right:-120%; bottom:-8px; }
+
+/* Nav CTA: the nav's own compact type scale. */
+.nav-cta-star .inner-content{
+  padding:10px 22px;
+  font-size:0.82rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+}
+/* Hero CTAs: the site button base is 14px/700 at 11px 24px padding. */
+.hero-cta-star .inner-content{
+  padding:11px 24px; font-size:14px; font-weight:700;
+}
+.hero-cta-star .inner-content svg{ flex-shrink:0; }
+.hero-actions .rtc-star{ display:inline-block; }
 
 /* Hero background layer (the ColorBends island). pointer-events:none so the
    headline and buttons above it stay clickable — the effect tracks the pointer

@@ -4,6 +4,10 @@ import PartnershipBand from '../components/PartnershipBand.astro';
 import ColorBends from '../components/ColorBends.jsx';
 import GradualBlur from '../components/GradualBlur.jsx';
 import GradientText from '../components/GradientText.jsx';
+import StarBorder from '../components/StarBorder.jsx';
+/* The site's blue button fill, passed to both the surface and the ring so the
+   star border reads as part of the button rather than an outline around it. */
+const HERO_CTA_FILL = 'linear-gradient(105deg,#0464DD 0%,#3992FF 50%,#0464DD 100%)';
 ---
 
 <BaseLayout
@@ -194,11 +198,38 @@ import GradientText from '../components/GradientText.jsx';
       <div class="hero-aside">
         <p class="hero-sub1">Build Faster. Scale Smarter.</p>
         <p class="hero-p">We connect growing businesses with world-class IT professionals — delivering GEO, technical consulting, Smartsheet, automation, and Web3 solutions that remove bottlenecks and scale with you.</p>
+        {/* Both hero CTAs are StarBorders, same seamless treatment as the
+            nav's. No client:* directive — the component has no hooks and the
+            sweep is CSS keyframes, so these render to static HTML and the
+            homepage gains no JavaScript from them. The same fill goes to the
+            surface and, via `style`, to the ring behind it, so there is no
+            visible outline. */}
         <div class="hero-actions">
-          <a href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;" class="btn btn-blue">Book a Call
+          <StarBorder
+            as="a"
+            href=""
+            data-calendly="https://calendly.com/kenneth-roblestech/30min"
+            className="rtc-star hero-cta-star"
+            color="#ffffff"
+            speed="6s"
+            thickness={4}
+            backgroundColor={HERO_CTA_FILL}
+            textColor="#ffffff"
+            borderColor="transparent"
+          >Book a Call
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-          </a>
-          <a href="/services" class="btn btn-dark">View Services</a>
+          </StarBorder>
+          <StarBorder
+            as="a"
+            href="/services"
+            className="rtc-star hero-cta-star"
+            color="#ffffff"
+            speed="6s"
+            thickness={4}
+            backgroundColor={HERO_CTA_FILL}
+            textColor="#ffffff"
+            borderColor="transparent"
+          >View Services</StarBorder>
         </div>
       </div>
     </div>

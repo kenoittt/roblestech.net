@@ -151,3 +151,18 @@ if (typeof IntersectionObserver === 'undefined') {
   update();
 })();
 
+
+/* ---------- Calendly popup triggers ----------
+   Most CTAs call Calendly from an inline onclick. That is not available to
+   anything rendered through a React component: React's server render drops an
+   unrecognised lowercase `onclick`, so the attribute never reaches the HTML
+   and the button does nothing. Elements carrying data-calendly get the same
+   behaviour bound here instead. */
+document.addEventListener('click', (e) => {
+  const trigger = e.target.closest('[data-calendly]');
+  if (!trigger) return;
+  const url = trigger.getAttribute('data-calendly');
+  if (!url || typeof Calendly === 'undefined') return;
+  e.preventDefault();
+  Calendly.initPopupWidget({ url });
+});

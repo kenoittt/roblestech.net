@@ -15,9 +15,10 @@ const { active = '', contactSolid = false, inner = false } = Astro.props;
 /* The header CTA is a StarBorder. No client:* directive — the component has no
    hooks or effects and the sweep is pure CSS keyframes, so Astro renders it to
    static HTML and this nav still ships zero JavaScript on all twenty pages.
-   The fill keeps the site's blue button gradient (navy on the Contact page,
-   which is what contactSolid has always meant) and the travelling highlight is
-   the brand lime. */
+   The same fill is passed twice — once for the button surface and once, via
+   `style`, for the ring behind it — which is what makes the ring seamless
+   instead of a visible outline. Navy on the Contact page, which is what
+   contactSolid has always meant. */
 const ctaFill = contactSolid
   ? 'var(--navy)'
   : 'linear-gradient(105deg,#0464DD 0%,#3992FF 50%,#0464DD 100%)';
@@ -48,13 +49,13 @@ const isActive = (name: string) =>
       <StarBorder
         as="a"
         href="/contact"
-        className="nav-cta-star"
-        color="#AEE37B"
+        className={`rtc-star nav-cta-star${contactSolid ? ' nav-cta-star--solid' : ''}`}
+        color="#ffffff"
         speed="6s"
         thickness={4}
         backgroundColor={ctaFill}
         textColor="#ffffff"
-        borderColor="rgba(255,255,255,.28)"
+        borderColor="transparent"
       >Contact Us</StarBorder>
     </li>
   </ul>
