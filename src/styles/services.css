@@ -496,20 +496,16 @@
 
 /* ───────────── showcase frame ───────────── */
 .rtcs-show { max-width: 960px; margin: 34px auto 0; position: relative; }
-/* The showcase is clickable on GEO — it opens the live sample dashboard — so
-   it needs to look it: a pointer and a lift on hover. The label that used to
-   sit under it is gone; it was the only thing keeping the frame's flat bottom
-   off the bottom edge of the band it is designed to run into. */
+/* The showcase is clickable on GEO — it opens the live sample dashboard. The
+   hover lift is gone: the frame is meant to sit welded to the bottom of its
+   band, and translating it up on hover broke that seam every time the pointer
+   crossed it. The pointer cursor and the browser chrome carry the affordance
+   now, since the cue label went too.
+
+   No transition and no transform left here, so there is nothing for a
+   reduced-motion block to turn off. */
 .rtcs-show-link { display: block; text-decoration: none; cursor: pointer; }
-.rtcs-show-link .rtcs-frame {
-  transition: transform var(--dur-base) cubic-bezier(0.2, 0, 0, 1);
-}
-.rtcs-show-link:hover .rtcs-frame { transform: translateY(-4px); }
 .rtcs-show-link:focus-visible { outline: 2px solid var(--rtc-green-400); outline-offset: 6px; border-radius: var(--radius-lg); }
-@media (prefers-reduced-motion: reduce) {
-  .rtcs-show-link .rtcs-frame { transition: none; }
-  .rtcs-show-link:hover .rtcs-frame { transform: none; }
-}
 /* Sky glow behind the frame, so the screenshot sits in light rather than on
    a flat band. */
 .rtcs-show::before {
@@ -517,8 +513,14 @@
   background: radial-gradient(ellipse at center, rgba(57, 146, 255, 0.35), transparent 65%);
   filter: blur(30px); pointer-events: none;
 }
+/* The padding is what the rotating ring shows through — the inner panel covers
+   everything else. 2px on three sides and 0 at the bottom means the glow runs
+   along the top, left and right only, and the white screenshot reaches the
+   frame's bottom edge, which sits flush on the band's. Any bottom padding here
+   puts a 2px line of ring (blue when lit, dark mesh when not) between the
+   white and the section below. */
 .rtcs-frame {
-  position: relative; overflow: hidden; padding: 2px;
+  position: relative; overflow: hidden; padding: 2px 2px 0;
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 /* The rotating conic ring. The keyframes must keep the centring translate or
