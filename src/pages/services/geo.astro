@@ -215,11 +215,20 @@ const serviceSchema = {
         <div class="rtcs-partner-copy">
           <div class="rtcs-eyebrow">Official Partnership</div>
           <h2>Semrush Agency Partner</h2>
-          <p>RTC is an official Semrush Agency Partner. Every engagement runs on the same enterprise-grade data Semrush uses to track 26 billion keywords: rank tracking, backlink audits, competitor gaps and AI-visibility monitoring.</p>
+          {/* The "26 billion keywords" figure is gone. It was Semrush's number,
+              quoted second-hand and never sourced — and it was doing no work
+              here, since the point is what RTC's reporting runs on, not how
+              big Semrush's index is.
+
+              The directory link is gone from the third point too: the badge
+              beside it is the link. Worth knowing that this makes the badge
+              the ONLY route to the listing, which is why its onerror fallback
+              swaps the image and leaves the anchor intact. */}
+          <p>RTC is an official Semrush Agency Partner. Every engagement runs on enterprise-grade Semrush data: rank tracking, backlink audits, competitor gaps and AI-visibility monitoring.</p>
           <ul class="rtcs-partner-points">
             <li>Vetted by Semrush for delivery quality and client results</li>
-            <li>Your reporting pulls from live Semrush data, not estimates</li>
-            <li>Listed in the <a class="rtcs-partner-link" href={SEMRUSH_DIRECTORY} target="_blank" rel="noreferrer noopener">official Semrush Agency Partners directory</a></li>
+            <li>Reporting pulls from live Semrush data, not estimates</li>
+            <li>Listed in the official Semrush Agency Partners directory</li>
           </ul>
         </div>
         <div class="rtcs-partner-cardwrap">
@@ -243,7 +252,7 @@ const serviceSchema = {
             <img
               class="rtcs-partner-badge"
               src="https://static.semrush.com/agency-directory/shared/badge.svg"
-              width="200" height="200" loading="lazy"
+              width="160" height="160" loading="lazy"
               alt="Semrush Certified Agency Partner — Robles Technologies Corp. in the Semrush Agency Partners directory"
               onerror="this.onerror=null;this.src='/semrush-icon.png';this.classList.add('rtcs-partner-badge-fallback');"
             />

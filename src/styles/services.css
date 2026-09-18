@@ -202,12 +202,12 @@
 
 /* Square badge. `height: auto` on the width-capped box would let a slow load
    collapse the row, so both axes are pinned to the intrinsic ratio. */
-.rtcs-partner-badge { width: min(200px, 56vw); height: auto; aspect-ratio: 1; }
+.rtcs-partner-badge { width: min(160px, 48vw); height: auto; aspect-ratio: 1; }
 /* The local fallback mark is a wide swoosh, not a square seal. */
-.rtcs-partner-badge-fallback { width: min(180px, 56vw); height: auto; aspect-ratio: auto; }
+.rtcs-partner-badge-fallback { width: min(145px, 48vw); height: auto; aspect-ratio: auto; }
 
-.rtcs-partner-link { color: var(--text-link); text-decoration: underline; text-underline-offset: 2px; }
-.rtcs-partner-link:hover { color: var(--text-link-hover); }
+/* .rtcs-partner-link is gone with the inline directory link in the third
+   proof point — the badge carries that link now. */
 
 /* Hub: the icon tile and the partner pill share a row above the line title.
    The 18px that used to sit under the tile moves to the row. */
