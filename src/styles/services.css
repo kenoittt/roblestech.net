@@ -589,9 +589,9 @@
 .rtcs-founder .txt { flex: 1; min-width: 260px; }
 
 /* The two founders the copy names. The circles overlap slightly so they read
-   as a pair rather than two unrelated avatars. .rtcs-face-mono stands in for a
-   founder whose photo has not arrived — the band stays balanced either way,
-   which is why it is built as a pair rather than a single portrait. */
+   as a pair rather than two unrelated avatars. .rtcs-face-mono is the initials
+   stand-in used while a photo was missing; both are real portraits now, and it
+   is kept for the next time one is not. */
 .rtcs-founder-faces { display: flex; align-items: center; flex-shrink: 0; }
 .rtcs-face {
   width: 78px; height: 78px; border-radius: 50%; object-fit: cover; display: block;

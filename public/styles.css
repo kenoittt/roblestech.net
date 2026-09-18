@@ -1250,9 +1250,9 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
 .about-visual-card p { font-size: var(--fs-xs); color: rgba(255,255,255,.80); line-height: var(--lh); position: relative; z-index: 1; margin-bottom: 0; }
 /* Founder portraits on the navy bio cards. The card paints a glow and a
    pattern through ::before/::after, so anything inside it needs z-index 1 to
-   sit above them. .leader-photo-mono is the stand-in for a founder whose photo
-   has not arrived yet — same circle, initials instead of a face, so the two
-   cards stay symmetrical either way. */
+   sit above them. .leader-photo-mono is the initials stand-in for a founder
+   with no photo yet; both founders have one now, so nothing uses it — it is
+   kept for the next person added before their headshot arrives. */
 .leader-photo {
   width: 132px; height: 132px; border-radius: 50%; overflow: hidden;
   margin-bottom: 24px; position: relative; z-index: 1;
