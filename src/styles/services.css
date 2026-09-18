@@ -193,7 +193,19 @@
   display: flex; flex-direction: column; align-items: center; gap: 18px;
   text-align: center;
 }
+/* The card is a link now. Nothing about it should read as a text link. */
+a.rtcs-partner-card { text-decoration: none; transition: transform .25s cubic-bezier(.2,0,0,1), box-shadow .25s cubic-bezier(.2,0,0,1); }
+a.rtcs-partner-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md), 0 18px 40px rgba(3,44,124,.12); }
+a.rtcs-partner-card:focus-visible { outline: 2px solid var(--rtc-blue-500); outline-offset: 4px; }
+
 .rtcs-partner-card img { width: 96px; height: auto; }
+/* Semrush's badge is square; the local fallback mark is a wide swoosh, so it
+   gets the width the old placeholder used rather than the square box. */
+.rtcs-partner-badge { width: 100px; height: 100px; }
+.rtcs-partner-badge-fallback { width: 96px; height: auto; }
+
+.rtcs-partner-link { color: var(--text-link); text-decoration: underline; text-underline-offset: 2px; }
+.rtcs-partner-link:hover { color: var(--text-link-hover); }
 .rtcs-partner-name { font-size: 17px; font-weight: 800; color: var(--text-strong); }
 .rtcs-partner-role {
   font-family: 'League Spartan', system-ui, sans-serif;
