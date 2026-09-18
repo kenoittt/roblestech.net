@@ -226,27 +226,27 @@ const serviceSchema = {
           {/* Semrush's own badge, embedded from their CDN exactly as their
               directory publishes it, and linked to the listing it certifies.
 
-              Their snippet ships alt="" with no link text, which would leave
-              this link with no accessible name at all — a screen reader would
-              announce "link" and nothing else. It carries a real description
-              instead.
+              The badge is on its own: the artwork already reads "Certified
+              Agency Partner", so the card frame and the "Semrush / Agency
+              Partner" lines that used to sit under it were saying the same
+              thing a third time.
 
-              onerror falls back to the local mark: this is a third-party image
-              on a domain we do not control, and the card should still read as
-              a credential if their CDN is unreachable. */}
+              Their snippet ships alt="" with no link text. With the text gone
+              this is now the link's ONLY accessible name — an empty alt would
+              leave a screen reader announcing "link" and nothing else.
+
+              onerror falls back to the local mark. That fallback is weaker
+              than it was — with no caption beside it, a bare swoosh no longer
+              says "partner" — but a broken-image icon in a credential slot is
+              worse. */}
           <a class="rtcs-partner-card" href={SEMRUSH_DIRECTORY} target="_blank" rel="noreferrer noopener">
             <img
               class="rtcs-partner-badge"
               src="https://static.semrush.com/agency-directory/shared/badge.svg"
-              width="100" height="100" loading="lazy"
-              alt="Semrush Agency Partner — Robles Technologies Corp. in the Semrush Agency Partners directory"
+              width="200" height="200" loading="lazy"
+              alt="Semrush Certified Agency Partner — Robles Technologies Corp. in the Semrush Agency Partners directory"
               onerror="this.onerror=null;this.src='/semrush-icon.png';this.classList.add('rtcs-partner-badge-fallback');"
             />
-            <div>
-              <div class="rtcs-partner-name">Semrush</div>
-              <div class="rtcs-partner-role">Agency Partner</div>
-            </div>
-            <div class="rtcs-partner-verified">Verified partner agency<br />roblestech.net</div>
           </a>
         </div>
       </div>

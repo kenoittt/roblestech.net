@@ -45,8 +45,22 @@ body {
 /* ══════════════════════════════════
    NAV
 ══════════════════════════════════ */
-/* Floating "island" nav — detached from the top edge, centered, rounded */
-nav {
+/* Floating "island" nav — detached from the top edge, centered, rounded.
+ *
+ * Scoped to #nav. These rules used to be on the bare `nav` element selector,
+ * which also caught the footer's <nav class="ft-legal">: the legal links were
+ * being lifted out of the footer and painted as a SECOND fixed glass island at
+ * top:16px, z-index 100, directly over the real one. It was invisible at rest
+ * because the two sat exactly on top of each other — but .scrolled moves #nav
+ * to top:10px and the footer nav stayed at 16px, so scrolling revealed the
+ * ghost as a second frame offset by six pixels.
+ *
+ * :where() is deliberate: it contributes no specificity, so `nav:where(#nav)`
+ * still weighs exactly as much as the old bare `nav`. A plain `#nav` would
+ * have started beating the Bootstrap utilities in the markup (.rounded-4,
+ * .shadow-lg, .border), silently changing the corner radius and the shadow
+ * this nav has always rendered with. */
+nav:where(#nav) {
   position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:100;
   display:flex; align-items:center; justify-content:space-between;
   width:calc(100% - 32px); max-width:1180px;
@@ -59,7 +73,7 @@ nav {
   transition:box-shadow .3s, background .3s, top .3s, width .3s, border-radius .3s;
 }
 /* Stay glassy in every state — translucent + blur, never fully solid */
-nav.scrolled {
+nav:where(#nav).scrolled {
   top:10px; width:calc(100% - 24px);
   background:rgba(245,246,250,0.66);
   backdrop-filter:blur(30px) saturate(190%);
@@ -67,7 +81,7 @@ nav.scrolled {
   box-shadow:0 1px 0 rgba(255,255,255,0.75) inset, 0 14px 40px rgba(3,44,124,0.16);
   border:1px solid rgba(255,255,255,0.7);
 }
-nav.nav-inner {
+nav:where(#nav).nav-inner {
   background:rgba(245,246,250,0.62);
   box-shadow:0 1px 0 rgba(255,255,255,0.7) inset, 0 10px 30px rgba(3,44,124,0.12);
   border:1px solid rgba(255,255,255,0.65);
@@ -1485,8 +1499,9 @@ footer { background:var(--navy); padding:56px 8% 26px; color:rgba(255,255,255,.7
    RESPONSIVE — SMALL PHONES (≤600px)
 ══════════════════════════════════ */
 @media(max-width:600px) {
-  /* Nav */
-  nav { padding:0 5%; height:72px; }
+  /* Nav — scoped like the base rule, so the footer's legal nav is not given
+     the island's phone padding and height either. */
+  nav:where(#nav) { padding:0 5%; height:72px; }
   .nav-logo-img { width:64px; height:64px; }
   .nav-name { font-size:.95rem; }
   .mobile-menu { top:72px; }

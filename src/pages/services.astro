@@ -120,10 +120,25 @@ const schema = {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={ICONS[l.icon]} />
               </div>
               {l.partner && (
-                <div class="rtcs-partner-pill">
-                  <img src="/semrush-icon.png" alt="" width="22" height="14" />
-                  <span>Semrush Agency Partner</span>
-                </div>
+                /* Same treatment as the band on /services/geo: Semrush's own
+                   badge, no pill frame and no label, because the artwork says
+                   "Certified Agency Partner" itself.
+
+                   NOT a link — the whole service line is already an anchor, and
+                   nesting one inside it is invalid. The directory link lives on
+                   the GEO page this line leads to.
+
+                   The alt carries real text now. It was empty before, which was
+                   correct while the "Semrush Agency Partner" label sat beside
+                   it; with the label gone, an empty alt would drop the
+                   credential for a screen reader entirely. */
+                <img
+                  class="rtcs-partner-seal"
+                  src="https://static.semrush.com/agency-directory/shared/badge.svg"
+                  width="52" height="52" loading="lazy"
+                  alt="Semrush Agency Partner"
+                  onerror="this.onerror=null;this.src='/semrush-icon.png';this.classList.add('rtcs-partner-seal-fallback');"
+                />
               )}
             </div>
             <h2>{l.name}</h2>

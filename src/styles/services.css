@@ -186,54 +186,39 @@
   content: "✓"; color: var(--rtc-blue-500); font-weight: 800; flex-shrink: 0;
 }
 
-.rtcs-partner-cardwrap { justify-self: center; width: 100%; max-width: 380px; }
+/* The badge stands alone — no card frame, no caption. Semrush's artwork
+   carries the wordmark and "Certified Agency Partner" itself. */
+.rtcs-partner-cardwrap { justify-self: center; display: flex; justify-content: center; width: 100%; }
 .rtcs-partner-card {
-  background: var(--surface-card); border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl); box-shadow: var(--shadow-md); padding: 40px;
-  display: flex; flex-direction: column; align-items: center; gap: 18px;
-  text-align: center;
+  display: inline-flex; text-decoration: none; border-radius: 14px;
+  transition: transform .25s cubic-bezier(.2,0,0,1);
 }
-/* The card is a link now. Nothing about it should read as a text link. */
-a.rtcs-partner-card { text-decoration: none; transition: transform .25s cubic-bezier(.2,0,0,1), box-shadow .25s cubic-bezier(.2,0,0,1); }
-a.rtcs-partner-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md), 0 18px 40px rgba(3,44,124,.12); }
-a.rtcs-partner-card:focus-visible { outline: 2px solid var(--rtc-blue-500); outline-offset: 4px; }
+.rtcs-partner-card:hover { transform: translateY(-3px) scale(1.03); }
+.rtcs-partner-card:focus-visible { outline: 2px solid var(--rtc-blue-500); outline-offset: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .rtcs-partner-card { transition: none; }
+  .rtcs-partner-card:hover { transform: none; }
+}
 
-.rtcs-partner-card img { width: 96px; height: auto; }
-/* Semrush's badge is square; the local fallback mark is a wide swoosh, so it
-   gets the width the old placeholder used rather than the square box. */
-.rtcs-partner-badge { width: 100px; height: 100px; }
-.rtcs-partner-badge-fallback { width: 96px; height: auto; }
+/* Square badge. `height: auto` on the width-capped box would let a slow load
+   collapse the row, so both axes are pinned to the intrinsic ratio. */
+.rtcs-partner-badge { width: min(200px, 56vw); height: auto; aspect-ratio: 1; }
+/* The local fallback mark is a wide swoosh, not a square seal. */
+.rtcs-partner-badge-fallback { width: min(180px, 56vw); height: auto; aspect-ratio: auto; }
 
 .rtcs-partner-link { color: var(--text-link); text-decoration: underline; text-underline-offset: 2px; }
 .rtcs-partner-link:hover { color: var(--text-link-hover); }
-.rtcs-partner-name { font-size: 17px; font-weight: 800; color: var(--text-strong); }
-.rtcs-partner-role {
-  font-family: 'League Spartan', system-ui, sans-serif;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--rtc-blue-500); margin-top: 4px;
-}
-/* The rule is only as wide as the text it sits under — the card centres a
-   shrink-to-fit column, which is what the design shows. */
-.rtcs-partner-verified {
-  border-top: 1px solid var(--border-subtle); padding-top: 16px;
-  font-size: 12.5px; line-height: 1.6; color: var(--text-muted);
-}
 
 /* Hub: the icon tile and the partner pill share a row above the line title.
    The 18px that used to sit under the tile moves to the row. */
 .rtcs-line-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
 .rtcs-line-head .rtcs-line-icon { margin-bottom: 0; }
-.rtcs-partner-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill); padding: 6px 14px 6px 8px;
-}
-.rtcs-partner-pill img { width: 22px; height: auto; }
-.rtcs-partner-pill span {
-  font-family: 'League Spartan', system-ui, sans-serif;
-  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-body);
-}
+/* The badge alone, squared off to the same 52px as the icon tile beside it so
+   the row reads as two equal marks rather than a tile and a stray graphic. */
+.rtcs-partner-seal { width: 52px; height: 52px; aspect-ratio: 1; }
+/* The local fallback mark is a wide swoosh, not a square seal — it keeps the
+   width the old pill gave it and sits on the tile's centre line. */
+.rtcs-partner-seal-fallback { width: 34px; height: auto; aspect-ratio: auto; }
 
 /* ───────────── GEO sticker ─────────────
    Sits on the left of the closing band and can be dragged anywhere on the
