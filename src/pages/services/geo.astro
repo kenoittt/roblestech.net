@@ -424,7 +424,16 @@ const serviceSchema = {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
           </a>
       {/* The screenshot is the live sample dashboard, so it opens it. New tab:
-          the visitor is mid-page on a sales flow and should come back to it. */}
+          the visitor is mid-page on a sales flow and should come back to it.
+
+          No visible cue label. The frame is drawn with a rounded top and a
+          FLAT bottom, meant to run off the bottom edge of this band — the cue
+          underneath was the only thing holding it 37px clear of that edge,
+          which is what read as a dark strip below the screenshot.
+
+          The aria-label still names the destination, so the link is not
+          silent for anyone who cannot see the browser chrome and the pointer
+          cursor that signal it. */}
       <a class="rtcs-show rtcs-show-link" href="https://portal.roblestech.net/demo"
          target="_blank" rel="noopener"
          aria-label="Open the live sample dashboard at portal.roblestech.net/demo">
@@ -436,7 +445,6 @@ const serviceSchema = {
             <img src="/geo-dashboard.png" alt="Sample client dashboard showing clicks, impressions, per-post performance and AI visibility. Sample data, not a real client." loading="lazy" width="1600" height="1000" />
           </div>
         </div>
-        <span class="rtcs-show-cue">Open the live sample dashboard →</span>
       </a>
     </div>
   </section>

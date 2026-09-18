@@ -497,22 +497,17 @@
 /* ───────────── showcase frame ───────────── */
 .rtcs-show { max-width: 960px; margin: 34px auto 0; position: relative; }
 /* The showcase is clickable on GEO — it opens the live sample dashboard — so
-   it needs to look it: a pointer, a lift on hover, and a cue underneath for
-   anyone who would not think to click a screenshot. */
+   it needs to look it: a pointer and a lift on hover. The label that used to
+   sit under it is gone; it was the only thing keeping the frame's flat bottom
+   off the bottom edge of the band it is designed to run into. */
 .rtcs-show-link { display: block; text-decoration: none; cursor: pointer; }
 .rtcs-show-link .rtcs-frame {
   transition: transform var(--dur-base) cubic-bezier(0.2, 0, 0, 1);
 }
 .rtcs-show-link:hover .rtcs-frame { transform: translateY(-4px); }
 .rtcs-show-link:focus-visible { outline: 2px solid var(--rtc-green-400); outline-offset: 6px; border-radius: var(--radius-lg); }
-.rtcs-show-cue {
-  display: block; margin-top: 14px;
-  font-size: 13px; font-weight: 700; color: var(--rtc-green-400);
-  opacity: .85; transition: opacity var(--dur-base) var(--ease-standard);
-}
-.rtcs-show-link:hover .rtcs-show-cue { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .rtcs-show-link .rtcs-frame, .rtcs-show-cue { transition: none; }
+  .rtcs-show-link .rtcs-frame { transition: none; }
   .rtcs-show-link:hover .rtcs-frame { transform: none; }
 }
 /* Sky glow behind the frame, so the screenshot sits in light rather than on
