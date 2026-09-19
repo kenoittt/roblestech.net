@@ -1,0 +1,369 @@
+---
+/*
+ * Gap Report request modal.
+ *
+ * The GEO page has four "Get Your Free Gap Report" CTAs. They used to navigate
+ * to /contact?request=gap-report, where a script pre-filled the contact form.
+ * They now open this dialog instead, so the request is made without leaving the
+ * page the pitch is on.
+ *
+ * Binding is by href, not by a data attribute on each button: two of the four
+ * CTAs are rendered by ServiceLayout from props, so marking them up
+ * individually would mean threading a flag through a layout every other service
+ * page also uses. Any anchor pointing at the Gap Report URL is claimed here,
+ * which also means a fifth CTA added later works with no extra wiring.
+ *
+ * Progressive enhancement: the anchors keep their real href. Without
+ * JavaScript, or before this script runs, they still go to the contact page and
+ * the old pre-fill still works. Nothing depends on the modal existing.
+ *
+ * Salesforce wiring follows NewsletterPopup: same Web-to-Lead endpoint, posted
+ * into a hidden iframe. One difference. retURL points at /sf-return.html, a
+ * page on our own origin, so when Salesforce redirects the iframe there we can
+ * read its location and confirm the POST completed. Web-to-Lead returns no CORS
+ * headers and reports no validation errors, so what we can prove is that
+ * Salesforce accepted and redirected, not that the Lead was created cleanly.
+ * The confirmation is worded to match: "Request Sent", not "Received".
+ */
+const SF_ENDPOINT = 'https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8&orgId=00Dd500000JnGbl';
+const SF_OID = '00Dd500000JnGbl';
+/** Matches the tag the contact page sets, so these stay one source in reporting. */
+const SF_LEAD_SOURCE = 'Gap Report';
+const SF_RETURN = 'https://roblestech.net/sf-return.html';
+/** Anchors with this in their href are taken over by the modal. */
+const GAP_HREF_MATCH = 'request=gap-report';
+---
+
+<div class="gapreq" id="gapModal" hidden role="dialog" aria-modal="true" aria-labelledby="gapTitle" aria-describedby="gapDesc">
+  <div class="gapreq-backdrop" data-gap-close></div>
+
+  <div class="gapreq-card" role="document">
+    <button type="button" class="gapreq-x" data-gap-close aria-label="Close">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="gapreq-eyebrow">Start Here · Free</div>
+    <h2 class="gapreq-h" id="gapTitle">Request Your Free Gap Report</h2>
+    <p class="gapreq-p" id="gapDesc">A 10-query diagnostic across ChatGPT, Gemini and Perplexity. We send a screenshot of every place your brand goes invisible, plus a roadmap if you decide to fix it. No sales call required.</p>
+
+    <form class="gapreq-form" id="gapForm" action={SF_ENDPOINT} method="POST" target="gap_sink" novalidate>
+      <input type="hidden" name="oid" value={SF_OID} />
+      <input type="hidden" name="lead_source" value={SF_LEAD_SOURCE} />
+      <input type="hidden" name="retURL" value={SF_RETURN} />
+      {/* Built on submit from the two fields below, in the same shape the
+          contact page pre-fills, so a Gap Report lead reads identically in
+          Salesforce whichever route it came in by. The website and product
+          inputs carry no name of their own: posting unmapped fields to
+          Web-to-Lead only creates values nothing reads. */}
+      <input type="hidden" name="description" id="gapDescription" />
+
+      <div class="gapreq-row">
+        <div class="gapreq-field">
+          <label for="gapFirst">First Name</label>
+          <input id="gapFirst" name="first_name" type="text" maxlength="40" autocomplete="given-name" />
+        </div>
+        <div class="gapreq-field">
+          <label for="gapLast">Last Name <span class="gapreq-req">*</span></label>
+          <input id="gapLast" name="last_name" type="text" maxlength="80" required autocomplete="family-name" />
+        </div>
+      </div>
+
+      <div class="gapreq-row">
+        <div class="gapreq-field">
+          <label for="gapEmail">Work Email <span class="gapreq-req">*</span></label>
+          <input id="gapEmail" name="email" type="email" maxlength="80" required autocomplete="email" placeholder="you@company.com" />
+        </div>
+        {/* Salesforce cannot create a Lead without Company. */}
+        <div class="gapreq-field">
+          <label for="gapCompany">Company <span class="gapreq-req">*</span></label>
+          <input id="gapCompany" name="company" type="text" maxlength="40" required autocomplete="organization" />
+        </div>
+      </div>
+
+      <div class="gapreq-field">
+        <label for="gapSite">Website <span class="gapreq-req">*</span></label>
+        <input id="gapSite" type="text" maxlength="120" required autocomplete="url" placeholder="yourbrand.com" />
+      </div>
+
+      <div class="gapreq-field">
+        <label for="gapSells">What You Sell</label>
+        <input id="gapSells" type="text" maxlength="120" placeholder="Creatine, protein, training programs" />
+      </div>
+
+      <p class="gapreq-err" id="gapErr" hidden></p>
+
+      <p class="gapreq-consent">
+        By sending this request you agree to our <a href="/terms-and-conditions" target="_blank" rel="noopener">Terms and Conditions</a>
+        and confirm you have read our <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.
+      </p>
+
+      <button type="submit" class="gapreq-btn" id="gapSubmit">Request My Gap Report
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+      </button>
+      <p class="gapreq-fine">The report is yours to keep either way. We reply within 1 business day.</p>
+    </form>
+  </div>
+</div>
+
+{/* The POST target, so the visitor stays on the page. */}
+<iframe name="gap_sink" id="gapSink" title="Gap Report submission" hidden style="display:none;width:0;height:0;border:0;"></iframe>
+
+{/* Bottom-right confirmation. role=status with aria-live=polite announces it
+    without stealing focus, which a toast must never do: the visitor is not
+    being asked to act on it. */}
+<div class="rtc-toast" id="gapToast" hidden role="status" aria-live="polite">
+  <span class="rtc-toast-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+  </span>
+  <div class="rtc-toast-text">
+    <strong>Request Sent</strong>
+    <span>Your Gap Report is on the way. We reply within 1 business day.</span>
+  </div>
+  <button type="button" class="rtc-toast-x" id="gapToastX" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+
+<script is:inline define:vars={{ GAP_HREF_MATCH }}>
+  (function () {
+    var modal = document.getElementById('gapModal');
+    var form = document.getElementById('gapForm');
+    var toast = document.getElementById('gapToast');
+    var sink = document.getElementById('gapSink');
+    if (!modal || !form || !toast || !sink) return;
+
+    var err = document.getElementById('gapErr');
+    var submitBtn = document.getElementById('gapSubmit');
+    var lastFocus = null;
+    var submitted = false;
+    var toastTimer = null;
+    var fallbackTimer = null;
+
+    function open(trigger) {
+      lastFocus = trigger || document.activeElement;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(function () { modal.classList.add('gapreq-in'); });
+      var f = document.getElementById('gapFirst');
+      if (f) f.focus();
+    }
+    function close() {
+      modal.classList.remove('gapreq-in');
+      document.body.style.overflow = '';
+      setTimeout(function () { modal.hidden = true; }, 200);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    /* Take over every Gap Report link on the page. Modified clicks and
+       middle-clicks are left alone so "open in new tab" still works, and the
+       href it opens is the contact page, which still handles the request. */
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest('a[href*="' + GAP_HREF_MATCH + '"]');
+      if (!a) return;
+      e.preventDefault();
+      open(a);
+    });
+
+    modal.addEventListener('click', function (e) {
+      if (e.target.closest('[data-gap-close]')) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (modal.hidden) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') {
+        var f = modal.querySelectorAll('button, input, a[href]');
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    function showToast() {
+      if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+      if (!submitted) return;
+      submitted = false;
+      toast.hidden = false;
+      requestAnimationFrame(function () { toast.classList.add('rtc-toast-in'); });
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 7000);
+    }
+    function hideToast() {
+      toast.classList.remove('rtc-toast-in');
+      setTimeout(function () { toast.hidden = true; }, 260);
+    }
+    document.getElementById('gapToastX').addEventListener('click', hideToast);
+
+    /* Salesforce redirects the hidden iframe to retURL once it has taken the
+       POST, so this fires when the submission has actually gone through rather
+       than merely been sent. The iframe's first load is about:blank, hence the
+       `submitted` gate. The timer is a backstop for the case where the load
+       event never reaches us. */
+    sink.addEventListener('load', function () { showToast(); });
+
+    form.addEventListener('submit', function (e) {
+      var last = document.getElementById('gapLast');
+      var email = document.getElementById('gapEmail');
+      var company = document.getElementById('gapCompany');
+      var site = document.getElementById('gapSite');
+      var sells = document.getElementById('gapSells');
+
+      /* novalidate plus explicit checks: a native validation bubble inside a
+         dialog is easy to miss, so errors are shown inline instead. */
+      var missing = null;
+      if (!last.value.trim()) missing = ['Please add your last name.', last];
+      else if (!email.value.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value)) missing = ['Please add a valid work email address.', email];
+      else if (!company.value.trim()) missing = ['Please add your company name.', company];
+      else if (!site.value.trim()) missing = ['Please add your website, so we know what to run the diagnostic against.', site];
+      if (missing) {
+        e.preventDefault();
+        err.textContent = missing[0];
+        err.hidden = false;
+        missing[1].focus();
+        return;
+      }
+      err.hidden = true;
+
+      /* Same shape the contact page pre-fills, so both routes read alike. */
+      document.getElementById('gapDescription').value =
+        "I'd like the free AI Visibility Gap Report.\n\n" +
+        'Website: ' + site.value.trim() + '\n' +
+        'What we sell: ' + (sells.value.trim() || '(not given)');
+
+      submitted = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      fallbackTimer = setTimeout(showToast, 6000);
+
+      /* Close straight away. The POST is already on its way to the hidden
+         iframe, and holding a dialog open over a request the visitor cannot
+         see would only make them wonder whether it worked. */
+      setTimeout(function () {
+        close();
+        form.reset();
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Request My Gap Report';
+      }, 150);
+    });
+  })();
+</script>
+
+<style>
+  .gapreq { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  /* Must follow the display:flex rule. A class rule in author CSS beats the UA
+     stylesheet's [hidden]{display:none}, so without this the dialog never
+     hides and swallows every click on the page. */
+  .gapreq[hidden] { display: none; }
+  .gapreq-backdrop { position: absolute; inset: 0; background: rgba(0,5,15,.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); opacity: 0; transition: opacity 200ms var(--ease-standard); }
+  .gapreq.gapreq-in .gapreq-backdrop { opacity: 1; }
+
+  .gapreq-card {
+    position: relative; width: 100%; max-width: 520px;
+    max-height: calc(100vh - 40px); overflow-y: auto;
+    background: var(--rtc-navy-900); border-radius: var(--rtc-radius-lg);
+    border: 1px solid var(--rtc-glass-border-dark);
+    box-shadow: var(--rtc-glass-shadow-dark), var(--rtc-glass-highlight-dark);
+    padding: 34px 32px;
+    opacity: 0; transform: translateY(12px) scale(.98);
+    transition: opacity 220ms var(--ease-standard), transform 220ms var(--ease-standard);
+  }
+  .gapreq.gapreq-in .gapreq-card { opacity: 1; transform: none; }
+
+  .gapreq-x {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.75); cursor: pointer; transition: background 200ms var(--ease-standard);
+  }
+  .gapreq-x:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+  .gapreq-eyebrow {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 10px;
+  }
+  .gapreq-h { font-weight: 800; font-size: 25px; letter-spacing: -.02em; color: #fff; margin: 0 0 10px; }
+  .gapreq-p { font-size: 14px; line-height: 1.65; color: rgba(255,255,255,.76); margin: 0 0 20px; }
+
+  .gapreq-form { display: flex; flex-direction: column; gap: 13px; }
+  .gapreq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .gapreq-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .gapreq-field label {
+    font-family: 'League Spartan', system-ui, sans-serif;
+    font-weight: 600; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+  }
+  .gapreq-req { color: var(--green); }
+  .gapreq-field input {
+    font-family: 'Montserrat', system-ui, sans-serif; font-size: .88rem; color: #fff;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+    border-radius: var(--rtc-radius-md); padding: 11px 14px; width: 100%; outline: none;
+    transition: border-color 200ms var(--ease-standard), box-shadow 200ms var(--ease-standard);
+  }
+  .gapreq-field input::placeholder { color: rgba(255,255,255,.38); }
+  .gapreq-field input:focus { border-color: var(--azure); box-shadow: var(--rtc-focus-ring); }
+
+  .gapreq-err { font-size: 12.5px; color: #ffb4ac; margin: 0; }
+
+  .gapreq-consent { font-size: 11.5px; line-height: 1.6; color: rgba(255,255,255,.55); margin: 0; }
+  .gapreq-consent a { color: rgba(255,255,255,.82); text-decoration: underline; text-underline-offset: 2px; }
+  .gapreq-consent a:hover { color: #fff; }
+
+  .gapreq-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 48px; padding: 0 22px; border: none; border-radius: var(--rtc-radius-md);
+    background: var(--green); color: var(--navy); cursor: pointer;
+    font-family: 'Montserrat', system-ui, sans-serif; font-weight: 800; font-size: 14.5px;
+    transition: background 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+  }
+  .gapreq-btn:hover { background: #9fdb63; }
+  .gapreq-btn:active { transform: translateY(1px); }
+  .gapreq-btn:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+  .gapreq-btn:disabled { opacity: .7; cursor: default; }
+
+  .gapreq-fine { font-size: 11.5px; line-height: 1.6; color: rgba(255,255,255,.5); margin: 0; }
+
+  /* ── bottom-right confirmation ── */
+  .rtc-toast {
+    position: fixed; right: 20px; bottom: 20px; z-index: 9999;
+    display: flex; align-items: flex-start; gap: 12px;
+    width: min(360px, calc(100vw - 40px));
+    padding: 14px 16px;
+    background: var(--rtc-navy-900); border: 1px solid rgba(174,227,123,.34);
+    border-radius: var(--rtc-radius-md);
+    box-shadow: 0 18px 46px rgba(0,5,15,.34);
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 260ms var(--ease-standard), transform 260ms var(--ease-standard);
+  }
+  .rtc-toast[hidden] { display: none; }
+  .rtc-toast.rtc-toast-in { opacity: 1; transform: none; }
+  .rtc-toast-mark {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    color: var(--green); background: rgba(174,227,123,.13); border: 1px solid rgba(174,227,123,.32);
+  }
+  .rtc-toast-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .rtc-toast-text strong { font-size: 14px; font-weight: 800; color: #fff; }
+  .rtc-toast-text span { font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,.72); }
+  .rtc-toast-x {
+    flex: none; margin-left: auto; width: 26px; height: 26px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 0; background: transparent; color: rgba(255,255,255,.55); cursor: pointer;
+    border-radius: 50%; transition: color 200ms var(--ease-standard), background 200ms var(--ease-standard);
+  }
+  .rtc-toast-x:hover { color: #fff; background: rgba(255,255,255,.1); }
+  .rtc-toast-x:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+
+  @media (max-width: 520px) {
+    .gapreq-card { padding: 28px 20px; }
+    .gapreq-row { grid-template-columns: 1fr; }
+    .gapreq-h { font-size: 21px; }
+    .rtc-toast { right: 12px; left: 12px; bottom: 12px; width: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gapreq-backdrop, .gapreq-card, .gapreq-btn, .gapreq-x, .gapreq-field input, .rtc-toast, .rtc-toast-x { transition: none; }
+    .gapreq-card, .rtc-toast { transform: none; }
+    .gapreq-btn:active { transform: none; }
+  }
+</style>

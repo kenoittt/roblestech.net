@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Submitted</title>
+</head>
+<body>
+<!--
+  Salesforce Web-to-Lead redirect target (retURL) for the Gap Report modal.
+
+  The modal posts into a hidden iframe so the visitor is never navigated away.
+  Salesforce answers that POST with a redirect to this page, which is on our
+  own origin, so the page's script can read the iframe's location and know the
+  POST actually completed rather than assuming it did.
+
+  Deliberately tiny and standalone. Pointing retURL at a real site page would
+  load the whole site, fonts and all, inside a hidden iframe on every
+  submission.
+-->
+<p>Submitted.</p>
+</body>
+</html>

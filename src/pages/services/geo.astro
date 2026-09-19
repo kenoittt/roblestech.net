@@ -2,14 +2,19 @@
 import ServiceLayout from '../../layouts/ServiceLayout.astro';
 import SopStepper from '../../components/SopStepper.astro';
 import StickerPeel from '../../components/StickerPeel.jsx';
+import GapReportModal from '../../components/GapReportModal.astro';
 
 /*
  * Service Line 01 — GEO + SEO. The flagship page.
  *
  * Pricing and the free, ungated Gap Report are shipped as specified in the
- * Services wireframe handoff and confirmed before build. The Gap Report CTAs
- * land on the contact form pre-filled, so the request is captured as a lead
- * rather than disappearing into an inbox.
+ * Services wireframe handoff and confirmed before build.
+ *
+ * The Gap Report CTAs open GapReportModal rather than navigating away, so the
+ * request is made on the page that made the pitch. They keep their real href:
+ * the modal claims them by it, and without JavaScript they still land on the
+ * contact form pre-filled, exactly as before. Either route creates the same
+ * Salesforce lead.
  */
 const CAL = "Calendly.initPopupWidget({url:'https://calendly.com/kenneth-roblestech/30min'});return false;";
 const GAP = '/contact?request=gap-report#contact-main';
@@ -466,6 +471,8 @@ const serviceSchema = {
       </div>
     </div>
   </section>
+
+  <GapReportModal />
 
   <!-- RELATED READING -->
   <section class="rtcs-band rtcs-band-sunken">
