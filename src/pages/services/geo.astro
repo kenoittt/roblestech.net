@@ -499,17 +499,16 @@ const serviceSchema = {
       carried anywhere on the page. client:visible means React and GSAP only
       download once the band is scrolled into view.
 
-      avoid="#nav" is what keeps them out of the floating nav. The nav is
-      translucent glass, so a sticker passing behind it shows through and reads
-      as sitting on top of it; the component fades each one while it overlaps
-      and nudges it clear if a drag ends there. */}
+      They pass over the nav on the way up the page, and that is deliberate:
+      clipping them at the nav's edge and fading them out were both tried and
+      both looked worse than leaving them alone. topInset still keeps them from
+      being parked under it. */}
   <StickerPeel
     slot="closing-extra"
     client:visible
     className="rtcs-geo-sticker"
     bounds="page"
     topInset={100}
-    avoid="#nav"
     imageSrc="/rtc-sticker.png"
     width={150}
     rotate={-8}
@@ -527,7 +526,6 @@ const serviceSchema = {
     className="rtcs-geo-sticker rtcs-geo-sticker-semrush"
     bounds="page"
     topInset={100}
-    avoid="#nav"
     imageSrc="/semrush-sticker.png"
     width={150}
     rotate={8}

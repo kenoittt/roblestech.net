@@ -40,36 +40,6 @@ import './StickerPeel.css';
  *      to these same pages earlier, and a name that generic sitting in a
  *      shared chunk is a collision waiting to happen. Everything else the
  *      component defines was already prefixed "sticker-".
- *
- *   4. The `avoid` prop keeps the sticker clear of the floating nav.
- *
- *      This is not a z-order problem and adding z-index does not fix it. The
- *      sticker already paints behind the nav, which was verified by hit-testing
- *      the overlap. The nav is glass — rgba(245,246,250,.55) over a blur — so
- *      whatever is behind it shows through, and a sticker passing under it
- *      reads as sitting on top of it.
- *
- *      topInset does not cover this either. It clamps the sticker's DOCUMENT
- *      position, but the nav is fixed to the VIEWPORT, so any element in the
- *      document passes through the nav's band on the way up the page no matter
- *      where it is parked.
- *
- *      The fix is to CLIP the sticker at the nav's bottom edge, not to hide it.
- *      Clipped, it reads exactly as it should: sliding under an opaque header,
- *      the way page content does everywhere else. Fading it out instead made it
- *      vanish on approach, which is not the same thing and looked broken.
- *
- *      The clip is a horizontal line, which only works because the static tilt
- *      lives on .sticker-image rather than out here. This element is
- *      un-rotated at rest, so a local inset() and a screen-space line are the
- *      same line. GSAP does rotate this element during a drag, so the clip is
- *      dropped for the duration of one, otherwise the cut would go diagonal
- *      under the cursor. The negative insets on the other three sides matter
- *      too: clip-path clips to the border box, and the tilted artwork overhangs
- *      it, so a plain inset(Npx 0 0 0) would shave the corners off.
- *
- *      On release it is still nudged clear of the nav, so it cannot come to
- *      rest with half of itself permanently clipped away.
  */
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
@@ -120,20 +90,6 @@ const clampToPage = (el, topInset = 0) => {
   }
 };
 
-/* How far the sticker's top sits above the bottom edge of the element it is
- * meant to avoid, in viewport pixels. 0 when they do not overlap. Both rects
- * are viewport rects, which is the space a fixed nav actually lives in. */
-const overlapWith = (el, selector) => {
-  if (!selector) return 0;
-  const avoidEl = document.querySelector(selector);
-  if (!avoidEl) return 0;
-  const r = el.getBoundingClientRect();
-  const n = avoidEl.getBoundingClientRect();
-  if (r.right <= n.left || r.left >= n.right) return 0;
-  if (r.top >= n.bottom || r.bottom <= n.top) return 0;
-  return n.bottom - r.top;
-};
-
 const StickerPeel = ({
   imageSrc,
   rotate = 30,
@@ -148,7 +104,6 @@ const StickerPeel = ({
   peelDirection = 0,
   bounds = '',
   topInset = 0,
-  avoid = '',
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -156,7 +111,6 @@ const StickerPeel = ({
   const pointLightRef = useRef(null);
   const pointLightFlippedRef = useRef(null);
   const draggableInstanceRef = useRef(null);
-  const draggingRef = useRef(false);
 
   const defaultPadding = 10;
 
@@ -187,12 +141,6 @@ const StickerPeel = ({
       type: 'x,y',
       bounds: usePage ? undefined : boundsFor(target),
       inertia: true,
-      onPress() {
-        draggingRef.current = true;
-        /* A clip line drawn for an un-rotated box would skew as soon as the
-           drag rotates this element, so it comes off for the duration. */
-        target.style.clipPath = '';
-      },
       onDrag() {
         if (usePage) clampToPage(target, topInset);
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
@@ -205,51 +153,8 @@ const StickerPeel = ({
         const rotationEase = 'power2.out';
         const duration = 0.8;
         gsap.to(target, { rotation: 0, duration, ease: rotationEase });
-      },
-      /* Fires after the throw settles too, which is the moment that decides
-         where the sticker comes to rest. */
-      onRelease() {
-        draggingRef.current = false;
-        nudgeClear();
-      },
-      onThrowComplete() {
-        draggingRef.current = false;
-        nudgeClear();
       }
     })[0];
-
-    /* Push the sticker down until its top clears the nav, so it cannot be
-       parked behind the glass. Runs on release rather than during the drag. */
-    const nudgeClear = () => {
-      const over = overlapWith(target, avoid);
-      if (over <= 0) return;
-      gsap.to(target, {
-        y: (Number(gsap.getProperty(target, 'y')) || 0) + over + 12,
-        duration: 0.32,
-        ease: 'power2.out',
-        onComplete: () => { if (usePage) clampToPage(target, topInset); syncAvoid(); }
-      });
-    };
-
-    /* While scrolling, keep the cut line on the nav's bottom edge. -60px on the
-       other three sides leaves the tilted artwork's overhang alone; clip-path
-       otherwise clips to the border box and would crop the corners. */
-    const syncAvoid = () => {
-      if (!avoid || draggingRef.current) return;
-      const over = overlapWith(target, avoid);
-      target.style.clipPath = over > 0 ? `inset(${over}px -60px -60px -60px)` : '';
-    };
-
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => { ticking = false; syncAvoid(); });
-    };
-    if (avoid) {
-      window.addEventListener('scroll', onScroll, { passive: true });
-      syncAvoid();
-    }
 
     /* Re-measure on resize. The published version clamped x and y to >= 0,
        which assumes the bounds start at the element's own origin; with page
@@ -261,7 +166,6 @@ const StickerPeel = ({
       if (!d) return;
       if (usePage) clampToPage(target, topInset);
       else d.update(true);
-      syncAvoid();
     };
 
     window.addEventListener('resize', handleResize);
@@ -270,12 +174,11 @@ const StickerPeel = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
-      window.removeEventListener('scroll', onScroll);
       if (draggableInstanceRef.current) {
         draggableInstanceRef.current.kill();
       }
     };
-  }, [bounds, topInset, avoid]);
+  }, [bounds, topInset]);
 
   useEffect(() => {
     const updateLight = e => {

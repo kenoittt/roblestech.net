@@ -170,16 +170,3 @@
     transition: none;
   }
 }
-
-/* Added for this site. The floating nav is translucent glass, so a sticker
-   scrolling underneath it shows straight through and reads as sitting on top
-   of it. The component clips the sticker at the nav's bottom edge instead, so
-   it tucks under the header the way ordinary page content does.
-
-   The clip itself is set inline, per frame, from the measured overlap. It is
-   deliberately not transitioned: it is already following the scroll position,
-   and easing it would make the cut line lag behind the nav it is supposed to
-   be welded to. */
-.sticker-draggable {
-  will-change: clip-path;
-}
