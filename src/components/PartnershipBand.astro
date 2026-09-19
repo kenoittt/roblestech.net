@@ -68,6 +68,14 @@ const CHIPS = [
     <div class="pb-chips rv d3">
       {CHIPS.map((c) => <span class="pb-chip">{c}</span>)}
     </div>
+
+    {/* The band names twelve capabilities and then stops. This is the only
+        route from it to the page that explains how the referral actually
+        works. */}
+    <a class="pb-more rv d3" href="/services/web3">
+      Learn More About Web3
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+    </a>
   </div>
 </section>
 
@@ -100,6 +108,20 @@ const CHIPS = [
 
   .pb-divider { width: 56px; height: 2px; background: var(--quecko-lime); margin: 0 auto 22px; opacity: .8; }
   .pb-lede { font-size: 16px; line-height: 1.65; color: rgba(255,255,255,.78); max-width: 560px; margin: 0 auto 30px; }
+
+  .pb-more {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 30px;
+    font-weight: 700; font-size: 14px; letter-spacing: .02em;
+    color: var(--quecko-lime); text-decoration: none;
+    transition: gap 200ms var(--ease-standard), opacity 200ms var(--ease-standard);
+  }
+  .pb-more:hover { gap: 12px; opacity: .85; }
+  .pb-more:focus-visible { outline: 2px solid var(--quecko-lime); outline-offset: 5px; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    .pb-more { transition: none; }
+    .pb-more:hover { gap: 8px; }
+  }
 
   .pb-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 860px; margin: 0 auto; }
   .pb-chip {

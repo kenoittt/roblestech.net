@@ -54,12 +54,22 @@ import './StickerPeel.css';
  *      document passes through the nav's band on the way up the page no matter
  *      where it is parked.
  *
- *      Two behaviours, because the two cases want different things. While
- *      scrolling, the sticker fades out for as long as it overlaps the nav and
- *      comes back when it is clear. While dragging, it does not fade, since
- *      hiding the thing under the cursor would be worse than the overlap; it is
- *      nudged clear of the nav on release instead, so it can never come to rest
- *      behind the glass.
+ *      The fix is to CLIP the sticker at the nav's bottom edge, not to hide it.
+ *      Clipped, it reads exactly as it should: sliding under an opaque header,
+ *      the way page content does everywhere else. Fading it out instead made it
+ *      vanish on approach, which is not the same thing and looked broken.
+ *
+ *      The clip is a horizontal line, which only works because the static tilt
+ *      lives on .sticker-image rather than out here. This element is
+ *      un-rotated at rest, so a local inset() and a screen-space line are the
+ *      same line. GSAP does rotate this element during a drag, so the clip is
+ *      dropped for the duration of one, otherwise the cut would go diagonal
+ *      under the cursor. The negative insets on the other three sides matter
+ *      too: clip-path clips to the border box, and the tilted artwork overhangs
+ *      it, so a plain inset(Npx 0 0 0) would shave the corners off.
+ *
+ *      On release it is still nudged clear of the nav, so it cannot come to
+ *      rest with half of itself permanently clipped away.
  */
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
@@ -179,8 +189,9 @@ const StickerPeel = ({
       inertia: true,
       onPress() {
         draggingRef.current = true;
-        /* Never leave it faded out under the cursor. */
-        target.classList.remove('sticker-behind-nav');
+        /* A clip line drawn for an un-rotated box would skew as soon as the
+           drag rotates this element, so it comes off for the duration. */
+        target.style.clipPath = '';
       },
       onDrag() {
         if (usePage) clampToPage(target, topInset);
@@ -220,10 +231,13 @@ const StickerPeel = ({
       });
     };
 
-    /* While scrolling, fade for exactly as long as the overlap lasts. */
+    /* While scrolling, keep the cut line on the nav's bottom edge. -60px on the
+       other three sides leaves the tilted artwork's overhang alone; clip-path
+       otherwise clips to the border box and would crop the corners. */
     const syncAvoid = () => {
       if (!avoid || draggingRef.current) return;
-      target.classList.toggle('sticker-behind-nav', overlapWith(target, avoid) > 0);
+      const over = overlapWith(target, avoid);
+      target.style.clipPath = over > 0 ? `inset(${over}px -60px -60px -60px)` : '';
     };
 
     let ticking = false;

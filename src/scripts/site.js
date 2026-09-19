@@ -39,13 +39,9 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.nav-learn.open').forEach((el) => el.classList.remove('open'));
 });
 
-// --- Mobile "Learn" submenu ---
-document.querySelectorAll('.mob-learn').forEach((el) => {
-  el.querySelector('.mob-learn-btn')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    el.classList.toggle('open');
-  });
-});
+// The mobile "Learn" submenu handler was removed with the accordion it drove:
+// the mobile menu is now grouped cards, so Learn is a card with its links
+// already visible rather than a row that expands.
 
 // --- FAQ accordion (faqs page) ---
 document.querySelectorAll('.faq-q').forEach((q) => {

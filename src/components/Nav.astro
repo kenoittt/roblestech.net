@@ -64,19 +64,47 @@ const isActive = (name: string) =>
   </button>
 </nav>
 
+{/* Mobile menu, in the shape of React Bits' CardNav: the flat list of links
+    became grouped cards, each with a label and its links under an arrow icon.
+
+    Built in markup and CSS rather than by importing the component. This nav is
+    in BaseLayout, so it renders on all twenty pages; hydrating CardNav would
+    put React and GSAP on every one of them, roughly 280 KB, for a menu that
+    only exists below 900px. The same reasoning kept StarBorder unhydrated. The
+    card layout is plain flexbox, the height reveal is a CSS transition and the
+    stagger is three transition delays, so this still ships no framework.
+
+    The one deliberate departure from CardNav: its mobile breakpoint hides the
+    CTA button outright. Contact is this site's primary conversion path, so it
+    stays, as a full-width button under the cards. */}
 <div class="mobile-menu glass-menu rounded-4 shadow-lg border" id="mobile-menu">
-  <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/team">Team</a></li>
-    <li><a href="/philosophy">Philosophy</a></li>
-    <li><a href="/services">Services</a></li>
-    <li class="mob-learn">
-      <button class="mob-learn-btn">Learn <span class="mob-arrow">▾</span></button>
-      <ul class="mob-submenu">
-        <li><a href="/blogs">Blog</a></li>
-        <li><a href="/faqs">FAQs</a></li>
-      </ul>
-    </li>
-    <li><a href="/contact" class="mob-cta">Contact Us</a></li>
-  </ul>
+  <div class="mnav-cards">
+    <div class="mnav-card" style="--mnav-card-bg:var(--navy)">
+      <div class="mnav-card-label">Company</div>
+      <div class="mnav-card-links">
+        <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>Home</a>
+        <a href="/team"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>Team</a>
+        <a href="/philosophy"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>Philosophy</a>
+      </div>
+    </div>
+
+    <div class="mnav-card" style="--mnav-card-bg:var(--core-blue)">
+      <div class="mnav-card-label">Services</div>
+      <div class="mnav-card-links">
+        <a href="/services"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>All Services</a>
+        <a href="/services/geo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>GEO + SEO</a>
+        <a href="/services/smartsheet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>Smartsheet</a>
+      </div>
+    </div>
+
+    <div class="mnav-card" style="--mnav-card-bg:var(--steel)">
+      <div class="mnav-card-label">Learn</div>
+      <div class="mnav-card-links">
+        <a href="/blogs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>Blog</a>
+        <a href="/faqs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>FAQs</a>
+      </div>
+    </div>
+  </div>
+
+  <a href="/contact" class="mob-cta">Contact Us</a>
 </div>
