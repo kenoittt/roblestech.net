@@ -239,6 +239,13 @@
   left: 6%;
   z-index: 40;
 }
+/* The Semrush comet takes the opposite corner. `left: auto` is needed as well
+   as `right`: the rule above sets left, and leaving both set would pin the
+   element across the band and stretch it. */
+.sticker-draggable.rtcs-geo-sticker-semrush {
+  left: auto;
+  right: 6%;
+}
 
 /* Narrow screens: the band's centred text and its two stacked CTAs use the
    full width, so there is no free corner to tuck into — the sticker landed on
@@ -253,6 +260,8 @@
 @media (max-width: 900px) {
   .rtcs-band.rtcs-closing-open { padding-bottom: 170px; }
   .sticker-draggable.rtcs-geo-sticker { top: auto; bottom: 16px; left: 16px; }
+  /* Still the opposite corner at this width, just a tighter inset. */
+  .sticker-draggable.rtcs-geo-sticker-semrush { left: auto; right: 16px; }
   .rtcs-geo-sticker .sticker-image,
   .rtcs-geo-sticker .sticker-flap-image { width: 96px; }
 }

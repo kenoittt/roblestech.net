@@ -170,3 +170,18 @@
     transition: none;
   }
 }
+
+/* Added for this site. The floating nav is translucent glass, so a sticker
+   scrolling underneath it shows straight through and reads as sitting on top
+   of it. The component fades the sticker for as long as it overlaps the nav.
+   Opacity only: the transform is GSAP's and must not be touched. */
+.sticker-draggable.sticker-behind-nav {
+  opacity: 0;
+  pointer-events: none;
+}
+.sticker-draggable {
+  transition: opacity 160ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticker-draggable { transition: none; }
+}

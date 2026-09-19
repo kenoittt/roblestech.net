@@ -40,6 +40,26 @@ import './StickerPeel.css';
  *      to these same pages earlier, and a name that generic sitting in a
  *      shared chunk is a collision waiting to happen. Everything else the
  *      component defines was already prefixed "sticker-".
+ *
+ *   4. The `avoid` prop keeps the sticker clear of the floating nav.
+ *
+ *      This is not a z-order problem and adding z-index does not fix it. The
+ *      sticker already paints behind the nav, which was verified by hit-testing
+ *      the overlap. The nav is glass — rgba(245,246,250,.55) over a blur — so
+ *      whatever is behind it shows through, and a sticker passing under it
+ *      reads as sitting on top of it.
+ *
+ *      topInset does not cover this either. It clamps the sticker's DOCUMENT
+ *      position, but the nav is fixed to the VIEWPORT, so any element in the
+ *      document passes through the nav's band on the way up the page no matter
+ *      where it is parked.
+ *
+ *      Two behaviours, because the two cases want different things. While
+ *      scrolling, the sticker fades out for as long as it overlaps the nav and
+ *      comes back when it is clear. While dragging, it does not fade, since
+ *      hiding the thing under the cursor would be worse than the overlap; it is
+ *      nudged clear of the nav on release instead, so it can never come to rest
+ *      behind the glass.
  */
 
 gsap.registerPlugin(Draggable, InertiaPlugin);
@@ -90,6 +110,20 @@ const clampToPage = (el, topInset = 0) => {
   }
 };
 
+/* How far the sticker's top sits above the bottom edge of the element it is
+ * meant to avoid, in viewport pixels. 0 when they do not overlap. Both rects
+ * are viewport rects, which is the space a fixed nav actually lives in. */
+const overlapWith = (el, selector) => {
+  if (!selector) return 0;
+  const avoidEl = document.querySelector(selector);
+  if (!avoidEl) return 0;
+  const r = el.getBoundingClientRect();
+  const n = avoidEl.getBoundingClientRect();
+  if (r.right <= n.left || r.left >= n.right) return 0;
+  if (r.top >= n.bottom || r.bottom <= n.top) return 0;
+  return n.bottom - r.top;
+};
+
 const StickerPeel = ({
   imageSrc,
   rotate = 30,
@@ -104,6 +138,7 @@ const StickerPeel = ({
   peelDirection = 0,
   bounds = '',
   topInset = 0,
+  avoid = '',
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -111,6 +146,7 @@ const StickerPeel = ({
   const pointLightRef = useRef(null);
   const pointLightFlippedRef = useRef(null);
   const draggableInstanceRef = useRef(null);
+  const draggingRef = useRef(false);
 
   const defaultPadding = 10;
 
@@ -141,6 +177,11 @@ const StickerPeel = ({
       type: 'x,y',
       bounds: usePage ? undefined : boundsFor(target),
       inertia: true,
+      onPress() {
+        draggingRef.current = true;
+        /* Never leave it faded out under the cursor. */
+        target.classList.remove('sticker-behind-nav');
+      },
       onDrag() {
         if (usePage) clampToPage(target, topInset);
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
@@ -153,8 +194,48 @@ const StickerPeel = ({
         const rotationEase = 'power2.out';
         const duration = 0.8;
         gsap.to(target, { rotation: 0, duration, ease: rotationEase });
+      },
+      /* Fires after the throw settles too, which is the moment that decides
+         where the sticker comes to rest. */
+      onRelease() {
+        draggingRef.current = false;
+        nudgeClear();
+      },
+      onThrowComplete() {
+        draggingRef.current = false;
+        nudgeClear();
       }
     })[0];
+
+    /* Push the sticker down until its top clears the nav, so it cannot be
+       parked behind the glass. Runs on release rather than during the drag. */
+    const nudgeClear = () => {
+      const over = overlapWith(target, avoid);
+      if (over <= 0) return;
+      gsap.to(target, {
+        y: (Number(gsap.getProperty(target, 'y')) || 0) + over + 12,
+        duration: 0.32,
+        ease: 'power2.out',
+        onComplete: () => { if (usePage) clampToPage(target, topInset); syncAvoid(); }
+      });
+    };
+
+    /* While scrolling, fade for exactly as long as the overlap lasts. */
+    const syncAvoid = () => {
+      if (!avoid || draggingRef.current) return;
+      target.classList.toggle('sticker-behind-nav', overlapWith(target, avoid) > 0);
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { ticking = false; syncAvoid(); });
+    };
+    if (avoid) {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      syncAvoid();
+    }
 
     /* Re-measure on resize. The published version clamped x and y to >= 0,
        which assumes the bounds start at the element's own origin; with page
@@ -166,6 +247,7 @@ const StickerPeel = ({
       if (!d) return;
       if (usePage) clampToPage(target, topInset);
       else d.update(true);
+      syncAvoid();
     };
 
     window.addEventListener('resize', handleResize);
@@ -174,11 +256,12 @@ const StickerPeel = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('scroll', onScroll);
       if (draggableInstanceRef.current) {
         draggableInstanceRef.current.kill();
       }
     };
-  }, [bounds, topInset]);
+  }, [bounds, topInset, avoid]);
 
   useEffect(() => {
     const updateLight = e => {

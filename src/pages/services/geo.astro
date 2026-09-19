@@ -493,19 +493,45 @@ const serviceSchema = {
     </div>
   </section>
 
-  {/* A draggable RTC sticker stuck to the left of the closing band. It is
-      absolutely positioned inside that band, but its drag bounds are the whole
-      document, so it can be carried anywhere on the page. client:visible means
-      React and GSAP only download once the band is scrolled into view. */}
+  {/* Two draggable stickers on the closing band, RTC on the left and the
+      Semrush comet on the right. Both are absolutely positioned inside that
+      band, but their drag bounds are the whole document, so either can be
+      carried anywhere on the page. client:visible means React and GSAP only
+      download once the band is scrolled into view.
+
+      avoid="#nav" is what keeps them out of the floating nav. The nav is
+      translucent glass, so a sticker passing behind it shows through and reads
+      as sitting on top of it; the component fades each one while it overlaps
+      and nudges it clear if a drag ends there. */}
   <StickerPeel
     slot="closing-extra"
     client:visible
     className="rtcs-geo-sticker"
     bounds="page"
     topInset={100}
+    avoid="#nav"
     imageSrc="/rtc-sticker.png"
     width={150}
     rotate={-8}
+    peelBackHoverPct={22}
+    peelBackActivePct={38}
+    shadowIntensity={0.5}
+    lightingIntensity={0.12}
+  />
+
+  {/* Mirrored: opposite corner, opposite tilt, and the peel lifts from the
+      other edge so the pair does not read as a copy-paste. */}
+  <StickerPeel
+    slot="closing-extra"
+    client:visible
+    className="rtcs-geo-sticker rtcs-geo-sticker-semrush"
+    bounds="page"
+    topInset={100}
+    avoid="#nav"
+    imageSrc="/semrush-sticker.png"
+    width={150}
+    rotate={8}
+    peelDirection={180}
     peelBackHoverPct={22}
     peelBackActivePct={38}
     shadowIntensity={0.5}
