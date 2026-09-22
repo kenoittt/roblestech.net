@@ -233,6 +233,7 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
   <button class="tab" data-tab="baseline">Baseline</button>
   <button class="tab" data-tab="performance">Performance</button>
   <button class="tab" data-tab="blogs">Blog performance</button>
+  <button class="tab" id="tabServices" data-tab="services" hidden>Service pages</button>
   <button class="tab" data-tab="trends">Trends &amp; log</button>
   <button class="tab" data-tab="sop">SOP status</button>
   <button class="tab" data-tab="ai">AI visibility</button>
@@ -365,6 +366,62 @@ tr.grp .grp-meta{ margin-left:auto; font-weight:600; color:var(--muted); text-tr
         </table>
       </div>
       <div class="note" id="bpNote"></div>
+    </div>
+  </div>
+
+  <!-- ============ SERVICE PAGES ============
+       Same shape as Blog performance, against config.services instead of the
+       content pipeline. Hidden entirely for a client with no service pages
+       configured, which is what scopes it without naming a client. -->
+  <div class="panel" id="panel-services">
+    <div class="rollups">
+      <div class="kpi"><div class="lbl">Pages tracked</div><div class="v" id="svTracked">0</div><div class="sub" id="svTrackedSub">service pages with a URL</div></div>
+      <div class="kpi"><div class="lbl">Clicks &middot; last 28d</div><div class="v" id="svClicks">0</div><div class="sub" id="svClicksSub">across tracked pages</div></div>
+      <div class="kpi"><div class="lbl">Impressions &middot; last 28d</div><div class="v" id="svImpr">0</div><div class="sub" id="svImprSub">across tracked pages</div></div>
+      <div class="kpi"><div class="lbl">Best performer</div><div class="v" id="svBest" style="font-size:1rem;line-height:1.35;">&mdash;</div><div class="sub" id="svBestSub">by clicks</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h2 style="margin:0;">History</h2>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <label style="font-size:12px;color:var(--steel);font-weight:600;margin:0;">Page
+            <select id="svPick" style="font-size:12px;padding:4px 6px;width:auto;max-width:340px;"></select>
+          </label>
+          <div class="toggles" id="svGran" style="margin:0;">
+            <button class="tgl" data-g="day">Day</button>
+            <button class="tgl active" data-g="week">Week</button>
+            <button class="tgl" data-g="month">Month</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box" style="margin-top:14px;"><canvas id="svcChart"></canvas></div>
+      <div class="note" id="svChartNote" style="margin-bottom:0;"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <h2 style="margin:0;">Per-page detail</h2>
+        <label style="font-size:12px;color:var(--steel);font-weight:600;margin:0;">Sort by
+          <select id="svSort" style="font-size:12px;padding:4px 6px;width:auto;">
+            <option value="clicks">Clicks (high to low)</option>
+            <option value="impr">Impressions (high to low)</option>
+            <option value="pos">Avg. position (best first)</option>
+            <option value="name">Page name</option>
+          </select>
+        </label>
+      </div>
+      <div class="bp-wrap" style="margin-top:14px;">
+        <table class="bp-table">
+          <thead><tr>
+            <th>Page</th>
+            <th class="num">Clicks</th><th class="num">Impressions</th>
+            <th class="num">CTR</th><th class="num">Avg&nbsp;pos.</th><th>First&nbsp;seen</th>
+          </tr></thead>
+          <tbody id="svBody"></tbody>
+        </table>
+      </div>
+      <div class="note" id="svNote"></div>
     </div>
   </div>
 
@@ -1563,6 +1620,182 @@ function makeBlogChart(){
     }
   });
 }
+/* ---------- service pages ----------
+   Deliberately a sibling of the blog code rather than a generalisation of it.
+   The two look alike today but answer different questions: a post is a dated
+   deliverable that gets ranked in plan order and compared against the month it
+   shipped, while a service page is evergreen and only ever ranked by
+   performance. Merging them would mean one function carrying both sets of
+   rules, and the shared parts here are the two small helpers below. */
+var svcSeries = __G.services || [];
+var svcConfigured = (window.__DASH__ && window.__DASH__.config && Array.isArray(window.__DASH__.config.services))
+  ? window.__DASH__.config.services : [];
+var svcChart = null;
+
+/* One row per configured service page, with its GSC series attached when we
+   have one. A page with no series is listed rather than dropped, so a page
+   that is not yet picking up impressions looks like the fact it is. */
+function svRows(){
+  var byPathMap = {};
+  svcSeries.forEach(function(s){ byPathMap[bpPath(s.url)] = s; });
+  return svcConfigured.map(function(p){
+    var s = p.url ? byPathMap[bpPath(p.url)] : null;
+    return {
+      label: p.label || p.url || "(unnamed)", url: p.url || "", s: s,
+      clicks: s ? s.totals.clicks : 0, impr: s ? s.totals.impr : 0
+    };
+  });
+}
+function svSort(rows, mode){
+  var byName = function(a, b){ return String(a.label).localeCompare(String(b.label)); };
+  if(mode === "name") return rows.sort(byName);
+  var metric = { clicks: function(r){ return r.clicks; },
+                 impr:   function(r){ return r.impr; },
+                 pos:    function(r){ return (r.s && r.s.totals.pos) || 0; } }[mode];
+  if(!metric) return rows.sort(byName);
+  var asc = mode === "pos";   // position 3 beats position 20
+  return rows.sort(function(a, b){
+    var av = metric(a), bv = metric(b);
+    var aHas = !!a.s && (!asc || av > 0), bHas = !!b.s && (!asc || bv > 0);
+    if(aHas !== bHas) return aHas ? -1 : 1;
+    if(!aHas) return byName(a, b);
+    return (asc ? av - bv : bv - av) || byName(a, b);
+  });
+}
+
+function renderServicePages(){
+  if(!svcConfigured.length) return;
+  var el = document.getElementById("svSort");
+  var rows = svSort(svRows(), (el && el.value) || "clicks");
+  var tracked = rows.filter(function(r){ return r.s; });
+  var clicks = tracked.reduce(function(a, r){ return a + r.clicks; }, 0);
+  var impr = tracked.reduce(function(a, r){ return a + r.impr; }, 0);
+
+  document.getElementById("svTracked").textContent = tracked.length;
+  document.getElementById("svTrackedSub").textContent =
+    tracked.length + " of " + rows.length + " configured page" + (rows.length === 1 ? "" : "s") + " reporting";
+  document.getElementById("svClicks").textContent = fmt(clicks);
+  document.getElementById("svImpr").textContent = fmt(impr);
+
+  var best = tracked.slice().sort(function(a, b){ return b.clicks - a.clicks; })[0];
+  document.getElementById("svBest").textContent = best && best.clicks > 0 ? best.label : "\u2014";
+  document.getElementById("svBestSub").textContent =
+    best && best.clicks > 0 ? fmt(best.clicks) + " clicks in 28d" : "no clicks recorded yet";
+
+  var tb = document.getElementById("svBody");
+  tb.innerHTML = "";
+  if(!rows.length){
+    tb.innerHTML = '<tr class="empty-row"><td colspan="6">No service pages configured yet.</td></tr>';
+  } else {
+    rows.forEach(function(r){
+      var tr = document.createElement("tr");
+      var nameCell = "<td>" + r.label + '<br><span class="r-period" style="font-size:11px;">' + r.url + "</span></td>";
+      if(!r.s){
+        tr.innerHTML = nameCell + '<td colspan="5" class="note" style="margin:0;">Awaiting the next daily Search Console pull.</td>';
+      } else {
+        tr.innerHTML = nameCell +
+          '<td class="num">' + fmt(r.clicks) + bpDelta(r.clicks, r.s.prev.clicks) + "</td>" +
+          '<td class="num">' + fmt(r.impr) + bpDelta(r.impr, r.s.prev.impr) + "</td>" +
+          '<td class="num">' + (r.impr ? r.s.totals.ctr + "%" : "\u2014") + "</td>" +
+          '<td class="num">' + (r.s.totals.pos || "\u2014") + "</td>" +
+          "<td>" + (r.s.first || "\u2014") + "</td>";
+      }
+      tb.appendChild(tr);
+    });
+  }
+  document.getElementById("svNote").innerHTML =
+    "<b>Reading this table.</b> Clicks, impressions, CTR and average position cover the trailing 28 days; the badge compares that to the previous 28. " +
+    "Average position is impression-weighted. Search Console lags ~2-3 days. " +
+    "Unlike a blog post, a service page has usually been live far longer than the engagement, so its numbers are a starting point to move rather than something this work created. " +
+    (__G.servicesRange ? "History window: " + __G.servicesRange + "." : "");
+
+  var pick = document.getElementById("svPick");
+  if(pick && !pick.options.length){
+    var opts = ['<option value="__all">All service pages (combined)</option>'];
+    rows.slice().sort(function(a, b){ return String(a.label).localeCompare(String(b.label)); })
+      .forEach(function(r){ if(r.s) opts.push('<option value="' + r.url + '">' + r.label + "</option>"); });
+    pick.innerHTML = opts.join("");
+  }
+}
+
+function makeServiceChart(){
+  if(!svcConfigured.length) return;
+  if(typeof Chart === "undefined"){ console.error("Chart.js did not load; svcChart skipped."); return; }
+  var pick = document.getElementById("svPick");
+  var granBtn = document.querySelector("#svGran .tgl.active");
+  var gran = granBtn ? granBtn.getAttribute("data-g") : "week";
+  var sel = pick ? pick.value : "__all";
+
+  var daily = [];
+  if(sel === "__all"){
+    var byDate = {};
+    svcSeries.forEach(function(s){
+      (s.daily || []).forEach(function(r){
+        if(!byDate[r.d]) byDate[r.d] = { d: r.d, c: 0, i: 0 };
+        byDate[r.d].c += r.c; byDate[r.d].i += r.i;
+      });
+    });
+    daily = Object.keys(byDate).map(function(k){ return byDate[k]; });
+  } else {
+    var one = svcSeries.filter(function(s){ return bpPath(s.url) === bpPath(sel); })[0];
+    daily = one ? (one.daily || []).slice() : [];
+  }
+  daily.sort(function(a, b){ return a.d.localeCompare(b.d); });
+
+  var t = bpAgg(daily, gran);
+  var note = document.getElementById("svChartNote");
+  if(note) note.textContent = daily.length
+    ? trendNote(t)
+    : "No Search Console rows for this selection yet.";
+
+  if(svcChart){
+    svcChart.data.labels = t.labels;
+    svcChart.data.datasets[0].data = t.impr;
+    svcChart.data.datasets[1].data = t.clicks;
+    svcChart.update();
+    return;
+  }
+  var ctx = document.getElementById("svcChart").getContext("2d");
+  svcChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: t.labels,
+      datasets: [
+        { label:"Impressions", data: t.impr, borderColor: cv("--brand"), backgroundColor: cv("--brand"), tension:.3, yAxisID:"yI" },
+        { label:"Clicks", data: t.clicks, borderColor: cv("--chart-2"), backgroundColor: cv("--chart-2"), tension:.3, yAxisID:"yC" }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { family: cv("--font") } } } },
+      scales: {
+        yI: { position:"left",  beginAtZero:true, title:{display:true,text:"Impressions"} },
+        yC: { position:"right", beginAtZero:true, grid:{drawOnChartArea:false}, title:{display:true,text:"Clicks"} }
+      }
+    }
+  });
+}
+
+function initServiceControls(){
+  /* The tab only exists for a client with service pages configured. Revealing
+     it here rather than in the markup means one source of truth: if the list
+     is empty there is no tab, no panel and no GSC calls behind it. */
+  var tab = document.getElementById("tabServices");
+  if(!svcConfigured.length){ return; }
+  if(tab) tab.hidden = false;
+
+  var g = document.getElementById("svGran");
+  if(g) g.addEventListener("click", function(e){
+    var b = e.target.closest(".tgl"); if(!b) return;
+    document.querySelectorAll("#svGran .tgl").forEach(function(x){ x.classList.remove("active"); });
+    b.classList.add("active"); makeServiceChart();
+  });
+  var pick = document.getElementById("svPick");
+  if(pick) pick.addEventListener("change", makeServiceChart);
+  var srt = document.getElementById("svSort");
+  if(srt) srt.addEventListener("change", renderServicePages);
+}
+
 function initBlogControls(){
   var g = document.getElementById("bpGran");
   if(g) g.addEventListener("click", function(e){
@@ -1602,6 +1835,7 @@ function initTabs(){
     // the first time their panel actually becomes visible.
     if(btn.getAttribute("data-tab") === "trends") safe(makeDailyChart, "makeDailyChart");
     if(btn.getAttribute("data-tab") === "blogs")  safe(makeBlogChart, "makeBlogChart");
+    if(btn.getAttribute("data-tab") === "services") safe(makeServiceChart, "makeServiceChart");
   });
 }
 
@@ -1626,6 +1860,7 @@ function initDashboard(){
   safe(initPerfToggles, "initPerfToggles");
   safe(initTrendControls, "initTrendControls");
   safe(initBlogControls, "initBlogControls");
+  safe(initServiceControls, "initServiceControls");
   safe(renderMeta, "renderMeta");
   safe(renderPipeline, "renderPipeline");
   safe(initPipelineToggles, "initPipelineToggles");
@@ -1634,6 +1869,7 @@ function initDashboard(){
   safe(renderBaseline, "renderBaseline");
   safe(renderSop, "renderSop");
   safe(renderBlogPerf, "renderBlogPerf");
+  safe(renderServicePages, "renderServicePages");
   safe(renderAi, "renderAi");
   safe(renderOpenItems, "renderOpenItems");
   safe(computeRollups, "computeRollups");

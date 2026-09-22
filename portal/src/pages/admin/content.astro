@@ -12,6 +12,10 @@ const cfg: any = ((client as any).config && typeof (client as any).config === 'o
 const baseline = cfg.baseline ?? {};
 const pages = Array.isArray(baseline.pages) ? baseline.pages : [];
 const pipeline = Array.isArray(cfg.pipeline) ? cfg.pipeline : [];
+/* Service pages to track in Search Console. Only a client with a list here
+   gets the Service pages tab on their dashboard, so this doubles as the
+   switch that turns it on. */
+const services = Array.isArray(cfg.services) ? cfg.services : [];
 const openItems = Array.isArray(cfg.openItems) ? cfg.openItems : [];
 const isSuper = Astro.locals.profile?.role === 'super_admin';
 
@@ -98,11 +102,17 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     <div id="pipeList"></div>
     <button type="button" class="mini js-add" data-list="pipe">+ Add post</button>
 
+    <div class="section-h">Service pages <span style="font-weight:600;font-size:.72rem;color:var(--steel);">&middot; Search Console tracking</span></div>
+    <p class="hint" style="margin:-6px 0 12px;">Pages to track for clicks and impressions alongside the blog. Leave empty and the client's dashboard shows no Service pages tab at all.</p>
+    <div id="svcList"></div>
+    <button type="button" class="mini js-add" data-list="svc">+ Add page</button>
+
     <div class="section-h">Open items</div>
     <div id="oiList"></div>
     <button type="button" class="mini js-add" data-list="oi">+ Add item</button>
 
     <input type="hidden" name="pipeline" id="f-pipe" />
+    <input type="hidden" name="services" id="f-svc" />
     <input type="hidden" name="openItems" id="f-oi" />
     <div style="margin-top:22px;"><button class="btn" type="submit">Save content</button></div>
   </form>
@@ -206,7 +216,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
     </div>
   )}
 
-  <script is:inline define:vars={{ pipeline, openItems, isSuper }}>
+  <script is:inline define:vars={{ pipeline, services, openItems, isSuper }}>
     const mk = (html) => { const d = document.createElement('div'); d.className = 'erow'; d.innerHTML = html; return d; };
     const esc = (s) => (s == null ? '' : String(s)).replace(/"/g, '&quot;');
     const statusOpts = (sel) => ['Not Started','Drafting','For Review','Live'].map((o) => `<option${o===sel?' selected':''}>${o}</option>`).join('');
@@ -234,6 +244,10 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
        <button type="button" class="mini js-del">✕</button>
        <input data-f="url" placeholder="/blogs/post-slug — needed for GSC tracking" value="${esc(d.url)}" style="flex:1 1 100%;" title="Path or full URL. This is what the Blog performance tab matches against Search Console.">
        ${sopPanel(d.sop)}`); }
+    function svcRow(d){ d=d||{}; return mk(
+      `<input data-f="label" placeholder="Page name — e.g. GEO + SEO" value="${esc(d.label)}" style="flex:1;">
+       <input data-f="url" placeholder="/services/geo — needed for GSC tracking" value="${esc(d.url)}" style="flex:2;" title="Path or full URL. This is what the Service pages tab matches against Search Console.">
+       <button type="button" class="mini js-del">✕</button>`); }
     function oiRow(d){ d=d||{}; return mk(
       `<select data-f="pri" style="width:90px;">${priOpts(d.pri)}</select>
        <input data-f="text" placeholder="Deliverable / item" value="${esc(d.text)}" style="flex:1;">
@@ -241,6 +255,7 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
 
     const lists = {
       pipe:  { el: document.getElementById('pipeList'),  row: pipeRow,  data: pipeline },
+      svc:   { el: document.getElementById('svcList'),   row: svcRow,   data: services },
       oi:    { el: document.getElementById('oiList'),    row: oiRow,    data: openItems },
     };
     Object.values(lists).forEach((L) => (L.data || []).forEach((d) => L.el.appendChild(L.row(d))));
@@ -276,6 +291,10 @@ const v = (x: any) => (x === undefined || x === null ? '' : String(x));
           const sop = Array.from(r.querySelectorAll('[data-s]')).map((s) => s.value);
           return { num:o.num, post:o.post, status:o.status, published:o.published, url:(o.url||'').trim(), sop };
         }).filter((x)=>x.post||x.num));
+      // A row with no URL cannot be matched against Search Console, so it is
+      // dropped rather than saved as an entry that would always read "no data".
+      document.getElementById('f-svc').value   = JSON.stringify(
+        collect(lists.svc.el, (o) => ({ label:(o.label||'').trim(), url:(o.url||'').trim() })).filter((x)=>x.url));
       document.getElementById('f-oi').value    = JSON.stringify(collect(lists.oi.el, (o) => ({ pri:o.pri, text:o.text })).filter((x)=>x.text));
     });
 

@@ -64,6 +64,11 @@ export type GscData = {
   /** Per-tracked-post series powering the Blog performance tab. */
   posts: PostSeries[];
   postsRange: string;
+  /** Per-service-page series powering the Service pages tab. Same shape and
+   *  same fetch as posts: a tracked URL is a tracked URL, and the only real
+   *  difference is which list it came from and how long it has existed. */
+  services: PostSeries[];
+  servicesRange: string;
 };
 
 /**
@@ -174,7 +179,11 @@ async function fetchPostSeries(
 }
 
 /** Pull ~90 days of daily metrics + top pages (28d) for one property. */
-export async function fetchGscData(property: string, postUrls: string[] = []): Promise<GscData> {
+export async function fetchGscData(
+  property: string,
+  postUrls: string[] = [],
+  serviceUrls: string[] = []
+): Promise<GscData> {
   const token = await accessToken();
 
   // GSC finalizes data over ~2-3 days; end the window 2 days back.
@@ -188,14 +197,23 @@ export async function fetchGscData(property: string, postUrls: string[] = []): P
   // chart still has a shape to show for posts published months ago.
   const postStart = new Date(end);
   postStart.setUTCDate(postStart.getUTCDate() - 179);
+  // Service pages predate the engagement, so their history is worth more than
+  // a post's: a full 16 months lets a seasonal shape and a year-on-year
+  // comparison show up rather than half a year of flat line. GSC itself only
+  // retains 16 months, so this is as deep as the API goes.
+  const svcStart = new Date(end);
+  svcStart.setUTCDate(svcStart.getUTCDate() - 485);
   const prevFrom = new Date(page28Start);
   prevFrom.setUTCDate(prevFrom.getUTCDate() - 28);
 
-  const [dateRows, pageRows, posts] = await Promise.all([
+  const [dateRows, pageRows, posts, services] = await Promise.all([
     query(token, property, { startDate: iso(start), endDate: iso(end), dimensions: ['date'], rowLimit: 500 }),
     query(token, property, { startDate: iso(page28Start), endDate: iso(end), dimensions: ['page'], rowLimit: 25 }),
     postUrls.length
       ? fetchPostSeries(token, property, postUrls, iso(postStart), iso(end), iso(page28Start), iso(prevFrom))
+      : Promise.resolve([] as PostSeries[]),
+    serviceUrls.length
+      ? fetchPostSeries(token, property, serviceUrls, iso(svcStart), iso(end), iso(page28Start), iso(prevFrom))
       : Promise.resolve([] as PostSeries[]),
   ]);
 
@@ -227,5 +245,7 @@ export async function fetchGscData(property: string, postUrls: string[] = []): P
     pullRange: `${iso(page28Start)} to ${iso(end)} (last 28 days)`,
     posts,
     postsRange: `${iso(postStart)} to ${iso(end)} (${posts.length} tracked post${posts.length === 1 ? '' : 's'})`,
+    services,
+    servicesRange: `${iso(svcStart)} to ${iso(end)} (${services.length} tracked page${services.length === 1 ? '' : 's'})`,
   };
 }

@@ -25,7 +25,14 @@ export async function runGscRefresh(clientId?: string): Promise<RefreshResult[]>
       const postUrls = (Array.isArray(pipeline) ? pipeline : [])
         .map((p) => String((p as { url?: unknown })?.url ?? '').trim())
         .filter(Boolean);
-      const gsc = await fetchGscData(row.gsc_property, postUrls);
+      // Service pages are tracked the same way, from their own list. A client
+      // with no config.services simply gets an empty array and no extra GSC
+      // calls, which is what keeps the Service pages tab off their dashboard.
+      const svc = (row.config as { services?: unknown })?.services;
+      const serviceUrls = (Array.isArray(svc) ? svc : [])
+        .map((p) => String((p as { url?: unknown })?.url ?? '').trim())
+        .filter(Boolean);
+      const gsc = await fetchGscData(row.gsc_property, postUrls, serviceUrls);
       const { error: upErr } = await admin
         .from('clients')
         .update({ gsc_data: gsc, gsc_updated_at: new Date().toISOString() })

@@ -12,7 +12,7 @@ const parseArr = (v: FormDataEntryValue | null) => {
   try { const a = JSON.parse(String(v ?? '[]')); return Array.isArray(a) ? a : []; } catch { return []; }
 };
 
-// Save Baseline + Content pipeline + Open items into a client's config,
+// Save Baseline + Content pipeline + Service pages + Open items into a client's config,
 // preserving the rest (brand, hero, aiAudit, sopSteps). Routes through the
 // approval gate (super admins apply; regular admins queue for approval).
 export const POST: APIRoute = async (context) => {
@@ -39,6 +39,10 @@ export const POST: APIRoute = async (context) => {
     baseline,
     ...(form.has('pipeline') ? { pipeline: parseArr(form.get('pipeline')) } : {}),
     ...(form.has('openItems') ? { openItems: parseArr(form.get('openItems')) } : {}),
+    // Service pages to track in GSC. Only clients with a list here get the
+    // Service pages tab, which is how it stays scoped without the dashboard
+    // having to know any client by name.
+    ...(form.has('services') ? { services: parseArr(form.get('services')) } : {}),
   };
 
   return gateChange(
