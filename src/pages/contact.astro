@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SMARTSHEET_TIERS, usd } from '../data/offers';
 import Arrow from '../components/Arrow.astro';
 ---
 
@@ -110,7 +111,7 @@ import Arrow from '../components/Arrow.astro';
         <div class="cd-icon"></div>
         <div>
           <div class="cd-label">Smartsheet Pricing</div>
-          <div class="cd-val">Launchpad $3,500 · Momentum $9,500 · Enterprise $22,000<br><a href="/services/smartsheet">See all tiers →</a></div>
+          <div class="cd-val">{SMARTSHEET_TIERS.map((t) => `${t.name} ${usd(t.price)}`).join(" · ")}<br><a href="/services/smartsheet">See all tiers →</a></div>
         </div>
       </div>
     </div>

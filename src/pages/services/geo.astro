@@ -3,6 +3,7 @@ import ServiceLayout from '../../layouts/ServiceLayout.astro';
 import SopStepper from '../../components/SopStepper.astro';
 import StickerPeel from '../../components/StickerPeel.jsx';
 import GapReportModal from '../../components/GapReportModal.astro';
+import { GEO_TIERS, GAP_REPORT, usd } from '../../data/offers';
 
 /*
  * Service Line 01 — GEO + SEO. The flagship page.
@@ -29,7 +30,7 @@ const AUDIENCES = [
 
 const TIERS = [
   {
-    label: 'Starter', name: 'Foundation', amt: '$2,500', unit: '/mo',
+    label: 'Starter', name: 'Foundation', amt: usd(GEO_TIERS[0].price), unit: GEO_TIERS[0].unit,
     tagline: 'Build your AI visibility baseline — tracking, content and schema locked in.',
     included: [
       '10 questions tracked across ChatGPT, Perplexity, Gemini and Google',
@@ -51,7 +52,7 @@ const TIERS = [
     rec: false,
   },
   {
-    label: 'Recommended', name: 'Engine', amt: '$4,500', unit: '/mo',
+    label: 'Recommended', name: 'Engine', amt: usd(GEO_TIERS[1].price), unit: GEO_TIERS[1].unit,
     tagline: 'The full GEO system.',
     inherits: 'Foundation',
     included: [
@@ -75,7 +76,7 @@ const TIERS = [
     rec: true,
   },
   {
-    label: 'Scale', name: 'Operator', amt: '$7,500', unit: '/mo',
+    label: 'Scale', name: 'Operator', amt: usd(GEO_TIERS[2].price), unit: GEO_TIERS[2].unit,
     tagline: 'Maximum coverage, founder access and a quarterly PR push.',
     inherits: 'Engine',
     included: [
@@ -203,7 +204,7 @@ const serviceSchema = {
   cta2Label="Book a Discovery Call"
   cta2Href="/contact#schedule"
   closingH2="See Where Your Brand Goes Invisible"
-  closingText="The Gap Report is free, no sales call required, and yours to keep either way."
+  closingText={`The Gap Report is free and yours to keep. ${GAP_REPORT.callLine}`}
   closingCtaLabel="Get Your Free Gap Report"
   closingCtaHref={GAP}
   closingCtaVariant="lime"
@@ -312,7 +313,7 @@ const serviceSchema = {
         <div class="txt">
           <div class="rtcs-eyebrow">Start Here · Free</div>
           <h2 style="font-size:28px;font-weight:800;letter-spacing:-.02em;">AI Visibility Gap Report</h2>
-          <p>A 10-query diagnostic across ChatGPT, Gemini and Perplexity, with a screenshot of every place your brand goes invisible and a clear roadmap if you decide to fix it. No sales call required to receive it. The report is yours to keep either way.</p>
+          <p>A {GAP_REPORT.queries}-query diagnostic across {GAP_REPORT.engines}, with a screenshot of every place your brand goes invisible and a clear roadmap if you decide to fix it. {GAP_REPORT.callLine} {GAP_REPORT.keepLine}</p>
         </div>
         <a href={GAP} class="rtcs-btn-lime">Get Your Free Gap Report
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>

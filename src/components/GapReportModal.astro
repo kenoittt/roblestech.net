@@ -1,4 +1,6 @@
 ---
+import { GAP_REPORT } from '../data/offers';
+
 /*
  * Gap Report request modal.
  *
@@ -44,7 +46,7 @@ const GAP_HREF_MATCH = 'request=gap-report';
 
     <div class="gapreq-eyebrow">Start Here · Free</div>
     <h2 class="gapreq-h" id="gapTitle">Request Your Free Gap Report</h2>
-    <p class="gapreq-p" id="gapDesc">A 10-query diagnostic across ChatGPT, Gemini and Perplexity. We send a screenshot of every place your brand goes invisible, plus a roadmap if you decide to fix it. No sales call required.</p>
+    <p class="gapreq-p" id="gapDesc">A {GAP_REPORT.queries}-query diagnostic across {GAP_REPORT.engines}. We send a screenshot of every place your brand goes invisible, plus a roadmap if you decide to fix it, and walk you through it on a {GAP_REPORT.callMinutes}-minute call.</p>
 
     <form class="gapreq-form" id="gapForm" action={SF_ENDPOINT} method="POST" target="gap_sink" novalidate>
       <input type="hidden" name="oid" value={SF_OID} />
@@ -100,7 +102,7 @@ const GAP_HREF_MATCH = 'request=gap-report';
       <button type="submit" class="gapreq-btn" id="gapSubmit">Request My Gap Report
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
       </button>
-      <p class="gapreq-fine">The report is yours to keep either way. We reply within 1 business day.</p>
+      <p class="gapreq-fine">{GAP_REPORT.keepLine} We reply within 1 business day to book your {GAP_REPORT.callMinutes} minutes.</p>
     </form>
   </div>
 </div>

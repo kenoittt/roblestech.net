@@ -1,5 +1,59 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  GEO_TIERS, geoTier, GAP_REPORT, SMARTSHEET_TIERS, smartsheetTier,
+  SMARTSHEET_ADDONS, CONSULTING_RETAINER, AUTOMATION_AUDIT, GEO_MIN_TERM, usd,
+} from '../data/offers';
+
+/*
+ * Every price on this page comes from src/data/offers.ts, including the copies
+ * inside the FAQPage JSON-LD below. They had drifted: this page was quoting the
+ * GEO tiers a full price generation behind /services/geo, and describing the
+ * Gap Report as a paid 20-query diagnostic when it had become a free 10-query
+ * one. The structured data carried the same stale figures, so the wrong numbers
+ * were the ones search engines were being handed.
+ */
+const F = geoTier('foundation'), E = geoTier('engine'), O = geoTier('operator');
+const SS_L = smartsheetTier('launchpad'), SS_M = smartsheetTier('momentum'), SS_E = smartsheetTier('enterprise');
+
+/* FAQPage structured data.
+ *
+ * Built here and serialized rather than written as inline JSON. It used to be
+ * an is:inline block, which Astro passes through untouched, so its prices could
+ * not reference anything and had to be retyped by hand. They were, and they
+ * went stale: the block was still advertising a $1,000 Gap Report and the old
+ * GEO tier prices. Structured data is what Google reads, so that was the worst
+ * copy to leave behind. Every figure below now comes from offers.ts. */
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    ['What is Robles Technologies Corp. (RTC)?',
+     'RTC is a Filipino-founded IT services company that bridges world-class Filipino IT talent with global clients. We specialize in GEO + SEO, Smartsheet development, and technical consulting — delivering high-standard execution with zero offshore communication friction.'],
+    ['Who do you typically work with?',
+     'We work with growing businesses and enterprises that need reliable tech support — from startups scaling their operations to Fortune 500 companies needing specialized Smartsheet or integration work. Our clients span various industries across the US and globally.'],
+    ['Do I need an existing Smartsheet subscription to work with RTC?',
+     'Yes. Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your Smartsheet environment.'],
+    ['Can you integrate Smartsheet with other tools we use?',
+     `Yes. We support integrations with tools like Jira, Salesforce, Slack, and more. Third-party integrations are included in the ${SS_M.name} tier and above, or available as add-ons starting from ${usd(SMARTSHEET_ADDONS.apiIntegration)} per system.`],
+    ['What is GEO, and how is it different from traditional SEO?',
+     'Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category — on ChatGPT, Gemini and Perplexity. Traditional SEO competes for a position in a list of links; GEO competes to be the answer. Only 3–5 brands get cited per AI answer, so the brand that establishes authority first is hard to displace.'],
+    ['What is the AI Visibility Gap Report?',
+     `${GAP_REPORT.priceLabel}: ${GAP_REPORT.queries} buying-intent queries run across ${GAP_REPORT.engines}, with screenshots of every place your brand is invisible and a roadmap if you decide to fix it, walked through on a ${GAP_REPORT.callMinutes}-minute call.`],
+    ['Do I own the content RTC produces?',
+     'Yes, at every GEO tier. Posts, schema, tracking setup and reporting are all yours to keep, with no lock-in.'],
+    ['How much does GEO + SEO cost?',
+     `Three monthly tiers, each on a ${GEO_MIN_TERM}: ${GEO_TIERS.map((t) => `${t.name} ${usd(t.price)}/month`).join(', ')}. The AI Visibility Gap Report is ${GAP_REPORT.priceLabel.toLowerCase()} and is the usual place to start.`],
+    ['What does Automations & AI cover?',
+     `Custom AI agents that triage, draft and act on repetitive knowledge work, plus event-driven integration pipelines that keep your systems in sync. Most engagements start with a ${usd(AUTOMATION_AUDIT.price)} Automation Audit, credited back in full against any build started within ${AUTOMATION_AUDIT.creditDays} days. Three packaged tiers follow: Pilot from $5,500 for one agent on one process, Copilot from $18,500 for up to three agents automating a full funnel, and Autopilot from $45,000 for up to six agents running sales, support and ops as one connected system.`],
+    ['How much do AI agents and automation cost?',
+     'Build fees are one-time: Pilot from $5,500 (2-3 weeks), Copilot from $18,500 (4-8 weeks) and Autopilot from $45,000 (8-16 weeks). An optional Managed AI Operations retainer starts at $1,500/mo for Pilot, $3,500/mo for Copilot and $7,500/mo for Autopilot, with a 6-month minimum term on Pilot and Copilot and 12 months on Autopilot. AI model, telephony and messaging usage is billed directly to accounts in your own name, so we never take a cut of it.'],
+    ['Do you build Web3 or blockchain projects?',
+     'Yes — smart contracts, wallet integrations and dApp front-ends, delivered in partnership with Quecko, plus honest guidance on where blockchain adds value and where it does not. Custom-scoped per project while packages are finalized.'],
+    ['Are your prices fixed or do they change after scoping?',
+     "We send fixed-price proposals within 48 hours of your discovery call. For project work, what's quoted is what you pay — no hidden fees. Retainers have defined monthly inclusions with overages billed at transparent hourly rates."],
+  ].map(([name, text]) => ({ '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text } })),
+};
 ---
 
 <BaseLayout
@@ -191,25 +245,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         .faq-nav a { font-size: 0.72rem; padding: 6px 10px; }
       }
     </style>
-    <script type="application/ld+json" is:inline>
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {"@type":"Question","name":"What is Robles Technologies Corp. (RTC)?","acceptedAnswer":{"@type":"Answer","text":"RTC is a Filipino-founded IT services company that bridges world-class Filipino IT talent with global clients. We specialize in GEO + SEO, Smartsheet development, and technical consulting — delivering high-standard execution with zero offshore communication friction."}},
-    {"@type":"Question","name":"Who do you typically work with?","acceptedAnswer":{"@type":"Answer","text":"We work with growing businesses and enterprises that need reliable tech support — from startups scaling their operations to Fortune 500 companies needing specialized Smartsheet or integration work. Our clients span various industries across the US and globally."}},
-    {"@type":"Question","name":"Do I need an existing Smartsheet subscription to work with RTC?","acceptedAnswer":{"@type":"Answer","text":"Yes. Your Smartsheet plan (Pro, Business, or Enterprise) is billed directly by Smartsheet to your organization — not through RTC. Our fees cover the consulting, build, and support work we perform within your Smartsheet environment."}},
-    {"@type":"Question","name":"Can you integrate Smartsheet with other tools we use?","acceptedAnswer":{"@type":"Answer","text":"Yes. We support integrations with tools like Jira, Salesforce, Slack, and more. Third-party integrations are included in the Momentum tier and above, or available as add-ons starting from $3,500 per system."}},
-    {"@type":"Question","name":"What is GEO, and how is it different from traditional SEO?","acceptedAnswer":{"@type":"Answer","text":"Generative Engine Optimization structures your content so AI models cite your brand by name when buyers ask questions in your category — on ChatGPT, Gemini and Perplexity. Traditional SEO competes for a position in a list of links; GEO competes to be the answer. Only 3–5 brands get cited per AI answer, so the brand that establishes authority first is hard to displace."}},
-    {"@type":"Question","name":"What is the AI Visibility Gap Report?","acceptedAnswer":{"@type":"Answer","text":"A one-time $1,000 diagnostic: 20 buying-intent queries run across ChatGPT, Gemini and Perplexity, with screenshots of every place your brand is invisible and a roadmap if you decide to fix it."}},
-    {"@type":"Question","name":"Do I own the content RTC produces?","acceptedAnswer":{"@type":"Answer","text":"Yes, at every GEO tier. Posts, schema, tracking setup and reporting are all yours to keep, with no lock-in."}},
-    {"@type":"Question","name":"What does Automations & AI cover?","acceptedAnswer":{"@type":"Answer","text":"Custom AI agents that triage, draft and act on repetitive knowledge work, plus event-driven integration pipelines that keep your systems in sync. Most engagements start with a $2,500 Automation Audit, credited back in full against any build started within 60 days. Three packaged tiers follow: Pilot from $5,500 for one agent on one process, Copilot from $18,500 for up to three agents automating a full funnel, and Autopilot from $45,000 for up to six agents running sales, support and ops as one connected system."}},
-    {"@type":"Question","name":"How much do AI agents and automation cost?","acceptedAnswer":{"@type":"Answer","text":"Build fees are one-time: Pilot from $5,500 (2-3 weeks), Copilot from $18,500 (4-8 weeks) and Autopilot from $45,000 (8-16 weeks). An optional Managed AI Operations retainer starts at $1,500/mo for Pilot, $3,500/mo for Copilot and $7,500/mo for Autopilot, with a 6-month minimum term on Pilot and Copilot and 12 months on Autopilot. AI model, telephony and messaging usage is billed directly to accounts in your own name, so we never take a cut of it."}},
-    {"@type":"Question","name":"Do you build Web3 or blockchain projects?","acceptedAnswer":{"@type":"Answer","text":"Yes — smart contracts, wallet integrations and dApp front-ends, delivered in partnership with Quecko, plus honest guidance on where blockchain adds value and where it does not. Custom-scoped per project while packages are finalized."}},
-    {"@type":"Question","name":"Are your prices fixed or do they change after scoping?","acceptedAnswer":{"@type":"Answer","text":"We send fixed-price proposals within 48 hours of your discovery call. For project work, what's quoted is what you pay — no hidden fees. Retainers have defined monthly inclusions with overages billed at transparent hourly rates."}}
-  ]
-}
-    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   </Fragment>
 
   <!-- PAGE HERO -->
@@ -283,9 +319,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div class="faq-a">
               <p>The tiers scale by complexity and team size:</p>
               <ul>
-                <li><strong>Launchpad ($3,500)</strong> — Small teams, up to 5 sheets, basic automations, 1 dashboard. Best for getting started.</li>
-                <li><strong>Momentum ($9,500)</strong> — Up to 15 sheets, advanced automations, one third-party integration (e.g. Jira, Salesforce, Slack), and team training.</li>
-                <li><strong>Enterprise ($22,000+)</strong> — Unlimited sheets, Bridge workflows, multi-system API integrations, Control Center/PMO setup, and a 90-day adoption guarantee.</li>
+                <li><strong>Launchpad ({usd(SS_L.price)})</strong> — Small teams, up to 5 sheets, basic automations, 1 dashboard. Best for getting started.</li>
+                <li><strong>Momentum ({usd(SS_M.price)})</strong> — Up to 15 sheets, advanced automations, one third-party integration (e.g. Jira, Salesforce, Slack), and team training.</li>
+                <li><strong>Enterprise ({usd(SS_E.price)}+)</strong> — Unlimited sheets, Bridge workflows, multi-system API integrations, Control Center/PMO setup, and a 90-day adoption guarantee.</li>
               </ul>
             </div>
           </div>
@@ -310,10 +346,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div class="faq-a">
               <p>Yes. We offer enhancement add-ons at any point:</p>
               <ul>
-                <li>Additional API integrations from <strong>$3,500 per system</strong></li>
+                <li>Additional API integrations from <strong>{usd(SMARTSHEET_ADDONS.apiIntegration)} per system</strong></li>
                 <li>Dashboard expansions from <strong>$600</strong></li>
                 <li>Extra training sessions from <strong>$450</strong></li>
-                <li>Smartsheet AI enablement from <strong>$4,500</strong></li>
+                <li>Smartsheet AI enablement from <strong>{usd(SMARTSHEET_ADDONS.aiEnablement)}</strong></li>
               </ul>
             </div>
           </div>
@@ -335,7 +371,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="faq-item">
             <div class="faq-q">What's included in the monthly Retainer? <span class="faq-chevron">▾</span></div>
-            <div class="faq-a"><p>The Retainer ($3,500/month, minimum 3-month commitment) includes up to 20 hours of consulting, architecture design, API builds and maintenance, web/app feature development, code review, a monthly strategy call, and async support via a dedicated channel. Hours beyond 20/month are billed at $175/hr.</p></div>
+            <div class="faq-a"><p>The Retainer ({usd(CONSULTING_RETAINER.price)}/month, {CONSULTING_RETAINER.minTerm}) includes up to 20 hours of consulting, architecture design, API builds and maintenance, web/app feature development, code review, a monthly strategy call, and async support via a dedicated channel. Hours beyond 20/month are billed at $175/hr.</p></div>
           </div>
 
           <div class="faq-item">
@@ -363,19 +399,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="faq-item">
             <div class="faq-q">What's the AI Visibility Gap Report? <span class="faq-chevron">▾</span></div>
-            <div class="faq-a"><p>A one-time $1,000 diagnostic and the usual place to start. We run 20 buying-intent queries across ChatGPT, Gemini and Perplexity and send you screenshots of every place your brand is invisible, plus a roadmap if you decide to fix it. Low-risk proof of the problem before you commit to a retainer.</p></div>
+            <div class="faq-a"><p>{GAP_REPORT.priceLabel}, and the usual place to start. We run {GAP_REPORT.queries} buying-intent queries across {GAP_REPORT.engines} and send you screenshots of every place your brand is invisible, plus a roadmap if you decide to fix it. We walk you through the findings on a {GAP_REPORT.callMinutes}-minute call. Low-risk proof of the problem before you commit to a retainer.</p></div>
           </div>
 
           <div class="faq-item">
             <div class="faq-q">What's included in the Foundation tier? <span class="faq-chevron">▾</span></div>
-            <div class="faq-a"><p><strong>Foundation ($2,000/month, 3-month minimum)</strong> builds your baseline: AI-visibility tracking across ChatGPT, Gemini and Perplexity, 2 GEO + SEO posts per month structured for citation, FAQ schema implementation, and a monthly scorecard of citation appearances and ranking shifts. Best for brands just starting to build AI search presence.</p></div>
+            <div class="faq-a"><p><strong>Foundation ({usd(F.price)}/month, 3-month minimum)</strong> builds your baseline: AI-visibility tracking across ChatGPT, Gemini and Perplexity, 2 GEO + SEO posts per month structured for citation, FAQ schema implementation, and a monthly scorecard of citation appearances and ranking shifts. Best for brands just starting to build AI search presence.</p></div>
           </div>
 
           <div class="faq-item">
             <div class="faq-q">When should I move up to Engine or Operator? <span class="faq-chevron">▾</span></div>
             <div class="faq-a">
-              <p>Choose <strong>Engine ($3,500/month)</strong> — our recommended tier — when you want the full system rather than a baseline: a complete visibility audit and content plan, 4 citation-optimized posts per month, FAQ schema plus Google Search Console setup, monthly reporting on citations and AI appearances, and an async strategy review each month.</p>
-              <p>Choose <strong>Operator ($6,000/month)</strong> when you want maximum output: everything in Engine plus 6–8 posts per month, conversion-focused product and landing copy, a quarterly citation / digital-PR push, priority turnaround, and a 45-minute monthly strategy call.</p>
+              <p>Choose <strong>Engine ({usd(E.price)}/month)</strong> — our recommended tier — when you want the full system rather than a baseline: a complete visibility audit and content plan, 4 citation-optimized posts per month, FAQ schema plus Google Search Console setup, monthly reporting on citations and AI appearances, and an async strategy review each month.</p>
+              <p>Choose <strong>Operator ({usd(O.price)}/month)</strong> when you want maximum output: everything in Engine plus 6–8 posts per month, conversion-focused product and landing copy, a quarterly citation / digital-PR push, priority turnaround, and a 45-minute monthly strategy call.</p>
             </div>
           </div>
 
