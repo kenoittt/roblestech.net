@@ -2,7 +2,6 @@
 import Avatar from '../components/Avatar.astro';
 import CardNav from '../components/CardNav.jsx';
 import { avatarSrc, initials, tint } from '../lib/avatar';
-import { getCategories } from '../lib/kb';
 
 interface Props { title?: string; showNav?: boolean; }
 const { title = 'PPM · Robles Tech', showNav = true } = Astro.props;
@@ -11,10 +10,10 @@ const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 const user = Astro.locals.user;
 /* The Account card's identity block, as data the React island can render. */
 /* The Knowledge Base card is built from the real categories, so renaming or
-   adding one in the admin centre changes the nav too. Categories are editable
-   data now; hardcoding five of them here would mean the nav quietly disagreed
-   with the handbook the first time someone added a sixth. */
-const kbCategories = Astro.locals.user ? await getCategories(Astro) : [];
+   adding one in the admin centre changes the nav too. They arrive on locals
+   from middleware: this layout renders on every page, and a query here runs
+   mid-stream where a refreshed session cookie cannot be written. */
+const kbCategories = Astro.locals.kbCategories ?? [];
 
 const accountMeta = user
   ? {

@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServer } from './lib/supabase';
+import { getCategories } from './lib/kb';
 
 const PUBLIC_PATHS = new Set<string>([
   '/login',
@@ -29,6 +30,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       .single();
     context.locals.profile = (profile as App.Locals['profile']) ?? null;
   }
+
+  /* The nav's Knowledge Base card is built from these. Loaded here, once, for
+     a signed-in user, so no layout has to query mid-render. */
+  context.locals.kbCategories = [];
+  if (user) context.locals.kbCategories = await getCategories(context);
 
   const isPublic = PUBLIC_PATHS.has(path);
   const r = context.locals.profile?.role;
