@@ -157,40 +157,50 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
     These are the shelves in the handbook and the links in the nav's Knowledge Base card.
     Deleting one leaves its articles in place, uncategorised, rather than deleting them with it.
   </p>
+  {/* The forms sit OUTSIDE the table and the fields point at them by id.
+      A <form> as a direct child of <tr> is invalid HTML: the parser foster-
+      parents it out of the table, and what it leaves behind owns no form. The
+      Save rows survived that by accident — their hidden id input kept the
+      association — but the Add row's three fields belonged to nothing, so the
+      button submitted an empty request and the category never appeared. The
+      form attribute is the valid way to do this, and it needs no JavaScript. */}
+  {categories.map((c) => (
+    <>
+      <form id={`cat-save-${c.id}`} method="post" action="/api/kb-category-save" hidden>
+        <input type="hidden" name="id" value={c.id} />
+      </form>
+      <form id={`cat-del-${c.id}`} method="post" action="/api/kb-category-delete" hidden
+            onsubmit="return confirm('Delete this category? Its articles stay, without a category.')">
+        <input type="hidden" name="id" value={c.id} />
+      </form>
+    </>
+  ))}
+  <form id="cat-add" method="post" action="/api/kb-category-save" hidden></form>
+
   <div class="tbl-wrap">
     <table class="tbl">
-      <thead><tr><th>Title</th><th>Slug</th><th>Blurb</th><th>Colour</th><th>Order</th><th></th></tr></thead>
+      <thead><tr><th>Title</th><th>Slug</th><th>Blurb</th><th>Colour</th><th>Order</th><th>Actions</th></tr></thead>
       <tbody>
         {categories.map((c) => (
           <tr>
-            <form method="post" action="/api/kb-category-save" style="display:contents;">
-              <input type="hidden" name="id" value={c.id} />
-              <td><input name="title" value={c.title} required maxlength="60" /></td>
-              <td><input name="slug" value={c.slug} required maxlength="40" /></td>
-              <td><input name="blurb" value={c.blurb ?? ''} maxlength="200" /></td>
-              <td><input name="color" value={c.color} maxlength="9" style="width:92px;" /></td>
-              <td><input name="sort" value={String(c.sort)} type="number" style="width:76px;" /></td>
-              <td style="white-space:nowrap;"><button class="mini" type="submit">Save</button></td>
-            </form>
-            <td style="white-space:nowrap;">
-              <form method="post" action="/api/kb-category-delete" style="display:inline;"
-                    onsubmit="return confirm('Delete this category? Its articles stay, without a category.')">
-                <input type="hidden" name="id" value={c.id} />
-                <button class="mini del-btn" type="submit">Delete</button>
-              </form>
+            <td><input form={`cat-save-${c.id}`} name="title" value={c.title} required maxlength="60" /></td>
+            <td><input form={`cat-save-${c.id}`} name="slug" value={c.slug} required maxlength="40" /></td>
+            <td><input form={`cat-save-${c.id}`} name="blurb" value={c.blurb ?? ''} maxlength="200" /></td>
+            <td><input form={`cat-save-${c.id}`} name="color" value={c.color} maxlength="9" style="width:92px;" /></td>
+            <td><input form={`cat-save-${c.id}`} name="sort" value={String(c.sort)} type="number" style="width:76px;" /></td>
+            <td class="row-acts">
+              <button class="mini" type="submit" form={`cat-save-${c.id}`}>Save</button>
+              <button class="mini del-btn" type="submit" form={`cat-del-${c.id}`}>Delete</button>
             </td>
           </tr>
         ))}
         <tr>
-          <form method="post" action="/api/kb-category-save" style="display:contents;">
-            <td><input name="title" placeholder="New category" maxlength="60" /></td>
-            <td><input name="slug" placeholder="slug" maxlength="40" /></td>
-            <td><input name="blurb" placeholder="What goes on this shelf" maxlength="200" /></td>
-            <td><input name="color" value="#0464DD" maxlength="9" style="width:92px;" /></td>
-            <td><input name="sort" value="100" type="number" style="width:76px;" /></td>
-            <td style="white-space:nowrap;"><button class="mini" type="submit">Add</button></td>
-          </form>
-          <td></td>
+          <td><input form="cat-add" name="title" placeholder="New category" required maxlength="60" /></td>
+          <td><input form="cat-add" name="slug" placeholder="left blank, from the title" maxlength="40" /></td>
+          <td><input form="cat-add" name="blurb" placeholder="What goes on this shelf" maxlength="200" /></td>
+          <td><input form="cat-add" name="color" value="#0464DD" maxlength="9" style="width:92px;" /></td>
+          <td><input form="cat-add" name="sort" value="100" type="number" style="width:76px;" /></td>
+          <td class="row-acts"><button class="mini" type="submit" form="cat-add">Add</button></td>
         </tr>
       </tbody>
     </table>
@@ -237,6 +247,8 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
   .tbl td a { color: var(--info-fg); }
   /* Two actions in one cell need a gap; without it they read as one word. */
   .tbl td > .mini + form, .tbl td > form + form { margin-left: 6px; }
+  .row-acts { white-space: nowrap; }
+  .row-acts > .mini + .mini { margin-left: 6px; }
   .tbl input, .tbl select {
     width: 100%; min-width: 88px; font-size: .84rem; padding: 8px 10px;
   }
