@@ -305,6 +305,30 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .tscroll{overflow-x:auto;}
 @media(max-width:900px){.dash-grid{grid-template-columns:1fr;}}
 
+/* Scrolling shadows.
+   Letting a wide table scroll inside its panel stops it dragging the page
+   sideways, but it also means the content just stops at the panel edge with
+   nothing to say there is more. At 375px the workload table hides 222px and
+   the handbook admin tables hide 206px — a trackpad user finds that by
+   accident and a mouse user does not find it at all.
+
+   The usual pure-CSS version of this paints two gradients `local` so they
+   travel with the content and cover the shadow at whichever end is already in
+   view. That needs the covering colour to be opaque, and every panel here is
+   glass — --card is rgba(255,255,255,.05) — so a cover covers nothing and the
+   shadow shows at both ends regardless of position. Hence an inset shadow
+   toggled from the scroll position instead: inset shadows are clipped to the
+   padding box and do not scroll with content, and they do not care what is
+   behind them. */
+.cue{--cue-shadow:rgba(0,0,0,.45);}
+:root[data-theme='light'] .cue{--cue-shadow:rgba(3,44,124,.28);}
+.cue[data-cue~='left']{box-shadow:inset 15px 0 13px -13px var(--cue-shadow);}
+.cue[data-cue~='right']{box-shadow:inset -15px 0 13px -13px var(--cue-shadow);}
+.cue[data-cue~='left'][data-cue~='right']{
+  box-shadow:inset 15px 0 13px -13px var(--cue-shadow),
+             inset -15px 0 13px -13px var(--cue-shadow);
+}
+
 /* Spreadsheet-style table view */
 .ttable-wrap{margin-top:14px;background:var(--s-1);border:1px solid var(--line);border-radius:14px;overflow:auto;}
 .ttable{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem;}

@@ -58,7 +58,7 @@ const COLS = [
     <button type="button" class="linkbtn" id="reset-cols">Reset column widths</button>
   </div>
 
-  <div class="ttable-wrap">
+  <div class="ttable-wrap cue">
     <table class="ttable ttable-resize" id="task-sheet">
       <colgroup>
         {COLS.map((c) => <col data-col={c.key} style={`width:${c.w}px;`} />)}

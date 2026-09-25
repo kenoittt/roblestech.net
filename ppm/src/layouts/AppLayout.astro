@@ -125,6 +125,51 @@ const account = user
         sync();
       })();
     </script>
+    <script is:inline>
+      /* Mark which way a scrollable panel still has content, so the shadow in
+         app.css knows which edge to draw. Nothing here creates the affordance
+         on its own — without the stylesheet this only sets an attribute, and
+         without the script the panels look exactly as they did before. */
+      (function () {
+        var panels = document.querySelectorAll('.cue');
+        if (!panels.length) return;
+
+        function mark(el) {
+          var slack = el.scrollWidth - el.clientWidth;
+          /* A sub-pixel remainder is not content. Sizing rounds, and a 0.5px
+             slack would otherwise leave a shadow pinned on at every width. */
+          if (slack < 2) return el.removeAttribute('data-cue');
+          var sides = [];
+          if (el.scrollLeft > 1) sides.push('left');
+          if (el.scrollLeft < slack - 1) sides.push('right');
+          if (sides.length) el.setAttribute('data-cue', sides.join(' '));
+          else el.removeAttribute('data-cue');
+        }
+
+        panels.forEach(function (el) {
+          mark(el);
+          el.addEventListener('scroll', function () { mark(el); }, { passive: true });
+        });
+
+        /* Whether a panel overflows depends on the width it was given, so the
+           answer changes on resize and whenever the content reflows. */
+        if (window.ResizeObserver) {
+          /* The observer fires for the table as well as the panel, and the
+             table is not the thing that scrolls — mark the panel either way. */
+          var ro = new ResizeObserver(function (entries) {
+            entries.forEach(function (e) { mark(e.target.closest('.cue') || e.target); });
+          });
+          panels.forEach(function (el) {
+            ro.observe(el);
+            if (el.firstElementChild) ro.observe(el.firstElementChild);
+          });
+        } else {
+          window.addEventListener('resize', function () {
+            Array.prototype.forEach.call(panels, mark);
+          });
+        }
+      })();
+    </script>
     <footer class="p-foot">&copy; {new Date().getFullYear()} Robles Technologies Corp. · Internal</footer>
   </body>
 </html>

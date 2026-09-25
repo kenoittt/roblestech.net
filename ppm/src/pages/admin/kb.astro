@@ -126,7 +126,7 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
 
   <!-- ─────────── all articles ─────────── -->
   <div class="section-h">All articles ({articles.length})</div>
-  <div class="tbl-wrap">
+  <div class="tbl-wrap cue">
     <table class="tbl">
       <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Owner</th><th></th></tr></thead>
       <tbody>
@@ -177,7 +177,7 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
   ))}
   <form id="cat-add" method="post" action="/api/kb-category-save" hidden></form>
 
-  <div class="tbl-wrap">
+  <div class="tbl-wrap cue">
     <table class="tbl">
       <thead><tr><th>Title</th><th>Slug</th><th>Blurb</th><th>Colour</th><th>Order</th><th>Actions</th></tr></thead>
       <tbody>
