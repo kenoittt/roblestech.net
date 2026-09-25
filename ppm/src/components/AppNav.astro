@@ -157,6 +157,11 @@ const isCurrent = (links: Link[]) =>
     position: absolute; top: calc(100% + 10px); left: 0; min-width: 232px;
     background: var(--pop); border: 1px solid var(--line); border-radius: 14px;
     box-shadow: var(--pop-shadow); padding: 8px; z-index: 2;
+    /* The handbook menu is built from however many categories exist, which is
+       a number someone edits in the admin centre. Thirteen already runs past
+       the bottom of a laptop screen — the same way the card nav this replaced
+       clipped its last item — so the panel scrolls rather than overflowing. */
+    max-height: min(70vh, 520px); overflow-y: auto; overscroll-behavior: contain;
   }
   .nv-panel[hidden] { display: none; }
   .nv-panel ul { list-style: none; margin: 0; padding: 0; }
@@ -270,6 +275,7 @@ const isCurrent = (links: Link[]) =>
     .nv-panel {
       position: static; min-width: 0; background: transparent; border: 0;
       box-shadow: none; padding: 0 0 8px 8px;
+      max-height: 46vh;
     }
     .nv-me { padding-left: 4px; }
   }

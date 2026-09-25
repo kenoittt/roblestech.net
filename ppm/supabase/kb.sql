@@ -91,22 +91,36 @@ create policy kb_art_read on public.kb_articles for select using (public.is_ppm_
 
 
 -- Seed: categories ------------------------------------------------------------
-insert into public.kb_categories (slug, title, blurb, color, sort) values ('internal', 'Internal', 'How we write, how we run calls, how delivery works, and what every tool is for.', '#032C7C', 1) on conflict (slug) do nothing;
-insert into public.kb_categories (slug, title, blurb, color, sort) values ('client', 'Client Facing', 'What we can hand a client directly: onboarding, what they get each month, how to read a dashboard.', '#0464DD', 2) on conflict (slug) do nothing;
-insert into public.kb_categories (slug, title, blurb, color, sort) values ('finance', 'Finance', 'Invoicing, payment terms, what happens when an invoice is late.', '#2F58A3', 3) on conflict (slug) do nothing;
-insert into public.kb_categories (slug, title, blurb, color, sort) values ('legal', 'Legal', 'Contracts, the minimum term, IP ownership, data handling.', '#16305e', 4) on conflict (slug) do nothing;
-insert into public.kb_categories (slug, title, blurb, color, sort) values ('faqs', 'FAQs', 'The questions we get repeatedly, with the answer we have settled on.', '#3992FF', 5) on conflict (slug) do nothing;
+--
+-- The shelves from the RTC Knowledge Base Categories document, in its order.
+-- "Service Lines" and "Tools" are headings in that document rather than shelves
+-- of their own: they carry no description, and their children are what articles
+-- are filed under, so the children appear here and the headings do not.
+--
+-- do nothing on conflict, so re-running this never overwrites a title, blurb or
+-- colour someone has since edited in the admin centre.
 
--- Seed: topics inside Internal -------------------------------------------------
-insert into public.kb_topics (category_id, slug, title, sort) select id, 'start', 'Start Here', 1 from public.kb_categories where slug = 'internal' on conflict (category_id, slug) do nothing;
-insert into public.kb_topics (category_id, slug, title, sort) select id, 'email', 'Email', 2 from public.kb_categories where slug = 'internal' on conflict (category_id, slug) do nothing;
-insert into public.kb_topics (category_id, slug, title, sort) select id, 'calls', 'Calls', 3 from public.kb_categories where slug = 'internal' on conflict (category_id, slug) do nothing;
-insert into public.kb_topics (category_id, slug, title, sort) select id, 'ops', 'Operations', 4 from public.kb_categories where slug = 'internal' on conflict (category_id, slug) do nothing;
-insert into public.kb_topics (category_id, slug, title, sort) select id, 'tools', 'Tools', 5 from public.kb_categories where slug = 'internal' on conflict (category_id, slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('faq', 'FAQ', 'Quick answers to common questions from clients, prospects, and the team about RTC''s services, process, and reporting.', '#0464DD', 1) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('marketing-sales', 'Marketing & Sales', 'Outreach playbooks, cold email frameworks, talk tracks, objection handling, and positioning guidance for winning new clients.', '#032C7C', 2) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('cost-guidelines', 'Cost Guidelines', 'Current pricing, retainer tiers, discounts, referral fees, and approval rules for quotes and proposals.', '#0464DD', 3) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('standard-procedure', 'Standard Procedure', 'Step-by-step SOPs for recurring work, from prospecting and audits to content production and client delivery.', '#2F58A3', 4) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('seo-geo', 'SEO & GEO', 'Everything on improving client visibility in Google and AI answer engines like ChatGPT, Gemini, and Perplexity.', '#16305E', 5) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('smartsheet', 'Smartsheet', 'Implementation, consulting, and build guidance for Smartsheet solutions, especially construction and PMO environments.', '#3992FF', 6) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('automation', 'Automation', 'Workflow and AI-assisted automations that cut manual work across client operations and systems.', '#3992FF', 7) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('web-development', 'Web Development', 'Website builds, restructuring, and technical setup for client sites, including Shopify and standard hosting.', '#032C7C', 8) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('advisory', 'Advisory', 'Strategic consulting on digital operations, tools, and growth for clients who need guidance beyond a single service.', '#2F58A3', 9) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('claude', 'Claude', 'How RTC uses Claude across departments, covering Projects, skills, prompts, and workflows for marketing, finance, legal, and development work.', '#16305E', 10) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('salesforce', 'Salesforce', 'How RTC runs its CRM, covering pipelines, campaign lines, custom fields, imports, email outreach, and this knowledge base.', '#0464DD', 11) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('outlook', 'Outlook', 'How RTC uses Outlook for email and calendars, covering mailbox setup, shared inboxes, signatures, scheduling, and email etiquette for client and prospect communication.', '#2F58A3', 12) on conflict (slug) do nothing;
+insert into public.kb_categories (slug, title, blurb, color, sort) values ('teams', 'Teams', 'How RTC uses Microsoft Teams for internal communication, covering channels, chats, meetings, file sharing, and guidelines for collaborating with the team and clients.', '#3992FF', 13) on conflict (slug) do nothing;
+
+-- Topics are a second grouping inside a category. None are seeded: the handbook
+-- files articles straight onto a shelf, and an unused sub-level only shows up
+-- as stale options in the article editor.
 
 -- Seed: the articles written when the handbook was first built -----------------
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'start-here', 'How This Handbook Works', 'Who can read it, what the status labels mean, and how to add an article.', '## Who can see this
+select c.id, null, 'start-here', 'How This Handbook Works', 'Who can read it, what the status labels mean, and how to add an article.', '## Who can see this
 
 Everyone signed in to PPM, and nobody else. PPM''s middleware refuses any account
 whose role is not `super_admin`, `admin` or `staff` before a page renders, so a
@@ -158,10 +172,10 @@ itself, three things matter more than polish:
   place instead of copying it here. Copied numbers go stale, and the handbook
   is the last place anyone thinks to check.
 ', 'ready', 'Ops', 'intro onboarding new starter contribute edit add article status'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'start'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'brand-voice', 'How RTC Sounds', 'The hard rules for anything written as the company. Applies to email, decks, captions and proposals.', 'These apply to everything published as the company: cold email, replies,
+select c.id, null, 'brand-voice', 'How RTC Sounds', 'The hard rules for anything written as the company. Applies to email, decks, captions and proposals.', 'These apply to everything published as the company: cold email, replies,
 proposals, decks, captions, one-pagers, website copy. They are rules, not
 preferences. If a draft breaks one, fix it before it goes out.
 
@@ -223,10 +237,10 @@ renders from it. Check the service page you are quoting:
 - Smartsheet: <https://roblestech.net/services/smartsheet>
 - Everything else: <https://roblestech.net/services>
 ', 'ready', 'Marketing', 'voice tone writing style rules em dash affordable buzzwords title case'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'email'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'cold-outreach', 'Cold Outreach', 'The shape of a first-touch email, what goes in the subject line, and what never does.', 'Follow [How RTC Sounds](/kb/brand-voice) first. Everything below assumes it.
+select c.id, null, 'cold-outreach', 'Cold Outreach', 'The shape of a first-touch email, what goes in the subject line, and what never does.', 'Follow [How RTC Sounds](/kb/brand-voice) first. Everything below assumes it.
 
 ## The shape
 
@@ -268,10 +282,10 @@ when a prospect goes back in the pool.
 
 **[Needs input]** — How a reply gets logged in Salesforce, and by whom.
 ', 'draft', 'Sales', 'cold email outbound prospecting first touch subject line sequence'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'email'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'replies-and-followups', 'Replies and Follow-ups', 'Answering an inbound, chasing a quiet thread, and handling the four objections we actually get.', '## Answering an inbound
+select c.id, null, 'replies-and-followups', 'Replies and Follow-ups', 'Answering an inbound, chasing a quiet thread, and handling the four objections we actually get.', '## Answering an inbound
 
 Match their length. A three-line enquiry gets a three-line answer, not a
 brochure. Never re-pitch what they have already read.
@@ -307,10 +321,10 @@ Two that the website already answers, so the reply is a link and a line:
 - A promise about ranking or citation outcomes.
 - Urgency language. We do not close that way.
 ', 'draft', 'Sales', 'reply follow up objection handling nurture inbound response'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'email'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'gap-report-call', 'The 20-Minute Gap Report Call', 'What we promise on the website, what the call covers, and what has to be true before you book it.', '## What the website promises
+select c.id, null, 'gap-report-call', 'The 20-Minute Gap Report Call', 'What we promise on the website, what the call covers, and what has to be true before you book it.', '## What the website promises
 
 Read this first, because it is what the prospect has already been told and we
 have to match it. From `/services/geo` and the request modal:
@@ -395,10 +409,10 @@ better:
 **[Needs input]** — The follow-up: what gets sent, when, and what the lead
 status becomes in Salesforce.
 ', 'draft', 'Sales', 'gap report call walkthrough 20 minutes ai visibility diagnostic booking'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'calls'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'discovery-calls', 'Discovery Calls', 'The 30-minute discovery call: agenda, what to capture, and what happens in the 48 hours after.', '**[Needs input]** — This whole article.
+select c.id, null, 'discovery-calls', 'Discovery Calls', 'The 30-minute discovery call: agenda, what to capture, and what happens in the 48 hours after.', '**[Needs input]** — This whole article.
 
 What it needs to cover, so whoever writes it knows the shape:
 
@@ -414,10 +428,10 @@ Until this exists, the Gap Report call is the only call flow that is written
 down, and it is a different thing: a walkthrough of findings we have already
 sent, capped at 20 minutes.
 ', 'needed', 'Sales', 'discovery call agenda qualification notes proposal 48 hours calendly'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'calls'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'ops-content-pipeline', 'Per-Post Production', 'The ten gated steps from keyword brief to publish, and who signs off on each.', 'Ten steps, run **one at a time**, each one stopping for approval before the next
+select c.id, null, 'ops-content-pipeline', 'Per-Post Production', 'The ten gated steps from keyword brief to publish, and who signs off on each.', 'Ten steps, run **one at a time**, each one stopping for approval before the next
 begins. The gate is the point: a draft that skips the evidence map produces a
 post nobody can defend, and by then the work is done.
 
@@ -456,10 +470,10 @@ map, QA report, review document) and the naming convention.
 
 **[Needs input]** — Who approves each gate for each client.
 ', 'draft', 'Delivery', 'content pipeline sop per post production brief evidence map draft qa review publish'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'ops'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'ops-post-publish', 'Post-Publish SOP', 'The seven checks that run the moment a post goes live. Live is not the same as found.', 'Run this the moment a post goes live. A post being *live* is not the same as
+select c.id, null, 'ops-post-publish', 'Post-Publish SOP', 'The seven checks that run the moment a post goes live. Live is not the same as found.', 'Run this the moment a post goes live. A post being *live* is not the same as
 being *found*. The order matters: conversion before SEO, discovery before
 tracking. Tag each item **[Confirmed]** or **[Verify in source]**.
 
@@ -507,10 +521,10 @@ That is expected and the dashboard says so; it is not a tracking fault.
 The framework version lives at `portal/docs/post-publish-sop.md`. The full
 version is `post-publish-sop.pdf`. Save each run as its own checklist file.
 ', 'ready', 'Delivery', 'post publish sop indexing sitemap schema gsc cluster wiring ai baseline'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'ops'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'ops-reporting', 'Client Reporting', 'What lands in a client dashboard, when it refreshes, and what to do when a number looks wrong.', '## What a client sees
+select c.id, null, 'ops-reporting', 'Client Reporting', 'What lands in a client dashboard, when it refreshes, and what to do when a number looks wrong.', '## What a client sees
 
 Their dashboard at `portal.roblestech.net`, which is a live page, not a PDF sent
 monthly. Tabs: Overview, Baseline, Performance, Blog performance, Trends and
@@ -550,10 +564,10 @@ Work through it in this order before escalating:
 **[Needs input]** — The monthly rhythm: what we send, on what day, and who
 writes the commentary that goes with it.
 ', 'draft', 'Delivery', 'reporting dashboard gsc refresh monthly scorecard cadence numbers wrong'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'ops'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'tools-ppm', 'PPM (This Tool)', 'Board, tasks, calendar and activity. What each view is for and who can see what.', 'Project management and this handbook, in one place, at `ppm.roblestech.net`.
+select c.id, null, 'tools-ppm', 'PPM (This Tool)', 'Board, tasks, calendar and activity. What each view is for and who can see what.', 'Project management and this handbook, in one place, at `ppm.roblestech.net`.
 
 ## Who can get in
 
@@ -587,10 +601,10 @@ client work gets a task per post, and who assigns.
 
 **[Needs input]** — Task naming convention, if there is one.
 ', 'draft', 'Ops', 'ppm board tasks calendar activity project management kanban assignment'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'tools'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'tools-portal', 'Client Portal', 'Client dashboards, the admin panel, the approval gate, and how GSC data gets in.', '`portal.roblestech.net`. Separate app from PPM, separate login list, and clients
+select c.id, null, 'tools-portal', 'Client Portal', 'Client dashboards, the admin panel, the approval gate, and how GSC data gets in.', '`portal.roblestech.net`. Separate app from PPM, separate login list, and clients
 have accounts here.
 
 ## The two sides
@@ -632,10 +646,10 @@ URLs each get their own query. Nothing is entered by hand.
 See [Client Reporting](/kb/ops-reporting) for the refresh timing and what to
 check when a number looks wrong.
 ', 'ready', 'Ops', 'portal dashboard admin client config pipeline approvals gsc refresh super admin'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'tools'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 insert into public.kb_articles (category_id, topic_id, slug, title, summary, body, status, owner, keywords)
-select c.id, t.id, 'tools-stack', 'The Rest of the Stack', 'Salesforce, Calendly, Search Console, Semrush and Smartsheet: what each is the source of truth for.', 'What each tool is the source of truth for. When two disagree, the one named here
+select c.id, null, 'tools-stack', 'The Rest of the Stack', 'Salesforce, Calendly, Search Console, Semrush and Smartsheet: what each is the source of truth for.', 'What each tool is the source of truth for. When two disagree, the one named here
 wins.
 
 | Tool | Source of truth for | Notes |
@@ -666,8 +680,8 @@ starter gets access.
 **[Needs input]** — Where credentials are stored. If the answer is "in a
 message somewhere", that is the thing to fix first.
 ', 'draft', 'Ops', 'salesforce calendly search console gsc semrush smartsheet supabase vercel tools access'
-from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'tools'
-where c.slug = 'internal' on conflict (slug) do nothing;
+from public.kb_categories c
+where c.slug = 'marketing-sales' on conflict (slug) do nothing;
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- Was this article helpful?
