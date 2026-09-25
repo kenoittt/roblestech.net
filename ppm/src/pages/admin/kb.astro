@@ -88,7 +88,9 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
               <option value={s} selected={s === (editing?.status ?? 'draft')}>{STATUS_LABEL[s]}</option>
             ))}
           </select>
-          <p class="hint">{STATUS_HELP.ready} / {STATUS_HELP.draft}</p>
+          <ul class="status-key">
+            {STATUSES.map((v) => <li><strong>{STATUS_LABEL[v]}</strong> {STATUS_HELP[v]}</li>)}
+          </ul>
         </div>
         <div>
           <label for="a-owner">Owner</label>
@@ -198,3 +200,48 @@ const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
     Adding a teammate is on the <a href="/admin">Team</a> page.
   </p>
 </AppLayout>
+
+<style>
+  /* These three classes were used here and styled nowhere, so the editor
+     rendered as one full-width column a screen and a half long, and the
+     article and category tables came out as bare HTML tables. */
+  .form-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px; margin-bottom: 14px;
+  }
+  .form-grid > div { min-width: 0; display: flex; flex-direction: column; }
+
+  .status-key { list-style: none; margin: 6px 0 0; padding: 0; }
+  .status-key li { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+  .status-key strong { color: var(--fg-soft); font-weight: 700; }
+
+  /* The body field is the one place a tall box earns its keep, but it had no
+     height of its own and grew to fill the card. */
+  textarea[name='body'] { min-height: 240px; max-height: 60vh; resize: vertical; }
+
+  .tbl-wrap {
+    margin-top: 12px; overflow-x: auto;
+    background: var(--s-1); border: 1px solid var(--line); border-radius: 14px;
+  }
+  .tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .88rem; }
+  .tbl thead th {
+    position: sticky; top: 0; z-index: 1;
+    text-align: left; white-space: nowrap;
+    font-family: 'League Spartan', sans-serif; font-size: .68rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    background: var(--sticky-bg); padding: 11px 14px; border-bottom: 1px solid var(--line);
+  }
+  .tbl tbody td { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+  .tbl tbody tr:last-child td { border-bottom: 0; }
+  .tbl tbody tr:hover { background: var(--s-1); }
+  .tbl td a { color: var(--info-fg); }
+  /* Two actions in one cell need a gap; without it they read as one word. */
+  .tbl td > .mini + form, .tbl td > form + form { margin-left: 6px; }
+  .tbl input, .tbl select {
+    width: 100%; min-width: 88px; font-size: .84rem; padding: 8px 10px;
+  }
+
+  @media (max-width: 760px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>

@@ -271,6 +271,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .alert{border-radius:10px;padding:11px 15px;font-size:.9rem;margin-bottom:16px;}
 .alert-ok{background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok-fg);}
 .alert-error{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-fg);}
+/* Used across the app and styled nowhere until now.
+   .num was meant to right-align a column of figures — without it the counts
+   sat hard against the label to their left. .empty is an empty state, which
+   has to read as absence rather than as content. */
+.num{text-align:right;font-variant-numeric:tabular-nums;}
+.empty{color:var(--muted);font-size:.9rem;}
+.statusform{margin-top:10px;}
 .hint{color:var(--muted);font-size:.8rem;margin-top:6px;}
 .section-h{font-size:1.15rem;font-weight:800;margin:34px 0 14px;}
 .login-wrap{max-width:400px;margin:10vh auto 0;}
@@ -280,6 +287,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .filterbar{display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin-top:18px;background:var(--s-1);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
 .filterbar label{display:flex;flex-direction:column;gap:5px;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0;}
 .filterbar select{width:auto;min-width:150px;padding:8px 10px;font-size:.85rem;}
+/* .mini — the small action in a dense table row.
+   It was used on six pages and styled on none of them, so "Edit" and "Delete"
+   rendered as two unspaced words of body text. A .del-btn carrying a text
+   label also has to stop being a 28px square, or the word is clipped. */
+.mini{display:inline-flex;align-items:center;justify-content:center;min-height:36px;
+  padding:7px 12px;border-radius:8px;cursor:pointer;
+  font-family:inherit;font-size:.8rem;font-weight:700;line-height:1;text-decoration:none;
+  color:var(--fg);background:var(--s-2);border:1px solid var(--line);}
+.mini:hover{background:var(--s-3);border-color:var(--s-4);}
+.mini:focus-visible{outline:2px solid var(--accent-fg);outline-offset:2px;}
+.del-btn.mini{width:auto;height:auto;}
+@media (pointer: coarse){ .mini{min-height:44px;} }
 .mini-link{color:var(--green);font-size:.8rem;font-weight:700;text-decoration:none;padding-bottom:10px;}
 /* A button that reads as a link (sheet actions). */
 .linkbtn{font-family:inherit;color:var(--green);font-size:.8rem;font-weight:700;background:none;border:0;padding:0;cursor:pointer;}

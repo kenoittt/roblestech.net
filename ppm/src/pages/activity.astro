@@ -126,7 +126,7 @@ const qs = (o: Record<string, string>) => {
   {events.length === 0 && <p class="empty" style="margin-top:18px;">No activity matches these filters yet.</p>}
 
   {groups.map((g) => (
-    <div class="section-gap" style="margin-top:24px;">
+    <div style="margin-top:24px;">
       <div class="day-h">{g.day}</div>
       <div class="feed">
         {g.items.map((e) => {
