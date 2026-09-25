@@ -132,8 +132,10 @@ const isCurrent = (links: Link[]) =>
   /* The only logo asset is a white mark, which disappears on the light theme's
      white bar. A navy chip keeps the real mark rather than inverting it into a
      different colour. */
-  :global(:root[data-theme='light']) .nv-brand {
-    background: var(--navy); border-radius: 9px; padding: 5px 7px;
+  /* The chip is on the image, not the link, so the link can carry a bigger tap
+     area on a phone without the chip growing with it. */
+  :global(:root[data-theme='light']) .nv-brand img {
+    background: var(--navy); border-radius: 9px; padding: 5px 7px; box-sizing: content-box;
   }
 
   .nv-menus { display: flex; align-items: center; gap: 4px; margin-left: 10px; }
@@ -219,11 +221,19 @@ const isCurrent = (links: Link[]) =>
 
   @media (max-width: 900px) {
     .nv-bar { height: 58px; padding: 0 10px 0 14px; gap: 8px; }
+    /* Touch targets. Everything tappable in the bar gets at least 44x44 on a
+       phone, which several of these missed — the burger was 40x40, the theme
+       switch 58x30, the logo 26x26. The visible shapes are unchanged: the
+       extra size is padding around them, which is what "expand the hit area
+       when the icon is smaller" means. */
     .nv-burger {
       display: inline-flex; flex-direction: column; justify-content: center; gap: 5px;
-      width: 40px; height: 40px; padding: 0 9px;
+      width: 44px; height: 44px; padding: 0 11px;
       background: transparent; border: 0; cursor: pointer; order: 3;
     }
+    .nv-theme { display: inline-flex; align-items: center; min-height: 44px; padding: 0 7px; }
+    .nv-cta { min-height: 44px; display: inline-flex; align-items: center; }
+    .nv-brand { min-width: 44px; min-height: 44px; justify-content: center; margin-left: -9px; }
     .nv-burger span {
       display: block; height: 2px; width: 100%; border-radius: 2px;
       background: var(--fg); transition: transform .2s ease, opacity .2s ease;

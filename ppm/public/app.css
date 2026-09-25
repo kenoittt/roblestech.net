@@ -63,7 +63,7 @@
   color-scheme: light;
   --fg:#0b1b3d;
   --fg-soft:rgba(11,27,61,.72);
-  --muted:#5a6b8f;
+  --muted:#516084;                   /* 4.42:1 on card surfaces at #5a6b8f */
   --line:rgba(3,44,124,0.14);
   --line-soft:rgba(3,44,124,0.08);
 
@@ -294,6 +294,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 
 /* Dashboard grid */
 .dash-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start;}
+/* A grid item defaults to min-width:auto, so a wide table inside one cannot
+   shrink — it pushes the card past the viewport and takes the whole page with
+   it. At 375px the workload card measured 562px and the page scrolled
+   sideways. The card may shrink; the table scrolls inside it instead. */
+.dash-grid > .card{min-width:0;}
+.tscroll{overflow-x:auto;}
 @media(max-width:900px){.dash-grid{grid-template-columns:1fr;}}
 
 /* View toggle */
