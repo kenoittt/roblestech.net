@@ -293,7 +293,16 @@ const byCategory = (id: string) => articles.filter((a) => a.category_id === id);
   .kbh { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 26px; align-items: start; }
   .kbh:has(.kbfc.is-shut) { grid-template-columns: 62px minmax(0, 1fr); }
 
-  .kbh-rail { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 96px; }
+  .kbh-rail {
+    display: flex; flex-direction: column; gap: 2px; position: sticky; top: 96px;
+    /* One row per shelf, and the number of shelves is edited in the admin
+       centre. At thirteen the rail is 698px, which does not fit the 624px
+       below the sticky offset on a 720px laptop — and a sticky element taller
+       than its own room cannot scroll to its bottom, so the last shelves and
+       the admin link simply could not be reached. It scrolls instead. */
+    max-height: calc(100vh - 112px); overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
   .kbh-rail-i {
     display: flex; align-items: center; min-height: 44px; padding: 9px 12px;
     border-left: 3px solid transparent; border-radius: 0 9px 9px 0;
