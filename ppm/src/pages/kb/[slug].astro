@@ -116,7 +116,12 @@ const voted = votes.mine !== null;
 ---
 
 <AppLayout title={`${article.title} · Handbook · RTC PPM`}>
-  <div class="kba-wrap">
+  {/* No contents list means no first column. Without this the article became
+      the grid's FIRST item and rendered inside the 236px sidebar track — a
+      strip of one-word lines with the rest of the page empty beside it. Half
+      the handbook has fewer than two headings, so half the handbook looked
+      like that. */}
+  <div class:list={['kba-wrap', { 'is-solo': toc.length <= 1 }]}>
     {toc.length > 1 && (
       <aside class="kbt" aria-label="In this article">
         <p class="kbt-h">In this article:</p>
@@ -232,6 +237,7 @@ const voted = votes.mine !== null;
 
 <style>
   .kba-wrap { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 28px; align-items: start; }
+  .kba-wrap.is-solo { grid-template-columns: minmax(0, 1fr); }
 
   /* Contents. Sticky, because the whole point is to still be there when you
      are three screens into a procedure. */
@@ -254,6 +260,7 @@ const voted = votes.mine !== null;
     color: var(--fg-soft); text-decoration: none;
   }
   .kbt a:hover { color: var(--fg); background: var(--s-1); }
+  @media (pointer: coarse) { .kbt a { min-height: 44px; } }
   .kbt a.is-on { color: var(--info-fg); border-left-color: var(--info-fg); background: var(--s-1); }
 
   .kbd {
@@ -266,11 +273,18 @@ const voted = votes.mine !== null;
     font-size: .84rem; font-weight: 700; margin-bottom: 14px;
   }
   .kbd-crumbs a { color: var(--info-fg); text-decoration: none; }
+  .kbd-crumbs a, .kbd-crumbs span { display: inline-flex; align-items: center; }
   .kbd-crumbs a:hover { text-decoration: underline; }
   .kbd-crumbs svg { color: var(--muted); flex: none; }
   .kbd-crumbs span { color: var(--muted); font-weight: 600; }
 
-  .kbd-h1 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); margin: 0 0 18px; }
+  .kbd-h1 {
+    font-size: clamp(1.7rem, 3.4vw, 2.3rem); margin: 0 0 18px;
+    /* "What does the client dashboard show?" is a title with long words and
+       no good break points. Balanced wrapping keeps the lines even, and
+       hyphenation is the fallback when a single word is wider than the column. */
+    text-wrap: balance; overflow-wrap: break-word; hyphens: auto;
+  }
   .kbd-lede { color: var(--muted); font-size: 1rem; margin: 0 0 22px; }
 
   .kbd-meta {
@@ -330,6 +344,15 @@ const voted = votes.mine !== null;
     font-size: .88rem; font-weight: 700; color: var(--fg); text-decoration: none;
   }
   .kbr-chip:hover { border-color: var(--info-fg); color: var(--info-fg); }
+
+  /* Tap targets. A breadcrumb crumb and the edit link are 15px of text, which
+     is a fine mouse target and an impossible thumb one. They keep their size
+     and gain the height around them. */
+  @media (pointer: coarse) {
+    .kbd-crumbs { gap: 2px 8px; }
+    .kbd-crumbs a, .kbd-crumbs span[aria-current] { min-height: 44px; }
+    .kbd-edit { min-height: 44px; display: inline-flex; align-items: center; }
+  }
 
   @media (max-width: 900px) {
     .kba-wrap { grid-template-columns: 1fr; gap: 16px; }
