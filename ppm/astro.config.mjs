@@ -1,19 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
-import react from '@astrojs/react';
 
 // Internal PPM app — server-rendered, session-checked per request.
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
-  /* @astrojs/react is pinned to v4 on purpose: it is the last major built
-     against Vite 6, which is what Astro 5 ships. v7 depends on Vite 8 and
-     installs its own copy, so @vitejs/plugin-react registers on a Vite
-     instance this build never uses. The JSX then falls through to the default
-     classic transform — React.createElement with no React import — and the nav
-     throws "React is not defined" during SSR on every signed-in page. */
-  integrations: [react()],
   /* No image service.
    *
    * PPM uses plain <img> and never astro:assets, but Astro still wires its
@@ -33,15 +25,10 @@ export default defineConfig({
 
   /* Packages that must be bundled rather than left for Node to resolve.
    *
-   * Both entries here are the same underlying problem: the package only loads
-   * if Node is new enough to paper over how the package is published, and the
-   * function runtime is not that new. Neither failure can be seen in
-   * development, because a current Node papers over both.
-   *
-   *   gsap — index.js is ESM source, but its package.json declares no
-   *   "type": "module". Node decides a .js file's format from that field, so
-   *   it loads the file as CommonJS, finds no named exports and throws
-   *   "Named export 'gsap' not found". Node 22.7+ sniffs the syntax instead.
+   * The problem these share: the package only loads if Node is new enough to
+   * paper over how it was published, and the function runtime is not that new.
+   * It cannot be seen in development, where the local Node papers over it.
+   * gsap was here too until the nav stopped needing it.
    *
    *   sanitize-html — CommonJS, and it require()s htmlparser2, which is ESM.
    *   That is ERR_REQUIRE_ESM on any runtime without require(esm), which Node
@@ -54,7 +41,6 @@ export default defineConfig({
   vite: {
     ssr: {
       noExternal: [
-        'gsap',
         /* sanitize-html and everything it reaches for. Bundling the package
            alone is not enough: Vite rewrites its require() calls into imports
            and leaves the targets external, which turns ERR_REQUIRE_ESM into

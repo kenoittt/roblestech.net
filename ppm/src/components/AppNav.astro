@@ -1,0 +1,259 @@
+---
+/*
+ * The app nav.
+ *
+ * Three menus and nothing else: Project Management, Knowledge Base, Account
+ * settings. It replaces React Bits' CardNav, which opened into three large
+ * coloured cards — that panel was taller than the viewport on a laptop, so the
+ * last item in each card was cut off, and it dropped a React island plus GSAP
+ * into every page of an internal tool to do the work of a dropdown.
+ *
+ * This is plain HTML with about thirty lines of script. Nothing hydrates, so
+ * the menus work the moment the markup arrives rather than after a bundle
+ * loads, and PPM no longer depends on React, react-dom, @astrojs/react or gsap
+ * at all.
+ */
+import Avatar from './Avatar.astro';
+
+interface Link { label: string; href?: string; action?: string; }
+interface Props {
+  groups: { id: string; label: string; links: Link[] }[];
+  account: { id: string; name: string; email: string; avatar: string | null } | null;
+  ctaLabel: string;
+  ctaHref: string;
+  current: string;
+}
+const { groups, account, ctaLabel, ctaHref, current } = Astro.props;
+
+/** A menu is "current" when the page you are on is one of its destinations. */
+const isCurrent = (links: Link[]) =>
+  links.some((l) => {
+    if (!l.href) return false;
+    const path = l.href.split('?')[0].split('#')[0];
+    if (path === '/') return current === '/';
+    return current === path || current.startsWith(path + '/');
+  });
+---
+
+<header class="nv">
+  <nav class="nv-bar" aria-label="Main">
+    <a class="nv-brand" href="/" aria-label="Robles Tech PPM">
+      <img src="/logo-white.png" alt="" width="28" height="28" />
+    </a>
+
+    <button class="nv-burger" type="button" aria-expanded="false" aria-controls="nv-menus"
+            aria-label="Menu" data-nv-burger>
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nv-menus" id="nv-menus" data-nv-menus>
+      {groups.map((g) => (
+        <div class="nv-group" data-nv-group>
+          <button type="button" aria-expanded="false"
+                  aria-controls={`nv-panel-${g.id}`}
+                  class:list={['nv-top', { 'is-current': isCurrent(g.links) }]}
+                  data-nv-toggle>
+            {g.label}
+            <svg class="nv-chev" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </button>
+
+          <div class="nv-panel" id={`nv-panel-${g.id}`} hidden data-nv-panel>
+            {g.id === 'account' && account && (
+              <div class="nv-me">
+                <Avatar id={account.id} name={account.name} email={account.email}
+                        path={account.avatar} size={34} />
+                <div class="nv-me-t">
+                  <strong>{account.name}</strong>
+                  <span>{account.email}</span>
+                </div>
+              </div>
+            )}
+            <ul>
+              {g.links.map((l) => (
+                <li>
+                  {l.action ? (
+                    <button type="button" data-action-label={l.action}>{l.label}</button>
+                  ) : (
+                    <a href={l.href} aria-current={l.href === current ? 'page' : undefined}>{l.label}</a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <a class="nv-cta" href={ctaHref}>{ctaLabel}</a>
+  </nav>
+</header>
+
+<style>
+  .nv { position: fixed; top: 16px; left: 0; right: 0; z-index: 100; padding: 0 16px; }
+  .nv-bar {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; max-width: 1180px; margin: 0 auto;
+    height: 64px; padding: 0 12px 0 18px; border-radius: 18px;
+    background: var(--s-25);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--s-4); box-shadow: var(--nav-shadow);
+  }
+
+  .nv-brand { display: inline-flex; align-items: center; flex: 0 0 auto; }
+  .nv-brand img { height: 26px; width: auto; display: block; }
+  /* The only logo asset is a white mark, which disappears on the light theme's
+     white bar. A navy chip keeps the real mark rather than inverting it into a
+     different colour. */
+  :global(:root[data-theme='light']) .nv-brand {
+    background: var(--navy); border-radius: 9px; padding: 5px 7px;
+  }
+
+  .nv-menus { display: flex; align-items: center; gap: 4px; margin-left: 10px; }
+  .nv-group { position: relative; }
+
+  .nv-top {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 700 .9rem/1 'Montserrat', system-ui, sans-serif;
+    color: var(--fg-soft); background: transparent; border: 0; cursor: pointer;
+    padding: 10px 13px; border-radius: 10px; white-space: nowrap;
+  }
+  .nv-top:hover { color: var(--fg); background: var(--s-2); }
+  .nv-top.is-current { color: var(--fg); }
+  .nv-top[aria-expanded='true'] { color: var(--fg); background: var(--s-3); }
+  .nv-chev { transition: transform .18s ease; opacity: .65; }
+  .nv-top[aria-expanded='true'] .nv-chev { transform: rotate(180deg); }
+
+  .nv-panel {
+    position: absolute; top: calc(100% + 10px); left: 0; min-width: 232px;
+    background: var(--pop); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--pop-shadow); padding: 8px; z-index: 2;
+  }
+  .nv-panel[hidden] { display: none; }
+  .nv-panel ul { list-style: none; margin: 0; padding: 0; }
+  .nv-panel a,
+  .nv-panel button {
+    display: block; width: 100%; text-align: left;
+    font: 600 .88rem/1.2 'Montserrat', system-ui, sans-serif;
+    color: var(--fg-soft); text-decoration: none; background: transparent; border: 0;
+    cursor: pointer; padding: 10px 12px; border-radius: 9px;
+  }
+  .nv-panel a:hover, .nv-panel button:hover { background: var(--s-2); color: var(--fg); }
+  .nv-panel a[aria-current='page'] { color: var(--accent-fg); background: var(--s-1); }
+
+  .nv-me {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 12px; margin-bottom: 6px; border-bottom: 1px solid var(--line-soft);
+  }
+  .nv-me-t { display: flex; flex-direction: column; min-width: 0; }
+  .nv-me-t strong { font-size: .88rem; color: var(--fg); }
+  .nv-me-t span {
+    font-size: .76rem; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;
+  }
+
+  .nv-cta {
+    margin-left: auto; flex: 0 0 auto;
+    font: 700 .85rem/1 'Montserrat', system-ui, sans-serif;
+    color: var(--deep); background: var(--green); text-decoration: none;
+    padding: 11px 17px; border-radius: 10px; white-space: nowrap;
+  }
+  .nv-cta:hover { filter: brightness(1.06); }
+
+  /* The hamburger only exists on narrow screens. */
+  .nv-burger { display: none; }
+
+  @media (max-width: 900px) {
+    .nv-bar { height: 58px; padding: 0 10px 0 14px; gap: 8px; }
+    .nv-burger {
+      display: inline-flex; flex-direction: column; justify-content: center; gap: 5px;
+      width: 40px; height: 40px; padding: 0 9px;
+      background: transparent; border: 0; cursor: pointer; order: 3;
+    }
+    .nv-burger span {
+      display: block; height: 2px; width: 100%; border-radius: 2px;
+      background: var(--fg); transition: transform .2s ease, opacity .2s ease;
+    }
+    .nv-burger[aria-expanded='true'] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nv-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
+    .nv-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .nv-cta { order: 2; margin-left: auto; padding: 9px 14px; font-size: .8rem; }
+
+    /* Stacked, not cards: every group is a heading with its links under it, so
+       nothing is hidden behind a second tap and nothing gets clipped. */
+    .nv-menus {
+      display: none; order: 4; flex-direction: column; align-items: stretch;
+      gap: 2px; width: 100%; margin: 0; padding: 6px 4px 10px;
+    }
+    .nv-menus.is-open { display: flex; }
+    .nv-bar { flex-wrap: wrap; height: auto; min-height: 58px; padding-bottom: 0; }
+    /* Open, the bar stops being a thin strip over the page and becomes a panel
+       covering it. Glass at 6% white is legible as a strip and completely
+       illegible as a panel — the dashboard shows straight through the links —
+       so an open menu drops the transparency. */
+    .nv-bar:has(.nv-menus.is-open) {
+      padding-bottom: 6px;
+      background: var(--pop);
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+      box-shadow: var(--pop-shadow);
+    }
+
+    .nv-group { position: static; }
+    .nv-top { width: 100%; justify-content: space-between; padding: 12px 12px; }
+    .nv-panel {
+      position: static; min-width: 0; background: transparent; border: 0;
+      box-shadow: none; padding: 0 0 8px 8px;
+    }
+    .nv-me { padding-left: 4px; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var bar = document.querySelector('[data-nv-menus]');
+    if (!bar) return;
+    var burger = document.querySelector('[data-nv-burger]');
+
+    function panelOf(btn) { return btn.parentElement.querySelector('[data-nv-panel]'); }
+
+    function closeAll(except) {
+      document.querySelectorAll('[data-nv-toggle]').forEach(function (b) {
+        if (b === except) return;
+        b.setAttribute('aria-expanded', 'false');
+        panelOf(b).hidden = true;
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      var toggle = e.target.closest && e.target.closest('[data-nv-toggle]');
+      if (toggle) {
+        var open = toggle.getAttribute('aria-expanded') === 'true';
+        closeAll(toggle);
+        toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+        panelOf(toggle).hidden = open;
+        return;
+      }
+      if (e.target.closest && e.target.closest('[data-nv-burger]')) {
+        var isOpen = bar.classList.toggle('is-open');
+        burger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (!isOpen) closeAll(null);
+        return;
+      }
+      // A click anywhere else closes the menus, including inside a panel —
+      // following a link should not leave the menu open behind the new page.
+      closeAll(null);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      closeAll(null);
+      if (bar.classList.contains('is-open')) {
+        bar.classList.remove('is-open');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+</script>

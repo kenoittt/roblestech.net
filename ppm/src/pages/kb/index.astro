@@ -30,6 +30,25 @@ const [categories, owners, articles] = await Promise.all([
   searchArticles(Astro, { q, category, status, owner }),
 ]);
 
+/* The filters are behind an icon, so what is currently applied has to be
+   visible some other way or a filtered page looks like an empty handbook.
+   Each chip links to the same search minus that one filter, which is also how
+   you remove it — no JavaScript involved. */
+const dropParam = (key: string) => {
+  const next = new URLSearchParams(url.searchParams);
+  next.delete(key);
+  const s = next.toString();
+  return s ? `/kb?${s}` : '/kb';
+};
+const chips: { label: string; href: string }[] = [];
+if (category) {
+  const c = categories.find((x) => x.slug === category);
+  chips.push({ label: c ? c.title : category, href: dropParam('category') });
+}
+if (status) chips.push({ label: STATUS_LABEL[status as KbStatus] ?? status, href: dropParam('status') });
+if (owner) chips.push({ label: owner, href: dropParam('owner') });
+const filterCount = chips.length;
+
 const catById = new Map(categories.map((c) => [c.id, c]));
 /* Grouped by category when nothing is filtered, flat when it is: once someone
    has searched, the ranking that matters is relevance, not which shelf it sits
@@ -45,21 +64,43 @@ const grouped = !filtered;
     Nobody outside the team can reach these pages.
   </p>
 
-  <form class="kb-filters" method="get" action="/kb">
-    <div class="kb-search-wrap">
+  <form class="kbf" method="get" action="/kb">
+    <div class="kbf-bar">
+      <svg class="kbf-icon" width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+      </svg>
       <label class="sr-only" for="q">Search the handbook</label>
       <input id="q" name="q" type="search" value={q} autocomplete="off"
-             placeholder="Search everything — a title, a phrase in the body, a tool name" />
+             placeholder="Search everything — a title, a phrase, a tool name" />
+
+      <button class="kbf-funnel" type="button" aria-expanded="false" aria-controls="kbf-panel"
+              data-kbf-toggle>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 5h18l-7 8v6l-4 2v-8Z" />
+        </svg>
+        <span class="sr-only">Filters</span>
+        {/* The count sits inside the button rather than floating on its corner:
+            a badge pinned to a 36px control inside a 6px-padded bar ends up
+            hanging over the bar's edge. */}
+        {filterCount > 0 && <span class="kbf-count">{filterCount}</span>}
+      </button>
+
+      <button class="btn kbf-go" type="submit">Search</button>
     </div>
-    <div class="kb-filter-row">
+
+    {/* Hidden until the funnel is clicked. Not a popover: on a phone a floating
+        panel over a list of selects is worse than pushing the list down. */}
+    <div class="kbf-panel" id="kbf-panel" hidden data-kbf-panel>
       <label>Category
-        <select name="category">
+        <select name="category" data-kbf-select>
           <option value="">All categories</option>
           {categories.map((c) => <option value={c.slug} selected={c.slug === category}>{c.title}</option>)}
         </select>
       </label>
       <label>Status
-        <select name="status">
+        <select name="status" data-kbf-select>
           <option value="">Any status</option>
           {(['ready', 'draft', 'needed'] as KbStatus[]).map((s) => (
             <option value={s} selected={s === status}>{STATUS_LABEL[s]}</option>
@@ -67,14 +108,31 @@ const grouped = !filtered;
         </select>
       </label>
       <label>Owner
-        <select name="owner">
+        <select name="owner" data-kbf-select>
           <option value="">Any owner</option>
           {owners.map((o) => <option value={o} selected={o === owner}>{o}</option>)}
         </select>
       </label>
-      <button class="btn kb-apply" type="submit">Search</button>
-      {filtered && <a class="linkbtn" href="/kb">Clear</a>}
+      {/* Without JavaScript the selects do nothing on their own, so the panel
+          keeps its own apply button. With it, changing a select submits. */}
+      <button class="btn kbf-apply" type="submit">Apply</button>
     </div>
+
+    {chips.length > 0 && (
+      <div class="kbf-chips">
+        {chips.map((c) => (
+          <a class="kbf-chip" href={c.href}>
+            {c.label}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
+              <path d="M5 5 19 19M19 5 5 19" />
+            </svg>
+            <span class="sr-only">Remove this filter</span>
+          </a>
+        ))}
+        {filtered && <a class="kbf-clear" href="/kb">Clear all</a>}
+      </div>
+    )}
   </form>
 
   <p class="hint kb-resultline">
@@ -158,3 +216,109 @@ const grouped = !filtered;
     </div>
   )}
 </AppLayout>
+
+<style>
+  /* The search bar: one control, with the filter funnel living inside it.
+     The three selects used to sit open under the search box, full width and
+     stacked, which pushed the article list off the bottom of the screen on a
+     laptop — you had to scroll past the filters to reach what you searched
+     for. */
+  .kbf { margin-bottom: 18px; }
+
+  .kbf-bar {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--s-25); border: 1px solid var(--line);
+    border-radius: 13px; padding: 6px 6px 6px 14px; max-width: 720px;
+  }
+  .kbf-bar:focus-within { border-color: var(--accent-fg); }
+  .kbf-icon { color: var(--muted); flex: 0 0 auto; }
+
+  .kbf-bar input {
+    flex: 1 1 auto; min-width: 0;
+    background: transparent; border: 0; outline: none; padding: 9px 0;
+    font: 400 .95rem/1 'Montserrat', system-ui, sans-serif; color: var(--fg);
+  }
+  .kbf-bar input::placeholder { color: var(--muted); }
+  .kbf-bar input::-webkit-search-cancel-button { filter: grayscale(1) opacity(.6); }
+
+  .kbf-funnel {
+    flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-width: 36px; height: 36px; padding: 0 9px; border-radius: 9px;
+    background: transparent; border: 1px solid transparent; color: var(--fg-soft);
+    cursor: pointer;
+  }
+  .kbf-funnel:hover { background: var(--s-2); color: var(--fg); }
+  .kbf-funnel[aria-expanded='true'] { background: var(--s-3); color: var(--fg); border-color: var(--line); }
+  .kbf-count {
+    min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
+    background: var(--green); color: var(--deep);
+    font: 800 .66rem/17px 'Montserrat', system-ui, sans-serif; text-align: center;
+  }
+  .kbf-go { flex: 0 0 auto; }
+
+  .kbf-panel {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: end; gap: 12px;
+    max-width: 720px; margin-top: 10px; padding: 14px;
+    background: var(--s-1); border: 1px solid var(--line); border-radius: 13px;
+  }
+  .kbf-panel[hidden] { display: none; }
+  .kbf-panel label {
+    display: flex; flex-direction: column; gap: 6px; min-width: 0;
+    font: 700 .72rem/1 'Montserrat', system-ui, sans-serif;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  }
+  .kbf-panel select {
+    font: 600 .86rem/1 'Montserrat', system-ui, sans-serif; color: var(--fg);
+    background: var(--s-25); border: 1px solid var(--line); border-radius: 9px;
+    padding: 9px 10px; width: 100%;
+  }
+
+  /* What is applied, when the panel that set it is closed. */
+  .kbf-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 10px; }
+  .kbf-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 700 .78rem/1 'Montserrat', system-ui, sans-serif;
+    color: var(--fg); text-decoration: none;
+    background: var(--s-3); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 11px;
+  }
+  .kbf-chip svg { opacity: .55; }
+  .kbf-chip:hover { border-color: var(--accent-fg); }
+  .kbf-chip:hover svg { opacity: 1; }
+  .kbf-clear {
+    font: 700 .78rem/1 'Montserrat', system-ui, sans-serif;
+    color: var(--accent-fg); text-decoration: none; padding: 6px 2px;
+  }
+  .kbf-clear:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .kbf-panel { grid-template-columns: 1fr; }
+    .kbf-bar { padding-left: 11px; }
+    .kbf-go { padding-left: 13px; padding-right: 13px; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var btn = document.querySelector('[data-kbf-toggle]');
+    var panel = document.querySelector('[data-kbf-panel]');
+    if (!btn || !panel) return;
+
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      panel.hidden = open;
+      if (!open) { var s = panel.querySelector('select'); if (s) s.focus(); }
+    });
+
+    /* Changing a filter searches straight away. The Apply button stays in the
+       markup for the no-JavaScript case, so it is only hidden once this runs. */
+    var apply = panel.querySelector('.kbf-apply');
+    if (apply) apply.style.display = 'none';
+    panel.querySelectorAll('[data-kbf-select]').forEach(function (sel) {
+      sel.addEventListener('change', function () { sel.form.submit(); });
+    });
+  })();
+</script>
