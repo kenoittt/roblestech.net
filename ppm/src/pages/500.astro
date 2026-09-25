@@ -1,0 +1,111 @@
+---
+/*
+ * The 500 page.
+ *
+ * Astro hands this page the error that killed the render, which is the only
+ * thing that makes a server error diagnosable after the fact. Vercel's default
+ * error page says "this page isn't working" and nothing else; the actual cause
+ * is then only visible in the runtime log, behind a dashboard, which is a slow
+ * way to find out that a query changed shape or an environment variable is
+ * missing.
+ *
+ * So this page does two things. It writes the full stack to the console, where
+ * Vercel captures it as one log line rather than a bare route message. And it
+ * shows the message on the page itself. That is safe here in a way it would
+ * not be on the marketing site: PPM is internal-only, every route is behind a
+ * staff session, and the people who see this page are the people who need to
+ * report it. Environment values are never printed — only the error's own
+ * message and the first few frames of its stack.
+ *
+ * Deliberately self-contained: no AppLayout, no Supabase, no locals. An error
+ * page that depends on the things that just failed is not an error page.
+ */
+const error = Astro.props.error as unknown;
+const err = error instanceof Error ? error : null;
+
+const message = err?.message ?? (typeof error === 'string' ? error : 'Unknown error');
+const name = err?.name ?? 'Error';
+const frames = (err?.stack ?? '')
+  .split('\n')
+  .slice(1)
+  .map((l) => l.trim())
+  .filter(Boolean)
+  .slice(0, 6);
+
+// One line, so it survives Vercel's per-line log capture intact.
+console.error(
+  `[500] ${Astro.request.method} ${Astro.url.pathname} — ${name}: ${message} :: ` +
+    (err?.stack ?? '(no stack)').split('\n').slice(1, 8).map((l) => l.trim()).join(' <- ')
+);
+
+const when = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Something broke · Robles Tech PPM</title>
+    <style is:inline>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; min-height: 100vh; padding: 8vh 6vw;
+        background: #0a1020; color: #e8eefc;
+        font: 400 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; }
+      .tag {
+        display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .12em;
+        text-transform: uppercase; color: #ff9b9b; margin-bottom: 14px;
+      }
+      h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 10px; line-height: 1.2; }
+      p.lede { color: #9fb0d0; margin: 0 0 26px; }
+      .box {
+        background: #111a30; border: 1px solid #22314f; border-radius: 12px;
+        padding: 16px 18px; margin-bottom: 22px; overflow-x: auto;
+      }
+      .box h2 {
+        font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+        color: #7f92b5; margin: 0 0 10px;
+      }
+      code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; }
+      pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+      .msg { color: #ffd3d3; }
+      .frames { color: #8fa3c6; margin-top: 10px; font-size: .78rem; }
+      .frames div { padding: 1px 0; }
+      a.btn {
+        display: inline-block; background: #0464dd; color: #fff; text-decoration: none;
+        font-weight: 700; padding: 11px 18px; border-radius: 9px; margin-right: 10px;
+      }
+      a.ghost { background: transparent; border: 1px solid #2c3e63; color: #cfdcf5; }
+      .when { color: #6b7d9e; font-size: .78rem; margin-top: 24px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <span class="tag">Server error</span>
+      <h1>Something broke while loading this page.</h1>
+      <p class="lede">
+        The page itself failed, not your session. The details below are what the server actually
+        hit — send them over and it can be fixed from that alone.
+      </p>
+
+      <div class="box">
+        <h2>What happened</h2>
+        <pre class="msg"><code>{name}: {message}</code></pre>
+        {frames.length > 0 && (
+          <div class="frames">
+            {frames.map((f) => <div>{f}</div>)}
+          </div>
+        )}
+      </div>
+
+      <a class="btn" href="/">Back to the dashboard</a>
+      <a class="btn ghost" href="/login">Sign in again</a>
+
+      <p class="when">{Astro.request.method} {Astro.url.pathname} · {when}</p>
+    </div>
+  </body>
+</html>
