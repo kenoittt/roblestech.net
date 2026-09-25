@@ -106,21 +106,8 @@ body{min-height:100vh;display:flex;flex-direction:column;font-family:'Montserrat
   background:var(--page-bg);}
 a{color:inherit}
 
-/* Floating glass island nav */
-.p-nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;
-  display:flex;align-items:center;justify-content:space-between;width:calc(100% - 32px);max-width:1180px;
-  padding:0 22px;height:64px;border-radius:18px;background:var(--s-25);
-  backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
-  border:1px solid var(--s-4);box-shadow:var(--nav-shadow);}
-.p-brand{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:1.1rem;text-decoration:none;letter-spacing:-.01em;}
-.p-brand img{height:28px;width:auto;display:block;}
-.p-brand span{color:var(--info-fg);}
-.p-brand em{font-style:normal;color:var(--accent-fg);font-weight:700;}
-.p-nav-links{display:flex;align-items:center;gap:22px;}
-.p-nav-links a{text-decoration:none;font-weight:600;font-size:.92rem;color:var(--fg-soft);}
-.p-nav-links a:hover{color:var(--fg);}
-.p-logout{margin:0;}
-.p-logout button{font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;color:var(--deep);background:var(--green);border:0;padding:8px 16px;border-radius:9px;}
+/* The floating glass island nav lived here. AppNav.astro replaced it and
+   carries its own styles, scoped to itself. */
 
 .p-main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:108px 28px 44px;}
 .p-foot{text-align:center;color:var(--muted);font-size:.8rem;padding:22px;border-top:1px solid var(--line);}
@@ -249,10 +236,7 @@ a.stat:hover{border-color:rgba(57,146,255,.45);}
   border:1px solid var(--s-5);background:var(--s-3);vertical-align:middle;}
 .avatar-i{color:var(--fg);font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1;}
 .who{display:inline-flex;align-items:center;gap:7px;min-width:0;}
-/* Nav account link */
-.p-me{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;font-size:.92rem;
-  color:var(--fg-soft);padding:4px 8px;border-radius:999px;border:1px solid transparent;}
-.p-me:hover{color:var(--fg);background:var(--s-3);border-color:var(--line);}
+/* The nav's account link moved into AppNav's Account menu. */
 .acct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;}
 .acct-h{font-size:1.05rem;margin-bottom:6px;}
 .avatar-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
@@ -321,11 +305,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 .tscroll{overflow-x:auto;}
 @media(max-width:900px){.dash-grid{grid-template-columns:1fr;}}
 
-/* View toggle */
-.view-toggle{display:inline-flex;gap:2px;background:var(--s-2);border:1px solid var(--line);border-radius:10px;padding:3px;}
-.vbtn{font-family:inherit;font-weight:700;font-size:.85rem;cursor:pointer;color:var(--muted);background:none;border:0;padding:8px 16px;border-radius:8px;}
-.vbtn.active{background:var(--s-3);color:var(--fg);}
-
 /* Spreadsheet-style table view */
 .ttable-wrap{margin-top:14px;background:var(--s-1);border:1px solid var(--line);border-radius:14px;overflow:auto;}
 .ttable{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem;}
@@ -371,9 +350,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
 @media(max-width:1100px){.board{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:1fr}.row{grid-template-columns:1fr 1fr}.ttable-wrap{overflow-x:auto}.ttable{min-width:700px}}
 @media(max-width:560px){
-  .p-nav{top:10px;width:calc(100% - 20px);height:58px;padding:0 14px;}
-  .p-brand em{display:none;}.p-brand{font-size:.95rem;}.p-logo{height:24px;}
-  .p-nav-links{gap:12px;font-size:.82rem;}.p-main{padding:84px 16px 24px;}
+  .p-main{padding:84px 16px 24px;}
   .row{grid-template-columns:1fr;}h1{font-size:1.5rem;}
 }
 
@@ -382,46 +359,26 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green);}
    reduced-motion. Brand colors untouched. */
 :focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 6px; }
 input:focus, select:focus, textarea:focus, .cell-input:focus, .cell-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(174,227,123,.20); }
-a, button, .btn, .vbtn, .task, .stat, .cell-input, .cell-select, .p-logout button, input, select, textarea {
+a, button, .btn, .task, .stat, .cell-input, .cell-select, input, select, textarea {
   transition: background-color .2s ease, border-color .2s ease, color .2s ease,
     box-shadow .2s ease, transform .15s ease, filter .2s ease;
 }
-.btn:hover, .p-logout button:hover { filter: brightness(1.06); transform: translateY(-1px); }
-.btn:active, .p-logout button:active { transform: translateY(0) scale(.98); }
+.btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.98); }
 .task:hover { border-color: rgba(57,146,255,.45); }
-.p-nav-links a { padding: 8px 2px; border-radius: 6px; }
 button { cursor: pointer; }
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
 ::selection { background: rgba(174,227,123,.30); color: var(--selection-fg); }
 @media (pointer: coarse) {
   .task select, .task button, .cell-select { min-height: 40px; }
-  .vbtn { min-height: 44px; }
-  .p-nav-links a { min-height: 44px; display: inline-flex; align-items: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
-/* ── Mobile burger menu: island nav collapses into a dark-glass dropdown ── */
-.nav-open{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
-.burger{display:none;}
-@media (max-width: 600px){
-  .burger{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 auto;
-    border:1px solid var(--s-5);border-radius:10px;background:var(--s-3);cursor:pointer;color:var(--fg);}
-  .burger .i-close{display:none;}
-  .nav-open:checked ~ .burger .i-menu{display:none;}
-  .nav-open:checked ~ .burger .i-close{display:block;}
-  .nav-open:focus-visible ~ .burger{outline:3px solid var(--green);outline-offset:2px;}
-  .p-nav-links{display:none;}
-  .nav-open:checked ~ .p-nav-links{display:flex;flex-direction:column;align-items:stretch;gap:2px;
-    position:absolute;top:calc(100% + 8px);left:0;right:0;padding:10px;z-index:1300;
-    background:var(--sheet-bg);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);
-    border:1px solid var(--s-5);border-radius:16px;box-shadow:var(--pop-shadow);}
-  .nav-open:checked ~ .p-nav-links a{display:block;width:100%;text-align:left;padding:13px 14px;font-size:.95rem;border-radius:10px;min-height:0;}
-  .nav-open:checked ~ .p-nav-links a:hover{background:var(--s-3);}
-  .nav-open:checked ~ .p-nav-links .p-logout{width:100%;margin-top:6px;}
-  .nav-open:checked ~ .p-nav-links .p-logout button{width:100%;padding:12px;}
-}
+/* The checkbox-driven burger menu that used to live here belonged to the old
+   island nav. AppNav.astro brings its own burger and its own scoped styles, so
+   these rules matched nothing and only made it ambiguous which nav was live. */
 
 /* The theme switch lives with the nav that owns it, in AppNav.astro. An
    earlier .theme-toggle block sat here styling markup nothing rendered. */
@@ -434,60 +391,22 @@ button { cursor: pointer; }
 .kb-crumbs a{color:var(--muted);text-decoration:none;font-weight:600;}
 .kb-crumbs a:hover{color:var(--fg);text-decoration:underline;}
 
-.kb-tally{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin:-14px 0 22px;}
-.kb-tally strong{color:var(--fg);font-weight:800;}
-
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
 
-.kb-resultline{margin:0 0 22px;}
-
-.kb-section{margin-bottom:30px;}
-.kb-section[hidden]{display:none;}
-/* The section head is a flex row, which it needs to be: .section-h is an <a>
-   here, and an inline element's vertical margins do not reserve space, so the
-   heading contributed no height and the blurb's negative top margin pulled
-   straight through it. The dot and the count were unstyled for the same
-   reason — the row they belong to did not exist. */
-.kb-section-head{display:flex;align-items:center;gap:9px;margin:30px 0 4px;}
-.kb-section-head .section-h{margin:0;}
-.kb-section-link{text-decoration:none;color:inherit;}
-.kb-section-link:hover{color:var(--info-fg);}
+/* The dot and the count sit beside a category name wherever one is shown. */
 .kb-dot{flex:none;width:9px;height:9px;border-radius:50%;display:inline-block;}
 .kb-count{font-size:.72rem;font-weight:800;color:var(--muted);background:var(--s-2);
   border:1px solid var(--line);border-radius:999px;padding:2px 8px;line-height:1.4;}
-.kb-blurb{margin:0 0 12px;}
-/* The category/owner line under a search result. Without the gap the dot sat
-   flush against the first letter. */
-.kb-tagline{display:inline-flex;align-items:center;gap:7px;margin-top:2px;font-size:.75rem;color:var(--muted);}
-/* On a phone the status pill and the title fight over one line, and the title
-   loses — "Draft — has gaps" is wide and it wraps the summary into a column
-   three words across. The pill goes under the text instead. */
-@media(max-width:640px){
-  .kb-list li{flex-direction:column;align-items:flex-start;gap:9px;}
-  .kb-list li > a{width:100%;}
-}
 
-.kb-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0;padding:0;}
-.kb-list li{display:flex;align-items:center;gap:14px;background:var(--s-1);border:1px solid var(--line);
-  border-radius:12px;padding:13px 16px;transition:background .2s,border-color .2s;}
-.kb-list li[hidden]{display:none;}
-.kb-list li:hover{background:var(--s-2);border-color:var(--s-4);}
-.kb-list li > a{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-decoration:none;color:inherit;}
-.kb-list li > a:focus-visible{outline:2px solid var(--green);outline-offset:4px;border-radius:8px;}
-.kb-list strong{font-size:.95rem;font-weight:700;}
-.kb-list span{font-size:.82rem;color:var(--muted);line-height:1.5;}
+/* The stacked list that the hub used to render, with its section heads,
+   taglines and banners, went when the hub became a category rail and a grid of
+   KbCards. The card carries its own styles. */
 
 .kb-status{flex:none;font-family:'League Spartan',sans-serif;font-size:.64rem;font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:999px;white-space:nowrap;}
 .kb-status-ready{background:var(--ok-bg);color:var(--ok-fg);border:1px solid var(--ok-line);}
 .kb-status-draft{background:rgba(255,180,90,.14);color:var(--warn-fg);border:1px solid rgba(255,180,90,.35);}
 .kb-status-needed{background:var(--s-2);color:var(--muted);border:1px solid var(--line);}
-
-.kb-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:-14px 0 20px;font-size:.8rem;color:var(--muted);}
-.kb-banner{border-radius:12px;padding:13px 16px;margin-bottom:24px;font-size:.88rem;line-height:1.6;}
-.kb-banner-draft{background:rgba(255,180,90,.10);border:1px solid rgba(255,180,90,.32);color:var(--fg);}
-.kb-banner-needed{background:var(--s-1);border:1px solid var(--line);color:var(--muted);}
-.kb-banner code{font-size:.85em;background:var(--s-3);padding:1px 5px;border-radius:5px;}
 
 /* Callouts.
    Global rather than scoped to the article page, because these are generated
@@ -532,6 +451,3 @@ button { cursor: pointer; }
   text-transform:uppercase;color:var(--muted);font-weight:700;}
 .kb-body hr{border:0;border-top:1px solid var(--line);margin:28px 0;}
 .kb-body input[type="checkbox"]{width:auto;margin-right:8px;}
-
-.kb-next{margin-top:38px;padding-top:6px;border-top:1px solid var(--line);}
-.kb-empty{color:var(--muted);font-size:.9rem;padding:20px 0;}
