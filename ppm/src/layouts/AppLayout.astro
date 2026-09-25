@@ -1,11 +1,30 @@
 ---
 import Avatar from '../components/Avatar.astro';
+import CardNav from '../components/CardNav.jsx';
+import { avatarSrc, initials, tint } from '../lib/avatar';
+import { getCategories } from '../lib/kb';
 
 interface Props { title?: string; showNav?: boolean; }
 const { title = 'PPM · Robles Tech', showNav = true } = Astro.props;
 const profile = Astro.locals.profile;
 const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 const user = Astro.locals.user;
+/* The Account card's identity block, as data the React island can render. */
+/* The Knowledge Base card is built from the real categories, so renaming or
+   adding one in the admin centre changes the nav too. Categories are editable
+   data now; hardcoding five of them here would mean the nav quietly disagreed
+   with the handbook the first time someone added a sixth. */
+const kbCategories = Astro.locals.user ? await getCategories(Astro) : [];
+
+const accountMeta = user
+  ? {
+      name: profile?.full_name || 'Your account',
+      email: user.email ?? '',
+      src: avatarSrc(user.id, profile?.avatar_url),
+      initials: initials(profile?.full_name, user.email),
+      tint: tint(user.id),
+    }
+  : null;
 ---
 
 <!doctype html>
@@ -14,6 +33,21 @@ const user = Astro.locals.user;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
+    {/* Theme, resolved before the first paint. In <head> and ahead of the
+        stylesheet on purpose: setting this from a deferred script paints the
+        default first and then swaps, which is a white flash on every
+        navigation for anyone on dark. A stored choice wins, otherwise the OS
+        decides. */}
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('rtc-ppm-theme');
+          var t = stored === 'light' || stored === 'dark' ? stored
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+      })();
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,34 +56,103 @@ const user = Astro.locals.user;
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
-    {showNav && (
-      <header class="p-nav">
-        <a class="p-brand" href="/"><img class="p-logo" src="/logo-white.png" alt="Robles Tech" /> Robles <span>Tech</span> <em>PPM</em></a>
-        {Astro.locals.user && (
-          <>
-            <input type="checkbox" id="nav-open" class="nav-open" aria-label="Toggle menu" />
-            <label for="nav-open" class="burger">
-              <svg class="i-menu" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-              <svg class="i-close" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
-            </label>
-            <nav class="p-nav-links">
-              <a href="/">Dashboard</a>
-              <a href="/board">Board</a>
-              <a href="/calendar">Calendar</a>
-              <a href="/tasks">Tasks</a>
-              <a href="/activity">Activity</a>
-              {isAdmin && <a href="/admin">Team</a>}
-              <a href="/account" class="p-me" title="My account">
-                {user && <Avatar id={user.id} name={profile?.full_name} email={user.email} path={profile?.avatar_url} size={26} />}
-                <span>{profile?.full_name?.split(' ')[0] || 'Account'}</span>
-              </a>
-              <form method="post" action="/logout" class="p-logout"><button type="submit">Sign out</button></form>
-            </nav>
-          </>
-        )}
-      </header>
+    {/* The nav is React Bits' CardNav, hydrated. PPM already runs every page
+        through a server session check, so the people seeing this are a handful
+        of signed-in staff on desks, which is where the component's weight is
+        affordable in a way it is not on the public marketing site.
+
+        The cards are built here rather than inside the component so they can
+        read the session: the Account card shows who you are, and the Team link
+        only exists for admins. */}
+    {showNav && Astro.locals.user && (
+      <CardNav
+        client:load
+        logo="/logo-white.png"
+        logoAlt="Robles Tech PPM"
+        ctaLabel="My Tasks"
+        ctaHref="/tasks"
+        baseColor="var(--s-25)"
+        menuColor="var(--fg)"
+        buttonBgColor="var(--green)"
+        buttonTextColor="var(--deep)"
+        ease="power3.out"
+        items={[
+          {
+            label: 'Project Management',
+            bgColor: 'var(--nav-card-bg)',
+            textColor: 'var(--nav-card-fg)',
+            links: [
+              { label: 'Dashboard', href: '/', ariaLabel: 'PM dashboard' },
+              { label: 'Tracker board', href: '/board', ariaLabel: 'Tracker board' },
+              { label: 'To do', href: '/tasks', ariaLabel: 'To do list' },
+              { label: 'Calendar', href: '/calendar', ariaLabel: 'Calendar' },
+              { label: 'Activity', href: '/activity', ariaLabel: 'Activity log' },
+              ...(isAdmin ? [{ label: 'Team', href: '/admin', ariaLabel: 'Manage the team' }] : []),
+            ],
+          },
+          {
+            label: 'Knowledge Base',
+            bgColor: 'var(--nav-card-bg-2)',
+            textColor: 'var(--nav-card-fg)',
+            links: [
+              { label: 'All articles', href: '/kb', ariaLabel: 'The whole handbook' },
+              ...kbCategories.slice(0, 5).map((c) => ({
+                label: c.title,
+                href: `/kb?category=${c.slug}`,
+                ariaLabel: `${c.title} articles`,
+              })),
+              ...(isAdmin ? [{ label: 'Manage handbook', href: '/admin/kb', ariaLabel: 'Handbook admin' }] : []),
+            ],
+          },
+          {
+            label: 'Account',
+            bgColor: 'var(--nav-card-bg-3)',
+            textColor: 'var(--nav-card-fg)',
+            /* Plain data, not markup. The Avatar here is an Astro component
+               and Astro components cannot render inside a React island, so the
+               card builds its own identity block from these three values using
+               the same avatar helpers. */
+            account: accountMeta,
+            links: [
+              /* `action` rather than `href`: switching the theme is not a
+                 destination, so the component renders it as a button. */
+              { label: 'Light mode', action: 'theme', ariaLabel: 'Switch between light and dark' },
+              { label: 'Profile and name', href: '/account', ariaLabel: 'Your profile' },
+              { label: 'Password reset', href: '/account#password', ariaLabel: 'Reset your password' },
+              { label: 'Sign out', href: '/logout', ariaLabel: 'Sign out' },
+            ],
+          },
+        ]}
+      />
     )}
     <main class="p-main"><slot /></main>
+    <script is:inline>
+      (function () {
+        function label() {
+          /* The control names the theme you would switch TO, which is what a
+             toggle is expected to say. The component owns the markup, so this
+             finds it by the data attribute rather than an id. */
+          var el = document.querySelector('[data-action-label="theme"]');
+          if (el) el.textContent =
+            document.documentElement.getAttribute('data-theme') === 'light' ? 'Dark mode' : 'Light mode';
+        }
+        function toggle() {
+          var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', next);
+          try { localStorage.setItem('rtc-ppm-theme', next); } catch (e) {}
+          label();
+        }
+        /* Delegated: the nav hydrates after this runs, so binding directly to
+           the button would find nothing. */
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-action-label="theme"]');
+          if (btn) toggle();
+        });
+        /* And again once React has painted, to set the initial wording. */
+        var tries = 0;
+        var t = setInterval(function () { label(); if (++tries > 20 || document.querySelector('[data-action-label="theme"]')) clearInterval(t); }, 100);
+      })();
+    </script>
     <footer class="p-foot">&copy; {new Date().getFullYear()} Robles Technologies Corp. · Internal</footer>
   </body>
 </html>

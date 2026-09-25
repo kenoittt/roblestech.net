@@ -1,0 +1,160 @@
+---
+/*
+ * Handbook hub: universal search across every article, plus filters.
+ *
+ * Search and filtering happen on the server, in the query, rather than in the
+ * browser over a preloaded list. The body text is searchable, and shipping
+ * every article's full body to the client so it can grep them would get slower
+ * with every article written. It also means a filtered view has a real URL,
+ * which is shareable and survives a refresh.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import { getCategories, searchArticles, getOwners, STATUS_LABEL, snippet } from '../../lib/kb';
+import type { KbStatus } from '../../lib/kb';
+
+export const prerender = false;
+
+const profile = Astro.locals.profile;
+const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
+const url = Astro.url;
+const q = url.searchParams.get('q') ?? '';
+const category = url.searchParams.get('category') ?? '';
+const status = url.searchParams.get('status') ?? '';
+const owner = url.searchParams.get('owner') ?? '';
+const filtered = Boolean(q || category || status || owner);
+
+const [categories, owners, articles] = await Promise.all([
+  getCategories(Astro),
+  getOwners(Astro),
+  searchArticles(Astro, { q, category, status, owner }),
+]);
+
+const catById = new Map(categories.map((c) => [c.id, c]));
+/* Grouped by category when nothing is filtered, flat when it is: once someone
+   has searched, the ranking that matters is relevance, not which shelf it sits
+   on. */
+const grouped = !filtered;
+---
+
+<AppLayout title="Handbook · RTC PPM">
+  <p class="eyebrow">Internal</p>
+  <h1>Team Handbook</h1>
+  <p class="lede">
+    How we write, how we run calls, how delivery works, and what every tool is for.
+    Nobody outside the team can reach these pages.
+  </p>
+
+  <form class="kb-filters" method="get" action="/kb">
+    <div class="kb-search-wrap">
+      <label class="sr-only" for="q">Search the handbook</label>
+      <input id="q" name="q" type="search" value={q} autocomplete="off"
+             placeholder="Search everything — a title, a phrase in the body, a tool name" />
+    </div>
+    <div class="kb-filter-row">
+      <label>Category
+        <select name="category">
+          <option value="">All categories</option>
+          {categories.map((c) => <option value={c.slug} selected={c.slug === category}>{c.title}</option>)}
+        </select>
+      </label>
+      <label>Status
+        <select name="status">
+          <option value="">Any status</option>
+          {(['ready', 'draft', 'needed'] as KbStatus[]).map((s) => (
+            <option value={s} selected={s === status}>{STATUS_LABEL[s]}</option>
+          ))}
+        </select>
+      </label>
+      <label>Owner
+        <select name="owner">
+          <option value="">Any owner</option>
+          {owners.map((o) => <option value={o} selected={o === owner}>{o}</option>)}
+        </select>
+      </label>
+      <button class="btn kb-apply" type="submit">Search</button>
+      {filtered && <a class="linkbtn" href="/kb">Clear</a>}
+    </div>
+  </form>
+
+  <p class="hint kb-resultline">
+    {filtered
+      ? `${articles.length} ${articles.length === 1 ? 'article' : 'articles'}${q ? ` matching “${q}”` : ''}`
+      : `${articles.length} articles across ${categories.length} categories`}
+    {isAdmin && <> · <a href="/admin/kb">Manage the handbook</a></>}
+  </p>
+
+  {articles.length === 0 ? (
+    <div class="kb-banner kb-banner-needed">
+      {filtered
+        ? 'Nothing matches. Try a shorter word, or clear the filters.'
+        : 'No articles yet. An admin can add the first one from the handbook admin centre.'}
+    </div>
+  ) : grouped ? (
+    categories.map((c) => {
+      const mine = articles.filter((a) => a.category_id === c.id);
+      return mine.length > 0 && (
+        <section class="kb-section">
+          <div class="kb-section-head">
+            <span class="kb-dot" style={`background:${c.color}`} aria-hidden="true"></span>
+            <a class="section-h kb-section-link" href={`/kb?category=${c.slug}`}>{c.title}</a>
+            <span class="kb-count">{mine.length}</span>
+          </div>
+          {c.blurb && <p class="hint kb-blurb">{c.blurb}</p>}
+          <ul class="kb-list">
+            {mine.map((a) => (
+              <li>
+                <a href={`/kb/${a.slug}`}>
+                  <strong>{a.title}</strong>
+                  <span>{a.summary}</span>
+                </a>
+                <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    })
+  ) : (
+    <ul class="kb-list">
+      {articles.map((a) => {
+        const c = a.category_id ? catById.get(a.category_id) : null;
+        return (
+          <li>
+            <a href={`/kb/${a.slug}`}>
+              <strong>{a.title}</strong>
+              <span>{q ? snippet(a.body, q) : a.summary}</span>
+              {c && (
+                <span class="kb-tagline">
+                  <span class="kb-dot" style={`background:${c.color}`} aria-hidden="true"></span>{c.title}
+                  {a.owner && <> · {a.owner}</>}
+                </span>
+              )}
+            </a>
+            <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+
+  {!filtered && categories.length > 0 && (
+    <div class="kb-next">
+      <div class="section-h">Empty shelves</div>
+      <p class="hint">
+        A category with nothing on it is a gap we know about rather than one we have hidden.
+      </p>
+      <ul class="kb-list">
+        {categories.filter((c) => !articles.some((a) => a.category_id === c.id)).map((c) => (
+          <li>
+            <a href={`/kb?category=${c.slug}`}>
+              <strong>{c.title}</strong>
+              <span>{c.blurb}</span>
+            </a>
+            <span class="kb-status kb-status-needed">Nothing yet</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</AppLayout>

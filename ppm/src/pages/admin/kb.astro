@@ -1,0 +1,200 @@
+---
+/*
+ * Handbook admin centre. Write access to the knowledge base lives here and
+ * nowhere else.
+ *
+ * Two locks, deliberately. Middleware already refuses /admin to anyone who is
+ * not admin or super_admin, and every API route this page posts to re-checks
+ * the role server-side. A page-level check alone would be one redirect away
+ * from being the only thing standing between staff and the edit endpoints.
+ *
+ * Staff can read the whole handbook and search it. They cannot change it.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import { getCategories, getTopics, searchArticles, getArticle, STATUS_LABEL, STATUS_HELP } from '../../lib/kb';
+import type { KbStatus } from '../../lib/kb';
+
+export const prerender = false;
+
+const profile = Astro.locals.profile;
+if (profile?.role !== 'admin' && profile?.role !== 'super_admin') return Astro.redirect('/kb');
+
+const url = Astro.url;
+const editSlug = url.searchParams.get('edit') ?? '';
+const err = url.searchParams.get('err') ?? '';
+const okMsg = url.searchParams.get('ok') ?? '';
+
+const [categories, topics, articles] = await Promise.all([
+  getCategories(Astro), getTopics(Astro), searchArticles(Astro, {}),
+]);
+const editing = editSlug ? await getArticle(Astro, editSlug) : null;
+const catById = new Map(categories.map((c) => [c.id, c]));
+const STATUSES: KbStatus[] = ['ready', 'draft', 'needed'];
+---
+
+<AppLayout title="Handbook admin · RTC PPM">
+  <nav class="kb-crumbs" aria-label="Breadcrumb"><a href="/kb">Handbook</a><span aria-hidden="true">/</span><span>Admin</span></nav>
+  <p class="eyebrow">Admin</p>
+  <h1>Manage the handbook</h1>
+  <p class="lede">Add and edit articles, and shape the categories they sit in. Only admins see this page.</p>
+
+  {err && <div class="alert alert-error">{err}</div>}
+  {okMsg && <div class="alert alert-ok">{okMsg}</div>}
+
+  <!-- ─────────── article editor ─────────── -->
+  <div class="card">
+    <div class="section-h" style="margin-top:0;">{editing ? `Edit: ${editing.title}` : 'New article'}</div>
+    <form method="post" action="/api/kb-article-save">
+      {editing && <input type="hidden" name="id" value={editing.id} />}
+      <div class="form-grid">
+        <div>
+          <label for="a-title">Title</label>
+          <input id="a-title" name="title" required maxlength="140" value={editing?.title ?? ''} />
+        </div>
+        <div>
+          <label for="a-slug">URL slug</label>
+          <input id="a-slug" name="slug" maxlength="80" value={editing?.slug ?? ''}
+                 placeholder="left blank, generated from the title" />
+          <p class="hint">Changing this breaks existing links to the article.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label for="a-cat">Category</label>
+          <select id="a-cat" name="category_id">
+            {categories.map((c) => <option value={c.id} selected={c.id === editing?.category_id}>{c.title}</option>)}
+          </select>
+        </div>
+        <div>
+          <label for="a-topic">Topic (optional)</label>
+          <select id="a-topic" name="topic_id">
+            <option value="">No topic</option>
+            {topics.map((t) => (
+              <option value={t.id} selected={t.id === editing?.topic_id}>
+                {catById.get(t.category_id)?.title} · {t.title}
+              </option>
+            ))}
+          </select>
+          <p class="hint">A second grouping inside a category. Most articles need none.</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label for="a-status">Status</label>
+          <select id="a-status" name="status">
+            {STATUSES.map((s) => (
+              <option value={s} selected={s === (editing?.status ?? 'draft')}>{STATUS_LABEL[s]}</option>
+            ))}
+          </select>
+          <p class="hint">{STATUS_HELP.ready} / {STATUS_HELP.draft}</p>
+        </div>
+        <div>
+          <label for="a-owner">Owner</label>
+          <input id="a-owner" name="owner" maxlength="60" value={editing?.owner ?? ''}
+                 placeholder="Sales, Delivery, Ops, Marketing" />
+        </div>
+      </div>
+
+      <label for="a-summary">Summary</label>
+      <input id="a-summary" name="summary" maxlength="240" value={editing?.summary ?? ''}
+             placeholder="One line. This is what shows in the list and in search results." />
+
+      <label for="a-keywords" style="margin-top:14px;">Search keywords</label>
+      <input id="a-keywords" name="keywords" maxlength="240" value={editing?.keywords ?? ''}
+             placeholder="Words people would search for that are not in the title" />
+
+      <label for="a-body" style="margin-top:14px;">Body</label>
+      <textarea id="a-body" name="body" rows="18" style="min-height:320px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86rem;"
+                placeholder="Markdown. Headings, lists, tables, code and links all work.">{editing?.body ?? ''}</textarea>
+      <p class="hint">
+        Markdown. To mark something nobody has answered yet, start a line with
+        <code>**[Needs input]**</code> and set the status to Draft. An honest gap gets filled;
+        a confident guess gets followed.
+      </p>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap;">
+        <button class="btn" type="submit">{editing ? 'Save changes' : 'Create article'}</button>
+        {editing && <a class="linkbtn" href="/admin/kb">Cancel</a>}
+        {editing && <a class="linkbtn" href={`/kb/${editing.slug}`}>View</a>}
+      </div>
+    </form>
+  </div>
+
+  <!-- ─────────── all articles ─────────── -->
+  <div class="section-h">All articles ({articles.length})</div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Owner</th><th></th></tr></thead>
+      <tbody>
+        {articles.length === 0 && <tr><td colspan="5" class="hint">No articles yet.</td></tr>}
+        {articles.map((a) => (
+          <tr>
+            <td><a href={`/kb/${a.slug}`}>{a.title}</a><br /><span class="hint">/kb/{a.slug}</span></td>
+            <td>{a.category_id ? catById.get(a.category_id)?.title : '—'}</td>
+            <td><span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span></td>
+            <td>{a.owner ?? '—'}</td>
+            <td style="white-space:nowrap;">
+              <a class="mini" href={`/admin/kb?edit=${a.slug}`}>Edit</a>
+              <form method="post" action="/api/kb-article-delete" style="display:inline;"
+                    onsubmit="return confirm('Delete this article? This cannot be undone.')">
+                <input type="hidden" name="id" value={a.id} />
+                <button class="mini del-btn" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─────────── categories ─────────── -->
+  <div class="section-h">Categories</div>
+  <p class="hint" style="margin-bottom:12px;">
+    These are the shelves in the handbook and the links in the nav's Knowledge Base card.
+    Deleting one leaves its articles in place, uncategorised, rather than deleting them with it.
+  </p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr><th>Title</th><th>Slug</th><th>Blurb</th><th>Colour</th><th>Order</th><th></th></tr></thead>
+      <tbody>
+        {categories.map((c) => (
+          <tr>
+            <form method="post" action="/api/kb-category-save" style="display:contents;">
+              <input type="hidden" name="id" value={c.id} />
+              <td><input name="title" value={c.title} required maxlength="60" /></td>
+              <td><input name="slug" value={c.slug} required maxlength="40" /></td>
+              <td><input name="blurb" value={c.blurb ?? ''} maxlength="200" /></td>
+              <td><input name="color" value={c.color} maxlength="9" style="width:92px;" /></td>
+              <td><input name="sort" value={String(c.sort)} type="number" style="width:76px;" /></td>
+              <td style="white-space:nowrap;"><button class="mini" type="submit">Save</button></td>
+            </form>
+            <td style="white-space:nowrap;">
+              <form method="post" action="/api/kb-category-delete" style="display:inline;"
+                    onsubmit="return confirm('Delete this category? Its articles stay, without a category.')">
+                <input type="hidden" name="id" value={c.id} />
+                <button class="mini del-btn" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        ))}
+        <tr>
+          <form method="post" action="/api/kb-category-save" style="display:contents;">
+            <td><input name="title" placeholder="New category" maxlength="60" /></td>
+            <td><input name="slug" placeholder="slug" maxlength="40" /></td>
+            <td><input name="blurb" placeholder="What goes on this shelf" maxlength="200" /></td>
+            <td><input name="color" value="#0464DD" maxlength="9" style="width:92px;" /></td>
+            <td><input name="sort" value="100" type="number" style="width:76px;" /></td>
+            <td style="white-space:nowrap;"><button class="mini" type="submit">Add</button></td>
+          </form>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="hint" style="margin-top:22px;">
+    Adding a teammate is on the <a href="/admin">Team</a> page.
+  </p>
+</AppLayout>

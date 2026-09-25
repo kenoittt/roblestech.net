@@ -1,0 +1,116 @@
+---
+/*
+ * One article.
+ *
+ * The body is markdown stored in the database and rendered here.
+ *
+ * The rendered HTML is sanitised against an allowlist before it reaches the
+ * page. marked passes raw HTML through by default, and a knowledge base is
+ * exactly the sort of long-lived free-text field that ends up holding
+ * something pasted from elsewhere. The authors are admins we trust, but
+ * "trusted author" and "trusted clipboard" are not the same claim, and no
+ * article needs to inject markup to say what it means.
+ */
+import AppLayout from '../../layouts/AppLayout.astro';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+import { getArticle, getCategories, getTopics, searchArticles, STATUS_LABEL } from '../../lib/kb';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const article = await getArticle(Astro, String(slug ?? ''));
+if (!article) return Astro.redirect('/kb');
+
+const profile = Astro.locals.profile;
+const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
+const [categories, topics] = await Promise.all([getCategories(Astro), getTopics(Astro)]);
+const category = categories.find((c) => c.id === article.category_id) ?? null;
+const topic = topics.find((t) => t.id === article.topic_id) ?? null;
+
+const siblings = category
+  ? (await searchArticles(Astro, { category: category.slug })).filter((a) => a.id !== article.id)
+  : [];
+
+marked.setOptions({ gfm: true, breaks: false });
+
+/* Allowlist, applied to marked's OUTPUT.
+ *
+ * Two earlier attempts were wrong and are worth recording. Overriding the
+ * renderer's `html` hook only catches block-level HTML, so an inline
+ * `<img onerror>` in a paragraph sailed through. Returning false from the
+ * tokenizer's `html` and `tag` did nothing at all in marked 18: the raw markup
+ * still reached the page. Both were attempts to talk marked out of a feature it
+ * is documented to have.
+ *
+ * Sanitising the rendered HTML against a list of tags an article could actually
+ * need is the version that holds, and it does not depend on marked's internals
+ * staying the same across an upgrade. */
+const ALLOWED_TAGS = [
+  'h1', 'h2', 'h3', 'h4', 'p', 'a', 'ul', 'ol', 'li', 'strong', 'em',
+  'code', 'pre', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'hr', 'br', 'del', 'input',
+];
+
+const rendered = await marked.parse(article.body ?? '', { async: true });
+const html = sanitizeHtml(rendered, {
+  allowedTags: ALLOWED_TAGS,
+  allowedAttributes: {
+    a: ['href', 'title'],
+    // Task-list checkboxes, which GFM emits and the SOP articles use.
+    input: ['type', 'checked', 'disabled'],
+    th: ['align'],
+    td: ['align'],
+  },
+  // No javascript: or data: in a link, whatever the markdown said.
+  allowedSchemes: ['http', 'https', 'mailto'],
+});
+
+const updated = new Date(article.updated_at).toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'short', year: 'numeric',
+});
+---
+
+<AppLayout title={`${article.title} · Handbook · RTC PPM`}>
+  <nav class="kb-crumbs" aria-label="Breadcrumb">
+    <a href="/kb">Handbook</a>
+    {category && <><span aria-hidden="true">/</span><a href={`/kb?category=${category.slug}`}>{category.title}</a></>}
+    {topic && <><span aria-hidden="true">/</span><span>{topic.title}</span></>}
+  </nav>
+
+  <p class="eyebrow">{category?.title ?? 'Handbook'}</p>
+  <h1>{article.title}</h1>
+  {article.summary && <p class="lede">{article.summary}</p>}
+
+  <div class="kb-meta">
+    <span class={`kb-status kb-status-${article.status}`}>{STATUS_LABEL[article.status]}</span>
+    {article.owner && <span class="kb-owner">Kept current by: {article.owner}</span>}
+    <span class="kb-owner">Updated {updated}</span>
+    {isAdmin && <a class="linkbtn" href={`/admin/kb?edit=${article.slug}`}>Edit</a>}
+  </div>
+
+  {article.status !== 'ready' && (
+    <div class={`kb-banner kb-banner-${article.status}`}>
+      {article.status === 'draft'
+        ? 'This article has gaps, and they are marked in place below. Read them before you rely on it, and fill one in if you know the answer.'
+        : 'This article has not been written yet. It exists so the gap is visible rather than forgotten. If you know how this works, write it down.'}
+    </div>
+  )}
+
+  <article class="kb-body" set:html={html} />
+
+  {siblings.length > 0 && (
+    <div class="kb-next">
+      <div class="section-h">More in {category?.title}</div>
+      <ul class="kb-list">
+        {siblings.map((a) => (
+          <li>
+            <a href={`/kb/${a.slug}`}><strong>{a.title}</strong><span>{a.summary}</span></a>
+            <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</AppLayout>
