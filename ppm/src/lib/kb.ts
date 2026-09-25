@@ -59,23 +59,49 @@ export type KbFilters = {
 const ARTICLE_COLS =
   'id, category_id, topic_id, slug, title, summary, body, status, owner, keywords, updated_at';
 
+/*
+ * Every read below fails soft.
+ *
+ * The nav asks for categories on EVERY page, so anything that can throw in
+ * here can take down the whole app rather than one section. Two ways that can
+ * happen and both are real: the migration has not been run yet, so the tables
+ * do not exist; or the Supabase client throws while refreshing a session token
+ * mid-render. Neither is a reason for the board and the task list to stop
+ * working, so a failed handbook read gives back nothing and the handbook shows
+ * as empty.
+ */
+async function safe<T>(label: string, run: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await run();
+  } catch (e) {
+    console.error(`[kb] ${label} failed:`, e);
+    return fallback;
+  }
+}
+
 export async function getCategories(context: APIContext): Promise<KbCategory[]> {
-  const supabase = createSupabaseServer(context);
-  const { data } = await supabase
-    .from('kb_categories')
-    .select('id, slug, title, blurb, color, sort')
-    .order('sort')
-    .order('title');
-  return (data as KbCategory[]) ?? [];
+  return safe('getCategories', async () => {
+    const supabase = createSupabaseServer(context);
+    const { data, error } = await supabase
+      .from('kb_categories')
+      .select('id, slug, title, blurb, color, sort')
+      .order('sort')
+      .order('title');
+    if (error) throw new Error(error.message);
+    return (data as KbCategory[]) ?? [];
+  }, []);
 }
 
 export async function getTopics(context: APIContext): Promise<KbTopic[]> {
-  const supabase = createSupabaseServer(context);
-  const { data } = await supabase
-    .from('kb_topics')
-    .select('id, category_id, slug, title, sort')
-    .order('sort');
-  return (data as KbTopic[]) ?? [];
+  return safe('getTopics', async () => {
+    const supabase = createSupabaseServer(context);
+    const { data, error } = await supabase
+      .from('kb_topics')
+      .select('id, category_id, slug, title, sort')
+      .order('sort');
+    if (error) throw new Error(error.message);
+    return (data as KbTopic[]) ?? [];
+  }, []);
 }
 
 /**
@@ -93,6 +119,10 @@ export async function searchArticles(
   context: APIContext,
   f: KbFilters = {}
 ): Promise<KbArticle[]> {
+  return safe('searchArticles', () => searchArticlesInner(context, f), []);
+}
+
+async function searchArticlesInner(context: APIContext, f: KbFilters): Promise<KbArticle[]> {
   const supabase = createSupabaseServer(context);
 
   let categoryId: string | null = null;
@@ -138,21 +168,25 @@ export async function searchArticles(
 }
 
 export async function getArticle(context: APIContext, slug: string): Promise<KbArticle | null> {
-  const supabase = createSupabaseServer(context);
-  const { data } = await supabase
-    .from('kb_articles').select(ARTICLE_COLS).eq('slug', slug).single();
-  return (data as KbArticle) ?? null;
+  return safe('getArticle', async () => {
+    const supabase = createSupabaseServer(context);
+    const { data } = await supabase
+      .from('kb_articles').select(ARTICLE_COLS).eq('slug', slug).maybeSingle();
+    return (data as KbArticle) ?? null;
+  }, null);
 }
 
 /** Distinct owners, for the owner filter. Small table, done in memory. */
 export async function getOwners(context: APIContext): Promise<string[]> {
-  const supabase = createSupabaseServer(context);
-  const { data } = await supabase.from('kb_articles').select('owner');
-  const set = new Set<string>();
-  for (const r of (data as { owner: string | null }[]) ?? []) {
-    if (r.owner && r.owner.trim()) set.add(r.owner.trim());
-  }
-  return [...set].sort();
+  return safe('getOwners', async () => {
+    const supabase = createSupabaseServer(context);
+    const { data } = await supabase.from('kb_articles').select('owner');
+    const set = new Set<string>();
+    for (const r of (data as { owner: string | null }[]) ?? []) {
+      if (r.owner && r.owner.trim()) set.add(r.owner.trim());
+    }
+    return [...set].sort();
+  }, []);
 }
 
 /** URL-safe slug from a title, for the admin form's default. */
