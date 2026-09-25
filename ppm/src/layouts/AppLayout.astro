@@ -38,9 +38,9 @@ const navGroups = [
     id: 'account',
     label: 'Account settings',
     links: [
-      /* `action` rather than `href`: switching the theme is not a destination,
-         so the nav renders it as a button. */
-      { label: 'Light mode', action: 'theme' },
+      /* No theme entry here. The switch sits in the nav bar itself, where it
+         is one tap and shows both states — a menu item can only name the state
+         you are not in, which people have to stop and parse. */
       { label: 'Profile and name', href: '/account' },
       { label: 'Password reset', href: '/account#password' },
       { label: 'Sign out', href: '/logout' },
@@ -99,29 +99,30 @@ const account = user
     <main class="p-main"><slot /></main>
     <script is:inline>
       (function () {
-        function label() {
-          /* The control names the theme you would switch TO, which is what a
-             toggle is expected to say. The component owns the markup, so this
-             finds it by the data attribute rather than an id. */
-          var el = document.querySelector('[data-action-label="theme"]');
-          if (el) el.textContent =
-            document.documentElement.getAttribute('data-theme') === 'light' ? 'Dark mode' : 'Light mode';
+        var sw = document.querySelector('[data-theme-switch]');
+        if (!sw) return;
+        var label = sw.querySelector('[data-theme-label]');
+
+        /* The switch is a two-state control, so it carries role="switch" and
+           has to report which state it is in. The visible knob is positioned
+           by CSS from the document's data-theme, so both read the same source
+           and cannot disagree. The label names the state you are IN, because
+           that is what aria-checked already means — naming the other one would
+           have a screen reader announce "Light mode, on" while in dark. */
+        function sync() {
+          var light = document.documentElement.getAttribute('data-theme') === 'light';
+          sw.setAttribute('aria-checked', light ? 'true' : 'false');
+          if (label) label.textContent = light ? 'Light mode' : 'Dark mode';
         }
-        function toggle() {
+
+        sw.addEventListener('click', function () {
           var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', next);
           try { localStorage.setItem('rtc-ppm-theme', next); } catch (e) {}
-          label();
-        }
-        document.addEventListener('click', function (e) {
-          var btn = e.target.closest && e.target.closest('[data-action-label="theme"]');
-          if (btn) toggle();
+          sync();
         });
-        /* The nav is server-rendered now, so the control is in the markup by
-           the time this script runs and the initial wording can just be set.
-           The old version polled for it, because the React island had not
-           mounted yet. */
-        label();
+
+        sync();
       })();
     </script>
     <footer class="p-foot">&copy; {new Date().getFullYear()} Robles Technologies Corp. · Internal</footer>

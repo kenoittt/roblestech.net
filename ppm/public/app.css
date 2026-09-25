@@ -398,20 +398,8 @@ button { cursor: pointer; }
   .nav-open:checked ~ .p-nav-links .p-logout button{width:100%;padding:12px;}
 }
 
-/* ── Theme toggle ──────────────────────────────────────────────────────────
-   One button, two icons, and the theme decides which one shows. It names the
-   theme you would switch TO, which is the convention people expect from a
-   toggle: a moon in light mode means "go dark". */
-.theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
-  border-radius:999px;border:1px solid transparent;background:transparent;color:var(--fg-soft);
-  cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
-.theme-toggle:hover{color:var(--fg);background:var(--s-3);border-color:var(--line);}
-.theme-toggle:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
-.theme-toggle .i-sun{display:none;}
-.theme-toggle .i-moon{display:block;}
-:root[data-theme="light"] .theme-toggle .i-sun{display:block;}
-:root[data-theme="light"] .theme-toggle .i-moon{display:none;}
-@media (prefers-reduced-motion: reduce){ .theme-toggle{transition:none;} }
+/* The theme switch lives with the nav that owns it, in AppNav.astro. An
+   earlier .theme-toggle block sat here styling markup nothing rendered. */
 
 
 /* ── Knowledge base ────────────────────────────────────────────────────────

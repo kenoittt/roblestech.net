@@ -86,6 +86,31 @@ const isCurrent = (links: Link[]) =>
       ))}
     </div>
 
+    {/* The theme switch lives in the bar, not in the Account menu. It is the
+        one control here people flip repeatedly — usually because the room's
+        light changed — and burying a two-state control behind a menu costs
+        two clicks and a text label that has to describe the state you are NOT
+        in. A switch shows both states at once and takes one tap.
+
+        It is driven by the data-theme attribute in CSS rather than by its own
+        aria-checked, so it cannot drift out of step with the page: the no-flash
+        script in <head> sets the attribute before this ever renders. */}
+    <button class="nv-theme" type="button" role="switch" aria-checked="false" data-theme-switch>
+      <span class="sr-only" data-theme-label>Dark mode</span>
+      <span class="nv-theme-track" aria-hidden="true">
+        <svg class="nv-theme-i i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+        </svg>
+        <svg class="nv-theme-i i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
+        </svg>
+        <span class="nv-theme-knob"></span>
+      </span>
+    </button>
+
     <a class="nv-cta" href={ctaHref}>{ctaLabel}</a>
   </nav>
 </header>
@@ -154,8 +179,35 @@ const isCurrent = (links: Link[]) =>
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;
   }
 
-  .nv-cta {
+  /* The theme switch. Both states are on show, and the knob sits over the one
+     you are currently in. */
+  .nv-theme {
     margin-left: auto; flex: 0 0 auto;
+    background: transparent; border: 0; padding: 0; cursor: pointer; line-height: 0;
+  }
+  .nv-theme-track {
+    position: relative; display: inline-flex; align-items: center; justify-content: space-between;
+    width: 58px; height: 30px; padding: 0 7px; border-radius: 999px;
+    background: var(--s-1); border: 1px solid var(--line);
+  }
+  .nv-theme:hover .nv-theme-track { border-color: var(--s-4); }
+  .nv-theme:focus-visible .nv-theme-track { outline: 2px solid var(--accent-fg); outline-offset: 2px; }
+  .nv-theme-i { width: 14px; height: 14px; position: relative; z-index: 1; }
+  .i-moon { color: var(--fg); }
+  .i-sun { color: var(--muted); }
+  .nv-theme-knob {
+    position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--s-3); border: 1px solid var(--line);
+    transition: transform .22s cubic-bezier(.4, 0, .2, 1);
+  }
+  /* Keyed off the page's theme, never off the button's own state. */
+  :global(:root[data-theme='light']) .nv-theme-knob { transform: translateX(28px); }
+  :global(:root[data-theme='light']) .i-sun { color: var(--fg); }
+  :global(:root[data-theme='light']) .i-moon { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .nv-theme-knob { transition: none; } }
+
+  .nv-cta {
+    flex: 0 0 auto;
     font: 700 .85rem/1 'Montserrat', system-ui, sans-serif;
     color: var(--deep); background: var(--green); text-decoration: none;
     padding: 11px 17px; border-radius: 10px; white-space: nowrap;
@@ -180,7 +232,8 @@ const isCurrent = (links: Link[]) =>
     .nv-burger[aria-expanded='true'] span:nth-child(2) { opacity: 0; }
     .nv-burger[aria-expanded='true'] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    .nv-cta { order: 2; margin-left: auto; padding: 9px 14px; font-size: .8rem; }
+    .nv-theme { order: 1; margin-left: auto; }
+    .nv-cta { order: 2; margin-left: 0; padding: 9px 14px; font-size: .8rem; }
 
     /* Stacked, not cards: every group is a heading with its links under it, so
        nothing is hidden behind a second tap and nothing gets clipped. */
