@@ -265,7 +265,8 @@ const isCurrent = (links: Link[]) =>
     }
 
     .nv-group { position: static; }
-    .nv-top { width: 100%; justify-content: space-between; padding: 12px 12px; }
+    .nv-top { width: 100%; justify-content: space-between; padding: 12px; min-height: 44px; }
+    .nv-panel a, .nv-panel button { min-height: 44px; display: flex; align-items: center; }
     .nv-panel {
       position: static; min-width: 0; background: transparent; border: 0;
       box-shadow: none; padding: 0 0 8px 8px;

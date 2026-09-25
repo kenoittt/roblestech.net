@@ -2,19 +2,31 @@
 /*
  * One article.
  *
- * The body is markdown stored in the database and rendered here.
+ * The body is markdown stored in the database and rendered here, then three
+ * things are layered on top of the rendered HTML — all of them AFTER the
+ * sanitiser, deliberately:
  *
- * The rendered HTML is sanitised against an allowlist before it reaches the
- * page. marked passes raw HTML through by default, and a knowledge base is
- * exactly the sort of long-lived free-text field that ends up holding
- * something pasted from elsewhere. The authors are admins we trust, but
- * "trusted author" and "trusted clipboard" are not the same claim, and no
- * article needs to inject markup to say what it means.
+ *   ids on the headings, so the contents list can link into the article
+ *   callout boxes, from GitHub's "> [!NOTE]" alert syntax
+ *   nothing else
+ *
+ * Doing this after sanitising rather than before means an author cannot supply
+ * their own id or class and have it survive: whatever they wrote is stripped
+ * first, and what remains is generated here from text this file controls.
+ *
+ * The rendered HTML is sanitised against an allowlist because marked passes
+ * raw HTML through by default, and a knowledge base is exactly the sort of
+ * long-lived free-text field that ends up holding something pasted from
+ * elsewhere. The authors are admins we trust, but "trusted author" and
+ * "trusted clipboard" are not the same claim.
  */
 import AppLayout from '../../layouts/AppLayout.astro';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
-import { getArticle, getCategories, getTopics, searchArticles, STATUS_LABEL } from '../../lib/kb';
+import {
+  getArticle, getCategories, searchArticles, getVotes, relatedTo,
+  STATUS_LABEL, slugify,
+} from '../../lib/kb';
 
 export const prerender = false;
 
@@ -22,31 +34,25 @@ const { slug } = Astro.params;
 const article = await getArticle(Astro, String(slug ?? ''));
 if (!article) return Astro.redirect('/kb');
 
+const user = Astro.locals.user;
 const profile = Astro.locals.profile;
 const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
-const [categories, topics] = await Promise.all([getCategories(Astro), getTopics(Astro)]);
+const [categories, everything, votes] = await Promise.all([
+  getCategories(Astro),
+  searchArticles(Astro, {}),
+  getVotes(Astro, article.id, user?.id ?? null),
+]);
 const category = categories.find((c) => c.id === article.category_id) ?? null;
-const topic = topics.find((t) => t.id === article.topic_id) ?? null;
+const catById = new Map(categories.map((c) => [c.id, c]));
 
-const siblings = category
-  ? (await searchArticles(Astro, { category: category.slug })).filter((a) => a.id !== article.id)
-  : [];
+const related = relatedTo(article, everything, 4);
+const siblings = everything.filter(
+  (a) => a.id !== article.id && a.category_id === article.category_id && !related.includes(a)
+);
 
 marked.setOptions({ gfm: true, breaks: false });
 
-/* Allowlist, applied to marked's OUTPUT.
- *
- * Two earlier attempts were wrong and are worth recording. Overriding the
- * renderer's `html` hook only catches block-level HTML, so an inline
- * `<img onerror>` in a paragraph sailed through. Returning false from the
- * tokenizer's `html` and `tag` did nothing at all in marked 18: the raw markup
- * still reached the page. Both were attempts to talk marked out of a feature it
- * is documented to have.
- *
- * Sanitising the rendered HTML against a list of tags an article could actually
- * need is the version that holds, and it does not depend on marked's internals
- * staying the same across an upgrade. */
 const ALLOWED_TAGS = [
   'h1', 'h2', 'h3', 'h4', 'p', 'a', 'ul', 'ol', 'li', 'strong', 'em',
   'code', 'pre', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
@@ -54,7 +60,7 @@ const ALLOWED_TAGS = [
 ];
 
 const rendered = await marked.parse(article.body ?? '', { async: true });
-const html = sanitizeHtml(rendered, {
+let html = sanitizeHtml(rendered, {
   allowedTags: ALLOWED_TAGS,
   allowedAttributes: {
     a: ['href', 'title'],
@@ -63,54 +69,307 @@ const html = sanitizeHtml(rendered, {
     th: ['align'],
     td: ['align'],
   },
-  // No javascript: or data: in a link, whatever the markdown said.
   allowedSchemes: ['http', 'https', 'mailto'],
+});
+
+/* Callouts. An author writes GitHub's alert syntax:
+ *
+ *   > [!NOTE]
+ *   > Backup file size is limited to 4 GB.
+ *
+ * and gets a boxed note. Only these four labels are recognised, and the class
+ * name is built from the matched label rather than from anything in the file,
+ * so an unknown label just stays an ordinary quote. */
+const CALLOUTS: Record<string, string> = {
+  NOTE: 'Note', TIP: 'Tip', IMPORTANT: 'Important', WARNING: 'Warning',
+};
+html = html.replace(
+  /<blockquote>\s*<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING)\]\s*(?:<br\s*\/?>)?\s*/gi,
+  (_m, kind: string) => {
+    const key = kind.toUpperCase();
+    return `<div class="kba kba-${key.toLowerCase()}">` +
+           `<p class="kba-h">${CALLOUTS[key]}</p><p>`;
+  }
+);
+html = html.replace(/<\/p>\s*<\/blockquote>/g, (m, ...rest) => m); // untouched quotes stay quotes
+/* Close the ones we opened: every callout we produced ended the blockquote it
+   replaced, so the matching </blockquote> becomes </div>. */
+html = html.replace(/(<div class="kba kba-[a-z]+">[\s\S]*?)<\/blockquote>/g, '$1</div>');
+
+/* Contents. Built from the h2s the article actually has, not from a list the
+   author has to remember to keep in step. */
+const toc: { id: string; text: string }[] = [];
+const seen = new Set<string>();
+html = html.replace(/<h2>([\s\S]*?)<\/h2>/g, (_m, inner: string) => {
+  const text = inner.replace(/<[^>]+>/g, '').trim();
+  let id = slugify(text) || `section-${toc.length + 1}`;
+  while (seen.has(id)) id = `${id}-${toc.length + 1}`;
+  seen.add(id);
+  toc.push({ id, text });
+  return `<h2 id="${id}">${inner}</h2>`;
 });
 
 const updated = new Date(article.updated_at).toLocaleDateString('en-GB', {
   day: 'numeric', month: 'short', year: 'numeric',
 });
+const voted = votes.mine !== null;
 ---
 
 <AppLayout title={`${article.title} · Handbook · RTC PPM`}>
-  <nav class="kb-crumbs" aria-label="Breadcrumb">
-    <a href="/kb">Handbook</a>
-    {category && <><span aria-hidden="true">/</span><a href={`/kb?category=${category.slug}`}>{category.title}</a></>}
-    {topic && <><span aria-hidden="true">/</span><span>{topic.title}</span></>}
-  </nav>
+  <div class="kba-wrap">
+    {toc.length > 1 && (
+      <aside class="kbt" aria-label="In this article">
+        <p class="kbt-h">In this article:</p>
+        <nav>
+          {toc.map((t) => <a href={`#${t.id}`} data-toc-link>{t.text}</a>)}
+        </nav>
+      </aside>
+    )}
 
-  <p class="eyebrow">{category?.title ?? 'Handbook'}</p>
-  <h1>{article.title}</h1>
-  {article.summary && <p class="lede">{article.summary}</p>}
+    <div class="kbd">
+      <nav class="kbd-crumbs" aria-label="Breadcrumb">
+        <a href="/kb">Handbook</a>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+        ><path d="m9 6 6 6-6 6" /></svg>
+        {category ? (
+          <>
+            <a href={`/kb?category=${category.slug}`}>{category.title}</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+            ><path d="m9 6 6 6-6 6" /></svg>
+          </>
+        ) : null}
+        <span aria-current="page">{article.title}</span>
+      </nav>
 
-  <div class="kb-meta">
-    <span class={`kb-status kb-status-${article.status}`}>{STATUS_LABEL[article.status]}</span>
-    {article.owner && <span class="kb-owner">Kept current by: {article.owner}</span>}
-    <span class="kb-owner">Updated {updated}</span>
-    {isAdmin && <a class="linkbtn" href={`/admin/kb?edit=${article.slug}`}>Edit</a>}
+      <h1 class="kbd-h1">{article.title}</h1>
+
+      <div class="kbd-meta">
+        <p class="kbd-meta-h">Who keeps this current?</p>
+        <ul>
+          <li><strong>Owner:</strong> {article.owner || 'Nobody yet'}</li>
+          <li><strong>Status:</strong> {STATUS_LABEL[article.status]}</li>
+          <li><strong>Updated:</strong> {updated}</li>
+        </ul>
+        {isAdmin && <a class="kbd-edit" href={`/admin/kb?edit=${article.slug}`}>Edit this article</a>}
+      </div>
+
+      {article.summary && <p class="kbd-lede">{article.summary}</p>}
+
+      {article.status !== 'ready' && (
+        <div class={`kba kba-${article.status === 'draft' ? 'warning' : 'important'}`}>
+          <p class="kba-h">{article.status === 'draft' ? 'Has gaps' : 'Not written yet'}</p>
+          <p>
+            {article.status === 'draft'
+              ? 'The gaps are marked in place below. Read them before you rely on this, and fill one in if you know the answer.'
+              : 'This exists so the gap is visible rather than forgotten. If you know how this works, write it down.'}
+          </p>
+        </div>
+      )}
+
+      <article class="kb-body" set:html={html} />
+
+      <section class="kbv" id="helpful">
+        <p class="kbv-q">{voted ? 'Thanks — that is recorded.' : 'Was this article helpful?'}</p>
+        {voted ? (
+          <p class="kbv-said">
+            You said {votes.mine ? 'yes' : 'no'}.
+            <form method="post" action="/api/kb-feedback">
+              <input type="hidden" name="slug" value={article.slug} />
+              <input type="hidden" name="helpful" value={votes.mine ? 'no' : 'yes'} />
+              <button class="linkbtn" type="submit">Change to {votes.mine ? 'no' : 'yes'}</button>
+            </form>
+          </p>
+        ) : (
+          <div class="kbv-btns">
+            {(['yes', 'no'] as const).map((v) => (
+              <form method="post" action="/api/kb-feedback">
+                <input type="hidden" name="slug" value={article.slug} />
+                <input type="hidden" name="helpful" value={v} />
+                <button class={`kbv-b kbv-${v}`} type="submit">{v === 'yes' ? 'Yes' : 'No'}</button>
+              </form>
+            ))}
+          </div>
+        )}
+        {isAdmin && (votes.yes + votes.no > 0) && (
+          <p class="kbv-tally">{votes.yes} yes · {votes.no} no</p>
+        )}
+      </section>
+
+      {related.length > 0 && (
+        <section class="kbr">
+          <h2 class="kbr-h">Related content</h2>
+          <ul class="kbr-links">
+            {related.map((a) => (
+              <li>
+                <a href={`/kb/${a.slug}`}>
+                  {a.title}
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"
+                       aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                </a>
+                {a.category_id && a.category_id !== article.category_id && (
+                  <span class="kbr-in">in {catById.get(a.category_id)?.title}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {siblings.length > 0 && category && (
+        <section class="kbr">
+          <h2 class="kbr-h">Also in {category.title}</h2>
+          <div class="kbr-chips">
+            {siblings.map((a) => <a class="kbr-chip" href={`/kb/${a.slug}`}>{a.title}</a>)}
+          </div>
+        </section>
+      )}
+    </div>
   </div>
-
-  {article.status !== 'ready' && (
-    <div class={`kb-banner kb-banner-${article.status}`}>
-      {article.status === 'draft'
-        ? 'This article has gaps, and they are marked in place below. Read them before you rely on it, and fill one in if you know the answer.'
-        : 'This article has not been written yet. It exists so the gap is visible rather than forgotten. If you know how this works, write it down.'}
-    </div>
-  )}
-
-  <article class="kb-body" set:html={html} />
-
-  {siblings.length > 0 && (
-    <div class="kb-next">
-      <div class="section-h">More in {category?.title}</div>
-      <ul class="kb-list">
-        {siblings.map((a) => (
-          <li>
-            <a href={`/kb/${a.slug}`}><strong>{a.title}</strong><span>{a.summary}</span></a>
-            <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
 </AppLayout>
+
+<style>
+  .kba-wrap { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 28px; align-items: start; }
+
+  /* Contents. Sticky, because the whole point is to still be there when you
+     are three screens into a procedure. */
+  .kbt {
+    position: sticky; top: 96px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--pop-shadow); padding: 16px 10px 12px 16px;
+  }
+  .kbt-h {
+    margin: 0 0 10px;
+    font: 800 .7rem/1 'League Spartan', 'Montserrat', sans-serif;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--fg);
+  }
+  .kbt nav { display: flex; flex-direction: column; }
+  .kbt a {
+    display: flex; align-items: center; min-height: 40px; padding: 8px 10px;
+    margin-left: -16px; padding-left: 16px;
+    border-left: 3px solid transparent;
+    font: 600 .86rem/1.4 'Montserrat', system-ui, sans-serif;
+    color: var(--fg-soft); text-decoration: none;
+  }
+  .kbt a:hover { color: var(--fg); background: var(--s-1); }
+  .kbt a.is-on { color: var(--info-fg); border-left-color: var(--info-fg); background: var(--s-1); }
+
+  .kbd {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px 32px 32px;
+  }
+
+  .kbd-crumbs {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    font-size: .84rem; font-weight: 700; margin-bottom: 14px;
+  }
+  .kbd-crumbs a { color: var(--info-fg); text-decoration: none; }
+  .kbd-crumbs a:hover { text-decoration: underline; }
+  .kbd-crumbs svg { color: var(--muted); flex: none; }
+  .kbd-crumbs span { color: var(--muted); font-weight: 600; }
+
+  .kbd-h1 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); margin: 0 0 18px; }
+  .kbd-lede { color: var(--muted); font-size: 1rem; margin: 0 0 22px; }
+
+  .kbd-meta {
+    background: var(--s-1); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 22px;
+  }
+  .kbd-meta-h { margin: 0 0 8px; font-size: .92rem; font-weight: 800; color: var(--fg); }
+  .kbd-meta ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+  .kbd-meta li { font-size: .85rem; color: var(--muted); }
+  .kbd-meta strong { color: var(--fg-soft); font-weight: 700; }
+  .kbd-edit {
+    display: inline-block; margin-top: 10px; font-size: .82rem; font-weight: 700;
+    color: var(--accent-fg); text-decoration: none;
+  }
+  .kbd-edit:hover { text-decoration: underline; }
+
+  /* ── the vote ─────────────────────────────────────────────────────────── */
+  .kbv {
+    margin-top: 34px; padding: 22px 0; text-align: center;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .kbv-q { margin: 0 0 14px; font-size: 1rem; font-weight: 800; color: var(--fg); }
+  .kbv-btns { display: flex; justify-content: center; gap: 12px; }
+  .kbv-b {
+    min-width: 92px; min-height: 44px; padding: 11px 22px; border-radius: 10px;
+    font: 700 .92rem/1 'Montserrat', system-ui, sans-serif; cursor: pointer;
+    border: 1px solid transparent; transition: background .2s, border-color .2s;
+  }
+  .kbv-yes { background: var(--green); color: var(--deep); }
+  .kbv-yes:hover { filter: brightness(1.06); }
+  .kbv-no { background: transparent; color: var(--info-fg); border-color: var(--info-fg); }
+  .kbv-no:hover { background: var(--s-2); }
+  .kbv-said { margin: 0; font-size: .9rem; color: var(--muted); }
+  .kbv-said form { display: inline; margin-left: 8px; }
+  .kbv-tally { margin: 12px 0 0; font-size: .78rem; color: var(--muted); }
+
+  /* ── related ──────────────────────────────────────────────────────────── */
+  .kbr { margin-top: 30px; }
+  .kbr-h {
+    font: 800 .74rem/1 'League Spartan', 'Montserrat', sans-serif;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .kbr-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .kbr-links li { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .kbr-links a {
+    display: inline-flex; align-items: center; gap: 7px; min-height: 44px;
+    font-size: .95rem; font-weight: 700; color: var(--info-fg); text-decoration: none;
+  }
+  .kbr-links a:hover { text-decoration: underline; }
+  .kbr-in { font-size: .78rem; color: var(--muted); }
+
+  .kbr-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .kbr-chip {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 10px 16px;
+    background: var(--s-2); border: 1px solid var(--line); border-radius: 10px;
+    font-size: .88rem; font-weight: 700; color: var(--fg); text-decoration: none;
+  }
+  .kbr-chip:hover { border-color: var(--info-fg); color: var(--info-fg); }
+
+  @media (max-width: 900px) {
+    .kba-wrap { grid-template-columns: 1fr; gap: 16px; }
+    .kbt { position: static; }
+    .kbd { padding: 20px 18px 24px; border-radius: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .kbv-b { transition: none; } }
+</style>
+
+<script is:inline>
+  (function () {
+    var links = document.querySelectorAll('[data-toc-link]');
+    if (!links.length) return;
+    var byId = {};
+    var targets = [];
+    links.forEach(function (l) {
+      var id = decodeURIComponent(l.getAttribute('href').slice(1));
+      var el = document.getElementById(id);
+      if (el) { byId[id] = l; targets.push(el); }
+    });
+    if (!targets.length) return;
+
+    /* Highlight the section you are actually reading. rootMargin pulls the
+       trigger line down from the top so a heading counts as "current" once it
+       reaches the upper third, not the instant it touches the viewport edge —
+       otherwise the highlight jumps ahead of the text you are looking at. */
+    var seen = new Set();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) seen.add(e.target.id); else seen.delete(e.target.id);
+      });
+      for (var i = 0; i < targets.length; i++) {
+        var on = seen.has(targets[i].id);
+        if (on) {
+          Object.keys(byId).forEach(function (k) { byId[k].classList.remove('is-on'); });
+          byId[targets[i].id].classList.add('is-on');
+          break;
+        }
+      }
+    }, { rootMargin: '-90px 0px -65% 0px' });
+    targets.forEach(function (t) { io.observe(t); });
+  })();
+</script>

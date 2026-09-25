@@ -207,3 +207,60 @@ export function snippet(body: string, term: string, len = 150): string {
   const from = Math.max(0, i - 40);
   return (from > 0 ? '…' : '') + plain.slice(from, from + len) + (from + len < plain.length ? '…' : '');
 }
+
+/* ── Was this article helpful? ─────────────────────────────────────────────
+ *
+ * One row per person per article. Reads run under the caller's session, so
+ * row level security decides what comes back; the write goes through the API
+ * route, which sets user_id from the session rather than from the request.
+ */
+
+export type KbVotes = { yes: number; no: number; mine: boolean | null };
+
+export async function getVotes(
+  context: APIContext,
+  articleId: string,
+  userId: string | null
+): Promise<KbVotes> {
+  return safe('getVotes', async () => {
+    const supabase = createSupabaseServer(context);
+    const { data } = await supabase
+      .from('kb_feedback')
+      .select('user_id, helpful')
+      .eq('article_id', articleId);
+    const rows = (data as { user_id: string; helpful: boolean }[]) ?? [];
+    return {
+      yes: rows.filter((r) => r.helpful).length,
+      no: rows.filter((r) => !r.helpful).length,
+      mine: userId ? (rows.find((r) => r.user_id === userId)?.helpful ?? null) : null,
+    };
+  }, { yes: 0, no: 0, mine: null });
+}
+
+/**
+ * Articles worth reading next.
+ *
+ * Keyword overlap first, because two articles sharing "invoice" are related in
+ * a way that two articles sharing a category are not. Same-category articles
+ * fill the rest, so the section is never empty on a small handbook.
+ */
+export function relatedTo(article: KbArticle, pool: KbArticle[], limit = 4): KbArticle[] {
+  const keys = new Set(
+    (article.keywords ?? '').toLowerCase().split(/[,\s]+/).filter((k) => k.length > 2)
+  );
+  const others = pool.filter((a) => a.id !== article.id);
+  const scored = others
+    .map((a) => {
+      const theirs = (a.keywords ?? '').toLowerCase().split(/[,\s]+/).filter(Boolean);
+      return { a, score: theirs.filter((k) => keys.has(k)).length };
+    })
+    .filter((s) => s.score > 0)
+    .sort((x, y) => y.score - x.score);
+
+  const out = scored.map((s) => s.a);
+  for (const a of others) {
+    if (out.length >= limit) break;
+    if (a.category_id === article.category_id && !out.includes(a)) out.push(a);
+  }
+  return out.slice(0, limit);
+}

@@ -1,0 +1,59 @@
+---
+/*
+ * One article, as a card in the handbook grid.
+ *
+ * The whole card is the link rather than the title inside it: a card that
+ * looks clickable but only responds on its four title words is the most
+ * common way this pattern goes wrong.
+ *
+ * The status marker only appears when there is something to say. Marking every
+ * card "Ready" trains people to stop reading the markers, which is exactly
+ * when a draft slips past.
+ */
+import { STATUS_LABEL } from '../lib/kb';
+import type { KbArticle } from '../lib/kb';
+
+interface Props { article: KbArticle; snippet?: string | null }
+const { article, snippet = null } = Astro.props;
+const body = snippet ?? article.summary;
+---
+
+<a class="kbc" href={`/kb/${article.slug}`}>
+  <span class="kbc-t">{article.title}</span>
+  {body && <span class="kbc-d">{body}</span>}
+  {article.status !== 'ready' && (
+    <span class={`kb-status kb-status-${article.status}`}>{STATUS_LABEL[article.status]}</span>
+  )}
+  <svg class="kbc-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+</a>
+
+<style>
+  .kbc {
+    position: relative;
+    display: flex; flex-direction: column; gap: 7px;
+    padding: 18px 46px 18px 20px; min-height: 118px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    text-decoration: none; color: inherit;
+    transition: background .2s, border-color .2s, box-shadow .2s;
+  }
+  .kbc:hover { background: var(--s-2); border-color: var(--s-4); box-shadow: var(--card-shadow, none); }
+  .kbc:focus-visible { outline: 2px solid var(--accent-fg); outline-offset: 3px; }
+
+  .kbc-t { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; color: var(--fg); }
+  .kbc-d { font-size: .84rem; line-height: 1.55; color: var(--muted); }
+
+  /* Bottom-right, out of the text's way, and it follows the hover so the whole
+     card reads as one target. */
+  .kbc-go {
+    position: absolute; right: 16px; bottom: 16px;
+    color: var(--info-fg); opacity: .75; transition: transform .2s, opacity .2s;
+  }
+  .kbc:hover .kbc-go { opacity: 1; transform: translateX(3px); }
+
+  .kbc .kb-status { align-self: flex-start; margin-top: auto; }
+
+  @media (prefers-reduced-motion: reduce) { .kbc, .kbc-go { transition: none; } }
+</style>

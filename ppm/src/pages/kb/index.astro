@@ -1,6 +1,10 @@
 ---
 /*
- * Handbook hub: universal search across every article, plus filters.
+ * Handbook hub: a rail of categories beside a grid of article cards.
+ *
+ * The rail owns the category, so the filter panel no longer offers one — two
+ * controls for the same thing is how they end up disagreeing. What is left
+ * behind the funnel is status and owner.
  *
  * Search and filtering happen on the server, in the query, rather than in the
  * browser over a preloaded list. The body text is searchable, and shipping
@@ -9,6 +13,7 @@
  * which is shareable and survives a refresh.
  */
 import AppLayout from '../../layouts/AppLayout.astro';
+import KbCard from '../../components/KbCard.astro';
 import { getCategories, searchArticles, getOwners, STATUS_LABEL, snippet } from '../../lib/kb';
 import type { KbStatus } from '../../lib/kb';
 
@@ -22,7 +27,11 @@ const q = url.searchParams.get('q') ?? '';
 const category = url.searchParams.get('category') ?? '';
 const status = url.searchParams.get('status') ?? '';
 const owner = url.searchParams.get('owner') ?? '';
-const filtered = Boolean(q || category || status || owner);
+
+/* Picking a category is navigation, not a search. Only the free text and the
+   two panel filters put the page into "results" mode, where the grid stops
+   being a shelf and starts being a ranked list. */
+const searching = Boolean(q || status || owner);
 
 const [categories, owners, articles] = await Promise.all([
   getCategories(Astro),
@@ -30,10 +39,20 @@ const [categories, owners, articles] = await Promise.all([
   searchArticles(Astro, { q, category, status, owner }),
 ]);
 
-/* The filters are behind an icon, so what is currently applied has to be
-   visible some other way or a filtered page looks like an empty handbook.
-   Each chip links to the same search minus that one filter, which is also how
-   you remove it — no JavaScript involved. */
+const active = categories.find((c) => c.slug === category) ?? null;
+
+/** Same view, different category — everything else about the query survives. */
+const railHref = (slug: string) => {
+  const next = new URLSearchParams(url.searchParams);
+  if (slug) next.set('category', slug);
+  else next.delete('category');
+  const s = next.toString();
+  return s ? `/kb?${s}` : '/kb';
+};
+
+/* The filters are behind an icon, so what is applied has to stay visible or a
+   filtered page reads as an empty handbook. Each chip links to the same view
+   minus that one filter, which is also how you remove it — no JavaScript. */
 const dropParam = (key: string) => {
   const next = new URLSearchParams(url.searchParams);
   next.delete(key);
@@ -41,19 +60,11 @@ const dropParam = (key: string) => {
   return s ? `/kb?${s}` : '/kb';
 };
 const chips: { label: string; href: string }[] = [];
-if (category) {
-  const c = categories.find((x) => x.slug === category);
-  chips.push({ label: c ? c.title : category, href: dropParam('category') });
-}
 if (status) chips.push({ label: STATUS_LABEL[status as KbStatus] ?? status, href: dropParam('status') });
 if (owner) chips.push({ label: owner, href: dropParam('owner') });
 const filterCount = chips.length;
 
-const catById = new Map(categories.map((c) => [c.id, c]));
-/* Grouped by category when nothing is filtered, flat when it is: once someone
-   has searched, the ranking that matters is relevance, not which shelf it sits
-   on. */
-const grouped = !filtered;
+const byCategory = (id: string) => articles.filter((a) => a.category_id === id);
 ---
 
 <AppLayout title="Handbook · RTC PPM">
@@ -73,157 +84,142 @@ const grouped = !filtered;
       <label class="sr-only" for="q">Search the handbook</label>
       <input id="q" name="q" type="search" value={q} autocomplete="off"
              placeholder="Search everything — a title, a phrase, a tool name" />
-
-      <button class="kbf-funnel" type="button" aria-expanded="false" aria-controls="kbf-panel"
-              data-kbf-toggle>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M3 5h18l-7 8v6l-4 2v-8Z" />
-        </svg>
-        <span class="sr-only">Filters</span>
-        {/* The count sits inside the button rather than floating on its corner:
-            a badge pinned to a 36px control inside a 6px-padded bar ends up
-            hanging over the bar's edge. */}
-        {filterCount > 0 && <span class="kbf-count">{filterCount}</span>}
-      </button>
-
       <button class="btn kbf-go" type="submit">Search</button>
     </div>
-
-    {/* Hidden until the funnel is clicked. Not a popover: on a phone a floating
-        panel over a list of selects is worse than pushing the list down. */}
-    <div class="kbf-panel" id="kbf-panel" hidden data-kbf-panel>
-      <label>Category
-        <select name="category" data-kbf-select>
-          <option value="">All categories</option>
-          {categories.map((c) => <option value={c.slug} selected={c.slug === category}>{c.title}</option>)}
-        </select>
-      </label>
-      <label>Status
-        <select name="status" data-kbf-select>
-          <option value="">Any status</option>
-          {(['ready', 'draft', 'needed'] as KbStatus[]).map((s) => (
-            <option value={s} selected={s === status}>{STATUS_LABEL[s]}</option>
-          ))}
-        </select>
-      </label>
-      <label>Owner
-        <select name="owner" data-kbf-select>
-          <option value="">Any owner</option>
-          {owners.map((o) => <option value={o} selected={o === owner}>{o}</option>)}
-        </select>
-      </label>
-      {/* Without JavaScript the selects do nothing on their own, so the panel
-          keeps its own apply button. With it, changing a select submits. */}
-      <button class="btn kbf-apply" type="submit">Apply</button>
-    </div>
-
-    {chips.length > 0 && (
-      <div class="kbf-chips">
-        {chips.map((c) => (
-          <a class="kbf-chip" href={c.href}>
-            {c.label}
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="3.4" stroke-linecap="round" aria-hidden="true">
-              <path d="M5 5 19 19M19 5 5 19" />
-            </svg>
-            <span class="sr-only">Remove this filter</span>
-          </a>
-        ))}
-        {filtered && <a class="kbf-clear" href="/kb">Clear all</a>}
-      </div>
-    )}
   </form>
 
-  <p class="hint kb-resultline">
-    {filtered
-      ? `${articles.length} ${articles.length === 1 ? 'article' : 'articles'}${q ? ` matching “${q}”` : ''}`
-      : `${articles.length} articles across ${categories.length} categories`}
-    {isAdmin && <> · <a href="/admin/kb">Manage the handbook</a></>}
-  </p>
+  <div class="kbh">
+    {/* Two different left columns, because they do two different jobs. While
+        you are browsing, the shelf you are on is the only thing that matters,
+        so it is a plain rail. Once you have searched, the question becomes how
+        to narrow a result set, so it is a filter card — collapsible, because
+        on a short list the filters are just a column of things you do not
+        need. */}
+    {searching ? (
+      <form class="kbfc" method="get" action="/kb" data-filters>
+        {q && <input type="hidden" name="q" value={q} />}
+        <div class="kbfc-head">
+          <span class="kbfc-title">Filters</span>
+          <button class="kbfc-collapse" type="button" aria-expanded="true"
+                  aria-controls="kbfc-body" data-filters-toggle>
+            <span class="sr-only">Hide filters</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m11 6-6 6 6 6M19 6l-6 6 6 6" />
+            </svg>
+          </button>
+        </div>
 
-  {articles.length === 0 ? (
-    <div class="kb-banner kb-banner-needed">
-      {filtered
-        ? 'Nothing matches. Try a shorter word, or clear the filters.'
-        : 'No articles yet. An admin can add the first one from the handbook admin centre.'}
-    </div>
-  ) : grouped ? (
-    categories.map((c) => {
-      const mine = articles.filter((a) => a.category_id === c.id);
-      return mine.length > 0 && (
-        <section class="kb-section">
-          <div class="kb-section-head">
-            <span class="kb-dot" style={`background:${c.color}`} aria-hidden="true"></span>
-            <a class="section-h kb-section-link" href={`/kb?category=${c.slug}`}>{c.title}</a>
-            <span class="kb-count">{mine.length}</span>
-          </div>
-          {c.blurb && <p class="hint kb-blurb">{c.blurb}</p>}
-          <ul class="kb-list">
-            {mine.map((a) => (
-              <li>
-                <a href={`/kb/${a.slug}`}>
-                  <strong>{a.title}</strong>
-                  <span>{a.summary}</span>
-                </a>
-                <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      );
-    })
-  ) : (
-    <ul class="kb-list">
-      {articles.map((a) => {
-        const c = a.category_id ? catById.get(a.category_id) : null;
-        return (
-          <li>
-            <a href={`/kb/${a.slug}`}>
-              <strong>{a.title}</strong>
-              <span>{q ? snippet(a.body, q) : a.summary}</span>
-              {c && (
-                <span class="kb-tagline">
-                  <span class="kb-dot" style={`background:${c.color}`} aria-hidden="true"></span>{c.title}
-                  {a.owner && <> · {a.owner}</>}
-                </span>
+        <div class="kbfc-body" id="kbfc-body" data-filters-body>
+          <details class="kbfc-grp" open={!!category}>
+            <summary>Category<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></summary>
+            <label class="sr-only" for="f-category">Category</label>
+            <select id="f-category" name="category" data-kbf-select>
+              <option value="">All categories</option>
+              {categories.map((c) => <option value={c.slug} selected={c.slug === category}>{c.title}</option>)}
+            </select>
+          </details>
+
+          <details class="kbfc-grp" open={!!status}>
+            <summary>Status<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></summary>
+            <label class="sr-only" for="f-status">Status</label>
+            <select id="f-status" name="status" data-kbf-select>
+              <option value="">Any status</option>
+              {(['ready', 'draft', 'needed'] as KbStatus[]).map((s) => (
+                <option value={s} selected={s === status}>{STATUS_LABEL[s]}</option>
+              ))}
+            </select>
+          </details>
+
+          <details class="kbfc-grp" open={!!owner}>
+            <summary>Owner<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg></summary>
+            <label class="sr-only" for="f-owner">Owner</label>
+            <select id="f-owner" name="owner" data-kbf-select>
+              <option value="">Any owner</option>
+              {owners.map((o) => <option value={o} selected={o === owner}>{o}</option>)}
+            </select>
+          </details>
+
+          {/* Without JavaScript the selects do nothing on their own, so the
+              card keeps its own submit. With it, changing one searches. */}
+          <button class="btn kbfc-apply" type="submit">Apply</button>
+          {chips.length > 0 && <a class="kbfc-clear" href={q ? `/kb?q=${encodeURIComponent(q)}` : '/kb'}>Clear all</a>}
+        </div>
+      </form>
+    ) : (
+      <nav class="kbh-rail" aria-label="Handbook categories">
+        <a href={railHref('')} class:list={['kbh-rail-i', { 'is-on': !active }]}
+         aria-current={!active ? 'page' : undefined}>All articles</a>
+        {categories.map((c) => (
+        <a href={railHref(c.slug)} class:list={['kbh-rail-i', { 'is-on': active?.id === c.id }]}
+           aria-current={active?.id === c.id ? 'page' : undefined}>{c.title}</a>
+      ))}
+        {isAdmin && <a class="kbh-rail-admin" href="/admin/kb">Manage the handbook</a>}
+      </nav>
+    )}
+
+    <div class="kbh-panel">
+      {searching ? (
+        <>
+          <p class="kbh-count">
+            {articles.length} {articles.length === 1 ? 'result' : 'results'}
+            {q && <> for “{q}”</>}
+            {active && <> in {active.title}</>}
+          </p>
+          {articles.length === 0 ? (
+            <p class="kbh-empty">Nothing matches. Try a shorter word, or clear the filters.</p>
+          ) : (
+            <div class="kbh-grid">
+              {articles.map((a) => <KbCard article={a} snippet={q ? snippet(a.body, q) : null} />)}
+            </div>
+          )}
+        </>
+      ) : active ? (
+        <>
+          {active.blurb && <p class="kbh-blurb">{active.blurb}</p>}
+          {articles.length === 0 ? (
+            <p class="kbh-empty">
+              Nothing on this shelf yet. That is a gap we know about rather than one we have hidden.
+            </p>
+          ) : (
+            <div class="kbh-grid">{articles.map((a) => <KbCard article={a} />)}</div>
+          )}
+        </>
+      ) : (
+        categories.map((c) => {
+          const mine = byCategory(c.id);
+          return (
+            <section class="kbh-sec">
+              <div class="kbh-sec-h">
+                <span class="kb-dot" style={`background:${c.color}`} aria-hidden="true"></span>
+                <a class="kbh-sec-t" href={railHref(c.slug)}>{c.title}</a>
+                <span class="kb-count">{mine.length}</span>
+              </div>
+              {mine.length === 0 ? (
+                <p class="kbh-empty">Nothing here yet.</p>
+              ) : (
+                <div class="kbh-grid">{mine.map((a) => <KbCard article={a} />)}</div>
               )}
-            </a>
-            <span class={`kb-status kb-status-${a.status}`}>{STATUS_LABEL[a.status]}</span>
-          </li>
-        );
-      })}
-    </ul>
-  )}
-
-  {!filtered && categories.length > 0 && (
-    <div class="kb-next">
-      <div class="section-h">Empty shelves</div>
-      <p class="hint">
-        A category with nothing on it is a gap we know about rather than one we have hidden.
-      </p>
-      <ul class="kb-list">
-        {categories.filter((c) => !articles.some((a) => a.category_id === c.id)).map((c) => (
-          <li>
-            <a href={`/kb?category=${c.slug}`}>
-              <strong>{c.title}</strong>
-              <span>{c.blurb}</span>
-            </a>
-            <span class="kb-status kb-status-needed">Nothing yet</span>
-          </li>
-        ))}
-      </ul>
+            </section>
+          );
+        })
+      )}
     </div>
-  )}
+  </div>
 </AppLayout>
 
 <style>
   /* The search bar: one control, with the filter funnel living inside it.
-     The three selects used to sit open under the search box, full width and
-     stacked, which pushed the article list off the bottom of the screen on a
-     laptop — you had to scroll past the filters to reach what you searched
-     for. */
-  .kbf { margin-bottom: 18px; }
+     The selects used to sit open under the search box, full width and stacked,
+     which pushed the article list off the bottom of the screen on a laptop —
+     you had to scroll past the filters to reach what you searched for. */
+  .kbf { margin-bottom: 22px; }
 
   .kbf-bar {
     display: flex; align-items: center; gap: 8px;
@@ -239,85 +235,161 @@ const grouped = !filtered;
     font: 400 .95rem/1 'Montserrat', system-ui, sans-serif; color: var(--fg);
   }
   .kbf-bar input::placeholder { color: var(--muted); }
-  .kbf-bar input::-webkit-search-cancel-button { filter: grayscale(1) opacity(.6); }
 
-  .kbf-funnel {
-    flex: 0 0 auto;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    min-width: 36px; height: 36px; padding: 0 9px; border-radius: 9px;
-    background: transparent; border: 1px solid transparent; color: var(--fg-soft);
-    cursor: pointer;
+  /* ── the filters card ────────────────────────────────────────────────── */
+  .kbfc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--pop-shadow); overflow: hidden;
+    position: sticky; top: 96px;
   }
-  .kbf-funnel:hover { background: var(--s-2); color: var(--fg); }
-  .kbf-funnel[aria-expanded='true'] { background: var(--s-3); color: var(--fg); border-color: var(--line); }
-  .kbf-count {
-    min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
-    background: var(--green); color: var(--deep);
-    font: 800 .66rem/17px 'Montserrat', system-ui, sans-serif; text-align: center;
+  .kbfc-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 14px 10px 14px 16px;
   }
-  .kbf-go { flex: 0 0 auto; }
+  .kbfc-title {
+    font: 800 .76rem/1 'League Spartan', 'Montserrat', sans-serif;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--fg);
+  }
+  .kbfc-collapse {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; margin: -6px; border-radius: 10px;
+    background: transparent; border: 0; cursor: pointer; color: var(--info-fg);
+  }
+  .kbfc-collapse:hover { background: var(--s-2); }
 
-  .kbf-panel {
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-    align-items: end; gap: 12px;
-    max-width: 720px; margin-top: 10px; padding: 14px;
-    background: var(--s-1); border: 1px solid var(--line); border-radius: 13px;
+  .kbfc-body { padding: 0 16px 14px; }
+  .kbfc-grp { border-top: 1px solid var(--line-soft); }
+  .kbfc-grp summary {
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 44px; padding: 10px 0; cursor: pointer; list-style: none;
+    font: 700 .9rem/1 'Montserrat', system-ui, sans-serif; color: var(--info-fg);
   }
-  .kbf-panel[hidden] { display: none; }
-  .kbf-panel label {
-    display: flex; flex-direction: column; gap: 6px; min-width: 0;
-    font: 700 .72rem/1 'Montserrat', system-ui, sans-serif;
-    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
-  }
-  .kbf-panel select {
+  .kbfc-grp summary::-webkit-details-marker { display: none; }
+  .kbfc-grp summary svg { transition: transform .2s ease; opacity: .8; }
+  .kbfc-grp[open] summary svg { transform: rotate(180deg); }
+  .kbfc-grp select {
+    width: 100%; margin: 0 0 12px;
     font: 600 .86rem/1 'Montserrat', system-ui, sans-serif; color: var(--fg);
     background: var(--s-25); border: 1px solid var(--line); border-radius: 9px;
-    padding: 9px 10px; width: 100%;
+    padding: 10px;
   }
-
-  /* What is applied, when the panel that set it is closed. */
-  .kbf-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 10px; }
-  .kbf-chip {
-    display: inline-flex; align-items: center; gap: 7px;
+  .kbfc-apply { width: 100%; margin-top: 12px; }
+  .kbfc-clear {
+    display: block; text-align: center; margin-top: 10px;
     font: 700 .78rem/1 'Montserrat', system-ui, sans-serif;
+    color: var(--accent-fg); text-decoration: none;
+  }
+  .kbfc-clear:hover { text-decoration: underline; }
+
+  /* Collapsed: the card shrinks to a strip with the word turned on its side,
+     which is how it stays discoverable rather than disappearing. */
+  .kbfc.is-shut { width: 62px; }
+  .kbfc.is-shut .kbfc-head { flex-direction: column-reverse; gap: 14px; padding: 12px 8px 18px; }
+  .kbfc.is-shut .kbfc-title { writing-mode: vertical-rl; letter-spacing: .18em; }
+  .kbfc.is-shut .kbfc-body { display: none; }
+
+  /* ── rail + panel ─────────────────────────────────────────────────────── */
+  .kbh { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 26px; align-items: start; }
+  .kbh:has(.kbfc.is-shut) { grid-template-columns: 62px minmax(0, 1fr); }
+
+  .kbh-rail { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 96px; }
+  .kbh-rail-i {
+    display: flex; align-items: center; min-height: 44px; padding: 9px 12px;
+    border-left: 3px solid transparent; border-radius: 0 9px 9px 0;
+    font: 700 .92rem/1.35 'Montserrat', system-ui, sans-serif;
+    color: var(--fg-soft); text-decoration: none;
+    transition: color .2s, background .2s, border-color .2s;
+  }
+  .kbh-rail-i:hover { color: var(--fg); background: var(--s-1); }
+  .kbh-rail-i.is-on { color: var(--info-fg); border-left-color: var(--info-fg); background: var(--s-1); }
+  .kbh-rail-admin {
+    margin-top: 10px; padding: 9px 12px; min-height: 44px; display: flex; align-items: center;
+    border-top: 1px solid var(--line);
+    font: 700 .82rem/1.35 'Montserrat', system-ui, sans-serif;
+    color: var(--accent-fg); text-decoration: none;
+  }
+  .kbh-rail-admin:hover { text-decoration: underline; }
+
+  .kbh-panel {
+    background: var(--s-1); border: 1px solid var(--line); border-radius: 18px;
+    padding: 22px; min-height: 280px;
+  }
+  .kbh-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .kbh-blurb, .kbh-count { margin: 0 0 16px; font-size: .88rem; color: var(--muted); }
+  .kbh-empty { margin: 0; font-size: .9rem; color: var(--muted); }
+
+  .kbh-sec { margin-bottom: 26px; }
+  .kbh-sec:last-child { margin-bottom: 0; }
+  .kbh-sec-h { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+  .kbh-sec-t {
+    font: 800 1.05rem/1.2 'Montserrat', system-ui, sans-serif;
     color: var(--fg); text-decoration: none;
-    background: var(--s-3); border: 1px solid var(--line);
-    border-radius: 999px; padding: 6px 11px;
   }
-  .kbf-chip svg { opacity: .55; }
-  .kbf-chip:hover { border-color: var(--accent-fg); }
-  .kbf-chip:hover svg { opacity: 1; }
-  .kbf-clear {
-    font: 700 .78rem/1 'Montserrat', system-ui, sans-serif;
-    color: var(--accent-fg); text-decoration: none; padding: 6px 2px;
-  }
-  .kbf-clear:hover { text-decoration: underline; }
+  .kbh-sec-t:hover { color: var(--info-fg); }
 
+  @media (max-width: 900px) {
+    .kbh { grid-template-columns: 1fr; gap: 16px; }
+    /* Horizontal above the panel: a vertical rail on a phone is a screen of
+       links before any content. */
+    .kbh-rail {
+      position: static; flex-direction: row; gap: 6px;
+      overflow-x: auto; padding-bottom: 4px; scrollbar-width: none;
+    }
+    .kbh-rail::-webkit-scrollbar { display: none; }
+    .kbh-rail-i {
+      flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent;
+      border-radius: 9px 9px 0 0; white-space: nowrap;
+    }
+    .kbh-rail-i.is-on { border-left: 0; border-bottom-color: var(--info-fg); }
+    .kbh-rail-admin { display: none; }
+    /* A sideways word in a 62px column is a desktop affordance; on a phone
+       the card is just a card. */
+    .kbfc { position: static; }
+    .kbfc.is-shut { width: auto; }
+    .kbfc.is-shut .kbfc-head { flex-direction: row; padding: 14px 10px 14px 16px; }
+    .kbfc.is-shut .kbfc-title { writing-mode: horizontal-tb; letter-spacing: .14em; }
+    .kbh-panel { padding: 16px; border-radius: 14px; }
+  }
   @media (max-width: 640px) {
+    .kbh-grid { grid-template-columns: 1fr; }
     .kbf-panel { grid-template-columns: 1fr; }
     .kbf-bar { padding-left: 11px; }
-    .kbf-go { padding-left: 13px; padding-right: 13px; }
   }
+  @media (prefers-reduced-motion: reduce) { .kbh-rail-i { transition: none; } }
 </style>
 
 <script is:inline>
   (function () {
-    var btn = document.querySelector('[data-kbf-toggle]');
-    var panel = document.querySelector('[data-kbf-panel]');
-    if (!btn || !panel) return;
+    var card = document.querySelector('[data-filters]');
+    if (!card) return;
 
-    btn.addEventListener('click', function () {
-      var open = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-      panel.hidden = open;
-      if (!open) { var s = panel.querySelector('select'); if (s) s.focus(); }
+    var toggle = card.querySelector('[data-filters-toggle]');
+    var body = card.querySelector('[data-filters-body]');
+    var label = toggle.querySelector('.sr-only');
+
+    /* Whether the card is open is a per-person preference, not part of the
+       search, so it stays out of the URL. */
+    try {
+      if (localStorage.getItem('rtc-kb-filters') === 'shut') {
+        card.classList.add('is-shut');
+        toggle.setAttribute('aria-expanded', 'false');
+        label.textContent = 'Show filters';
+      }
+    } catch (e) {}
+
+    toggle.addEventListener('click', function () {
+      var shut = card.classList.toggle('is-shut');
+      toggle.setAttribute('aria-expanded', shut ? 'false' : 'true');
+      label.textContent = shut ? 'Show filters' : 'Hide filters';
+      body.hidden = false;
+      try { localStorage.setItem('rtc-kb-filters', shut ? 'shut' : 'open'); } catch (e) {}
     });
 
     /* Changing a filter searches straight away. The Apply button stays in the
        markup for the no-JavaScript case, so it is only hidden once this runs. */
-    var apply = panel.querySelector('.kbf-apply');
+    var apply = card.querySelector('.kbfc-apply');
     if (apply) apply.style.display = 'none';
-    panel.querySelectorAll('[data-kbf-select]').forEach(function (sel) {
+    card.querySelectorAll('[data-kbf-select]').forEach(function (sel) {
       sel.addEventListener('change', function () { sel.form.submit(); });
     });
   })();

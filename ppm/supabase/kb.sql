@@ -668,3 +668,37 @@ message somewhere", that is the thing to fix first.
 ', 'draft', 'Ops', 'salesforce calendly search console gsc semrush smartsheet supabase vercel tools access'
 from public.kb_categories c left join public.kb_topics t on t.category_id = c.id and t.slug = 'tools'
 where c.slug = 'internal' on conflict (slug) do nothing;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- Was this article helpful?
+--
+-- One row per person per article, so a second vote replaces the first rather
+-- than stacking. The point is not a score: it is to surface which articles are
+-- failing the people who actually had to use them, which is why the vote is
+-- attributed rather than anonymous — an admin can go and ask.
+-- ────────────────────────────────────────────────────────────────────────────
+create table if not exists public.kb_feedback (
+  article_id uuid not null references public.kb_articles(id) on delete cascade,
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  helpful    boolean not null,
+  created_at timestamptz not null default now(),
+  primary key (article_id, user_id)
+);
+
+create index if not exists kb_feedback_article_idx on public.kb_feedback (article_id);
+
+alter table public.kb_feedback enable row level security;
+
+drop policy if exists kb_feedback_read on public.kb_feedback;
+create policy kb_feedback_read on public.kb_feedback
+  for select using (public.is_ppm_user());
+
+-- You may only write your own vote, whatever the request body claims.
+drop policy if exists kb_feedback_insert on public.kb_feedback;
+create policy kb_feedback_insert on public.kb_feedback
+  for insert with check (public.is_ppm_user() and user_id = auth.uid());
+
+drop policy if exists kb_feedback_update on public.kb_feedback;
+create policy kb_feedback_update on public.kb_feedback
+  for update using (public.is_ppm_user() and user_id = auth.uid())
+  with check (public.is_ppm_user() and user_id = auth.uid());
