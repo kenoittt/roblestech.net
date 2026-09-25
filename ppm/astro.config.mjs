@@ -31,25 +31,41 @@ export default defineConfig({
    * this app needs from image processing. */
   image: { service: { entrypoint: 'astro/assets/services/noop' } },
 
-  /* gsap is bundled into the server build instead of imported at runtime.
+  /* Packages that must be bundled rather than left for Node to resolve.
    *
-   * gsap's package.json has no "type": "module", but its index.js is written
-   * in ESM. Node decides a .js file's format from that field, so it loads the
-   * file as CommonJS, finds no named exports in it, and throws:
+   * Both entries here are the same underlying problem: the package only loads
+   * if Node is new enough to paper over how the package is published, and the
+   * function runtime is not that new. Neither failure can be seen in
+   * development, because a current Node papers over both.
    *
-   *   SyntaxError: Named export 'gsap' not found. The requested module 'gsap'
-   *   is a CommonJS module, which may not support all module.exports as named
-   *   exports.
+   *   gsap — index.js is ESM source, but its package.json declares no
+   *   "type": "module". Node decides a .js file's format from that field, so
+   *   it loads the file as CommonJS, finds no named exports and throws
+   *   "Named export 'gsap' not found". Node 22.7+ sniffs the syntax instead.
    *
-   * Node 22.7 and later sniff the syntax and load it as ESM anyway, which is
-   * why this never reproduced in development — it depends entirely on the Node
-   * version the function happens to run on. Left external, the nav imports gsap
-   * at the top of the layout chunk, so on a runtime without that sniffing every
-   * page that renders the nav — which is every page — returned a 500.
+   *   sanitize-html — CommonJS, and it require()s htmlparser2, which is ESM.
+   *   That is ERR_REQUIRE_ESM on any runtime without require(esm), which Node
+   *   enabled by default only in 22.12.
    *
-   * Bundling it removes the question: Vite inlines the ESM source at build time
-   * and Node never resolves the package at all. */
-  vite: { ssr: { noExternal: ['gsap'] } },
+   * Bundling removes the question entirely: Vite inlines the source at build
+   * time and Node never resolves the package. The QA pass keeps this list
+   * honest by importing every remaining runtime dependency with both Node
+   * features switched off. */
+  vite: {
+    ssr: {
+      noExternal: [
+        'gsap',
+        /* sanitize-html and everything it reaches for. Bundling the package
+           alone is not enough: Vite rewrites its require() calls into imports
+           and leaves the targets external, which turns ERR_REQUIRE_ESM into
+           "does not provide an export named 'default'". The tree goes in
+           together or not at all. */
+        'sanitize-html',
+        'htmlparser2',
+        'is-plain-object',
+      ],
+    },
+  },
   site: 'https://ppm.roblestech.net',
   security: {
     // Same reason as the portal: Astro's origin check misfires behind Vercel's
