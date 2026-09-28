@@ -75,7 +75,26 @@ alter table public.kb_categories enable row level security;
 alter table public.kb_topics     enable row level security;
 alter table public.kb_articles   enable row level security;
 
-create or replace function public.is_ppm_user() returns boolean language sql stable as $$
+-- SECURITY DEFINER is not optional here, and it is not about privilege.
+-- This function reads public.profiles, and profiles' own SELECT policy calls
+-- this function. Without SECURITY DEFINER the inner read is itself subject to
+-- that policy, so the function calls itself until the stack runs out:
+-- "stack depth limit exceeded", on every query that touches profiles.
+--
+-- It hid for weeks because admins never saw it. The profiles policy reads
+-- (id = auth.uid() or is_admin() or is_ppm_user()), is_admin() is already
+-- SECURITY DEFINER, and for an admin it returns true and short-circuits the OR
+-- before this function is reached. Staff fell through to it and recursed, so
+-- staff could not read the handbook, or even their own profile row.
+--
+-- Running as the owner makes the inner read bypass RLS, which breaks the
+-- cycle. search_path is pinned for the usual reason a definer function pins
+-- it: it must not resolve its names through the caller's search_path.
+create or replace function public.is_ppm_user() returns boolean
+language sql stable
+security definer
+set search_path to 'public'
+as $$
   select exists (
     select 1 from public.profiles p
     where p.id = auth.uid() and p.role in ('super_admin','admin','staff')
