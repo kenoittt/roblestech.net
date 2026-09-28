@@ -1,0 +1,875 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="GEO vs SEO: What Actually Changed, and What Still Works" description="GEO vs SEO, explained plainly: what changed when search moved into AI answers, what still works from SEO, and how we measure both on our own website." active="">
+  <Fragment slot="head">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="GEO vs SEO: What Actually Changed, and What Still Works">
+  <meta property="og:description" content="GEO vs SEO, explained plainly: what changed when search moved into AI answers, what still works from SEO, and how we measure both on our own website.">
+  <meta property="og:url" content="https://roblestech.net/geo-vs-seo">
+  <meta property="og:site_name" content="Robles Technologies Corp.">
+  <meta property="og:image" content="https://roblestech.net/blog4/geo-vs-seo-og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="GEO vs SEO: What Actually Changed, and What Still Works. Robles Technologies Corp., roblestech.net">
+  <meta name="twitter:card" content="summary_large_image">
+    <style>
+    /* roblestech.net post styles. Every rule sits under an rp- class: the site scopes a page's styles
+       to that page's markup, so rules for body, html or :root would never apply there. Colours fall
+       back to the site's own values when its tokens aren't loaded. */
+    .rp {
+      --rp-navy: var(--rtc-navy-700, #032c7c);
+      --rp-blue: var(--rtc-blue-500, #0464dd);
+      --rp-blue-deep: #0356bd;
+      --rp-sky: var(--rtc-blue-400, #3992ff);
+      --rp-lime: var(--rtc-green-400, #aee37b);
+      --rp-green-ink: #4d7a24;
+      --rp-text: #2f58a3;
+      --rp-muted: #56688a;
+      --rp-line: rgba(3, 44, 124, .10);
+      --rp-card: #ffffff;
+      --rp-r-md: 14px;
+      --rp-r-lg: 20px;
+      --rp-r-xl: 28px;
+      --rp-shadow-sm: 0 2px 10px rgba(3, 44, 124, .07);
+      --rp-shadow-md: 0 12px 30px rgba(3, 44, 124, .13);
+      --rp-shadow-lg: 0 24px 60px rgba(3, 44, 124, .16);
+      --rp-focus: 0 0 0 3px rgba(57, 146, 255, .45);
+      --rp-ease: cubic-bezier(.23, 1, .32, 1);
+      --rp-mesh: var(--rtc-gradient-mesh,
+                 radial-gradient(120% 120% at 0% 0%, #3992ff 0%, transparent 55%),
+                 radial-gradient(120% 120% at 100% 0%, #5864ff 0%, transparent 50%),
+                 radial-gradient(140% 140% at 50% 120%, #032c7c 0%, #00050f 75%));
+      --rp-brand: var(--rtc-gradient-brand, linear-gradient(90deg, #032c7c 0%, #00050f 100%));
+      --rp-label-font: 'League Spartan', 'Montserrat', system-ui, sans-serif;
+      display: block;
+      color: var(--rp-text);
+      font-family: 'Montserrat', system-ui, sans-serif;
+      padding-bottom: 104px;
+    }
+
+    /* ---------- hero ---------- */
+    .rp-hero {
+      position: relative; overflow: hidden; isolation: isolate;
+      background: var(--rp-mesh); color: #fff;
+      padding: 190px 0 140px; /* the site's page-hero top padding: its navigation floats over this space */
+    }
+    .rp-hero::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background: url('/rtc-pattern.png') repeat; background-size: 480px auto; opacity: .07;
+      -webkit-mask-image: linear-gradient(115deg, #000 0%, rgba(0, 0, 0, .35) 55%, transparent 85%);
+      mask-image: linear-gradient(115deg, #000 0%, rgba(0, 0, 0, .35) 55%, transparent 85%);
+    }
+    .rp-hero-inner { width: min(720px, 100% - 40px); margin: 0 auto; }
+    .rp-crumbs ol {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+      list-style: none; margin: 0 0 26px; padding: 0; font-size: 12.5px; font-weight: 500;
+      color: rgba(255, 255, 255, .6);
+    }
+    .rp-crumbs li + li::before { content: "/"; margin-right: 8px; color: rgba(255, 255, 255, .3); }
+    .rp-crumbs a { color: rgba(255, 255, 255, .75); text-decoration: none; transition: color .2s ease; }
+    .rp-crumbs a:hover { color: #fff; }
+    .rp-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 22px; }
+    .rp-pill, .rp-chip {
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11px; letter-spacing: .16em;
+      text-transform: uppercase; line-height: 1; padding: 7px 12px 6px; border-radius: 999px;
+    }
+    .rp-pill { color: var(--rp-lime); background: rgba(174, 227, 123, .14); border: 1px solid rgba(174, 227, 123, .32); }
+    .rp-chip { color: rgba(255, 255, 255, .8); background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .16); }
+    .rp-h1 {
+      font-size: clamp(34px, 5vw, 56px); line-height: 1.06; font-weight: 900; letter-spacing: -.03em;
+      color: #fff; margin: 0 0 22px; text-wrap: balance;
+    }
+    .rp-lead {
+      font-size: clamp(17px, 1.45vw, 19.5px); line-height: 1.65; font-weight: 400;
+      color: rgba(255, 255, 255, .86); margin: 0; max-width: 660px; text-wrap: pretty;
+    }
+    .rp-meta {
+      display: flex; align-items: center; gap: 14px; margin-top: 30px;
+      font-size: 13.5px; font-weight: 500; color: rgba(255, 255, 255, .72);
+    }
+    .rp-meta-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .rp-meta-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+    .rp-avatar {
+      width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
+      border: 2px solid rgba(255, 255, 255, .35);
+    }
+    .rp-avatar-initials {
+      display: inline-grid; place-items: center; background: rgba(255, 255, 255, .14);
+      color: #fff; font-weight: 800; font-size: 13px; letter-spacing: .04em;
+    }
+    .rp-byline { color: #fff; font-weight: 700; font-size: 14.5px; }
+    .rp-byline a { color: inherit; text-decoration: none; }
+    .rp-byline a:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .rp-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+
+    /* ---------- the article column, with room for wide blocks ---------- */
+    .rp-flow {
+      display: grid; padding-top: 48px;
+      grid-template-columns:
+        [full-start] minmax(20px, 1fr) [wide-start] minmax(0, 130px)
+        [content-start] min(720px, 100% - 40px)
+        [content-end] minmax(0, 130px) [wide-end] minmax(20px, 1fr) [full-end];
+    }
+    .rp-flow > * { grid-column: content; min-width: 0; }
+    .rp-flow > .rp-wide { grid-column: wide; }
+
+    :where(.rp-flow) p { font-size: 17px; line-height: 1.78; margin: 0 0 20px; text-wrap: pretty; }
+    :where(.rp-flow) h2 {
+      font-size: clamp(25px, 2.6vw, 31px); line-height: 1.18; font-weight: 800; letter-spacing: -.022em;
+      color: var(--rp-navy); margin: 44px 0 16px; scroll-margin-top: 112px; text-wrap: balance;
+    }
+    :where(.rp-flow) h2::before {
+      content: ""; display: block; width: 32px; height: 3px; border-radius: 3px;
+      background: var(--rp-blue); margin-bottom: 20px;
+    }
+    :where(.rp-flow) h3 {
+      font-size: 20px; line-height: 1.3; font-weight: 800; letter-spacing: -.012em;
+      color: var(--rp-navy); margin: 16px 0 10px; text-wrap: balance;
+    }
+    :where(.rp-flow) strong { color: var(--rp-navy); font-weight: 700; }
+    :where(.rp-flow) a:not([class]) {
+      color: var(--rp-blue); text-decoration: underline; text-decoration-thickness: 1px;
+      text-underline-offset: 3px; text-decoration-color: rgba(4, 100, 221, .35);
+      transition: color .2s ease, text-decoration-color .2s ease;
+    }
+    :where(.rp-flow) a:not([class]):hover { color: var(--rp-blue-deep); text-decoration-color: currentColor; }
+    .rp a:focus-visible, .rp summary:focus-visible { outline: none; box-shadow: var(--rp-focus); border-radius: 6px; }
+    :where(.rp-flow) ul:not([class]), :where(.rp-flow) ol:not([class]) { list-style: none; margin: 0 0 24px; padding: 0; }
+    :where(.rp-flow) ul:not([class]) > li, :where(.rp-flow) ol:not([class]) > li {
+      position: relative; font-size: 17px; line-height: 1.72; margin: 0 0 10px; padding-left: 28px;
+    }
+    :where(.rp-flow) ul:not([class]) > li::before {
+      content: ""; position: absolute; left: 7px; top: .7em; width: 7px; height: 7px;
+      border-radius: 50%; background: var(--rp-sky);
+    }
+    :where(.rp-flow) ol:not([class]) { counter-reset: rp-ol; }
+    :where(.rp-flow) ol:not([class]) > li { counter-increment: rp-ol; }
+    :where(.rp-flow) ol:not([class]) > li::before {
+      content: counter(rp-ol) "."; position: absolute; left: 0; font-weight: 800; color: var(--rp-blue);
+    }
+    .rp-label {
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11.5px; letter-spacing: .16em;
+      text-transform: uppercase; line-height: 1.2; color: var(--rp-blue); margin: 0 0 14px;
+    }
+
+    /* ---------- summary card: the short version, and the contents ---------- */
+    .rp-summary {
+      position: relative; z-index: 2; margin: -136px 0 36px;
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg);
+      box-shadow: var(--rp-shadow-lg); overflow: hidden;
+    }
+    .rp-summary > * { padding: 28px 32px 30px; }
+    .rp-toc { background: rgba(4, 100, 221, .035); border-top: 1px solid var(--rp-line); }
+    .rp-checks {
+      list-style: none; margin: 0; padding: 0; display: grid; gap: 16px 28px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .rp-checks:has(> li:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 900px) { .rp-checks, .rp-checks:has(> li:nth-child(4)) { grid-template-columns: 1fr; } }
+    .rp-checks li {
+      position: relative; padding-left: 32px; font-size: 15.5px; line-height: 1.6;
+      font-weight: 500; color: var(--rp-navy);
+    }
+    .rp-checks li::before {
+      content: ""; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--rp-blue) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.4l2.6 2.6L12 5.6' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 13px no-repeat;
+    }
+    .rp-toc-list { list-style: none; margin: 0; padding: 0; counter-reset: rp-toc; columns: 2; column-gap: 40px; }
+    .rp-toc-list li { counter-increment: rp-toc; break-inside: avoid; }
+    .rp-toc a {
+      display: flex; gap: 12px; padding: 6px 0; font-size: 14.5px; font-weight: 600; line-height: 1.45;
+      color: var(--rp-navy); text-decoration: none; transition: color .2s ease;
+    }
+    .rp-toc a::before {
+      content: counter(rp-toc, decimal-leading-zero); flex: none; min-width: 20px; padding-top: 3px;
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11.5px; letter-spacing: .06em; color: var(--rp-blue);
+    }
+    .rp-toc a:hover { color: var(--rp-blue); }
+
+    /* ---------- blocks ---------- */
+    .rp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 12px 0 34px; }
+    .rp-stat {
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-md);
+      box-shadow: var(--rp-shadow-sm); padding: 22px 22px 20px;
+    }
+    .rp-stat .rp-stat-num {
+      font-size: clamp(34px, 3.6vw, 44px); line-height: 1; font-weight: 900; letter-spacing: -.035em;
+      color: var(--rp-blue); font-variant-numeric: tabular-nums; margin: 0 0 12px;
+    }
+    .rp-stat .rp-stat-label { font-size: 14.5px; line-height: 1.55; font-weight: 500; color: var(--rp-navy); margin: 0 0 12px; }
+    .rp-stat .rp-stat-src { font-size: 12px; line-height: 1.5; color: var(--rp-muted); margin: 0; }
+    .rp-stat .rp-stat-src a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+    .rp-table-wrap {
+      margin: 12px 0 34px; overflow-x: auto; background: var(--rp-card); border: 1px solid var(--rp-line);
+      border-radius: var(--rp-r-lg); box-shadow: var(--rp-shadow-sm);
+    }
+    .rp-table { width: 100%; min-width: 560px; border-collapse: collapse; font-size: 15px; line-height: 1.55; }
+    .rp-table th, .rp-table td { text-align: left; vertical-align: top; padding: 15px 20px; }
+    .rp-table thead th {
+      background: var(--rp-navy); color: #fff; font-family: var(--rp-label-font); font-weight: 600;
+      font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; padding-top: 16px; padding-bottom: 15px;
+    }
+    .rp-table tbody th { width: 26%; color: var(--rp-navy); font-weight: 700; }
+    .rp-table td { color: var(--rp-text); }
+    .rp-table tbody tr + tr { border-top: 1px solid var(--rp-line); }
+    .rp-table tbody tr:nth-child(even) { background: rgba(4, 100, 221, .025); }
+    @media (max-width: 760px) {
+      .rp-table thead th:first-child, .rp-table tbody th {
+        position: sticky; left: 0; z-index: 1; box-shadow: 1px 0 0 var(--rp-line);
+      }
+      .rp-table thead th:first-child { background: var(--rp-navy); }
+      .rp-table tbody th { background: var(--rp-card); }
+      .rp-table tbody tr:nth-child(even) th { background: #f9fbfe; }
+      .rp-table { min-width: 520px; font-size: 14.5px; }
+      .rp-table th, .rp-table td { padding: 13px 14px; }
+    }
+
+    .rp-versus { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; margin: 12px 0 34px; }
+    .rp-vs-card {
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg);
+      box-shadow: var(--rp-shadow-sm); padding: 26px 26px 24px;
+    }
+    .rp-vs-card h3 { font-size: 19px; margin: 0 0 10px; }
+    .rp-vs-card p:last-child { font-size: 15.5px; line-height: 1.7; margin: 0; }
+    .rp-vs-card--dark { position: relative; overflow: hidden; background: var(--rp-brand); border-color: transparent; box-shadow: var(--rp-shadow-md); }
+    .rp-vs-card--dark h3 { color: #fff; }
+    .rp-vs-card--dark p:last-child { color: rgba(255, 255, 255, .84); }
+    .rp-vs-card--dark .rp-label { color: var(--rp-lime); }
+    .rp-vs-sep {
+      align-self: center; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+      background: var(--rp-card); border: 1px solid var(--rp-line); box-shadow: var(--rp-shadow-sm);
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 12px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--rp-blue);
+    }
+
+    .rp-steps { list-style: none; margin: 12px 0 30px; padding: 0; counter-reset: rp-step; }
+    .rp-steps li {
+      position: relative; counter-increment: rp-step; padding: 0 0 24px 54px;
+      font-size: 17px; line-height: 1.72;
+    }
+    .rp-steps li::before {
+      content: counter(rp-step); position: absolute; left: 0; top: -2px; width: 34px; height: 34px;
+      display: grid; place-items: center; border-radius: 50%; background: var(--rp-blue); color: #fff;
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 14px; padding-top: 2px;
+      box-shadow: 0 0 0 5px rgba(4, 100, 221, .1);
+    }
+    .rp-steps li::after {
+      content: ""; position: absolute; left: 16px; top: 40px; bottom: 4px; width: 2px; border-radius: 2px;
+      background: linear-gradient(rgba(4, 100, 221, .28), rgba(4, 100, 221, .06));
+    }
+    .rp-steps li:last-child { padding-bottom: 0; }
+    .rp-steps li:last-child::after { display: none; }
+
+    .rp-ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0 34px; }
+    .rp-ledger-col {
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg);
+      box-shadow: var(--rp-shadow-sm); padding: 24px 26px; border-top: 3px solid var(--rp-blue);
+    }
+    .rp-ledger-no { border-top-color: rgba(3, 44, 124, .35); }
+    .rp-ledger-no .rp-label { color: var(--rp-muted); }
+    .rp-ledger-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    .rp-ledger-list li { position: relative; padding-left: 30px; font-size: 15.5px; line-height: 1.6; }
+    .rp-ledger-list li::before {
+      content: ""; position: absolute; left: 0; top: 3px; width: 18px; height: 18px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4l2.9 2.9L12.5 5' fill='none' stroke='%230464dd' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .rp-ledger-no .rp-ledger-list li::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 4.5l7 7M11.5 4.5l-7 7' fill='none' stroke='%2356688a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    .rp-quote { margin: 14px 0 36px; padding: 6px 0 6px 28px; border-left: 3px solid var(--rp-blue); }
+    .rp-quote blockquote { margin: 0; }
+    .rp-quote blockquote p {
+      font-size: clamp(19px, 1.9vw, 22px); line-height: 1.5; font-weight: 600; letter-spacing: -.01em;
+      color: var(--rp-navy); margin: 0; text-wrap: balance;
+    }
+    .rp-quote figcaption { margin-top: 14px; font-size: 14px; line-height: 1.55; color: var(--rp-muted); }
+    .rp-quote figcaption a { color: var(--rp-text); text-underline-offset: 3px; }
+
+    .rp-note {
+      position: relative; margin: 8px 0 30px; padding: 18px 22px 18px 58px; border-radius: var(--rp-r-md);
+      background: rgba(4, 100, 221, .05); border: 1px solid rgba(4, 100, 221, .16);
+    }
+    .rp-note::before {
+      content: ""; position: absolute; left: 20px; top: 19px; width: 22px; height: 22px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%230464dd'/%3E%3Cpath d='M8 4.1v5' stroke='%23fff' stroke-width='1.8' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='11.7' r='1.05' fill='%23fff'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .rp-note .rp-note-label {
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11.5px; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--rp-blue); margin: 2px 0 6px; line-height: 1.3;
+    }
+    .rp-note p:last-child { font-size: 15.5px; line-height: 1.7; margin: 0; }
+    .rp-note--tip { background: rgba(174, 227, 123, .16); border-color: rgba(77, 122, 36, .22); }
+    .rp-note--tip::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%234d7a24'/%3E%3Cpath d='M4.6 8.3l2.2 2.2 4.6-4.7' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    .rp-note--tip .rp-note-label { color: var(--rp-green-ink); }
+
+    .rp-figure { margin: 14px 0 38px; }
+    .rp-figure > img, .rp-shot > img {
+      display: block; width: 100%; height: auto; background: var(--rp-card);
+      border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg); box-shadow: var(--rp-shadow-sm);
+    }
+    .rp-figure figcaption { margin-top: 12px; font-size: 13.5px; line-height: 1.6; color: var(--rp-muted); max-width: 720px; }
+    .rp-shot { border-radius: var(--rp-r-lg); overflow: hidden; border: 1px solid var(--rp-line); box-shadow: var(--rp-shadow-md); background: var(--rp-card); }
+    .rp-shot-bar { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px; background: #f1f4f9; border-bottom: 1px solid var(--rp-line); }
+    .rp-shot-bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(3, 44, 124, .16); }
+    .rp-shot > img { border: 0; border-radius: 0; box-shadow: none; }
+
+    .rp-case {
+      position: relative; overflow: hidden; margin: 12px 0 34px; padding: 26px 28px;
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg);
+      box-shadow: var(--rp-shadow-sm);
+    }
+    .rp-case::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--rp-blue); }
+    .rp-case > p:not(.rp-label) { font-size: 16px; line-height: 1.72; margin: 0 0 16px; }
+    .rp-case-results { display: flex; flex-wrap: wrap; gap: 10px; }
+    .rp-case-results > div {
+      display: flex; align-items: baseline; gap: 8px; padding: 10px 14px; border-radius: 12px;
+      background: rgba(4, 100, 221, .06); font-size: 13.5px; color: var(--rp-text);
+    }
+    .rp-case-results strong { font-size: 18px; font-weight: 900; letter-spacing: -.02em; color: var(--rp-blue); }
+
+    /* A bar chart in HTML: it uses the page's fonts, stays readable on a phone, and its numbers are real
+       text. Set each bar's length with style="--v: 40%". */
+    .rp-chart {
+      margin: 14px 0 38px; padding: 26px 28px 22px; background: var(--rp-card);
+      border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg); box-shadow: var(--rp-shadow-sm);
+    }
+    .rp-chart .rp-chart-title { font-size: 18px; line-height: 1.35; font-weight: 800; letter-spacing: -.01em; color: var(--rp-navy); margin: 0 0 4px; }
+    .rp-chart .rp-chart-sub { font-size: 13px; line-height: 1.55; color: var(--rp-muted); margin: 0 0 22px; }
+    .rp-bar { margin: 0 0 18px; }
+    .rp-bar .rp-bar-label { font-size: 14.5px; line-height: 1.45; font-weight: 600; color: var(--rp-navy); margin: 0 0 8px; }
+    .rp-bar-row { display: flex; align-items: center; gap: 14px; }
+    .rp-bar-track { flex: 1; height: 14px; border-radius: 999px; background: rgba(4, 100, 221, .08); overflow: hidden; }
+    .rp-bar-fill {
+      display: block; height: 100%; width: max(var(--v, 50%), 8px); border-radius: inherit;
+      background: linear-gradient(90deg, var(--rp-blue), var(--rp-sky));
+    }
+    .rp-bar--muted .rp-bar-fill { background: rgba(3, 44, 124, .28); }
+    .rp-bar-value {
+      flex: none; min-width: 64px; text-align: right; font-size: 17px; font-weight: 900; letter-spacing: -.02em;
+      color: var(--rp-blue); font-variant-numeric: tabular-nums;
+    }
+    .rp-bar--muted .rp-bar-value { color: var(--rp-muted); }
+    .rp-chart figcaption { margin-top: 4px; padding-top: 14px; border-top: 1px solid var(--rp-line); font-size: 13.5px; line-height: 1.6; color: var(--rp-muted); }
+
+    /* ---------- FAQ ---------- */
+    .rp-faq { display: grid; gap: 12px; margin: 6px 0 12px; }
+    .rp-faq-item {
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-md);
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .rp-faq-item[open] { border-color: rgba(4, 100, 221, .3); box-shadow: var(--rp-shadow-sm); }
+    .rp-faq-q {
+      list-style: none; cursor: pointer; display: flex; align-items: center; gap: 16px;
+      padding: 18px 20px 18px 22px; font-size: 16.5px; line-height: 1.45; font-weight: 700; color: var(--rp-navy);
+      border-radius: var(--rp-r-md);
+    }
+    .rp-faq-q::-webkit-details-marker { display: none; }
+    .rp-faq-q::after {
+      content: ""; flex: none; margin-left: auto; width: 30px; height: 30px; border-radius: 50%;
+      color: var(--rp-blue); background-color: rgba(4, 100, 221, .08);
+      background-image: linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+      background-size: 12px 2px, 2px 12px; background-position: center; background-repeat: no-repeat;
+      transition: transform .22s var(--rp-ease), background-color .2s ease, color .2s ease;
+    }
+    .rp-faq-item[open] .rp-faq-q::after { transform: rotate(45deg); background-color: var(--rp-blue); color: #fff; }
+    .rp-faq-a { padding: 0 22px 20px; }
+    .rp-faq-a p { font-size: 16px; line-height: 1.75; margin: 0; }
+    .rp-faq-item[open] .rp-faq-a { animation: rp-reveal .24s var(--rp-ease); }
+    @keyframes rp-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    @keyframes rp-fade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ---------- sources ---------- */
+    .rp-sources { list-style: none; margin: 0; padding: 0; counter-reset: rp-src; display: grid; gap: 12px; }
+    .rp-sources li {
+      counter-increment: rp-src; position: relative; padding-left: 36px;
+      font-size: 14px; line-height: 1.6; color: var(--rp-muted);
+    }
+    .rp-sources li::before {
+      content: counter(rp-src); position: absolute; left: 0; top: 0; width: 24px; height: 24px;
+      display: grid; place-items: center; border-radius: 50%; background: rgba(4, 100, 221, .08);
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11px; color: var(--rp-blue); padding-top: 1px;
+    }
+    .rp-sources a { color: var(--rp-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(47, 88, 163, .3); }
+    .rp-sources a:hover { color: var(--rp-blue); text-decoration-color: currentColor; }
+
+    /* ---------- after the article: call to action, author, further reading ---------- */
+    .rp-foot { padding-top: 64px; }
+    .rp-cta {
+      position: relative; overflow: hidden; isolation: isolate;
+      display: flex; align-items: center; gap: 36px; padding: 44px 46px;
+      background: var(--rp-brand); border-radius: var(--rp-r-xl); color: #fff; box-shadow: var(--rp-shadow-md);
+    }
+    .rp-cta::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+      background: url('/rtc-pattern.png') repeat; background-size: 420px auto; opacity: .06;
+      -webkit-mask-image: linear-gradient(100deg, transparent 20%, #000 100%); mask-image: linear-gradient(100deg, transparent 20%, #000 100%);
+    }
+    .rp-cta-copy { flex: 1; min-width: 0; }
+    .rp-cta .rp-label { color: var(--rp-lime); }
+    .rp-cta .rp-cta-title { font-size: clamp(22px, 2.3vw, 27px); line-height: 1.22; font-weight: 800; letter-spacing: -.02em; color: #fff; margin: 0 0 10px; }
+    .rp-cta p.rp-cta-text { font-size: 15.5px; line-height: 1.7; color: rgba(255, 255, 255, .82); margin: 0; max-width: 540px; }
+    .rp-cta-actions { display: flex; flex-direction: column; gap: 12px; flex: none; }
+    .rp-cta-actions .btn { justify-content: center; }
+
+    .rp-author {
+      display: flex; align-items: flex-start; gap: 22px; margin-top: 40px; padding: 28px 30px;
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-lg); box-shadow: var(--rp-shadow-sm);
+      /* This white card sits inside the dark call-to-action section, so it
+         inherits that section's rgba(255,255,255,.82) text colour. The name and
+         the role set their own colours and survived; the bio did not, and
+         shipped as white on white — 153px of fully rendered, invisible text.
+         Setting it on the card covers anything else added here later. */
+      color: var(--rp-text);
+    }
+    .rp-author-photo {
+      width: 76px; height: 76px; flex: none; border-radius: 50%; object-fit: cover;
+      border: 3px solid #fff; box-shadow: var(--rp-shadow-md);
+    }
+    .rp-author-photo.rp-avatar-initials { background: rgba(4, 100, 221, .1); color: var(--rp-blue); font-size: 22px; }
+    .rp-author .rp-label { margin-bottom: 8px; }
+    .rp-author .rp-author-name { font-size: 18px; font-weight: 800; letter-spacing: -.01em; color: var(--rp-navy); margin: 0 0 2px; }
+    .rp-author .rp-author-role { font-size: 13.5px; font-weight: 500; color: var(--rp-muted); margin: 0 0 12px; }
+    .rp-author .rp-author-bio { font-size: 15px; line-height: 1.7; margin: 0 0 12px; }
+    .rp-arrow-link {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;
+      color: var(--rp-blue); text-decoration: none;
+    }
+    .rp-arrow-link svg { transition: transform .2s var(--rp-ease); }
+
+    .rp-related { margin-top: 56px; }
+    .rp-related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .rp-read {
+      display: flex; flex-direction: column; gap: 8px; padding: 22px 24px 24px; text-decoration: none;
+      background: var(--rp-card); border: 1px solid var(--rp-line); border-radius: var(--rp-r-md); box-shadow: var(--rp-shadow-sm);
+      transition: transform .22s var(--rp-ease), box-shadow .22s var(--rp-ease), border-color .2s ease;
+    }
+    .rp-read-k {
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 10.5px; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--rp-blue);
+    }
+    .rp-read-title { font-size: 16px; line-height: 1.4; font-weight: 800; color: var(--rp-navy); }
+    .rp-read-text { font-size: 13.5px; line-height: 1.6; color: var(--rp-text); }
+
+    /* ---------- motion: hover only where there's a real pointer, and never when motion is reduced ---------- */
+    @media (hover: hover) and (pointer: fine) {
+      .rp-read:hover { transform: translateY(-3px); box-shadow: var(--rp-shadow-md); border-color: rgba(4, 100, 221, .22); }
+      .rp-arrow-link:hover svg { transform: translateX(3px); }
+      .rp-faq-q:hover::after { background-color: rgba(4, 100, 221, .14); }
+      .rp-faq-item[open] .rp-faq-q:hover::after { background-color: var(--rp-blue-deep); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rp-read, .rp-arrow-link svg, .rp-faq-q::after { transition: none; }
+      .rp-read:hover, .rp-arrow-link:hover svg { transform: none; }
+      .rp-faq-item[open] .rp-faq-a { animation: rp-fade .16s ease; }
+    }
+
+    /* ---------- smaller screens ---------- */
+    @media (max-width: 760px) {
+      .rp-hero { padding: 140px 0 116px; }
+      .rp-meta { margin-top: 24px; }
+      .rp-summary { margin-top: -112px; }
+      .rp-summary > * { padding: 22px 22px 24px; }
+      .rp-toc-list { columns: 1; }
+      :where(.rp-flow) p, :where(.rp-flow) ul:not([class]) > li, :where(.rp-flow) ol:not([class]) > li, .rp-steps li { font-size: 16.5px; }
+      .rp-versus, .rp-ledger { grid-template-columns: 1fr; }
+      .rp-vs-sep { justify-self: center; }
+      .rp-cta { flex-direction: column; align-items: stretch; gap: 24px; padding: 32px 24px; }
+      .rp-author { flex-direction: column; padding: 24px; }
+    }
+  
+    /* ---------- layout: sticky contents rail beside the article (new block, flagged for Kenneth) ----------
+       Wide screens: a left rail of numbered contents that stays in view while the article scrolls.
+       Narrower screens: the same contents sit above the article, not sticky. */
+    .rp-hero--rail { padding-bottom: 72px; }
+    .rp-hero--rail .rp-hero-inner { width: min(760px, 100% - 40px); }
+    .rp-hero--rail .rp-h1, .rp-hero--rail .rp-lead { max-width: 780px; }
+    .rp-shell { width: min(760px, 100% - 40px); margin: 0 auto; padding-top: 48px; }
+    .rp-rail { margin: 0 0 34px; padding: 0 0 24px; border-bottom: 1px solid var(--rp-line); }
+    .rp-rail-list { list-style: none; margin: 0; padding: 0; counter-reset: rp-rail; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 28px; }
+    .rp-rail-list li { counter-increment: rp-rail; }
+    .rp-rail-list a {
+      display: flex; gap: 12px; padding: 6px 0; font-size: 14px; font-weight: 600; line-height: 1.45;
+      color: var(--rp-navy); text-decoration: none; transition: color .2s ease;
+    }
+    .rp-rail-list a::before {
+      content: counter(rp-rail, decimal-leading-zero); flex: none; min-width: 20px; padding-top: 2px;
+      font-family: var(--rp-label-font); font-weight: 600; font-size: 11.5px; letter-spacing: .06em; color: var(--rp-blue);
+    }
+    .rp-rail-list a:hover { color: var(--rp-blue); }
+    .rp-stage { min-width: 0; }
+    .rp-shell .rp-flow { display: block; padding-top: 0; }
+    .rp-shell .rp-foot { padding-top: 56px; }
+    .rp-shell .rp-summary { margin: 0 0 36px; box-shadow: var(--rp-shadow-sm); }
+    .rp-shell .rp-checks { grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 1040px) {
+      .rp-shell { width: min(1016px, 100% - 40px); display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; align-items: start; }
+      .rp-hero--rail .rp-hero-inner { width: min(1016px, 100% - 40px); }
+      .rp-rail {
+        position: sticky; top: 112px; margin: 0; padding: 4px 0 0; border-bottom: 0;
+        max-height: calc(100vh - 136px); overflow-y: auto;
+      }
+      .rp-rail-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) { .rp-rail-list { grid-template-columns: 1fr; } }
+    @media (max-width: 760px) { .rp-hero--rail { padding-bottom: 56px; } }
+  </style>
+    <script type="application/ld+json" is:inline>
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "GEO vs SEO: What Actually Changed, and What Still Works",
+    "description": "GEO vs SEO, explained plainly: what changed when search moved into AI answers, what still works from SEO, and how we measure both on our own website.",
+    "author": {
+      "@type": "Person",
+      "name": "Christian Panes",
+      "jobTitle": "Co-Founder and COO",
+      "url": "https://roblestech.net/team",
+      "worksFor": {
+        "@id": "https://roblestech.net/#organization"
+      }
+    },
+    "publisher": {
+      "@type": "Organization",
+      "@id": "https://roblestech.net/#organization",
+      "name": "Robles Technologies Corp.",
+      "url": "https://roblestech.net",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://roblestech.net/logo.png"
+      }
+    },
+    "datePublished": "2026-09-28T09:00:00+08:00",
+    "dateModified": "2026-09-28T09:00:00+08:00",
+    "mainEntityOfPage": "https://roblestech.net/geo-vs-seo",
+    "image": "https://roblestech.net/blog4/geo-vs-seo-og.png",
+    "inLanguage": "en"
+  }
+  </script>
+    <script type="application/ld+json" is:inline>
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What Is the Difference Between GEO and SEO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SEO is the work of ranking your pages in Google's list of links. GEO, or generative engine optimization, is the work of getting your brand named and cited inside AI answers from ChatGPT, Gemini, Perplexity and Google's AI Overviews. Most of the groundwork is shared, but the win and the way you measure it are different."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What Is GEO in SEO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GEO stands for generative engine optimization. It is the part of search work aimed at AI answers rather than ranked links: making your pages easy for AI tools to find, read and quote. It builds on SEO rather than replacing it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What Is AEO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AEO stands for answer engine optimization. In practice it describes mostly the same work as GEO: making your content the answer an AI tool gives. Different vendors use different names for it, and we use GEO."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How Is AEO Different From SEO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SEO aims to rank a page in Google's list of links, while AEO aims to have your content used in the answer itself. Most of the groundwork overlaps, including crawlable pages, clear structure and accurate claims. Google says its own AI features need no special optimization beyond good SEO."
+          }
+        }
+      ]
+    }
+    </script>
+  </Fragment>
+
+  <main class="rp">
+    <article>
+
+      <header class="rp-hero rp-hero--rail">
+        <div class="rp-hero-inner">
+          <nav class="rp-crumbs rv" aria-label="Breadcrumb">
+            <ol>
+              <li><a href="/">Home</a></li>
+              <li><a href="/blogs">Blog</a></li>
+              <li aria-current="page">GEO + SEO</li>
+            </ol>
+          </nav>
+          <div class="rp-kicker rv d1">
+            <span class="rp-pill">GEO + SEO</span>
+            <span class="rp-chip">AI Search</span>
+            <span class="rp-chip">Explainer</span>
+          </div>
+          <h1 class="rp-h1 rv d2">GEO vs SEO: What Actually Changed, and What Still Works</h1>
+          <p class="rp-lead rv d3">The difference between GEO and SEO is where you show up: SEO ranks your pages in Google's list of links, and GEO gets your brand named and cited inside AI answers from ChatGPT, Gemini, Perplexity and Google's AI Overviews. Most of the groundwork is shared, but what counts as a win, and how you measure it, is not.</p>
+          <div class="rp-meta rv d4">
+            <img class="rp-avatar" src="/team/christian.webp" alt="" aria-hidden="true" width="44" height="44">
+            <div class="rp-meta-text">
+              <span class="rp-byline">By <a href="/team">Christian Panes</a></span>
+              <span class="rp-meta-sub">
+                <time datetime="2026-09-28">September 28, 2026</time>
+                <span class="rp-dot" aria-hidden="true"></span>
+                <span>6 min read</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="rp-shell">
+        <aside class="rp-rail" aria-label="In this post">
+          <p class="rp-label">In This Post</p>
+          <ol class="rp-rail-list">
+              <li><a href="#different">How Are GEO and SEO Different?</a></li>
+              <li><a href="#changed">What Actually Changed When Search Moved Into AI Answers?</a></li>
+              <li><a href="#still-works">What Still Works From SEO?</a></li>
+              <li><a href="#search-vs-ask">Why Do People Search One Way and Ask AI Another?</a></li>
+              <li><a href="#aeo">Is AEO Different From GEO?</a></li>
+              <li><a href="#writing">What Does GEO Change About How You Write a Page?</a></li>
+              <li><a href="#measure">How Do You Measure GEO Next to SEO?</a></li>
+              <li><a href="#limits">When Won't GEO Help You?</a></li>
+              <li><a href="#faq">Frequently Asked Questions</a></li>
+            </ol>
+        </aside>
+
+        <div class="rp-stage">
+      <div class="rp-flow">
+
+        <div class="rp-summary rv">
+          <aside class="rp-takeaways" aria-label="Key takeaways">
+            <p class="rp-label">The Short Version</p>
+            <ul class="rp-checks">
+              <li>SEO earns your page a place in a list of links. GEO earns your brand a mention inside the answer itself.</li>
+              <li>Google says its AI features need no special markup or tricks, so solid SEO is still the foundation for GEO.</li>
+              <li>You measure GEO by asking AI tools the same buyer questions on a schedule and recording who gets named.</li>
+            </ul>
+          </aside>
+        </div>
+
+        <p>If you run marketing for a DTC brand or a B2B software company, you have probably been told that SEO is fading and GEO is the new thing to buy. Neither half of that is quite right. Below we explain what actually changed, what still works, and how we measure both on our own site, starting from our own before picture.</p>
+
+        <h2 id="different" class="rv">How Are GEO and SEO Different?</h2>
+        <p>SEO and GEO use many of the same inputs, but they aim at different results: SEO earns a position in a list of links, and GEO earns a mention inside an answer. With SEO, a buyer sees your page and decides whether to click. With GEO, an AI tool reads pages like yours and decides whether to name you in what it writes.</p>
+
+        <div class="rp-table-wrap rp-wide rv" role="region" aria-label="GEO and SEO compared" tabindex="0">
+          <table class="rp-table">
+            <thead>
+              <tr><th scope="col">Aspect</th><th scope="col">SEO</th><th scope="col">GEO</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Where you show up</th><td>Google's list of results</td><td>Inside the answer from ChatGPT, Gemini, Perplexity or Google's AI Overviews</td></tr>
+              <tr><th scope="row">What a win looks like</th><td>A high position, then a click to your site</td><td>Your brand named, or your page cited as a source</td></tr>
+              <tr><th scope="row">What the engine works from</th><td>Your page, the links pointing to it, and signals of trust</td><td>Pages it can find and read, condensed into one answer</td></tr>
+              <tr><th scope="row">How you measure it</th><td>Rankings, impressions and clicks in Google Search Console</td><td>A fixed set of buyer questions, asked on a schedule, with who got named recorded</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>The line between the two is blurry. Google's AI Overviews sit on the same results page as the links, so one search can put you in both places, or in neither.</p>
+
+        <h2 id="changed" class="rv">What Actually Changed When Search Moved Into AI Answers?</h2>
+        <p>The big change in search is that a growing share of searches now end with an AI-written answer, so a buyer can learn about your category without clicking a link. That shifts the goal from being found to being named.</p>
+
+        <div class="rp-stats rp-wide rv">
+          <div class="rp-stat">
+            <p class="rp-stat-num">15.69%</p>
+            <p class="rp-stat-label">Of keywords showed a Google AI Overview in November 2025, in a study of more than 10 million keywords.</p>
+            <p class="rp-stat-src"><a href="https://www.semrush.com/blog/semrush-ai-overviews-study/">Semrush AI Overviews Study</a>, December 2025</p>
+          </div>
+          <div class="rp-stat">
+            <p class="rp-stat-num">80%</p>
+            <p class="rp-stat-label">Of consumers rely on zero-click results in at least 40% of their searches.</p>
+            <p class="rp-stat-src"><a href="https://www.bain.com/insights/goodbye-clicks-hello-ai-zero-click-search-redefines-marketing/">Bain &amp; Company</a>, February 2025</p>
+          </div>
+        </div>
+
+        <p>Both numbers need context. Semrush's own series swung from 6.49% of keywords in January 2025 to 24.61% in July, then back to 15.69% in November, so the share moves as Google adjusts. Bain's figure comes from one survey of 1,117 people in December 2024, and Bain estimates that zero-click behavior is cutting organic web traffic by 15% to 25%.</p>
+        <p>Across the keywords we target, AI answers are already the norm. When we built our content plan for all six of our service lines, 150 of the 164 keywords we chose showed an AI Overview on Google (Semrush, US, August 22, 2026). A later Semrush study found AI Overviews grew an average of 71% on searches with commercial intent, the kind people run while comparing what to buy, between November 2025 and April 2026.</p>
+
+        <h2 id="still-works" class="rv">What Still Works From SEO?</h2>
+        <p>Most of what makes a page rank on Google also makes it usable for AI answers: a page search engines can crawl, a clear structure, accurate claims and a site people trust. Google says this directly for its own AI features.</p>
+
+        <figure class="rp-quote rv">
+          <blockquote><p>There are no additional requirements to appear in AI Overviews or AI Mode, nor other special optimizations necessary.</p></blockquote>
+          <figcaption>Google Search Central, <a href="https://developers.google.com/search/docs/appearance/ai-features">AI features and your website</a>, last updated December 10, 2025</figcaption>
+        </figure>
+
+        <p>The same page says all existing SEO fundamentals continue to be worthwhile, and that there is no special schema.org structured data you need to add. That guidance covers Google Search only. ChatGPT, Gemini and Perplexity each choose their sources their own way.</p>
+        <p>So is GEO replacing SEO? No. Good SEO is what gets your pages found and read in the first place, but ranking well does not guarantee an AI tool will name you. On our own site we keep the door open: our robots.txt welcomes GPTBot, ClaudeBot, PerplexityBot and the other main AI crawlers by name.</p>
+
+        <h2 id="search-vs-ask" class="rv">Why Do People Search One Way and Ask AI Another?</h2>
+        <p>People type short phrases into Google and ask AI tools full questions, so the words you need to rank for and the question you need to be cited for are rarely the same. Keyword tools like Semrush measure the Google side.</p>
+
+        <figure class="rp-chart rp-wide rv">
+          <p class="rp-chart-title">What People Type vs What They Ask</p>
+          <p class="rp-chart-sub">US Google searches a month. Semrush, US database, pulled September 26, 2026.</p>
+          <div class="rp-bar" style="--v: 100%">
+            <p class="rp-bar-label">"geo vs seo"</p>
+            <div class="rp-bar-row"><span class="rp-bar-track"><span class="rp-bar-fill"></span></span><span class="rp-bar-value">3,600</span></div>
+          </div>
+          <div class="rp-bar rp-bar--muted" style="--v: 3%">
+            <p class="rp-bar-label">"what is the difference between seo and geo"</p>
+            <div class="rp-bar-row"><span class="rp-bar-track"><span class="rp-bar-fill"></span></span><span class="rp-bar-value">110</span></div>
+          </div>
+          <figcaption>The short phrase gets about 33 times the searches. The full question is closer to how people ask an AI tool.</figcaption>
+        </figure>
+
+        <p>When we audited our own visibility in August 2026, we looked up all 20 of our buyer questions in Semrush exactly as a person would ask them. 17 of the 20 returned no search data at all. Our read: that doesn't mean nobody asks them, it means keyword tools measure Google searches, not prompts typed into AI tools.</p>
+        <p>So we track two things for every topic. The Google keyword carries the search volume, and the question is what an AI tool actually gets asked. For this post, those are "geo vs seo" and "What is the difference between GEO and SEO?"</p>
+
+        <h2 id="aeo" class="rv">Is AEO Different From GEO?</h2>
+        <p>AEO (answer engine optimization) and GEO describe mostly the same work: making your content the answer an AI tool gives. We call it GEO. Our <a href="/services/geo">GEO + SEO service</a> covers that work, and we don't sell AEO as a separate line item.</p>
+        <p>The names differ because the industry hasn't settled on one. You will also see AIO, LLM SEO and AI search optimization used for the same idea. That's our read of how the terms are used, not an official definition.</p>
+
+        <div class="rp-note rp-note--tip">
+          <p class="rp-note-label">Tip</p>
+          <p>If a proposal lists GEO and AEO as two separate line items, ask what work is different between them. If nobody can name it, you are paying twice for one job.</p>
+        </div>
+
+        <h2 id="writing" class="rv">What Does GEO Change About How You Write a Page?</h2>
+        <p>GEO asks you to write each section so its first sentence can be lifted out and quoted on its own, with the source and the number attached to the claim. An AI tool that condenses many pages into one answer needs sentences that still make sense out of context.</p>
+
+        <div class="rp-versus rp-wide rv">
+          <div class="rp-vs-card">
+            <p class="rp-label">Hard to Quote</p>
+            <h3>Leans on the Heading</h3>
+            <p>"There aren't any extra requirements." Extra requirements for what, and says who?</p>
+          </div>
+          <span class="rp-vs-sep" aria-hidden="true">vs</span>
+          <div class="rp-vs-card rp-vs-card--dark">
+            <p class="rp-label">Easy to Quote</p>
+            <h3>Carries Its Own Subject</h3>
+            <p>"Google says there are no additional requirements to appear in AI Overviews." The subject and the source travel with the claim.</p>
+          </div>
+        </div>
+
+        <p>There is research behind this. A study from Princeton University and IIT Delhi, presented at KDD 2024, found that edits like adding citations, quotations and statistics raised a page's visibility in generative engine answers by up to 40%. Keyword stuffing, an old SEO habit, scored below the unedited pages.</p>
+        <p>Treat that as direction, not a guarantee. The main tests ran on a simulated engine built on GPT-3.5, with a repeat test on Perplexity, not on today's ChatGPT or Gemini. A 2026 position paper at ICML makes the same warning in general: results from offline test setups and from live AI systems can differ. We write our own posts this way, and we add structured data to each one as labelling for machines, not as a ranking trick.</p>
+
+        <h2 id="measure" class="rv">How Do You Measure GEO Next to SEO?</h2>
+        <p>You measure SEO with rankings, impressions and clicks in Google Search Console, and you measure GEO by asking AI tools a fixed set of buyer questions on a schedule and recording who they name. The questions stay word for word the same each time, or the comparison means nothing.</p>
+        <p>We run that check on ourselves first. On August 22, 2026, we asked 20 real buyer questions on Google, ChatGPT, Gemini and Perplexity, without naming our company, and recorded who each one named instead.</p>
+
+        <aside class="rp-case rv" aria-label="Our starting line">
+          <p class="rp-label">Our Starting Line, August 22, 2026</p>
+          <p>The one question we had already written a post for is the only one where AI tools named us, in 2 of our 80 checks. The questions behind our GEO and SEO service had no posts yet, and none of those 32 checks named us. This post is the first of eight we are publishing on GEO and SEO, and we re-run the same 20 questions at the end of October to see what changes.</p>
+          <div class="rp-case-results">
+            <div><strong>20</strong> buyer questions</div>
+            <div><strong>4</strong> platforms</div>
+            <div><strong>80</strong> checks</div>
+          </div>
+        </aside>
+
+        <p>For the question this post answers, Google drew on Informa TechTarget, Contentful and Semrush, and Perplexity drew on Coursera, Evergreen and ClickForest. ChatGPT and Gemini showed no sources for it that day. One round on one day is a signal, not a rate, which is why we put the before picture on the record before the after.</p>
+
+        <figure class="rp-figure rp-wide rv">
+          <div class="rp-shot">
+            <div class="rp-shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+            <img src="/geo-dashboard.png" alt="Robles Tech Post Performance and GEO Dashboard, labelled Sample Dashboard, Not a Real Client, showing site clicks, impressions, posts live, post-publish checks and AI visibility checks above a content pipeline table for a fictional company" width="1920" height="1168" loading="lazy">
+          </div>
+          <figcaption>Our tracking dashboard, shown with sample data for a fictional company. Every figure is invented. <a href="https://portal.roblestech.net/demo">Open the live demo</a>.</figcaption>
+        </figure>
+
+        <h2 id="limits" class="rv">When Won't GEO Help You?</h2>
+        <p>GEO won't help much if your buyers don't ask AI tools for recommendations yet, or if your site has nothing worth citing. In those cases, the basics come first.</p>
+
+        <div class="rp-ledger rp-wide rv">
+          <div class="rp-ledger-col rp-ledger-yes">
+            <p class="rp-label">GEO Is Worth It When</p>
+            <ul class="rp-ledger-list">
+              <li>Your buyers ask AI tools which product, tool or partner to choose.</li>
+              <li>You have real expertise, data or results you can publish.</li>
+              <li>Google already crawls and indexes your key pages.</li>
+            </ul>
+          </div>
+          <div class="rp-ledger-col rp-ledger-no">
+            <p class="rp-label">Fix These First</p>
+            <ul class="rp-ledger-list">
+              <li>Google can't crawl or index your key pages.</li>
+              <li>Your site says little a buyer couldn't read on a competitor's site.</li>
+              <li>You need results by a fixed date. Nobody can promise when an AI tool will start naming you.</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>If you're not sure which side you're on, ask two or three AI tools the questions your buyers ask, and note who gets named. That hour tells you more than any keyword report.</p>
+
+        <h2 id="faq" class="rv">Frequently Asked Questions</h2>
+        <div class="rp-faq">
+          <details class="rp-faq-item">
+            <summary class="rp-faq-q">What Is the Difference Between GEO and SEO?</summary>
+            <div class="rp-faq-a"><p>SEO is the work of ranking your pages in Google's list of links. GEO, or generative engine optimization, is the work of getting your brand named and cited inside AI answers from ChatGPT, Gemini, Perplexity and Google's AI Overviews. Most of the groundwork is shared, but the win and the way you measure it are different.</p></div>
+          </details>
+          <details class="rp-faq-item">
+            <summary class="rp-faq-q">What Is GEO in SEO?</summary>
+            <div class="rp-faq-a"><p>GEO stands for generative engine optimization. It is the part of search work aimed at AI answers rather than ranked links: making your pages easy for AI tools to find, read and quote. It builds on SEO rather than replacing it.</p></div>
+          </details>
+          <details class="rp-faq-item">
+            <summary class="rp-faq-q">What Is AEO?</summary>
+            <div class="rp-faq-a"><p>AEO stands for answer engine optimization. In practice it describes mostly the same work as GEO: making your content the answer an AI tool gives. Different vendors use different names for it, and we use GEO.</p></div>
+          </details>
+          <details class="rp-faq-item">
+            <summary class="rp-faq-q">How Is AEO Different From SEO?</summary>
+            <div class="rp-faq-a"><p>SEO aims to rank a page in Google's list of links, while AEO aims to have your content used in the answer itself. Most of the groundwork overlaps, including crawlable pages, clear structure and accurate claims. Google says its own AI features need no special optimization beyond good SEO.</p></div>
+          </details>
+        </div>
+
+        <h2 id="sources">Sources</h2>
+        <ol class="rp-sources">
+          <li><a href="https://developers.google.com/search/docs/appearance/ai-features">AI features and your website</a>, Google Search Central, last updated December 10, 2025.</li>
+          <li><a href="https://www.semrush.com/blog/semrush-ai-overviews-study/">Semrush AI Overviews Study: What 2025 SEO Data Tells Us About Google's Search Shift</a>, Jana Garanko, Semrush, December 15, 2025.</li>
+          <li><a href="https://www.semrush.com/blog/ai-overviews-commercial-search-study/">AI Overviews Are Expanding Across Commercial Intent Search</a>, Luke Harsel, Semrush, July 3, 2026.</li>
+          <li><a href="https://www.bain.com/insights/goodbye-clicks-hello-ai-zero-click-search-redefines-marketing/">Goodbye Clicks, Hello AI: Zero-Click Search Redefines Marketing</a>, Natasha Sommerfeld, Megan McCurry and Doug Harrington, Bain &amp; Company, February 19, 2025.</li>
+          <li><a href="https://arxiv.org/abs/2311.09735">GEO: Generative Engine Optimization</a>, Pranjal Aggarwal, Vishvak Murahari, Tanmay Rajpurohit, Ashwin Kalyan, Karthik Narasimhan and Ameet Deshpande, KDD 2024.</li>
+          <li><a href="https://arxiv.org/abs/2606.12439">Position: Generative Engine Optimization Creates Underexamined Risks, Governance Must Target Concentration, Disclosure, and Academic Blind Spots</a>, Yizhu Wen, Nan Zhang, Haohan Yuan, Xun Chen, Haopeng Zhang and Hanqing Guo, ICML 2026.</li>
+          <li>RTC AI Visibility Audit, Baseline Round 1, Robles Technologies Corp., August 22, 2026. Internal record.</li>
+          <li>Semrush keyword data, US database, pulled August 22 and September 26, 2026.</li>
+        </ol>
+
+      </div>
+
+      <footer class="rp-flow rp-foot">
+
+        <div class="rp-cta rp-wide">
+          <div class="rp-cta-copy">
+            <p class="rp-label">Start Here, Free</p>
+            <h3 class="rp-cta-title">See Where AI Answers Leave Your Brand Out</h3>
+            <p class="rp-cta-text">Our free AI Visibility Gap Report is a 10-query diagnostic across ChatGPT, Gemini and Perplexity, with a screenshot of every place your brand goes invisible. We walk you through it on a 20-minute call, and the report is yours to keep either way.</p>
+          </div>
+          <div class="rp-cta-actions">
+            <a class="btn btn-white" href="/contact?request=gap-report#contact-main">Get Your Free Gap Report
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+            </a>
+            <a class="btn btn-ghost" href="/services">View Our Services</a>
+          </div>
+        </div>
+
+        <aside class="rp-author" aria-label="About the author">
+          <img class="rp-author-photo" src="/team/christian.webp" alt="Christian Panes" width="76" height="76" loading="lazy">
+          <div>
+            <p class="rp-label">About the Author</p>
+            <p class="rp-author-name">Christian Panes</p>
+            <p class="rp-author-role">Co-Founder and COO, Robles Technologies Corp.</p>
+            <p class="rp-author-bio">Christian leads RTC's AI practice and oversees the team behind our GEO and SEO service. He built the workflow that service runs on, from how each blog post is researched, written and checked to the post-publish SOP that confirms it is live, found and working. He also wrote RTC's 90-day search and AI visibility plan, and this post is part of it.</p>
+            <a class="rp-arrow-link" href="/team">Meet the team
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+            </a>
+          </div>
+        </aside>
+
+      </footer>
+        </div>
+      </div>
+    </article>
+  </main>
+
+</BaseLayout>
