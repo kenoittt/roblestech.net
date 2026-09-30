@@ -16,5 +16,9 @@ export default defineConfig({
   build: {
     format: 'file',
   },
+  // Astro 7's default drops the space between inline elements written on
+  // separate lines ("the <a>Privacy Policy</a> and" became "thePrivacy
+  // Policyand" on every page). This keeps the whitespace as written.
+  compressHTML: true,
   integrations: [react()],
 });

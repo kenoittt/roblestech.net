@@ -18,7 +18,9 @@ import { createHash } from 'node:crypto';
 // old stylesheet against the new markup. Hashing the contents into the query
 // string means the URL changes whenever the CSS does, and never otherwise.
 const stylesHash = createHash('sha256')
-  .update(readFileSync(new URL('../../public/styles.css', import.meta.url)))
+  // A relative path reads from the project folder. Astro 7 bundles this file
+  // elsewhere before running it, so a path from import.meta.url would break.
+  .update(readFileSync('public/styles.css'))
   .digest('hex')
   .slice(0, 8);
 
