@@ -5,6 +5,9 @@ import { createSupabaseAdmin } from '../../lib/supabase';
 export const prerender = false;
 
 // Admin-only: create an internal PPM staff login.
+// Only a super admin may create an admin. Roles are shared with the client
+// portal, where an admin sees every client's data, so this matches the
+// portal's own rule (portal/src/pages/api/create-admin.ts).
 export const POST: APIRoute = async (context) => {
   const { profile } = await getSession(context);
   if (profile?.role !== 'admin' && profile?.role !== 'super_admin') return new Response('Forbidden', { status: 403 });
@@ -14,6 +17,9 @@ export const POST: APIRoute = async (context) => {
   const password = String(form.get('password') ?? '');
   const fullName = String(form.get('full_name') ?? '').trim();
   const role = String(form.get('role') ?? 'staff') === 'admin' ? 'admin' : 'staff';
+  if (role === 'admin' && profile?.role !== 'super_admin') {
+    return context.redirect('/admin?err=' + encodeURIComponent('Only a super admin can create an admin.'));
+  }
   if (!email || password.length < 8) {
     return context.redirect('/admin?err=' + encodeURIComponent('Email and 8+ char password required.'));
   }
