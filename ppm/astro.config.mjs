@@ -49,10 +49,25 @@ export default defineConfig({
            alone is not enough: Vite rewrites its require() calls into imports
            and leaves the targets external, which turns ERR_REQUIRE_ESM into
            "does not provide an export named 'default'". The tree goes in
-           together or not at all. */
+           together or not at all.
+
+           Since Astro 7 (Vite 8), the require() calls it doesn't bundle stay
+           require() calls at run time. Vercel doesn't trace those, so the
+           packages were missing from the function and every handbook article
+           failed with "Cannot find module 'deepmerge'". Hence the whole tree:
+           sanitize-html's dependencies and theirs. */
         'sanitize-html',
         'htmlparser2',
         'is-plain-object',
+        'deepmerge',
+        'escape-string-regexp',
+        'parse-srcset',
+        'postcss',
+        'nanoid',
+        'picocolors',
+        'source-map-js',
+        'launder',
+        'dayjs',
       ],
     },
   },
