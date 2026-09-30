@@ -10,9 +10,9 @@ export const prerender = false;
  * The new password travels in the POST body only and is never echoed back —
  * the redirect carries a status message naming the member, not the secret.
  *
- * An admin may reset staff and other admins, but only a super_admin may reset
- * a super_admin: otherwise any admin could set a password on the super_admin
- * account and take it over.
+ * An admin may reset staff. Setting an admin's or a super_admin's
+ * password takes a super_admin: otherwise an admin could set a password on
+ * that account, sign in as them, and act with their role.
  */
 export const POST: APIRoute = async (context) => {
   const { profile } = await getSession(context);
@@ -39,8 +39,8 @@ export const POST: APIRoute = async (context) => {
   if (tErr || !target) return fail('That member no longer exists.');
 
   const t = target as { id: string; full_name: string | null; role: string };
-  if (t.role === 'super_admin' && actorRole !== 'super_admin') {
-    return fail('Only a super admin can reset a super admin password.');
+  if ((t.role === 'admin' || t.role === 'super_admin') && actorRole !== 'super_admin') {
+    return fail('Only a super admin can set an admin\'s password.');
   }
 
   const { error } = await admin.auth.admin.updateUserById(t.id, { password });

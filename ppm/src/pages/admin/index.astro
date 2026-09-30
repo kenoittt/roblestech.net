@@ -4,6 +4,9 @@ import Avatar from '../../components/Avatar.astro';
 import { createSupabaseServer } from '../../lib/supabase';
 
 const supabase = createSupabaseServer(Astro);
+// Only super admins create admins or set their passwords; the API routes
+// enforce this too, so these just keep the page from offering what will fail.
+const isSuper = Astro.locals.profile?.role === 'super_admin';
 const { data: people } = await supabase.from('profiles').select('id, full_name, role, avatar_url').in('role', ['super_admin', 'admin', 'staff']).order('role');
 const { data: projects } = await supabase.from('ppm_projects').select('id, name, color').eq('archived', false).order('name');
 const ok = Astro.url.searchParams.get('ok');
@@ -21,7 +24,7 @@ const err = Astro.url.searchParams.get('err');
     <div><label>Name</label><input name="full_name" placeholder="Team member" /></div>
     <div><label>Email</label><input name="email" type="email" required placeholder="name@roblestech.net" /></div>
     <div><label>Password</label><input name="password" type="text" required minlength="8" placeholder="8+ characters" /></div>
-    <div><label>Role</label><select name="role"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+    <div><label>Role</label><select name="role"><option value="staff">Staff</option>{isSuper && <option value="admin">Admin</option>}</select></div>
     <button class="btn" type="submit">Create login</button>
   </form>
 
@@ -50,12 +53,12 @@ const err = Astro.url.searchParams.get('err');
           <span class="who"><Avatar id={p.id} name={p.full_name} path={p.avatar_url} size={26} />{p.full_name || '(no name)'}</span>
           <span style="display:flex;align-items:center;gap:10px;">
             <span class="hint" style="margin:0;text-transform:uppercase;letter-spacing:.1em;">{p.role}</span>
-            <button type="button" class="mini js-pw" data-for={p.id}>Set password</button>
+            {(isSuper || (p.role !== 'admin' && p.role !== 'super_admin')) && <button type="button" class="mini js-pw" data-for={p.id}>Set password</button>}
           </span>
         </div>
         {/* Hidden until asked for, so the row stays clean and a password field
             is never sitting open on screen. */}
-        <form method="post" action="/api/reset-user-password" id={`pw-${p.id}`} hidden
+        {(isSuper || (p.role !== 'admin' && p.role !== 'super_admin')) && <form method="post" action="/api/reset-user-password" id={`pw-${p.id}`} hidden
               style="display:flex;gap:8px;align-items:end;border-top:1px solid var(--line);padding-top:10px;">
           <input type="hidden" name="user_id" value={p.id} />
           <div style="flex:1;">
@@ -63,7 +66,7 @@ const err = Astro.url.searchParams.get('err');
             <input name="password" type="text" required minlength="8" autocomplete="off" placeholder="8+ characters" />
           </div>
           <button class="btn" type="submit" style="padding:10px 14px;">Save</button>
-        </form>
+        </form>}
       </li>
     ))}
   </ul>
