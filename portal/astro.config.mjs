@@ -8,6 +8,10 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
+  // Astro 7's default drops the space between inline elements written on
+  // separate lines ("the <a>Privacy Policy</a> and" became "thePrivacy
+  // Policyand"). This keeps the whitespace handling pages were written for.
+  compressHTML: true,
   site: 'https://portal.roblestech.net',
   security: {
     // Astro's default origin check compares the Origin header against the host,
