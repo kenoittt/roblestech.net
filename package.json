@@ -12,9 +12,11 @@
     "astro": "astro"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "astro": "^5.6.1"
+    "astro": "^5.6.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.6",
