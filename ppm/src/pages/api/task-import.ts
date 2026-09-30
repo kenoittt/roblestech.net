@@ -31,18 +31,18 @@ export const POST: APIRoute = async (context) => {
   const form = await context.request.formData();
   const file = form.get('file');
   if (!(file instanceof File) || file.size === 0) {
-    return context.redirect('/?err=' + encodeURIComponent('Please choose a CSV file.'));
+    return context.redirect('/tasks?err=' + encodeURIComponent('Please choose a CSV file.'));
   }
 
   const rows = parseCsv(await file.text())
     .filter((r) => r.length && !(r[0] ?? '').trim().startsWith('#') && r.some((c) => c.trim() !== ''));
-  if (rows.length < 2) return context.redirect('/?err=' + encodeURIComponent('CSV has no data rows.'));
+  if (rows.length < 2) return context.redirect('/tasks?err=' + encodeURIComponent('CSV has no data rows.'));
 
   const header = rows[0].map((h) => h.trim().toLowerCase());
   const col = (name: string) => header.indexOf(name);
   const iTitle = col('title'), iDesc = col('description'), iEmail = col('assignee_email'),
     iPrio = col('priority'), iDue = col('due_date'), iProj = col('project');
-  if (iTitle < 0) return context.redirect('/?err=' + encodeURIComponent('CSV must have a "title" column.'));
+  if (iTitle < 0) return context.redirect('/tasks?err=' + encodeURIComponent('CSV must have a "title" column.'));
 
   const admin = createSupabaseAdmin();
 
@@ -100,5 +100,5 @@ export const POST: APIRoute = async (context) => {
   }
 
   const msg = `Imported ${created} task${created === 1 ? '' : 's'}.` + (errors.length ? ` ${errors.length} note(s): ${errors.slice(0, 3).join('; ')}${errors.length > 3 ? '…' : ''}` : '');
-  return context.redirect('/?ok=' + encodeURIComponent(msg));
+  return context.redirect('/tasks?ok=' + encodeURIComponent(msg));
 };
