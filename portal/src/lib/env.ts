@@ -1,10 +1,10 @@
-// Env access that works both in local dev (import.meta.env from .env) and at
-// runtime on Vercel (process.env). PUBLIC_* are safe for the browser; the
-// service-role key must never leave the server.
-export const pick = (key: string): string =>
-  (import.meta.env as Record<string, string | undefined>)[key] ??
-  (typeof process !== 'undefined' ? process.env[key] : undefined) ??
-  '';
+// Settings, read on the server at request time. getSecret() keeps values out
+// of the build output; Astro 6 and later bake import.meta.env into the build.
+// PUBLIC_* are safe for the browser; the service-role key must never leave
+// the server.
+import { getSecret } from 'astro:env/server';
+
+export const pick = (key: string): string => getSecret(key) ?? '';
 
 export const SUPABASE_URL = pick('PUBLIC_SUPABASE_URL');
 export const SUPABASE_ANON_KEY = pick('PUBLIC_SUPABASE_ANON_KEY');
