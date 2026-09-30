@@ -1,0 +1,42 @@
+# Builds every app on each pull request into main.
+# Type errors are listed but don't block yet: set an app's strict to true
+# once its type check is clean, and from then on they block merging too.
+# Node matches production builds: 24 everywhere (engines 24.x since PR #1).
+name: Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.app.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - { name: Public site, dir: ., node: 24, strict: false }
+          - { name: PPM, dir: ppm, node: 24, strict: false }
+          - { name: Portal, dir: portal, node: 24, strict: false }
+          - { name: WanderWise, dir: travel, node: 24, strict: false }
+    defaults:
+      run:
+        working-directory: ${{ matrix.app.dir }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.app.node }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.app.dir }}/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Type check
+        run: npx astro check
+        continue-on-error: ${{ !matrix.app.strict }}
