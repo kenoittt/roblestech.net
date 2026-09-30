@@ -6,6 +6,10 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
+  // Astro 7's default drops the space between inline elements written on
+  // separate lines ("the <a>Privacy Policy</a> and" became "thePrivacy
+  // Policyand"). This keeps the whitespace handling pages were written for.
+  compressHTML: true,
   /* No image service.
    *
    * PPM uses plain <img> and never astro:assets, but Astro still wires its
