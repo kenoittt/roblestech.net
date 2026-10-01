@@ -61,7 +61,8 @@ export function TimeGrid({
   const scroller = useRef<HTMLDivElement>(null)
   const grid = useRef<HTMLDivElement>(null)
   const { update } = useCalendarActions()
-  const [drag, setDrag] = useState<{ col: string; from: number; to: number } | null>(null)
+  // Drawing a new block. On a phone the outline waits for the finger to lift, so a scroll shows nothing.
+  const [drag, setDrag] = useState<{ col: string; from: number; to: number; touch: boolean } | null>(null)
   // Moving or resizing one of your own entries.
   const [move, setMove] = useState<MoveState | null>(null)
   const justMoved = useRef<string | null>(null)
@@ -69,8 +70,10 @@ export function TimeGrid({
   const crossColumns = new Set(columns.map((c) => c.day)).size === columns.length && columns.length > 1
 
   const beginMove = (e: React.PointerEvent, placed: Placed, col: number, mode: "move" | "resize") => {
-    if (e.button !== 0) return
     e.stopPropagation()
+    // A finger scrolls the day instead; a tap still opens the details, where Edit changes the times.
+    if (e.button !== 0 || e.pointerType === "touch") return
+    const pointer = e.pointerId
     const startX = e.clientX
     const startY = e.clientY
     const length = placed.end - placed.start
@@ -82,6 +85,7 @@ export function TimeGrid({
     setMove(state)
 
     const onMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointer) return
       const dy = ev.clientY - startY
       const dx = ev.clientX - startX
       const delta = Math.round(dy / PX_PER_MIN / SNAP) * SNAP
@@ -101,10 +105,18 @@ export function TimeGrid({
       state = { ...state, newStart, newEnd, newCol, moved }
       setMove(state)
     }
-    const onUp = () => {
+    const stop = () => {
       window.removeEventListener("pointermove", onMove)
       window.removeEventListener("pointerup", onUp)
+      window.removeEventListener("pointercancel", onCancel)
       setMove(null)
+    }
+    const onCancel = (ev: PointerEvent) => {
+      if (ev.pointerId === pointer) stop()
+    }
+    const onUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointer) return
+      stop()
       const changed = state.newStart !== state.start || state.newEnd !== state.end || state.newCol !== state.col
       if (state.moved) justMoved.current = state.id
       if (!changed) return
@@ -116,6 +128,7 @@ export function TimeGrid({
     }
     window.addEventListener("pointermove", onMove)
     window.addEventListener("pointerup", onUp)
+    window.addEventListener("pointercancel", onCancel)
   }
 
   // Start the view at 8 AM, where the day begins.
@@ -181,7 +194,7 @@ export function TimeGrid({
                   if (!mine || e.button !== 0 || (e.target as HTMLElement).closest("[data-event]")) return
                   const m = pointerMinute(e)
                   e.currentTarget.setPointerCapture(e.pointerId)
-                  setDrag({ col: c.key, from: m, to: m + 60 })
+                  setDrag({ col: c.key, from: m, to: m + 60, touch: e.pointerType === "touch" })
                 }}
                 onPointerMove={(e) => {
                   if (!drag || drag.col !== c.key) return
@@ -194,6 +207,8 @@ export function TimeGrid({
                   setDrag(null)
                   onCreate(c.day, from, Math.max(to, from + 30))
                 }}
+                // The browser took over (a phone scroll, say): drop the drawing.
+                onPointerCancel={() => setDrag(null)}
               >
                 {hours.map((m) => (
                   <div key={m} className="pointer-events-none absolute inset-x-0 border-t border-line/70" style={{ top: minuteToY(m) }} />
@@ -230,7 +245,7 @@ export function TimeGrid({
                   </div>
                 )}
 
-                {drag?.col === c.key && (
+                {drag?.col === c.key && !drag.touch && (
                   <div
                     className="pointer-events-none absolute inset-x-1 rounded-md border border-brand/60 bg-brand-soft px-2 py-1 text-xs text-fg"
                     style={{ top: minuteToY(drag.from), height: Math.max(14, minuteToY(drag.to) - minuteToY(drag.from)) }}
@@ -352,7 +367,6 @@ function EventBlock({
             aria-hidden
             onPointerDown={(e) => onBeginMove(e, "resize")}
             className="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize"
-            style={{ touchAction: "none" }}
           />
         )}
       </PopoverTrigger>
