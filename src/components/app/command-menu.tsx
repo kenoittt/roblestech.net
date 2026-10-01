@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { getSupabase } from "@/lib/supabase/client"
 import { Command as Cmdk } from "cmdk"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { useTheme } from "next-themes"
@@ -62,6 +64,15 @@ function Palette({ onClose }: { onClose: () => void }) {
   const { open } = useTaskPanel()
   const { setTheme } = useTheme()
   const [query, setQuery] = useState("")
+  // Handbook titles, fetched once per session the first time the menu opens.
+  const { data: articles = [] } = useQuery({
+    queryKey: ["handbook", "titles"],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data } = await getSupabase().from("kb_articles").select("slug,title,status").order("title")
+      return (data ?? []) as { slug: string; title: string; status: string }[]
+    },
+  })
 
   const run = (fn: () => void) => {
     onClose()
@@ -124,6 +135,17 @@ function Palette({ onClose }: { onClose: () => void }) {
           <Item value="handbook knowledge base articles" onSelect={() => go("/handbook")} icon={BookOpen01Icon} shortcut="G B">Handbook</Item>
           <Item value="settings profile account" onSelect={() => go("/settings")} icon={Settings01Icon}>Settings</Item>
         </Group>
+
+        {query.trim().length >= 2 && articles.length > 0 && (
+          <Group heading="Handbook">
+            {articles.map((a) => (
+              <Item key={a.slug} value={`article ${a.title}`} onSelect={() => go(`/handbook/${a.slug}`)} icon={BookOpen01Icon}>
+                <span className="truncate">{a.title}</span>
+                {a.status !== "ready" && <span className="ml-auto text-xs text-fg-4">{a.status === "draft" ? "Draft" : "To write"}</span>}
+              </Item>
+            ))}
+          </Group>
+        )}
 
         <Group heading="Projects">
           {projects.filter((p) => p.status !== "closed").map((p) => (
