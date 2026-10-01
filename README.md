@@ -17,7 +17,7 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
 - **Calendar:** your week and the team's day; drag to block time, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically.
 - **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
-- **Inbox, activity log, command menu (Cmd K), keyboard shortcuts, settings.**
+- **Inbox, activity log, command menu (Cmd K), keyboard shortcuts, settings** (including a profile photo).
 - **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
 - **Import and export:** tasks from a CSV, checked in a preview first; all tasks to a CSV.
 - **Live updates:** someone else's change appears without a refresh, in about half a second.
@@ -82,16 +82,20 @@ npm run test:smoke   # with npm run dev running: 19 end-to-end checks, about a m
 
 It signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules, and live updates.
 
-## A five-minute demo
+## A ten-minute demo
 
-1. Sign in as **Kyan**. Home answers "what do I do today?" before anything else.
-2. Open **All tasks**. Switch List, Board, Calendar. Group by assignee from Display.
-3. Press **C** to create a task. Assign it: the menu shows who has room.
-4. Click a task: the panel opens beside the list. Change its status; open the sign-off rule.
-5. On the **board**, drag a card to In review. Try dragging one that needs a reviewer to Done.
-6. Open **People**. Invite someone, then open the email at http://127.0.0.1:54324 and set their password.
-7. Switch to **Carl** (staff) from the account menu. He can't change roles, and Christian's report needs Kenneth's sign-off.
-8. Open a **project**: health, what's late, who's carrying it, then its board.
+1. Sign in as **Kyan**. Home answers "what do I do today?" first: what's overdue and due, today's plan, what waits for your sign-off. The team's load and the projects come after.
+2. Open **All tasks**. Switch List, Board, Calendar; the choice is remembered. Group by assignee from Display.
+3. Press **C** to create a task. Assign it: the menu shows everyone's open and late work, and who has the most room. The email lands at http://127.0.0.1:54324.
+4. Click a task: the panel opens beside the list. Change its status, comment, open the sign-off rule.
+5. On the **board**, drag a card to In review. Dragging one that needs someone else's sign-off to Done is refused, with the reason.
+6. Open the **calendar**. My week: drag down an empty slot to block time. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
+7. Open **People**. Invite someone, open the email in the mail catcher, and set their password.
+8. Switch to **Carl** (staff) from the account menu. He can't change roles, and Christian's report needs Kenneth's sign-off.
+9. Open a **project**: health, what's late, who's carrying it, then its board.
+10. Open a second browser window as **Kenneth** and rename a task: it changes in Kyan's window by itself.
+
+For the smoothest demo, run the production build: `npm run build && npm start`, then open http://localhost:3000 (stop `npm run dev` first, or use `npm start -- -p 3001`).
 
 ## How the code is organised
 
