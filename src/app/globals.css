@@ -422,3 +422,13 @@
   & th { text-align: left; font-weight: 500; color: var(--fg-3); border-bottom: 1px solid var(--line-strong); padding: 0.45em 0.75em 0.45em 0; }
   & td { border-bottom: 1px solid var(--line); padding: 0.55em 0.75em 0.55em 0; vertical-align: top; color: var(--fg-2); }
 }
+
+/* Long-form articles: a little larger and roomier than task descriptions. */
+@utility prose-article {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  & h2 { font-size: 1.15rem; margin-top: 2em; scroll-margin-top: 1.5rem; }
+  & h3 { font-size: 1rem; margin-top: 1.6em; scroll-margin-top: 1.5rem; }
+  & > * + * { margin-top: 0.85em; }
+  & table { margin-top: 1.2em; }
+}
