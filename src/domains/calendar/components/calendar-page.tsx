@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { PageHeader } from "@/components/app/page"
+import { Progress } from "@/components/app/charts"
 import { cn } from "@/lib/utils"
 import { useIsNarrow } from "@/lib/use-narrow"
 import {
@@ -94,9 +95,10 @@ export function CalendarPage() {
     mode === "week"
       ? days.map((day) => {
           const mine = events.filter((e) => e.owner_id === me.id || e.attendee_ids.includes(me.id))
-          const planned = mine
-            .filter((e) => isoDay(e.starts_at) === day)
-            .reduce((s, e) => s + (minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)), 0)
+          const ofDay = mine.filter((e) => isoDay(e.starts_at) === day)
+          const length = (e: CalEvent) => minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)
+          const planned = ofDay.reduce((s, e) => s + length(e), 0)
+          const done = ofDay.filter((e) => isEventDone(e, now)).reduce((s, e) => s + length(e), 0)
           const hidden = modeFor(day)
           return {
             key: day,
@@ -109,6 +111,7 @@ export function CalendarPage() {
                 day={day}
                 today={today}
                 planned={planned}
+                done={done}
                 hidden={hidden}
                 onHide={(m) => setRange.mutate({ startsOn: day, endsOn: day, mode: m })}
               />
@@ -300,52 +303,64 @@ function DayHeader({
   day,
   today,
   planned,
+  done,
   hidden,
   onHide,
 }: {
   day: string
   today: string
   planned: number
+  /** Minutes of the planned time already done. */
+  done: number
   hidden: "public" | "busy" | "private"
   onHide: (mode: "public" | "busy" | "private") => void
 }) {
   const isToday = day === today
   const past = diffDays(day, today) < 0
+  const summary = `${durationLabel(done)} of ${durationLabel(planned)} done`
   return (
-    <div className="group flex items-start justify-between gap-1">
-      <div className="min-w-0">
-        <p className={cn("text-[11px] font-medium", isToday ? "text-brand" : "text-fg-3")}>{weekdayName(day)}</p>
-        <p className="flex items-center gap-1.5">
-          <span
+    <div className="group">
+      <div className="flex items-start justify-between gap-1">
+        <div className="min-w-0">
+          <p className={cn("text-[11px] font-medium", isToday ? "text-brand" : "text-fg-3")}>{weekdayName(day)}</p>
+          <p className="flex items-center gap-1.5">
+            <span
+              className={cn(
+                "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-sm font-semibold tabular",
+                isToday ? "bg-brand-solid text-white" : past ? "text-fg-3" : "text-fg",
+              )}
+            >
+              {Number(day.slice(8))}
+            </span>
+            {planned > 0 && <span className="truncate text-[11px] text-fg-3 tabular">{durationLabel(planned)}</span>}
+          </p>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label={`Who sees ${weekdayName(day, true)}`}
             className={cn(
-              "inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1 text-sm font-semibold tabular",
-              isToday ? "bg-brand-solid text-white" : past ? "text-fg-3" : "text-fg",
+              "pressable inline-flex size-6 items-center justify-center rounded-md hover:bg-hover hover:text-fg data-popup-open:bg-hover",
+              hidden === "public" ? "text-fg-4 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100" : "text-fg-2",
             )}
           >
-            {Number(day.slice(8))}
-          </span>
-          {planned > 0 && <span className="truncate text-[11px] text-fg-3 tabular">{durationLabel(planned)}</span>}
-        </p>
+            <Icon icon={hidden === "private" ? LockKeyIcon : hidden === "busy" ? ViewOffIcon : ViewIcon} size={13} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>{weekdayName(day, true)}: what the team sees</DropdownMenuLabel>
+            <DropdownMenuRadioGroup value={hidden} onValueChange={(v) => onHide(v as "public" | "busy" | "private")}>
+              <DropdownMenuRadioItem value="public">Everything</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="busy">Only that I'm busy</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="private">Nothing</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          aria-label={`Who sees ${weekdayName(day, true)}`}
-          className={cn(
-            "pressable inline-flex size-6 items-center justify-center rounded-md hover:bg-hover hover:text-fg data-popup-open:bg-hover",
-            hidden === "public" ? "text-fg-4 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100" : "text-fg-2",
-          )}
-        >
-          <Icon icon={hidden === "private" ? LockKeyIcon : hidden === "busy" ? ViewOffIcon : ViewIcon} size={13} />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>{weekdayName(day, true)}: what the team sees</DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={hidden} onValueChange={(v) => onHide(v as "public" | "busy" | "private")}>
-            <DropdownMenuRadioItem value="public">Everything</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="busy">Only that I'm busy</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="private">Nothing</DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Done against planned, for days that have started. */}
+      {planned > 0 && (past || isToday) && (
+        <div role="img" aria-label={summary} title={summary} className="mt-1.5">
+          <Progress value={done / planned} />
+        </div>
+      )}
     </div>
   )
 }

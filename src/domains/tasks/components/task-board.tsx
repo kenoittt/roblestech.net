@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 import { useUI } from "@/components/app/ui-state"
 import { useMe, useMemberMap, useProjectMap } from "@/domains/workspace/provider"
 import { firstName } from "@/domains/workspace/types"
-import { STATUSES, STATUS_META, canComplete, signOffPeople, taskKey, type Status, type Task } from "../config"
+import { STATUSES, STATUS_META, canComplete, signOffPeople, taskKey, type Ordering, type Status, type Task } from "../config"
 import { useUpdateTask } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { ProjectSwatch, StatusIcon } from "./glyphs"
@@ -32,7 +32,17 @@ import { TaskAssigneeButton, TaskDueButton, TaskPriorityButton } from "./task-pr
  * its status, and the sign-off rules still apply, so a card that needs a
  * reviewer can't be dropped on Done by the wrong person.
  */
-export function TaskBoard({ tasks, showCancelled = false, showProject = true }: { tasks: Task[]; showCancelled?: boolean; showProject?: boolean }) {
+export function TaskBoard({
+  tasks,
+  ordering,
+  showCancelled = false,
+  showProject = true,
+}: {
+  tasks: Task[]
+  ordering?: Ordering
+  showCancelled?: boolean
+  showProject?: boolean
+}) {
   const me = useMe()
   const members = useMemberMap()
   const update = useUpdateTask()
@@ -40,8 +50,16 @@ export function TaskBoard({ tasks, showCancelled = false, showProject = true }: 
 
   const columns = useMemo(() => {
     const statuses = STATUSES.filter((s) => s !== "cancelled" || showCancelled)
-    return statuses.map((s) => ({ status: s, tasks: tasks.filter((t) => t.status === s) }))
-  }, [tasks, showCancelled])
+    return statuses.map((s) => {
+      const list = tasks.filter((t) => t.status === s)
+      // Under priority or due order, finished work reads newest first: a done
+      // task's due date says little. Updated and created orders stay as chosen.
+      if ((s === "done" || s === "cancelled") && (ordering === "priority" || ordering === "due")) {
+        list.sort((a, b) => ((b.completed_at ?? b.updated_at) > (a.completed_at ?? a.updated_at) ? 1 : -1))
+      }
+      return { status: s, tasks: list }
+    })
+  }, [tasks, showCancelled, ordering])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -87,7 +105,8 @@ function Column({ status, tasks, showProject }: { status: Status; tasks: Task[];
       ref={setNodeRef}
       aria-label={STATUS_META[status].label}
       className={cn(
-        "flex w-[280px] shrink-0 flex-col rounded-lg transition-colors duration-150",
+        // Columns share the width so every status fits on a laptop; narrow screens scroll.
+        "flex max-w-[340px] min-w-[216px] flex-1 flex-col rounded-lg transition-colors duration-150",
         isOver ? "bg-selected" : "bg-transparent",
       )}
     >
