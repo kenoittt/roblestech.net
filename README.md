@@ -15,7 +15,12 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
-- **Live updates:** someone else's change appears without a refresh.
+- **Calendar:** your week and the team's day; drag to block time, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically.
+- **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
+- **Inbox, activity log, command menu (Cmd K), keyboard shortcuts, settings.**
+- **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
+- **Import and export:** tasks from a CSV, checked in a preview first; all tasks to a CSV.
+- **Live updates:** someone else's change appears without a refresh, in about half a second.
 - **Dark first,** following the system setting; light works too.
 
 Still being built: see "Status" in the build plan.
@@ -69,6 +74,14 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 - **`npx supabase …` prints nothing and never finishes:** macOS is asking whether the Supabase tool may read your Documents folder, and the prompt may be hidden behind other windows. Allow it in System Settings, Privacy and Security, Files and Folders.
 - **`npm run dev` says Ready but pages never load:** the file watcher is stuck. Use `npm run dev:poll`, which watches by polling instead.
 
+### Check it works
+
+```bash
+npm run test:smoke   # with npm run dev running: 19 end-to-end checks, about a minute
+```
+
+It signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules, and live updates.
+
 ## A five-minute demo
 
 1. Sign in as **Kyan**. Home answers "what do I do today?" before anything else.
@@ -114,5 +127,14 @@ supabase/
 
 - Back up the live database (Kenneth, from the Supabase dashboard).
 - Apply `supabase/migrations/20261002000200_ppm_revamp.sql` to production. It only adds; but new statuses and priorities may confuse the old app, so switch over the same day.
-- Production settings: the Supabase URL and keys, and email through Microsoft 365 (the live PPM's `MS_*` settings).
+- Production settings, in Vercel:
+
+  | Setting | What it is |
+  |---|---|
+  | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | The Supabase project (the live PPM uses the same three) |
+  | `NEXT_PUBLIC_APP_URL` | The PPM's address, for links in emails |
+  | `MS_TENANT_ID`, `MS_CLIENT_ID`, `MS_CLIENT_SECRET`, `MAIL_FROM` | Email through Microsoft 365, exactly as the live PPM sends it |
+  | `CRON_SECRET` | Protects the 8 AM reminder; Vercel sends it to the route itself |
+
+  Leave `NEXT_PUBLIC_DEMO_MODE` and `MAIL_DEV_URL` unset in production. `vercel.json` already sets Singapore and the 8 AM schedule.
 - Deploy to Vercel as its own project, try it on its own address, then point `ppm.roblestech.net` at it.

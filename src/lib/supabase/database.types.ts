@@ -178,13 +178,13 @@ isOneToOne: false
                   ]
                 },"ppm_notifications": {
                   Row: {
-                    "actor_id": string | null,"created_at": string,"event_id": string | null,"id": string,"meta": NonNullable<Json>,"read_at": string | null,"task_id": string | null,"type": string,"user_id": string
+                    "actor_id": string | null,"created_at": string,"emailed_at": string | null,"event_id": string | null,"id": string,"meta": NonNullable<Json>,"read_at": string | null,"task_id": string | null,"type": string,"user_id": string
                   }
                   Insert: {
-                    "actor_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"meta"?: NonNullable<Json>,"read_at"?: string | null,"task_id"?: string | null,"type": string,"user_id": string
+                    "actor_id"?: string | null,"created_at"?: string,"emailed_at"?: string | null,"event_id"?: string | null,"id"?: string,"meta"?: NonNullable<Json>,"read_at"?: string | null,"task_id"?: string | null,"type": string,"user_id": string
                   }
                   Update: {
-                    "actor_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"meta"?: NonNullable<Json>,"read_at"?: string | null,"task_id"?: string | null,"type"?: string,"user_id"?: string
+                    "actor_id"?: string | null,"created_at"?: string,"emailed_at"?: string | null,"event_id"?: string | null,"id"?: string,"meta"?: NonNullable<Json>,"read_at"?: string | null,"task_id"?: string | null,"type"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {

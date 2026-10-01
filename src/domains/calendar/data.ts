@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { getSupabase } from "@/lib/supabase/client"
 import { useUid } from "@/domains/workspace/provider"
 import { explain } from "@/domains/tasks/data"
+import { nudgeDelivery } from "@/domains/inbox/deliver"
 
 /** A calendar entry as the team view returns it: masked where its owner chose privacy. */
 export type CalEvent = {
@@ -99,7 +100,10 @@ export function useCalendarActions() {
       }
       return data.id as string
     },
-    onSuccess: refresh,
+    onSuccess: () => {
+      refresh()
+      nudgeDelivery()
+    },
     onError: (e) => toast.error(explain(e)),
   })
 

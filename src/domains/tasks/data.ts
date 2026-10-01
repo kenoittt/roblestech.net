@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { getSupabase } from "@/lib/supabase/client"
 import { useUid } from "@/domains/workspace/provider"
+import { nudgeDelivery } from "@/domains/inbox/deliver"
 import { TASK_COLUMNS, taskKey, type Task, type TaskPatch, type TaskRow } from "./config"
 
 // Every write is optimistic: the screen changes at once, the database decides,
@@ -62,6 +63,7 @@ export function useUpdateTask() {
     onSuccess: (row) => {
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => (t.id === row.id ? row : t)))
       qc.invalidateQueries({ queryKey: ["task", row.id] })
+      nudgeDelivery()
     },
   })
 }
@@ -89,6 +91,7 @@ export function useBulkUpdate() {
     onSuccess: (rows) => {
       const byId = new Map(rows.map((r) => [r.id, r]))
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => byId.get(t.id) ?? t))
+      nudgeDelivery()
     },
   })
 }
@@ -121,6 +124,7 @@ export function useCreateTask() {
     },
     onSuccess: (row) => {
       qc.setQueryData<Task[]>(["tasks"], (old = []) => (old.some((t) => t.id === row.id) ? old : [...old, row]))
+      nudgeDelivery()
     },
     onError: (error) => toast.error(explain(error)),
   })
@@ -250,7 +254,10 @@ export function useAddComment() {
         .insert({ task_id: taskId, body, author_id: uid })
       if (error) throw error
     },
-    onSuccess: (_d, { taskId }) => qc.invalidateQueries({ queryKey: ["task", taskId] }),
+    onSuccess: (_d, { taskId }) => {
+      qc.invalidateQueries({ queryKey: ["task", taskId] })
+      nudgeDelivery()
+    },
     onError: (error) => toast.error(explain(error)),
   })
 }

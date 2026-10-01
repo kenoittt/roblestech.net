@@ -4,6 +4,7 @@ import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { APP_URL } from "@/lib/env"
 import type { Role } from "@/domains/workspace/types"
+import { deliverNotifications } from "@/domains/inbox/actions"
 
 // Managing people needs the service role (inviting, banning, changing roles),
 // which skips the database's rules. So every action here checks the caller's
@@ -125,6 +126,7 @@ export async function deactivateMember(userId: string, reassignTo: string | null
   const { error } = await admin.from("profiles").update({ deactivated_at: new Date().toISOString() }).eq("id", userId)
   if (error) return { ok: false, error: error.message }
   await admin.auth.admin.updateUserById(userId, { ban_duration: "876000h" })
+  await deliverNotifications()
   return { ok: true, message: `${them.full_name ?? them.email} can no longer sign in.` }
 }
 

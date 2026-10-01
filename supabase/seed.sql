@@ -354,6 +354,9 @@ insert into public.ppm_notifications (user_id, actor_id, type, task_id, event_id
   (pg_temp.person(5), pg_temp.person(4), 'comment',  pg_temp.task(38), null, jsonb_build_object('excerpt', 'Do the three from the expo first.'), null, now() - interval '4 hours'),
   (pg_temp.person(4), pg_temp.person(1), 'comment',  pg_temp.task(33), null, jsonb_build_object('excerpt', 'Looks good. One question on the pricing line.'), null, now() - interval '35 minutes');
 
+-- Sample notifications are history, not news: nothing to email.
+update public.ppm_notifications set emailed_at = created_at;
+
 -- -----------------------------------------------------------------------------
 -- Handbook: how to use the new PPM, plus a few shelves still to write
 -- -----------------------------------------------------------------------------

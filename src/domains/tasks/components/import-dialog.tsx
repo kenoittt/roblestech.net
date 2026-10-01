@@ -15,6 +15,7 @@ import { useMembers, useProjects, useToday, useUid } from "@/domains/workspace/p
 import { displayName } from "@/domains/workspace/types"
 import { PRIORITIES, STATUSES, STATUS_META, TASK_COLUMNS, type Task } from "../config"
 import { explain } from "../data"
+import { nudgeDelivery } from "@/domains/inbox/deliver"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 
 type Row = {
@@ -150,6 +151,7 @@ export function ImportDialog({ open, onClose }: { open: boolean; onClose: () => 
       if (error) throw error
       qc.setQueryData<Task[]>(["tasks"], (old = []) => [...old, ...((data ?? []) as unknown as Task[])])
       if (newProjects.length) qc.invalidateQueries({ queryKey: ["projects"] })
+      nudgeDelivery()
       toast(`Imported ${data?.length ?? 0} tasks`, {
         description: newProjects.length ? `New projects: ${newProjects.join(", ")}` : undefined,
       })
