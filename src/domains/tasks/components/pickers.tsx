@@ -167,6 +167,10 @@ export function usePeopleOptions({
       const pb = projectMembers.has(b.id) ? 0 : 1
       return pa - pb || displayName(a).localeCompare(displayName(b))
     })
+    // Whoever carries the least gets a quiet hint: the first place to look.
+    const loads = active.map((m) => load.get(m.id)?.active ?? 0)
+    const least = Math.min(...loads)
+    const roomiest = active.length > 2 && loads.filter((x) => x === least).length === 1 ? active[loads.indexOf(least)].id : null
     const options: PickerOption[] = active.map((m) => {
       const l = load.get(m.id)
       return {
@@ -176,6 +180,7 @@ export function usePeopleOptions({
         keywords: [m.email ?? "", m.title ?? ""],
         meta: l ? (
           <span className="tabular">
+            {m.id === roomiest && <span className="mr-1.5 text-brand">most room</span>}
             {l.active} open
             {l.overdue > 0 && <span className="text-danger"> · {l.overdue} late</span>}
           </span>

@@ -170,6 +170,8 @@ const login = JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/
 const res = execSync(`curl -s -X PATCH "http://127.0.0.1:54321/rest/v1/ppm_tasks?number=eq.18" -H "apikey: ${anon}" -H "Authorization: Bearer ${login.access_token}" -H "Content-Type: application/json" -d '{"status":"done"}'`).toString()
 check("Staff can't mark a task done that needs Kenneth's sign-off", res.includes("Only the people chosen"), res.slice(0, 90))
 const roleRes = execSync(`curl -s -X PATCH "http://127.0.0.1:54321/rest/v1/profiles?id=eq.00000000-0000-4000-a000-000000000005" -H "apikey: ${anon}" -H "Authorization: Bearer ${login.access_token}" -H "Content-Type: application/json" -H "Prefer: return=representation" -d '{"role":"super_admin"}'`).toString()
+const priv = execSync(`curl -s "http://127.0.0.1:54321/rest/v1/ppm_tasks?select=title&title=eq.Renew%20passport" -H "apikey: ${anon}" -H "Authorization: Bearer ${login.access_token}"`).toString()
+check("Someone else's private task is invisible to staff", priv.trim() === "[]", priv.slice(0, 60))
 check("Staff can't promote themselves", sql(`select role from profiles where id = '00000000-0000-4000-a000-000000000005'`) === "staff", roleRes.slice(0, 80))
 
 
