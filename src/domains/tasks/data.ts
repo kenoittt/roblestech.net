@@ -190,6 +190,7 @@ export type Comment = {
   task_id: string
   author_id: string | null
   body: string
+  mentions: string[]
   created_at: string
   edited_at: string | null
 }
@@ -248,10 +249,10 @@ export function useAddComment() {
   const qc = useQueryClient()
   const uid = useUid()
   return useMutation({
-    mutationFn: async ({ taskId, body }: { taskId: string; body: string }) => {
+    mutationFn: async ({ taskId, body, mentions = [] }: { taskId: string; body: string; mentions?: string[] }) => {
       const { error } = await getSupabase()
         .from("ppm_task_comments")
-        .insert({ task_id: taskId, body, author_id: uid })
+        .insert({ task_id: taskId, body, author_id: uid, mentions })
       if (error) throw error
     },
     onSuccess: (_d, { taskId }) => {

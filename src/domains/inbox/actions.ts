@@ -90,6 +90,12 @@ export async function deliverNotifications(): Promise<{ sent: number }> {
         heading = `${actor} commented on ${task?.title}`
         if (n.meta?.excerpt) lines.push(`“${n.meta.excerpt}”`)
         break
+      case "mention":
+        subject = `${actor} mentioned you on ${task?.title}`
+        heading = `${actor} mentioned you`
+        lines.push(`On ${task?.title} (${key}):`)
+        if (n.meta?.excerpt) lines.push(`“${n.meta.excerpt}”`)
+        break
       case "meeting": {
         const at = n.meta?.starts_at
         subject = `Meeting: ${n.meta?.title ?? "a meeting"}`

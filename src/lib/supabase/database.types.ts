@@ -254,13 +254,13 @@ isOneToOne: false
                   ]
                 },"ppm_task_comments": {
                   Row: {
-                    "author_id": string | null,"body": string,"created_at": string,"edited_at": string | null,"id": string,"task_id": string
+                    "author_id": string | null,"body": string,"created_at": string,"edited_at": string | null,"id": string,"mentions": (string)[],"task_id": string
                   }
                   Insert: {
-                    "author_id"?: string | null,"body": string,"created_at"?: string,"edited_at"?: string | null,"id"?: string,"task_id": string
+                    "author_id"?: string | null,"body": string,"created_at"?: string,"edited_at"?: string | null,"id"?: string,"mentions"?: (string)[],"task_id": string
                   }
                   Update: {
-                    "author_id"?: string | null,"body"?: string,"created_at"?: string,"edited_at"?: string | null,"id"?: string,"task_id"?: string
+                    "author_id"?: string | null,"body"?: string,"created_at"?: string,"edited_at"?: string | null,"id"?: string,"mentions"?: (string)[],"task_id"?: string
                   }
                   Relationships: [
                     {

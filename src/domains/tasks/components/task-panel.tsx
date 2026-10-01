@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils"
 import { ago, dueLabel, shortDate } from "@/lib/dates"
 import { useMarkRead, useNotifications } from "@/domains/inbox/data"
 import { useMe, useMemberMap, useNow, useProjectMap, useTasks, useToday } from "@/domains/workspace/provider"
-import { displayName, type Member } from "@/domains/workspace/types"
+import { displayName, firstName, type Member } from "@/domains/workspace/types"
 import {
   POLICY_META,
   PRIORITY_META,
@@ -44,7 +44,6 @@ import {
   type Task,
 } from "../config"
 import {
-  useAddComment,
   useChecklistActions,
   useDeleteComment,
   useDeleteTask,
@@ -56,6 +55,7 @@ import {
 } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { describeEvent } from "./history"
+import { CommentComposer, withMentions } from "./comment-composer"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
 import { useDoneBlock } from "./task-properties"
@@ -682,9 +682,7 @@ function Activity({
   const now = useNow()
   const projects = useProjectMap()
   const me = useMe()
-  const add = useAddComment()
   const remove = useDeleteComment()
-  const [draft, setDraft] = useState("")
 
   const items = useMemo(() => {
     const list: ({ kind: "event"; at: string; e: TaskEvent } | { kind: "comment"; at: string; c: Comment })[] = [
@@ -693,13 +691,6 @@ function Activity({
     ]
     return list.sort((a, b) => (a.at < b.at ? -1 : 1))
   }, [events, comments])
-
-  const submit = () => {
-    const body = draft.trim()
-    if (!body) return
-    add.mutate({ taskId: task.id, body })
-    setDraft("")
-  }
 
   return (
     <section className="border-t border-line px-6 pt-4 pb-8">
@@ -735,7 +726,9 @@ function Activity({
                   )}
                 </div>
                 <div className="prose-app mt-0.5">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.c.body}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {withMentions(item.c.body, item.c.mentions ?? [], (id) => firstName(members.get(id)))}
+                  </ReactMarkdown>
                 </div>
               </div>
             </li>
@@ -745,34 +738,7 @@ function Activity({
 
       <div className="mt-5 flex items-start gap-2.5">
         <Avatar id={me.id} name={displayName(me)} size="sm" className="mt-1.5" />
-        <div className="min-w-0 flex-1 rounded-lg border border-line px-3 pt-2 pb-2 focus-within:border-line-strong">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault()
-                submit()
-              }
-            }}
-            rows={2}
-            placeholder="Leave a comment…"
-            className="w-full resize-none bg-transparent text-sm text-fg outline-none placeholder:text-fg-4"
-          />
-          <div className="flex items-center justify-end gap-2">
-            <span className="text-xs text-fg-4">
-              <Kbd>⌘</Kbd> <Kbd>Enter</Kbd>
-            </span>
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!draft.trim() || add.isPending}
-              className="pressable h-7 rounded-md bg-brand-solid px-2.5 text-xs font-medium text-white hover:bg-brand-solid-hover disabled:opacity-40"
-            >
-              Comment
-            </button>
-          </div>
-        </div>
+        <CommentComposer taskId={task.id} />
       </div>
     </section>
   )

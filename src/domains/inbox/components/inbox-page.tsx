@@ -116,13 +116,14 @@ function Row({ n }: { n: Notification }) {
       case "reopened": return <>reopened {subject}</>
       case "review": return <>asked you to sign off {subject}</>
       case "comment": return <>commented on {subject}</>
+      case "mention": return <>mentioned you on {subject}</>
       case "meeting": return <>invited you to {strong(meta.title ?? "a meeting")}</>
       default: return <>updated {subject}</>
     }
   })()
 
   const detail =
-    n.type === "comment" && meta.excerpt
+    (n.type === "comment" || n.type === "mention") && meta.excerpt
       ? `“${meta.excerpt}”`
       : n.type === "meeting" && meta.starts_at
         ? `${shortDate(isoDay(meta.starts_at), today)} at ${clockTime(meta.starts_at)}`
