@@ -6,6 +6,7 @@ import { Command as Cmdk } from "cmdk"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { useTheme } from "next-themes"
 import {
+  Activity01Icon,
   Add01Icon,
   BookOpen01Icon,
   Calendar03Icon,
@@ -119,6 +120,7 @@ function Palette({ onClose }: { onClose: () => void }) {
           <Item value="calendar schedule" onSelect={() => go("/calendar")} icon={Calendar03Icon} shortcut="G C">Calendar</Item>
           <Item value="projects portfolio" onSelect={() => go("/projects")} icon={Folder02Icon} shortcut="G P">Projects</Item>
           <Item value="people team members" onSelect={() => go("/people")} icon={UserGroupIcon} shortcut="G E">People</Item>
+          <Item value="activity log history" onSelect={() => go("/activity")} icon={Activity01Icon} shortcut="G A">Activity</Item>
           <Item value="handbook knowledge base articles" onSelect={() => go("/handbook")} icon={BookOpen01Icon} shortcut="G B">Handbook</Item>
           <Item value="settings profile account" onSelect={() => go("/settings")} icon={Settings01Icon}>Settings</Item>
         </Group>

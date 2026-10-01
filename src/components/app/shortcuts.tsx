@@ -17,6 +17,7 @@ const GO: Record<string, string> = {
   p: "/projects",
   e: "/people",
   b: "/handbook",
+  a: "/activity",
 }
 
 const LIST: { keys: string[]; does: string }[] = [
@@ -29,6 +30,7 @@ const LIST: { keys: string[]; does: string }[] = [
   { keys: ["G", "C"], does: "Go to the calendar" },
   { keys: ["G", "P"], does: "Go to projects" },
   { keys: ["G", "E"], does: "Go to people" },
+  { keys: ["G", "A"], does: "Go to the activity log" },
   { keys: ["G", "B"], does: "Go to the handbook" },
   { keys: ["J", "K"], does: "Move down and up a list" },
   { keys: ["Enter"], does: "Open the selected task" },

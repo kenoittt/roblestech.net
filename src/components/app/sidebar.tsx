@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { useMemo, useState, useTransition } from "react"
 import { useTheme } from "next-themes"
 import {
+  Activity01Icon,
   ArrowDown01Icon,
   BookOpen01Icon,
   Calendar03Icon,
@@ -105,6 +106,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <NavItem href="/tasks" icon={Task01Icon} label="All tasks" active={is("/tasks")} onNavigate={onNavigate} />
         <NavItem href="/projects" icon={Folder02Icon} label="Projects" active={pathname === "/projects"} onNavigate={onNavigate} />
         <NavItem href="/people" icon={UserGroupIcon} label="People" active={is("/people")} onNavigate={onNavigate} />
+        <NavItem href="/activity" icon={Activity01Icon} label="Activity" active={is("/activity")} onNavigate={onNavigate} />
         <NavItem href="/handbook" icon={BookOpen01Icon} label="Handbook" active={is("/handbook")} onNavigate={onNavigate} />
       </div>
 
