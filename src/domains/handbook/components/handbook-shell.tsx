@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo, useState, type ReactNode } from "react"
-import { Add01Icon, BookOpen01Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import { Add01Icon, BookOpen01Icon, LeftToRightListBulletIcon, Search01Icon } from "@hugeicons/core-free-icons"
+import { ShelvesDialog } from "./shelves-dialog"
 import { Icon } from "@/components/app/icon"
 import { PageHeader } from "@/components/app/page"
 import { cn } from "@/lib/utils"
@@ -26,6 +27,7 @@ export function HandbookShell({
 }) {
   const pathname = usePathname()
   const [query, setQuery] = useState("")
+  const [shelves, setShelves] = useState(false)
   const q = query.trim().toLowerCase()
 
   const groups = useMemo(() => {
@@ -48,6 +50,15 @@ export function HandbookShell({
         icon={BookOpen01Icon}
         actions={
           canEdit && (
+            <>
+            <button
+              type="button"
+              onClick={() => setShelves(true)}
+              className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
+            >
+              <Icon icon={LeftToRightListBulletIcon} size={14} />
+              Shelves
+            </button>
             <Link
               href="/handbook/new"
               className="pressable inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2.5 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
@@ -55,6 +66,7 @@ export function HandbookShell({
               <Icon icon={Add01Icon} size={14} />
               New article
             </Link>
+            </>
           )
         }
       />
@@ -113,6 +125,7 @@ export function HandbookShell({
         </nav>
         <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</div>
       </div>
+      {canEdit && <ShelvesDialog open={shelves} onClose={() => setShelves(false)} categories={categories} articles={articles} />}
     </>
   )
 }

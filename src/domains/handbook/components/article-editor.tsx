@@ -61,6 +61,24 @@ export function ArticleEditor({ article, categories }: { article: KbArticle | nu
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-fg">{article ? "Edit article" : "New article"}</h2>
         <div className="flex gap-2">
+          {article && (
+            <Button
+              variant="destructive"
+              disabled={pending}
+              onClick={() =>
+                start(async () => {
+                  if (!window.confirm(`Delete "${article.title}"? This can't be undone.`)) return
+                  const { error } = await getSupabase().from("kb_articles").delete().eq("id", article.id)
+                  if (error) return void toast.error(error.message)
+                  toast("Article deleted")
+                  router.push("/handbook")
+                  router.refresh()
+                })
+              }
+            >
+              Delete
+            </Button>
+          )}
           <Button variant="ghost" onClick={() => router.back()}>Cancel</Button>
           <Button onClick={save} disabled={pending}>{pending ? "Saving…" : "Save"}</Button>
         </div>
