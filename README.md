@@ -11,13 +11,13 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Home:** your work first (overdue, today, the next 7 days), your plan for today, what's waiting for your sign-off. Then the team: workload per person, tasks finished over 14 days, project health, what's late, recent activity.
 - **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date.
 - **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
-- **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, project, reviewer, sign-off rule, description (Markdown), checklist, history and comments.
+- **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, project, reviewer, sign-off rule, description (Markdown), checklist, history and comments, with @mentions that notify the person.
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
-- **Calendar:** your week and the team's day; drag to block time, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically.
+- **Calendar:** your week and the team's day; drag to block time, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically. "Copy my plan" puts your day on the clipboard for the team chat.
 - **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
-- **Inbox, activity log, command menu (Cmd K), keyboard shortcuts, settings** (including a profile photo).
+- **Inbox, activity log, command menu (Cmd K: pages, tasks, projects, people, handbook articles), keyboard shortcuts, settings** (including a profile photo).
 - **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
 - **Import and export:** tasks from a CSV, checked in a preview first; all tasks to a CSV.
 - **Live updates:** someone else's change appears without a refresh, in about half a second.
