@@ -6,14 +6,28 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
-import { clockTime, minutesOfDay } from "@/lib/dates"
+import { clockTime, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { useMe, useMemberMap, useNow, useTasks } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
 import { taskKey, type Task } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { isEventDone, useCalendarActions, type CalEvent } from "../data"
-import { DAY_END, DAY_START, PX_PER_MIN, durationLabel, formatMinute, minuteToY, placeEvents, yToMinute } from "../layout"
+import { DAY_END, DAY_START, PX_PER_MIN, SNAP, durationLabel, formatMinute, minuteToY, placeEvents, yToMinute, type Placed } from "../layout"
+
+type MoveState = {
+  id: string
+  mode: "move" | "resize"
+  col: number
+  newCol: number
+  start: number
+  end: number
+  newStart: number
+  newEnd: number
+  moved: boolean
+  kind: "block" | "meeting"
+  title: string
+}
 
 export type GridColumn = {
   key: string
@@ -45,7 +59,64 @@ export function TimeGrid({
   const me = useMe()
   const now = useNow(30_000)
   const scroller = useRef<HTMLDivElement>(null)
+  const grid = useRef<HTMLDivElement>(null)
+  const { update } = useCalendarActions()
   const [drag, setDrag] = useState<{ col: string; from: number; to: number } | null>(null)
+  // Moving or resizing one of your own entries.
+  const [move, setMove] = useState<MoveState | null>(null)
+  const justMoved = useRef<string | null>(null)
+  // Days side by side (your week) let an entry move between columns; people side by side don't.
+  const crossColumns = new Set(columns.map((c) => c.day)).size === columns.length && columns.length > 1
+
+  const beginMove = (e: React.PointerEvent, placed: Placed, col: number, mode: "move" | "resize") => {
+    if (e.button !== 0) return
+    e.stopPropagation()
+    const startX = e.clientX
+    const startY = e.clientY
+    const length = placed.end - placed.start
+    let state: MoveState = {
+      id: placed.event.id, mode, col, newCol: col,
+      start: placed.start, end: placed.end, newStart: placed.start, newEnd: placed.end, moved: false,
+      kind: placed.event.kind, title: placed.event.title,
+    }
+    setMove(state)
+
+    const onMove = (ev: PointerEvent) => {
+      const dy = ev.clientY - startY
+      const dx = ev.clientX - startX
+      const delta = Math.round(dy / PX_PER_MIN / SNAP) * SNAP
+      const moved = state.moved || Math.abs(dx) > 4 || Math.abs(dy) > 4
+      let { newStart, newEnd, newCol } = state
+      if (mode === "move") {
+        newStart = Math.max(DAY_START, Math.min(DAY_END - length, state.start + delta))
+        newEnd = newStart + length
+        const rect = grid.current?.getBoundingClientRect()
+        if (crossColumns && rect) {
+          const width = (rect.width - 56) / columns.length
+          newCol = Math.max(0, Math.min(columns.length - 1, Math.floor((ev.clientX - rect.left - 56) / width)))
+        }
+      } else {
+        newEnd = Math.max(state.start + SNAP, Math.min(DAY_END, state.end + delta))
+      }
+      state = { ...state, newStart, newEnd, newCol, moved }
+      setMove(state)
+    }
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove)
+      window.removeEventListener("pointerup", onUp)
+      setMove(null)
+      const changed = state.newStart !== state.start || state.newEnd !== state.end || state.newCol !== state.col
+      if (state.moved) justMoved.current = state.id
+      if (!changed) return
+      const day = columns[state.newCol].day
+      update.mutate({
+        id: state.id,
+        patch: { starts_at: manilaInstant(day, state.newStart), ends_at: manilaInstant(day, state.newEnd) },
+      })
+    }
+    window.addEventListener("pointermove", onMove)
+    window.addEventListener("pointerup", onUp)
+  }
 
   // Start the view at 8 AM, where the day begins.
   useEffect(() => {
@@ -91,7 +162,7 @@ export function TimeGrid({
       )}
 
       <div ref={scroller} className="relative min-h-0 flex-1 overflow-y-auto">
-        <div className="relative flex" style={{ height }}>
+        <div ref={grid} className="relative flex" style={{ height }}>
           <div className="relative w-14 shrink-0">
             {hours.map((m) => (
               <span key={m} className="absolute right-2 -translate-y-1/2 text-[10px] text-fg-4 tabular" style={{ top: minuteToY(m) }}>
@@ -99,7 +170,7 @@ export function TimeGrid({
               </span>
             ))}
           </div>
-          {columns.map((c) => {
+          {columns.map((c, colIndex) => {
             const placed = placeEvents(c.events, c.day)
             const mine = c.ownerId === me.id
             return (
@@ -132,8 +203,32 @@ export function TimeGrid({
                 ))}
 
                 {placed.map((p) => (
-                  <EventBlock key={p.event.id} placed={p} onEdit={onEdit} />
+                  <EventBlock
+                    key={p.event.id}
+                    placed={p}
+                    onEdit={onEdit}
+                    moving={move?.id === p.event.id && move.moved}
+                    onBeginMove={(e, mode) => beginMove(e, p, colIndex, mode)}
+                    justMovedRef={justMoved}
+                  />
                 ))}
+
+                {move?.moved && move.newCol === colIndex && (
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute inset-x-1 z-20 rounded-md border-l-2 px-1.5 py-1 text-[11px] leading-4 shadow-popover",
+                      move.kind === "meeting"
+                        ? "border-status-in-review bg-[color-mix(in_oklab,var(--status-in-review)_22%,var(--surface))]"
+                        : "border-brand bg-[color-mix(in_oklab,var(--brand)_20%,var(--surface))]",
+                    )}
+                    style={{ top: minuteToY(move.newStart), height: Math.max(20, minuteToY(move.newEnd) - minuteToY(move.newStart) - 2) }}
+                  >
+                    <span className="block truncate font-medium text-fg">{move.title}</span>
+                    <span className="block truncate text-fg-2 tabular">
+                      {formatMinute(move.newStart)} to {formatMinute(move.newEnd)}
+                    </span>
+                  </div>
+                )}
 
                 {drag?.col === c.key && (
                   <div
@@ -175,8 +270,21 @@ function DueChip({ task }: { task: Task }) {
   )
 }
 
-function EventBlock({ placed, onEdit }: { placed: ReturnType<typeof placeEvents>[number]; onEdit: (e: CalEvent) => void }) {
+function EventBlock({
+  placed,
+  onEdit,
+  moving,
+  onBeginMove,
+  justMovedRef,
+}: {
+  placed: Placed
+  onEdit: (e: CalEvent) => void
+  moving: boolean
+  onBeginMove: (e: React.PointerEvent, mode: "move" | "resize") => void
+  justMovedRef: React.RefObject<string | null>
+}) {
   const { event, top, height, lane, lanes, start, end } = placed
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const me = useMe()
   const members = useMemberMap()
   const tasks = useTasks()
@@ -213,19 +321,40 @@ function EventBlock({ placed, onEdit }: { placed: ReturnType<typeof placeEvents>
     </>
   )
 
+  const draggable = mine && !event.masked
   return (
-    <Popover>
+    <Popover
+      open={detailsOpen}
+      onOpenChange={(next) => {
+        // A drag ends with a click; that click shouldn't open the details.
+        if (next && justMovedRef.current === event.id) {
+          justMovedRef.current = null
+          return
+        }
+        setDetailsOpen(next)
+      }}
+    >
       <PopoverTrigger
         data-event
-        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => (draggable ? onBeginMove(e, "move") : e.stopPropagation())}
         className={cn(
-          "absolute z-[1] flex flex-col items-stretch justify-start overflow-hidden rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          "absolute z-[1] flex flex-col items-stretch justify-start overflow-hidden rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
           tone,
           done && "opacity-55",
+          draggable && "cursor-grab active:cursor-grabbing",
+          moving && "opacity-30",
         )}
         style={{ top, height, width, left }}
       >
         {body}
+        {draggable && height >= 28 && (
+          <span
+            aria-hidden
+            onPointerDown={(e) => onBeginMove(e, "resize")}
+            className="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize"
+            style={{ touchAction: "none" }}
+          />
+        )}
       </PopoverTrigger>
       <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
         <div>
