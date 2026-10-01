@@ -1,8 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { toast } from "sonner"
 import {
   Add01Icon,
+  Copy01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Calendar03Icon,
@@ -26,8 +28,10 @@ import { cn } from "@/lib/utils"
 import { useIsNarrow } from "@/lib/use-narrow"
 import {
   addDays,
+  clockTime,
   diffDays,
   isoDay,
+  longDate,
   manilaInstant,
   minutesOfDay,
   monthName,
@@ -36,7 +40,7 @@ import {
 } from "@/lib/dates"
 import { useMe, useMembers, useNow, useTasks, useToday } from "@/domains/workspace/provider"
 import { displayName, firstName } from "@/domains/workspace/types"
-import { isOpen, type Task } from "@/domains/tasks/config"
+import { isOpen, taskKey, type Task } from "@/domains/tasks/config"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
@@ -146,6 +150,34 @@ export function CalendarPage() {
     return set.size === 1 ? [...set][0] : "mixed"
   })()
 
+  // The team posts each day's plan in the group chat. This writes it for them:
+  // public entries by name, busy-only ones as "Busy", private ones left out.
+  const copyPlan = async () => {
+    const day = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
+    const mine = events
+      .filter((e) => (e.owner_id === me.id || e.attendee_ids.includes(me.id)) && isoDay(e.starts_at) === day)
+      .filter((e) => e.visibility !== "private" || e.kind === "meeting")
+      .sort((a, b) => (a.starts_at < b.starts_at ? -1 : 1))
+    const linked = new Map(tasks.map((t) => [t.id, t]))
+    const lines = mine.map((e) => {
+      const t = e.task_id ? linked.get(e.task_id) : null
+      const what = e.visibility === "busy" && e.kind !== "meeting" ? "Busy" : `${e.title}${t ? ` (${taskKey(t)})` : ""}`
+      return `${clockTime(e.starts_at)} to ${clockTime(e.ends_at)}: ${what}`
+    })
+    const due = dueBy(day, me.id).map((t) => `${t.title} (${taskKey(t)})`)
+    const text = [
+      `${firstName(me)}'s plan for ${longDate(day)}`,
+      ...(lines.length ? lines : ["Nothing blocked yet"]),
+      ...(due.length ? ["", `Due: ${due.join(", ")}`] : []),
+    ].join("\n")
+    try {
+      await navigator.clipboard.writeText(text)
+      toast("Your plan is copied", { description: "Paste it in the group chat." })
+    } catch {
+      toast.error("Couldn't reach the clipboard. Try again.")
+    }
+  }
+
   const newBlock = (taskId?: string) => {
     const base = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
     const start = base === today ? Math.min(20 * 60, Math.ceil(minutesOfDay(now) / 30) * 30 + 30) : 9 * 60
@@ -199,9 +231,20 @@ export function CalendarPage() {
         </div>
         <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular">{label}</h2>
 
+        <button
+          type="button"
+          onClick={copyPlan}
+          className={cn(
+            "pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg",
+            mode === "team" ? "" : "ml-auto",
+          )}
+        >
+          <Icon icon={Copy01Icon} size={14} />
+          <span className="hidden sm:inline">Copy my plan</span>
+        </button>
         {mode === "week" && (
           <DropdownMenu>
-            <DropdownMenuTrigger className="pressable ml-auto inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
+            <DropdownMenuTrigger className="pressable inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
               <Icon icon={weekMode === "private" ? LockKeyIcon : weekMode === "busy" ? ViewOffIcon : ViewIcon} size={14} />
               <span className="hidden sm:inline">
                 {weekMode === "private" ? "Week hidden" : weekMode === "busy" ? "Week shows busy only" : weekMode === "mixed" ? "Some days hidden" : "Week shared"}
