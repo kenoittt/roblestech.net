@@ -56,6 +56,7 @@ import {
 import { useTaskPanel } from "../panel-state"
 import { describeEvent } from "./history"
 import { CommentComposer, withMentions } from "./comment-composer"
+import { TaskFiles } from "./task-files"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
 import { useDoneBlock } from "./task-properties"
@@ -238,6 +239,8 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
         </div>
 
         <Checklist taskId={task.id} items={detail.data?.checklist ?? []} />
+
+        <TaskFiles taskId={task.id} />
 
         <Activity
           task={task}

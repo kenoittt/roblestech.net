@@ -290,6 +290,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ppm_task_files": {
+                  Row: {
+                    "content_type": string | null,"created_at": string,"id": string,"name": string,"path": string,"size": number,"task_id": string,"uploaded_by": string | null
+                  }
+                  Insert: {
+                    "content_type"?: string | null,"created_at"?: string,"id"?: string,"name": string,"path": string,"size"?: number,"task_id": string,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "content_type"?: string | null,"created_at"?: string,"id"?: string,"name"?: string,"path"?: string,"size"?: number,"task_id"?: string,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ppm_task_files_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "ppm_tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ppm_tasks": {
                   Row: {
                     "assigned_by": string | null,"assignee_id": string | null,"completed_at": string | null,"completed_by": string | null,"completion_approvers": (string)[],"completion_policy": string,"created_at": string,"created_by": string | null,"deleted_at": string | null,"deleted_by": string | null,"description": string | null,"due_date": string | null,"id": string,"is_private": boolean,"number": number,"priority": string,"project_id": string | null,"reviewer_id": string | null,"sort_order": number,"start_date": string | null,"status": string,"title": string,"updated_at": string,"ppm_completion_message": string | null

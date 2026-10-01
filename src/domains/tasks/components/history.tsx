@@ -45,6 +45,8 @@ export function describeEvent(e: TaskEvent, members: Map<string, Member>, projec
       if (field === "description") return "edited the description"
       return "updated the task"
     }
+    case "attached":
+      return <>attached {strong(String(meta.name ?? "a file"))}</>
     case "deleted":
       return "deleted the task"
     case "restored":
