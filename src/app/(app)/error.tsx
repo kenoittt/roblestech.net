@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect } from "react"
 import { Alert02Icon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
@@ -19,10 +20,9 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
         description="Nothing you saved is lost. Try again, and if it keeps happening, tell Kyan what you were doing."
         action={
           <div className="flex gap-2">
-            {/* A full page load on purpose: it clears whatever state broke. */}
-            <a href="/" className="inline-flex h-8 items-center rounded-lg border border-line-strong px-2.5 text-sm font-medium text-fg-2 hover:bg-hover hover:text-fg">
+            <Link href="/" className="inline-flex h-8 items-center rounded-lg border border-line-strong px-2.5 text-sm font-medium text-fg-2 hover:bg-hover hover:text-fg">
               Go home
-            </a>
+            </Link>
             <Button onClick={reset}>Try again</Button>
           </div>
         }
