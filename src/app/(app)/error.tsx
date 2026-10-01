@@ -19,7 +19,10 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
         description="Nothing you saved is lost. Try again, and if it keeps happening, tell Kyan what you were doing."
         action={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => (window.location.href = "/")}>Go home</Button>
+            {/* A full page load on purpose: it clears whatever state broke. */}
+            <a href="/" className="inline-flex h-8 items-center rounded-lg border border-line-strong px-2.5 text-sm font-medium text-fg-2 hover:bg-hover hover:text-fg">
+              Go home
+            </a>
             <Button onClick={reset}>Try again</Button>
           </div>
         }
