@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RTC PPM (the revamp)
 
-## Getting Started
+The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboard, projects, the team calendar and the handbook, in one fast workspace. It replaces the Astro PPM at `ppm.roblestech.net` once it's ready to deploy.
 
-First, run the development server:
+**Kind:** CODE, with this README as its MAINTAINED guide. Plan and decisions: `../RTC-Website-Notes/docs/plans/ppm-build-plan.md`.
+**Started:** 2026-10-02, by Kyan and Claude, from Kyan's voice plan (`../RTC-Website-Notes/docs/raw/2026-10-02_Kyan-voice-plan-for-the-revamp.md`).
+
+## What works today
+
+- **Sign-in** with the same roles as the live PPM: super admin, admin, staff. Clients are refused.
+- **Home:** your work first (overdue, today, the next 7 days), your plan for today, what's waiting for your sign-off. Then the team: workload per person, tasks finished over 14 days, project health, what's late, recent activity.
+- **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date.
+- **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
+- **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, project, reviewer, sign-off rule, description (Markdown), checklist, history and comments.
+- **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it.
+- **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
+- **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
+- **Live updates:** someone else's change appears without a refresh.
+- **Dark first,** following the system setting; light works too.
+
+Still being built: see "Status" in the build plan.
+
+## Run it locally
+
+You need Node 24, and Docker for the local database. On a Mac, Colima provides Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Docker (once per restart of the Mac)
+colima start --cpu 4 --memory 6
+
+# 2. The local database: the live schema, the revamp's additions and sample data
+npx supabase start          # first run downloads images; a few minutes
+# Optional, to start over with fresh sample data:
+npx supabase db reset
+
+# 3. The app
+npm install
+npm run dev                 # or `npm run dev:poll` if the page never loads (see below)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**`.env.local`** holds the local database's address and keys. They're the local stack's defaults, printed by `npx supabase status -o env`. Copy `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` into `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and set `NEXT_PUBLIC_DEMO_MODE=true`. Never put production keys in it.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Sample accounts
 
-## Learn More
+Every sample account uses the password `rtc-demo-2026`. The sign-in page lists them in demo mode, and the account menu can switch between them.
 
-To learn more about Next.js, take a look at the following resources:
+| Person | Email | Role |
+|---|---|---|
+| Kenneth Robles | kenneth@rtc.test | Super admin |
+| Christian Panes | christian@rtc.test | Super admin |
+| Kyan Lumanog | kyan@rtc.test | Admin |
+| Andrei | andrei@rtc.test | Admin |
+| Carl | carl@rtc.test | Staff |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The people are RTC's team; the tasks, comments and calendar entries are made up. Dates are relative to the day the sample data loads, so the demo always looks current.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Local tools
 
-## Deploy on Vercel
+| What | Where |
+|---|---|
+| The app | http://localhost:3000 |
+| Emails (invitations, resets) land here | http://127.0.0.1:54324 |
+| Database browser (Supabase Studio) | http://127.0.0.1:54323 |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### If something hangs on a Mac
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`npx supabase …` prints nothing and never finishes:** macOS is asking whether the Supabase tool may read your Documents folder, and the prompt may be hidden behind other windows. Allow it in System Settings, Privacy and Security, Files and Folders.
+- **`npm run dev` says Ready but pages never load:** the file watcher is stuck. Use `npm run dev:poll`, which watches by polling instead.
+
+## A five-minute demo
+
+1. Sign in as **Kyan**. Home answers "what do I do today?" before anything else.
+2. Open **All tasks**. Switch List, Board, Calendar. Group by assignee from Display.
+3. Press **C** to create a task. Assign it: the menu shows who has room.
+4. Click a task: the panel opens beside the list. Change its status; open the sign-off rule.
+5. On the **board**, drag a card to In review. Try dragging one that needs a reviewer to Done.
+6. Open **People**. Invite someone, then open the email at http://127.0.0.1:54324 and set their password.
+7. Switch to **Carl** (staff) from the account menu. He can't change roles, and Christian's report needs Kenneth's sign-off.
+8. Open a **project**: health, what's late, who's carrying it, then its board.
+
+## How the code is organised
+
+Folders follow the business, not the framework (domain-driven):
+
+```
+src/
+  app/                 routes only: each page is a thin file that renders a domain screen
+  components/ui/       shadcn components on Base UI, restyled to our tokens
+  components/app/      app-wide pieces: shell, sidebar, page frame, charts, icons, avatars
+  domains/
+    workspace/         who's signed in, the team, projects, live updates, preferences
+    tasks/             task model, rules, views (list, board, calendar), panel, pickers
+    dashboard/         the home screen
+    people/            user management, and its server actions
+    projects/          portfolio, project pages, project form
+    calendar/          the team calendar
+    handbook/          the handbook (docs layout)
+    inbox/             notifications
+    auth/              sign-in, invitations, passwords
+  lib/                 Supabase clients, dates (always Manila time), settings
+supabase/
+  migrations/          the live schema (baseline), then the revamp's additions
+  seed.sql             sample data, local only
+  templates/           invitation and password emails
+```
+
+**The design system** lives in `src/app/globals.css`: every colour, size, radius and motion curve as a token. Change a token there and it changes everywhere.
+
+**Data:** the server loads the team, projects and live tasks in one round of parallel queries; after that the browser keeps them in a cache, so views switch instantly and edits show at once while they save. Writes go through row-level security and database triggers, which also write each task's history and the notifications.
+
+## Before this replaces the live PPM
+
+- Back up the live database (Kenneth, from the Supabase dashboard).
+- Apply `supabase/migrations/20261002000200_ppm_revamp.sql` to production. It only adds; but new statuses and priorities may confuse the old app, so switch over the same day.
+- Production settings: the Supabase URL and keys, and email through Microsoft 365 (the live PPM's `MS_*` settings).
+- Deploy to Vercel as its own project, try it on its own address, then point `ppm.roblestech.net` at it.

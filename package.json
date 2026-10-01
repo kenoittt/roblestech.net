@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:poll": "WATCHPACK_POLLING=true next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -48,5 +53,8 @@
     "supabase": "^2.119.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
