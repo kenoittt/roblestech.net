@@ -147,7 +147,7 @@ function DraggableChip({ task }: { task: Task }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
   const { open } = useTaskPanel()
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} onClick={() => open(task.number)} className={cn("outline-none", isDragging && "opacity-30")}>
+    <div ref={setNodeRef} {...attributes} {...listeners} onClick={() => open(task.number)} className={cn("outline-none select-none", isDragging && "opacity-30")}>
       <Chip task={task} />
     </div>
   )

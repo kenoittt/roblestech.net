@@ -67,7 +67,7 @@ export function TaskBoard({ tasks, showCancelled = false, showProject = true }: 
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
-      <div className="flex h-full min-h-0 gap-3 overflow-x-auto px-3 pt-3 pb-4 sm:px-4">
+      <div className="flex h-full min-h-0 gap-3 overflow-x-auto px-3 pt-3 pb-4 select-none sm:px-4">
         {columns.map((col) => (
           <Column key={col.status} status={col.status} tasks={col.tasks} showProject={showProject} />
         ))}
@@ -127,7 +127,7 @@ const DraggableCard = memo(function DraggableCard({ task, showProject }: { task:
       {...attributes}
       {...listeners}
       onClick={() => open(task.number)}
-      className={cn("outline-none", isDragging && "opacity-30")}
+      className={cn("outline-none select-none", isDragging && "opacity-30")}
     >
       <CardBody task={task} showProject={showProject} />
     </div>
