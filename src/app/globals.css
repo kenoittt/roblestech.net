@@ -30,8 +30,8 @@
   /* Text, from primary to faint */
   --fg: #11141a;
   --fg-2: #4a515e;
-  --fg-3: #737a88;
-  --fg-4: #a4aab4;
+  --fg-3: #656c7a;
+  --fg-4: #878d99;
 
   /* Brand */
   --brand: #0464dd;
@@ -43,13 +43,13 @@
   /* Meaning */
   --danger: #d23c3c;
   --danger-soft: rgb(210 60 60 / 0.09);
-  --warning: #c58a0c;
+  --warning: #9a6a00;
   --success: #3f8a1f;
 
   /* Task statuses */
   --status-backlog: #a4aab4;
   --status-todo: #7a818f;
-  --status-in-progress: #d29a12;
+  --status-in-progress: #a87700;
   --status-in-review: #5864ff;
   --status-done: #4b9a26;
   --status-cancelled: #a4aab4;
@@ -112,8 +112,8 @@
 
   --fg: #eceef2;
   --fg-2: #a3aab7;
-  --fg-3: #6f7684;
-  --fg-4: #4b515c;
+  --fg-3: #7d8494;
+  --fg-4: #626977;
 
   --brand: #4d9bff;
   --brand-solid: #1a6ff0;
@@ -126,12 +126,12 @@
   --warning: #f0b33d;
   --success: #aee37b;
 
-  --status-backlog: #5b616d;
+  --status-backlog: #656c79;
   --status-todo: #9aa1ad;
   --status-in-progress: #f0c04c;
   --status-in-review: #8590ff;
   --status-done: #aee37b;
-  --status-cancelled: #5b616d;
+  --status-cancelled: #656c79;
 
   --priority-urgent: #f2994a;
 

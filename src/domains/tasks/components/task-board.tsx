@@ -127,7 +127,11 @@ const DraggableCard = memo(function DraggableCard({ task, showProject }: { task:
       {...attributes}
       {...listeners}
       onClick={() => open(task.number)}
-      className={cn("outline-none select-none", isDragging && "opacity-30")}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") open(task.number)
+      }}
+      aria-label={`${taskKey(task)}: ${task.title}. Enter opens it; Space picks it up to move.`}
+      className={cn("rounded-lg outline-none select-none focus-visible:shadow-[0_0_0_2px_var(--brand)]", isDragging && "opacity-30")}
     >
       <CardBody task={task} showProject={showProject} />
     </div>

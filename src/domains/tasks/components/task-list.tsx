@@ -225,9 +225,14 @@ export const TaskRow = memo(function TaskRow({
     <div
       id={`task-row-${task.id}`}
       role="listitem"
+      tabIndex={0}
+      aria-label={`${taskKey(task)}: ${task.title}`}
       onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && e.target === e.currentTarget) onOpen()
+      }}
       className={cn(
-        "group/row relative flex h-10 cursor-default items-center gap-1 border-b border-line/60 pr-2 pl-2 text-sm transition-colors sm:pr-3 sm:pl-3",
+        "group/row relative flex h-10 cursor-default items-center gap-1 border-b border-line/60 pr-2 pl-2 text-sm transition-colors outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--brand)] sm:pr-3 sm:pl-3",
         selected ? "bg-brand-soft" : active ? "bg-selected" : "hover:bg-hover",
         focused && !selected && "bg-hover shadow-[inset_2px_0_0_var(--brand)]",
       )}

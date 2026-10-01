@@ -233,8 +233,13 @@ function CompactRow({ task, right }: { task: Task; right?: ReactNode }) {
   const project = task.project_id ? projects.get(task.project_id) : null
   return (
     <li
+      tabIndex={0}
+      aria-label={task.title}
       onClick={() => open(task.number)}
-      className="group -mx-2 flex h-9 cursor-default items-center gap-2 rounded-md px-2 text-sm hover:bg-hover"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && e.target === e.currentTarget) open(task.number)
+      }}
+      className="group -mx-2 flex h-9 cursor-default items-center gap-2 rounded-md px-2 text-sm outline-none hover:bg-hover focus-visible:shadow-[inset_0_0_0_2px_var(--brand)]"
     >
       <TaskStatusButton task={task} />
       <span className="min-w-0 flex-1 truncate text-fg">{task.title}</span>
