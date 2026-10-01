@@ -69,7 +69,7 @@ try {
   check("Change status from the panel", sql(`select status from ppm_tasks where number = ${num}`) === "in_progress")
   check("History records the change", sql(`select count(*) from ppm_task_events e join ppm_tasks t on t.id = e.task_id where t.number = ${num} and e.type = 'status_changed' and e.to_status = 'in_progress'`) === "1")
 
-  await page.fill('textarea[placeholder="Leave a comment…"]', "Looks good from here.")
+  await page.fill('textarea[placeholder^="Leave a comment"]', "Looks good from here.")
   await page.keyboard.press("Meta+Enter")
   await page.waitForTimeout(1200)
   check("Post a comment", sql(`select count(*) from ppm_task_comments c join ppm_tasks t on t.id = c.task_id where t.number = ${num}`) === "1")
