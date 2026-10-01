@@ -173,7 +173,7 @@ export function CreateTaskDialog() {
               options={people}
               value={draft.assignee_id ?? "none"}
               placeholder="Assign to…"
-              width="w-72"
+              width="w-80"
               onSelect={(v) => set({ assignee_id: v === "none" ? null : v })}
             />
             <DueDatePicker
@@ -183,7 +183,7 @@ export function CreateTaskDialog() {
               trigger={draft.due_date ? dueLabel(draft.due_date, today) : "Due date"}
             />
             <PickerMenu triggerLabel="Who can mark it done" triggerClassName={chipClass} trigger={<PolicyChip value={draft.completion_policy} />}
-              options={policyOpts} value={draft.completion_policy} placeholder="Who can mark it done?" width="w-72"
+              options={policyOpts} value={draft.completion_policy} placeholder="Who can mark it done?" width="w-80"
               onSelect={(completion_policy) => set({ completion_policy })} />
             {(draft.completion_policy === "reviewer" || draft.reviewer_id) && (
               <PickerMenu
@@ -193,7 +193,7 @@ export function CreateTaskDialog() {
                 options={reviewers}
                 value={draft.reviewer_id ?? "none"}
                 placeholder="Reviewer…"
-                width="w-72"
+                width="w-80"
                 onSelect={(v) => set({ reviewer_id: v === "none" ? null : v })}
               />
             )}

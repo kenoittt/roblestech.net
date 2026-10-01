@@ -115,7 +115,7 @@ export function TaskAssigneeButton({
       options={options}
       value={task.assignee_id ?? "none"}
       placeholder="Assign to…"
-      width="w-72"
+      width="w-80"
       align={withName ? "start" : "end"}
       onSelect={(v) => {
         const assignee_id = v === "none" ? null : v

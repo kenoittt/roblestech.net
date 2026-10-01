@@ -392,7 +392,7 @@ function Properties({ task }: { task: Task }) {
           options={people}
           value={task.assignee_id ?? "none"}
           placeholder="Assign to…"
-          width="w-72"
+          width="w-80"
           onSelect={(v) => patch({ assignee_id: v === "none" ? null : v })}
         />
       </Prop>
@@ -434,7 +434,7 @@ function Properties({ task }: { task: Task }) {
           options={reviewers}
           value={task.reviewer_id ?? "none"}
           placeholder="Choose a reviewer…"
-          width="w-72"
+          width="w-80"
           onSelect={(v) => patch({ reviewer_id: v === "none" ? null : v })}
         />
       </Prop>
@@ -446,7 +446,7 @@ function Properties({ task }: { task: Task }) {
           options={policyOpts}
           value={policy}
           placeholder="Who can mark it done?"
-          width="w-72"
+          width="w-80"
           onSelect={(v) => patch({ completion_policy: v })}
           footer={POLICY_META[policy]?.hint}
         />
@@ -467,7 +467,7 @@ function Properties({ task }: { task: Task }) {
             options={approvers}
             value={task.completion_approvers}
             placeholder="Who can sign it off?"
-            width="w-72"
+            width="w-80"
             onSelect={(v) => {
               const set = new Set(task.completion_approvers)
               if (set.has(v)) set.delete(v)

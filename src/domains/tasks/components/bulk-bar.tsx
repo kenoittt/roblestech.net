@@ -59,7 +59,7 @@ export function BulkBar({ tasks, onClear }: { tasks: Task[]; onClear: () => void
         <PickerMenu triggerLabel="Set status" triggerClassName={action} trigger="Status" options={status} value={null}
           placeholder="Set status…" onSelect={(v) => apply({ status: v })} align="center" />
         <PickerMenu triggerLabel="Assign" triggerClassName={action} trigger="Assign" options={people} value={null}
-          placeholder="Assign to…" width="w-72" onSelect={(v) => apply({ assignee_id: v === "none" ? null : v })} align="center" />
+          placeholder="Assign to…" width="w-80" onSelect={(v) => apply({ assignee_id: v === "none" ? null : v })} align="center" />
         <PickerMenu triggerLabel="Set priority" triggerClassName={action} trigger="Priority" options={priority} value={null}
           placeholder="Set priority…" onSelect={(v) => apply({ priority: v })} align="center" />
         <PickerMenu triggerLabel="Move to project" triggerClassName={action} trigger="Project" options={projects} value={null}

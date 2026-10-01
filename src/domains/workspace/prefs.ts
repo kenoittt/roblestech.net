@@ -9,7 +9,7 @@ import type { Member, Prefs } from "./types"
 /**
  * Personal preferences (each view's layout, grouping, and so on), saved to the
  * person's profile so they follow them to any computer. The screen updates at
- * once; the save waits half a second so quick changes become one write.
+ * once and the save goes straight out, so leaving the page never loses it.
  */
 export function usePrefs() {
   const me = useMe()
@@ -34,7 +34,7 @@ export function usePrefs() {
       if (timer.current) clearTimeout(timer.current)
       timer.current = setTimeout(() => {
         getSupabase().from("profiles").update({ prefs: next as Member["prefs"] }).eq("id", me.id).then(() => {})
-      }, 500)
+      }, 0)
     },
     [qc, me.id],
   )

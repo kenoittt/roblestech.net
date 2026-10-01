@@ -136,7 +136,7 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
                   options={owners}
                   value={draft.owner_id}
                   placeholder="Who owns it?"
-                  width="w-72"
+                  width="w-80"
                   onSelect={(owner_id) => set({ owner_id, memberIds: [...new Set([...draft.memberIds, owner_id])] })}
                 />
               </div>

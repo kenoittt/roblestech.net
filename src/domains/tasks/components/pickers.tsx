@@ -171,7 +171,7 @@ export function usePeopleOptions({
       const l = load.get(m.id)
       return {
         value: m.id,
-        label: m.id === me.id ? `${displayName(m)} (you)` : displayName(m),
+        label: displayName(m),
         icon: <Avatar id={m.id} name={displayName(m)} size="sm" />,
         keywords: [m.email ?? "", m.title ?? ""],
         meta: l ? (
