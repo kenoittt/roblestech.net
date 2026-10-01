@@ -64,7 +64,9 @@ export function TimeGrid({
   }
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto">
+      {/* Columns keep a readable width; on a phone the team's day scrolls sideways. */}
+      <div className="flex min-h-0 flex-1 flex-col" style={{ minWidth: columns.length * 112 + 56 }}>
       <div className="flex shrink-0 border-b border-line">
         <div className="w-14 shrink-0" />
         {columns.map((c) => (
@@ -152,6 +154,7 @@ export function TimeGrid({
             )
           })}
         </div>
+      </div>
       </div>
     </div>
   )

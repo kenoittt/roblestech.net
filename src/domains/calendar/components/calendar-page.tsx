@@ -23,6 +23,7 @@ import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { PageHeader } from "@/components/app/page"
 import { cn } from "@/lib/utils"
+import { useIsNarrow } from "@/lib/use-narrow"
 import {
   addDays,
   diffDays,
@@ -64,8 +65,13 @@ export function CalendarPage() {
   const { setRange } = useCalendarActions()
   const { data: ranges } = usePrivacyRanges()
 
+  // On a phone, "my week" becomes one day at a time: seven columns don't fit.
+  const narrow = useIsNarrow()
   const weekStart = startOfWeek(anchor)
-  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart])
+  const days = useMemo(
+    () => (narrow ? [anchor] : Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))),
+    [weekStart, narrow, anchor],
+  )
   const rangeStart = mode === "week" ? weekStart : anchor
   const rangeEnd = mode === "week" ? addDays(weekStart, 7) : addDays(anchor, 1)
   const { data: events = [] } = useCalendar(manilaInstant(rangeStart, 0), manilaInstant(rangeEnd, 0))
@@ -129,9 +135,9 @@ export function CalendarPage() {
           }
         })
 
-  const step = (dir: number) => setAnchor((a) => addDays(a, mode === "week" ? 7 * dir : dir))
+  const step = (dir: number) => setAnchor((a) => addDays(a, mode === "week" && !narrow ? 7 * dir : dir))
   const label =
-    mode === "week"
+    mode === "week" && !narrow
       ? `${monthName(days[0])} ${Number(days[0].slice(8))} to ${monthName(days[6]) === monthName(days[0]) ? "" : monthName(days[6]) + " "}${Number(days[6].slice(8))}, ${days[6].slice(0, 4)}`
       : `${weekdayName(anchor, true)}, ${monthName(anchor)} ${Number(anchor.slice(8))}`
 
@@ -158,7 +164,7 @@ export function CalendarPage() {
           </Button>
         }
       />
-      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-line px-3 sm:px-4">
+      <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-line px-3 py-1.5 sm:px-4">
         <div role="radiogroup" aria-label="View" className="flex items-center gap-0.5 rounded-md bg-hover p-0.5">
           {(["week", "team"] as const).map((m) => (
             <button
@@ -191,13 +197,15 @@ export function CalendarPage() {
             <Icon icon={ArrowRight01Icon} size={14} />
           </button>
         </div>
-        <h2 className="text-sm font-medium text-fg tabular">{label}</h2>
+        <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular">{label}</h2>
 
         {mode === "week" && (
           <DropdownMenu>
             <DropdownMenuTrigger className="pressable ml-auto inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
               <Icon icon={weekMode === "private" ? LockKeyIcon : weekMode === "busy" ? ViewOffIcon : ViewIcon} size={14} />
-              {weekMode === "private" ? "Week hidden" : weekMode === "busy" ? "Week shows busy only" : weekMode === "mixed" ? "Some days hidden" : "Week shared"}
+              <span className="hidden sm:inline">
+                {weekMode === "private" ? "Week hidden" : weekMode === "busy" ? "Week shows busy only" : weekMode === "mixed" ? "Some days hidden" : "Week shared"}
+              </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel>What the team sees this week</DropdownMenuLabel>
