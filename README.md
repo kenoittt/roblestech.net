@@ -15,7 +15,7 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
-- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically. "Copy my plan" puts your day on the clipboard for the team chat.
+- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. "Copy my plan" puts your day on the clipboard for the team chat.
 - **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
 - **Inbox, activity log, command menu (Cmd K: pages, tasks, projects, people, handbook articles), keyboard shortcuts, settings** (including a profile photo).
 - **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
