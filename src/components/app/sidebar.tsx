@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useMemo, useState, useTransition } from "react"
@@ -85,7 +86,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           onClick={onNavigate}
           className="pressable flex min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 py-1 hover:bg-hover"
         >
-          <img src="/brand/rtc-mark-64.png" alt="" width={22} height={22} className="size-[22px] shrink-0" />
+          <Image src="/brand/rtc-mark-64.png" alt="" width={22} height={22} className="size-[22px] shrink-0" priority />
           <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-fg">Robles Tech</span>
         </Link>
         <SidebarIconButton icon={Search01Icon} label="Search" shortcut="⌘K" onClick={() => setCommandOpen(true)} />

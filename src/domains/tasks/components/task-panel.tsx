@@ -154,15 +154,15 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
       <header className="flex h-12 shrink-0 items-center gap-1 border-b border-line px-3">
         <div className="flex min-w-0 items-center gap-1.5 text-sm">
           {project ? (
-            <a href={`/projects/${project.id}`} className="flex min-w-0 items-center gap-1.5 text-fg-3 hover:text-fg">
+            <a href={`/projects/${project.id}`} className="hidden min-w-0 items-center gap-1.5 text-fg-3 hover:text-fg sm:flex">
               <ProjectSwatch color={project.color} size={9} />
               <span className="truncate">{project.name}</span>
             </a>
           ) : (
-            <span className="text-fg-3">No project</span>
+            <span className="hidden text-fg-3 sm:inline">No project</span>
           )}
-          <span className="text-fg-4">/</span>
-          <span className="font-mono text-xs text-fg-2 tabular">{taskKey(task)}</span>
+          <span className="hidden text-fg-4 sm:inline">/</span>
+          <span className="font-mono text-xs whitespace-nowrap text-fg-2 tabular">{taskKey(task)}</span>
           {task.is_private && (
             <span title="Private: only the creator and the assignee see it" className="ml-1 text-fg-3">
               <Icon icon={LockKeyIcon} size={13} />
@@ -175,7 +175,7 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
               type="button"
               onClick={() => update.mutate({ id: task.id, patch: primary.patch })}
               className={cn(
-                "pressable mr-1.5 inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium",
+                "pressable mr-1.5 inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium whitespace-nowrap",
                 primary.label === "Mark done"
                   ? "bg-brand-solid text-white hover:bg-brand-solid-hover"
                   : "border border-line text-fg-2 hover:bg-hover hover:text-fg",
@@ -185,8 +185,10 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
               {primary.label}
             </button>
           )}
-          <HeaderButton label="Previous task" icon={ArrowUp01Icon} onClick={() => step(-1)} disabled={index <= 0} />
-          <HeaderButton label="Next task" icon={ArrowDown01Icon} onClick={() => step(1)} disabled={index === -1 || index >= siblings.length - 1} />
+          <span className="hidden sm:contents">
+            <HeaderButton label="Previous task" icon={ArrowUp01Icon} onClick={() => step(-1)} disabled={index <= 0} />
+            <HeaderButton label="Next task" icon={ArrowDown01Icon} onClick={() => step(1)} disabled={index === -1 || index >= siblings.length - 1} />
+          </span>
           <HeaderButton label="Copy link" icon={Link01Icon} onClick={copyLink} />
           <DropdownMenu>
             <DropdownMenuTrigger aria-label="More actions" className="pressable inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg data-popup-open:bg-hover">

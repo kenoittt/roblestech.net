@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Cancel01Icon, LockKeyIcon, UserIcon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon, LockKeyIcon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
@@ -204,8 +204,8 @@ export function CreateTaskDialog() {
               className={cn(chipClass, draft.is_private && "border-brand/50 text-fg")}
               title="Only you and the assignee will see it"
             >
-              <Icon icon={LockKeyIcon} size={13} />
-              {draft.is_private ? "Private" : "Team"}
+              <Icon icon={draft.is_private ? LockKeyIcon : UserGroupIcon} size={13} />
+              {draft.is_private ? "Private" : "Visible to the team"}
             </button>
           </div>
 
