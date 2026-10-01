@@ -220,7 +220,8 @@ export function projectStats(project: Project, tasks: Task[], today: string): Pr
     const share = overdue / open
     const daysLeft = project.target_date ? diffDays(project.target_date, today) : null
     const behind = daysLeft !== null && daysLeft < 7 && progress < 0.75
-    if (share >= 0.25 || overdue >= 3 || (daysLeft !== null && daysLeft < 0)) health = "off_track"
+    // Off track: past its end date with work left, or lateness is spreading.
+    if ((daysLeft !== null && daysLeft < 0) || overdue >= 3 || (overdue >= 2 && share >= 0.34)) health = "off_track"
     else if (overdue > 0 || behind) health = "at_risk"
   }
   return { total, done, open, overdue, progress, health }

@@ -32,7 +32,7 @@ import { TaskAssigneeButton, TaskDueButton, TaskPriorityButton } from "./task-pr
  * its status, and the sign-off rules still apply, so a card that needs a
  * reviewer can't be dropped on Done by the wrong person.
  */
-export function TaskBoard({ tasks, showCancelled = false }: { tasks: Task[]; showCancelled?: boolean }) {
+export function TaskBoard({ tasks, showCancelled = false, showProject = true }: { tasks: Task[]; showCancelled?: boolean; showProject?: boolean }) {
   const me = useMe()
   const members = useMemberMap()
   const update = useUpdateTask()
@@ -69,7 +69,7 @@ export function TaskBoard({ tasks, showCancelled = false }: { tasks: Task[]; sho
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
       <div className="flex h-full min-h-0 gap-3 overflow-x-auto px-3 pt-3 pb-4 sm:px-4">
         {columns.map((col) => (
-          <Column key={col.status} status={col.status} tasks={col.tasks} />
+          <Column key={col.status} status={col.status} tasks={col.tasks} showProject={showProject} />
         ))}
       </div>
       <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.23, 1, 0.32, 1)" }}>
@@ -79,7 +79,7 @@ export function TaskBoard({ tasks, showCancelled = false }: { tasks: Task[]; sho
   )
 }
 
-function Column({ status, tasks }: { status: Status; tasks: Task[] }) {
+function Column({ status, tasks, showProject }: { status: Status; tasks: Task[]; showProject: boolean }) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
   const { openCreateTask } = useUI()
   return (
@@ -106,7 +106,7 @@ function Column({ status, tasks }: { status: Status; tasks: Task[] }) {
       </header>
       <div className="flex min-h-24 flex-1 flex-col gap-1.5 overflow-y-auto px-1 pb-2">
         {tasks.map((t) => (
-          <DraggableCard key={t.id} task={t} />
+          <DraggableCard key={t.id} task={t} showProject={showProject} />
         ))}
         {tasks.length === 0 && (
           <div className="flex h-20 items-center justify-center rounded-md border border-dashed border-line text-xs text-fg-4">
@@ -118,7 +118,7 @@ function Column({ status, tasks }: { status: Status; tasks: Task[] }) {
   )
 }
 
-const DraggableCard = memo(function DraggableCard({ task }: { task: Task }) {
+const DraggableCard = memo(function DraggableCard({ task, showProject }: { task: Task; showProject: boolean }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id })
   const { open } = useTaskPanel()
   return (
@@ -129,12 +129,12 @@ const DraggableCard = memo(function DraggableCard({ task }: { task: Task }) {
       onClick={() => open(task.number)}
       className={cn("outline-none", isDragging && "opacity-30")}
     >
-      <CardBody task={task} />
+      <CardBody task={task} showProject={showProject} />
     </div>
   )
 })
 
-function CardBody({ task, overlay = false }: { task: Task; overlay?: boolean }) {
+function CardBody({ task, overlay = false, showProject = true }: { task: Task; overlay?: boolean; showProject?: boolean }) {
   const projects = useProjectMap()
   const project = task.project_id ? projects.get(task.project_id) : null
   const closed = !STATUS_META[task.status as Status]?.open
@@ -156,7 +156,7 @@ function CardBody({ task, overlay = false }: { task: Task; overlay?: boolean }) 
       <div className="flex min-h-6 items-center gap-1.5">
         <TaskPriorityButton task={task} className="-ml-1" />
         <TaskDueButton task={task} />
-        {project && (
+        {project && showProject && (
           <span className="ml-auto flex min-w-0 items-center gap-1.5 text-xs text-fg-3">
             <ProjectSwatch color={project.color} size={8} />
             <span className="truncate">{project.name}</span>

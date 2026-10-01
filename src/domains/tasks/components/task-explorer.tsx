@@ -140,7 +140,7 @@ export function TaskExplorer({
         ) : view === "list" ? (
           <TaskList tasks={visible} grouping={grouping} showProject={showProject} />
         ) : view === "board" ? (
-          <TaskBoard tasks={visible} showCancelled={filters.statuses?.includes("cancelled")} />
+          <TaskBoard tasks={visible} showCancelled={filters.statuses?.includes("cancelled")} showProject={showProject} />
         ) : (
           <TaskCalendar tasks={visible} />
         )}
