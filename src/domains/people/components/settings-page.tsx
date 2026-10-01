@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, type ReactNode } from "react"
+import { useRef, useState, useTransition, type ReactNode } from "react"
 import { useTheme } from "next-themes"
 import { useQueryClient } from "@tanstack/react-query"
 import { Settings01Icon } from "@hugeicons/core-free-icons"
@@ -73,6 +73,7 @@ export function SettingsPage() {
               <p className="text-sm text-fg-3">
                 {ROLE_META[me.role as Role]?.label} · {me.email}
               </p>
+              <PhotoButtons hasPhoto={Boolean(me.avatar_url)} uid={me.id} />
             </div>
           </div>
 
@@ -179,5 +180,65 @@ function ThemeSwatch({ kind }: { kind: "dark" | "light" | "linear" }) {
         </>
       )}
     </span>
+  )
+}
+
+/** Choose a photo: it's cropped to a square and shrunk in the browser before upload. */
+function PhotoButtons({ hasPhoto, uid }: { hasPhoto: boolean; uid: string }) {
+  const qc = useQueryClient()
+  const input = useRef<HTMLInputElement>(null)
+  const [busy, start] = useTransition()
+
+  const save = (avatar_url: string | null) => getSupabase().from("profiles").update({ avatar_url }).eq("id", uid)
+
+  const upload = (file: File) =>
+    start(async () => {
+      try {
+        const blob = await squareJpeg(file, 256)
+        const supabase = getSupabase()
+        const { error } = await supabase.storage.from("avatars").upload(uid, blob, { upsert: true, contentType: "image/jpeg" })
+        if (error) throw error
+        const { error: pErr } = await save(`${uid}?v=${Date.now()}`)
+        if (pErr) throw pErr
+        qc.invalidateQueries({ queryKey: ["members"] })
+        toast("Photo updated")
+      } catch (e) {
+        toast.error((e as Error).message ?? "The photo didn't upload.")
+      }
+    })
+
+  const remove = () =>
+    start(async () => {
+      await getSupabase().storage.from("avatars").remove([uid])
+      await save(null)
+      qc.invalidateQueries({ queryKey: ["members"] })
+      toast("Photo removed")
+    })
+
+  return (
+    <div className="mt-2 flex items-center gap-3 text-xs">
+      <input ref={input} type="file" accept="image/*" className="sr-only" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+      <button type="button" disabled={busy} onClick={() => input.current?.click()} className="font-medium text-brand hover:underline disabled:opacity-50">
+        {busy ? "Saving…" : hasPhoto ? "Change photo" : "Add a photo"}
+      </button>
+      {hasPhoto && (
+        <button type="button" disabled={busy} onClick={remove} className="text-fg-3 hover:text-fg disabled:opacity-50">
+          Remove
+        </button>
+      )}
+    </div>
+  )
+}
+
+async function squareJpeg(file: File, size: number): Promise<Blob> {
+  const bitmap = await createImageBitmap(file)
+  const side = Math.min(bitmap.width, bitmap.height)
+  const canvas = document.createElement("canvas")
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext("2d")!
+  ctx.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, size, size)
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("The photo couldn't be read."))), "image/jpeg", 0.88),
   )
 }

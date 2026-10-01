@@ -4,6 +4,7 @@ import { createContext, use, useEffect, useMemo, useState, type ReactNode } from
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query"
 import { getSupabase } from "@/lib/supabase/client"
 import { isoDay } from "@/lib/dates"
+import { AvatarPhotos } from "@/components/app/avatar"
 import { TASK_COLUMNS, type Task } from "@/domains/tasks/config"
 import {
   fetchMembers,
@@ -36,10 +37,25 @@ export function WorkspaceProvider({ bootstrap, children }: { bootstrap: Bootstra
     <QueryClientProvider client={queryClient}>
       <Ctx value={value}>
         <LiveUpdates uid={bootstrap.uid} />
-        {children}
+        <Photos>{children}</Photos>
       </Ctx>
     </QueryClientProvider>
   )
+}
+
+/** Everyone's photo address, rebuilt when someone changes theirs. */
+function Photos({ children }: { children: ReactNode }) {
+  const members = useMembers()
+  const photos = useMemo(
+    () =>
+      new Map(
+        members
+          .filter((m) => m.avatar_url)
+          .map((m) => [m.id, `/api/avatar/${m.id}?v=${encodeURIComponent(m.avatar_url!.split("?v=")[1] ?? "1")}`]),
+      ),
+    [members],
+  )
+  return <AvatarPhotos value={photos}>{children}</AvatarPhotos>
 }
 
 function useWorkspaceContext() {

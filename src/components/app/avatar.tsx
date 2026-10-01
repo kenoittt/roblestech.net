@@ -1,3 +1,6 @@
+"use client"
+
+import { createContext, use, useState } from "react"
 import { cn } from "@/lib/utils"
 
 // Initials on a quiet tint, picked from the person's id so it never changes.
@@ -16,6 +19,9 @@ function tintFor(id: string) {
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
   return TINTS[Math.abs(hash) % TINTS.length]
 }
+
+/** Photo addresses by person, provided by the workspace; empty outside it (the sign-in page). */
+export const AvatarPhotos = createContext<Map<string, string>>(new Map())
 
 export function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -47,6 +53,20 @@ export function Avatar({
   muted?: boolean
   className?: string
 }) {
+  const photo = use(AvatarPhotos).get(id)
+  const [failed, setFailed] = useState<string | null>(null)
+  if (photo && failed !== photo) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- a small, private, already-sized image
+      <img
+        src={photo}
+        alt=""
+        title={name}
+        onError={() => setFailed(photo)}
+        className={cn("inline-block shrink-0 rounded-full object-cover", SIZES[size], muted && "opacity-45 grayscale", className)}
+      />
+    )
+  }
   return (
     <span
       className={cn(
