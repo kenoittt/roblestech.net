@@ -1,6 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import { redirect } from "next/navigation"
+import { after } from "next/server"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { fetchMembers, fetchProjects, fetchTasks, type Bootstrap } from "./types"
 
@@ -29,5 +30,12 @@ export const getBootstrap = cache(async (): Promise<Bootstrap> => {
   const me = members.find((m) => m.id === uid)
   // Clients, and people whose access was turned off, have no PPM.
   if (!me || me.deactivated_at) redirect("/auth/no-access")
+  // "Last active" on the People page: refreshed at most every five minutes,
+  // after the page has been sent, so it never slows anything down.
+  if (!me.last_seen_at || Date.now() - new Date(me.last_seen_at).getTime() > 5 * 60_000) {
+    after(async () => {
+      await supabase.from("profiles").update({ last_seen_at: new Date().toISOString() }).eq("id", uid)
+    })
+  }
   return { uid, serverNow: Date.now(), members, projects, tasks }
 })

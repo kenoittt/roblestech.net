@@ -33,6 +33,7 @@ const LIST: { keys: string[]; does: string }[] = [
   { keys: ["J", "K"], does: "Move down and up a list" },
   { keys: ["Enter"], does: "Open the selected task" },
   { keys: ["X"], does: "Select the task, for changing several at once" },
+  { keys: ["I"], does: "Assign the selected task to yourself" },
   { keys: ["Esc"], does: "Close the panel or clear the selection" },
   { keys: ["⌘", "Enter"], does: "Save: create a task, post a comment" },
 ]

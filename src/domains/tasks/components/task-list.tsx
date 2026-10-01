@@ -4,12 +4,13 @@ import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { Add01Icon, ArrowDown01Icon, LockKeyIcon } from "@hugeicons/core-free-icons"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
-import { useMembers, useProjects } from "@/domains/workspace/provider"
+import { useMe, useMembers, useProjects } from "@/domains/workspace/provider"
 import { Avatar } from "@/components/app/avatar"
 import { useUI } from "@/components/app/ui-state"
 import { displayName } from "@/domains/workspace/types"
 import { STATUS_META, taskKey, type Grouping, type Status, type Task } from "../config"
 import { groupTasks, type TaskGroup } from "../selectors"
+import { useUpdateTask } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import {
@@ -39,6 +40,8 @@ export function TaskList({
 }) {
   const members = useMembers()
   const projects = useProjects()
+  const me = useMe()
+  const update = useUpdateTask()
   const { open, current } = useTaskPanel()
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(["done", "cancelled"]))
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -80,6 +83,9 @@ export function TaskList({
         if (t) open(t.number)
       } else if (e.key === "x" && focusId) {
         toggle(focusId)
+      } else if (e.key === "i" && focusId) {
+        const t = visible[index]
+        if (t && t.assignee_id !== me.id) update.mutate({ id: t.id, patch: { assignee_id: me.id } })
       } else if (e.key === "Escape" && selected.size) {
         setSelected(new Set())
       }

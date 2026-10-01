@@ -169,3 +169,19 @@ export async function updateTitle(userId: string, title: string): Promise<Result
   if (error) return { ok: false, error: error.message }
   return { ok: true }
 }
+
+/** For someone invited who hasn't set their password yet: a fresh link. */
+export async function resendInvite(userId: string): Promise<Result> {
+  const me = await caller()
+  if (!me || RANK[me.role] < RANK.admin) return { ok: false, error: "Only admins can invite people." }
+  const them = await target(userId)
+  if (!them?.email) return { ok: false, error: "That person has no email address." }
+  if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can invite an admin." }
+  const admin = createSupabaseAdmin()
+  const { error } = await admin.auth.admin.inviteUserByEmail(them.email, {
+    data: { full_name: them.full_name ?? "" },
+    redirectTo: `${APP_URL}/auth/confirm?next=/welcome`,
+  })
+  if (error) return { ok: false, error: error.message }
+  return { ok: true, message: `A new invitation is on its way to ${them.email}.` }
+}

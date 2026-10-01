@@ -93,7 +93,7 @@ export function TaskCalendar({ tasks }: { tasks: Task[] }) {
           <div key={d} className="px-2 py-1.5 text-xs font-medium text-fg-3">{d}</div>
         ))}
       </div>
-      <DndContext sensors={sensors} onDragStart={(e) => setDragging(tasks.find((t) => t.id === e.active.id) ?? null)} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
+      <DndContext id="task-calendar" sensors={sensors} onDragStart={(e) => setDragging(tasks.find((t) => t.id === e.active.id) ?? null)} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
         <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 overflow-y-auto">
           {days.map((day) => (
             <DayCell key={day} day={day} tasks={byDay.get(day) ?? []} inMonth={day.slice(0, 7) === month.slice(0, 7)} today={today} />

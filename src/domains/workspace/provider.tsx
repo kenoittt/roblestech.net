@@ -112,6 +112,12 @@ function LiveUpdates({ uid }: { uid: string }) {
 
   useEffect(() => {
     const supabase = getSupabase()
+    let cancelled = false
+    // Realtime checks the database rules as the signed-in person, so it needs
+    // their token before joining; without it every change is filtered out.
+    const { data: auth } = supabase.auth.onAuthStateChange((_event, session) => {
+      supabase.realtime.setAuth(session?.access_token ?? null)
+    })
     const channel = supabase
       .channel("ppm-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "ppm_tasks" }, (payload) => {
@@ -145,8 +151,14 @@ function LiveUpdates({ uid }: { uid: string }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "cal_events" }, () =>
         queryClient.invalidateQueries({ queryKey: ["calendar"] }),
       )
-      .subscribe()
+    supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return
+      supabase.realtime.setAuth(data.session?.access_token ?? null)
+      channel.subscribe()
+    })
     return () => {
+      cancelled = true
+      auth.subscription.unsubscribe()
       supabase.removeChannel(channel)
     }
   }, [queryClient, uid])

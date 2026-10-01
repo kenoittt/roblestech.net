@@ -66,7 +66,7 @@ export function TaskBoard({ tasks, showCancelled = false, showProject = true }: 
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
+    <DndContext id="task-board" sensors={sensors} collisionDetection={closestCorners} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
       <div className="flex h-full min-h-0 gap-3 overflow-x-auto px-3 pt-3 pb-4 select-none sm:px-4">
         {columns.map((col) => (
           <Column key={col.status} status={col.status} tasks={col.tasks} showProject={showProject} />

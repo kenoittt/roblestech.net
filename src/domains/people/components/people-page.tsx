@@ -9,6 +9,7 @@ import { toast } from "sonner"
 import {
   Cancel01Icon,
   Key01Icon,
+  Mail01Icon,
   MoreHorizontalIcon,
   Search01Icon,
   UserAdd01Icon,
@@ -37,7 +38,7 @@ import { useMe, useMembers, useNow, useTasks, useToday } from "@/domains/workspa
 import { ROLE_META, displayName, isAdminRole, type Member, type Role } from "@/domains/workspace/types"
 import { LOAD_LIMIT, workload } from "@/domains/tasks/selectors"
 import { PickerMenu, usePeopleOptions } from "@/domains/tasks/components/pickers"
-import { changeRole, deactivateMember, inviteMember, reactivateMember, sendPasswordReset } from "../actions"
+import { changeRole, deactivateMember, inviteMember, reactivateMember, resendInvite, sendPasswordReset } from "../actions"
 
 /** Who can change whom: admins manage staff, super admins manage everyone. */
 export function canManage(me: Pick<Member, "id" | "role">, them: Pick<Member, "id" | "role">) {
@@ -179,7 +180,7 @@ export function PeoplePage() {
                     <td className="text-xs text-fg-2 tabular">{l?.dueThisWeek ?? 0}</td>
                     <td className="text-xs text-fg-2 tabular">{l?.doneThisWeek ?? 0}</td>
                     <td className="text-xs text-fg-3 tabular">
-                      {m.deactivated_at ? "Deactivated" : m.last_seen_at ? ago(m.last_seen_at, now) : "Never"}
+                      {m.deactivated_at ? "Deactivated" : m.last_seen_at ? ago(m.last_seen_at, now) : <span className="text-warning">Invited</span>}
                     </td>
                     <td className="pr-3">
                       {(manageable || m.id === me.id) && <RowMenu member={m} onDeactivate={() => setDeactivating(m)} self={m.id === me.id} />}
@@ -270,10 +271,17 @@ function RowMenu({ member, onDeactivate, self }: { member: Member; onDeactivate:
         <Icon icon={MoreHorizontalIcon} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={() => run(() => sendPasswordReset(member.id))}>
-          <Icon icon={Key01Icon} className="text-fg-3" />
-          Send password reset
-        </DropdownMenuItem>
+        {!member.last_seen_at && !member.deactivated_at ? (
+          <DropdownMenuItem onClick={() => run(() => resendInvite(member.id))}>
+            <Icon icon={Mail01Icon} className="text-fg-3" />
+            Resend invitation
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => run(() => sendPasswordReset(member.id))}>
+            <Icon icon={Key01Icon} className="text-fg-3" />
+            Send password reset
+          </DropdownMenuItem>
+        )}
         {!self && (
           <>
             <DropdownMenuSeparator />
