@@ -4,10 +4,8 @@ import Link from "next/link"
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
-import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { toast } from "sonner"
 import {
-  Cancel01Icon,
   Key01Icon,
   Mail01Icon,
   MoreHorizontalIcon,
@@ -31,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
 import { StackedBar } from "@/components/app/charts"
 import { Icon } from "@/components/app/icon"
+import { ModalShell } from "@/components/app/modal"
 import { EmptyState, PageBody, PageHeader } from "@/components/app/page"
 import { cn } from "@/lib/utils"
 import { ago } from "@/lib/dates"
@@ -323,25 +322,6 @@ function RoleGuide() {
 // ---------------------------------------------------------------------------
 // Dialogs
 // ---------------------------------------------------------------------------
-function ModalShell({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="ui-backdrop fixed inset-0 z-50 bg-black/45" />
-        <DialogPrimitive.Popup className="ui-dialog fixed top-[14vh] left-1/2 z-50 w-[min(460px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl bg-raised shadow-popover outline-none">
-          <div className="flex items-center justify-between px-5 pt-4">
-            <DialogPrimitive.Title className="text-md font-semibold text-fg">{title}</DialogPrimitive.Title>
-            <DialogPrimitive.Close aria-label="Close" className="pressable inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg">
-              <Icon icon={Cancel01Icon} />
-            </DialogPrimitive.Close>
-          </div>
-          {children}
-        </DialogPrimitive.Popup>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
-  )
-}
-
 const inputClass =
   "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
 

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { ModalShell } from "@/components/app/modal"
 import { cn } from "@/lib/utils"
 import { getSupabase } from "@/lib/supabase/client"
 import { Markdown, slugify } from "./markdown"
@@ -24,6 +25,18 @@ export function ArticleEditor({ article, categories }: { article: KbArticle | nu
   const [owner, setOwner] = useState(article?.owner ?? "")
   const [keywords, setKeywords] = useState(article?.keywords ?? "")
   const [tab, setTab] = useState<"write" | "preview">("write")
+  const [confirming, setConfirming] = useState(false)
+
+  const remove = () =>
+    start(async () => {
+      if (!article) return
+      const { error } = await getSupabase().from("kb_articles").delete().eq("id", article.id)
+      if (error) return void toast.error(error.message)
+      setConfirming(false)
+      toast("Article deleted")
+      router.push("/handbook")
+      router.refresh()
+    })
 
   const save = () =>
     start(async () => {
@@ -62,20 +75,7 @@ export function ArticleEditor({ article, categories }: { article: KbArticle | nu
         <h2 className="text-lg font-semibold text-fg">{article ? "Edit article" : "New article"}</h2>
         <div className="flex gap-2">
           {article && (
-            <Button
-              variant="destructive"
-              disabled={pending}
-              onClick={() =>
-                start(async () => {
-                  if (!window.confirm(`Delete "${article.title}"? This can't be undone.`)) return
-                  const { error } = await getSupabase().from("kb_articles").delete().eq("id", article.id)
-                  if (error) return void toast.error(error.message)
-                  toast("Article deleted")
-                  router.push("/handbook")
-                  router.refresh()
-                })
-              }
-            >
+            <Button variant="destructive" disabled={pending} onClick={() => setConfirming(true)}>
               Delete
             </Button>
           )}
@@ -138,6 +138,19 @@ export function ArticleEditor({ article, categories }: { article: KbArticle | nu
           {body.trim() ? <Markdown source={body} /> : <p className="text-sm text-fg-4">The preview appears here.</p>}
         </div>
       </div>
+      {article && (
+        <ModalShell open={confirming} onClose={() => setConfirming(false)} title="Delete this article?">
+          <div className="flex flex-col gap-4 px-5 pt-3 pb-5">
+            <p className="text-sm text-fg-3">“{article.title}” leaves the handbook for everyone. This can't be undone.</p>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button type="button" variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
+              <Button type="button" variant="destructive" disabled={pending} onClick={remove}>
+                {pending ? "Deleting…" : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </ModalShell>
+      )}
     </div>
   )
 }
