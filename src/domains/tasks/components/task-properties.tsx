@@ -39,6 +39,21 @@ export function useDoneBlock(task: Task): string | null {
   return `Only ${names.join(" or ")} can mark this done. Move it to In review.`
 }
 
+/** For a task in review: who it's waiting on, in a few words, or null when anyone can sign it off. */
+export function useWaitingOn(task: Task): { text: string; you: boolean } | null {
+  const me = useMe()
+  const members = useMemberMap()
+  if (task.status !== "in_review" || task.completion_policy === "anyone") return null
+  if (task.completion_policy === "not_assignee") {
+    const assignee = task.assignee_id ? firstName(members.get(task.assignee_id)) : null
+    return assignee ? { text: `Waiting on anyone but ${assignee}`, you: false } : null
+  }
+  const ids = signOffPeople(task)
+  if (ids.includes(me.id)) return { text: "Waiting on you", you: true }
+  const names = ids.map((id) => firstName(members.get(id))).filter(Boolean)
+  return names.length ? { text: `Waiting on ${names.join(" or ")}`, you: false } : null
+}
+
 /** For an admin about to sign off in someone else's place: whose sign-off it was. */
 export function useAdminSignOffNote(task: Task): string | null {
   const me = useMe()

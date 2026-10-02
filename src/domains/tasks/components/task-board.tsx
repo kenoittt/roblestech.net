@@ -25,7 +25,7 @@ import { STATUSES, STATUS_META, canComplete, signOffPeople, taskKey, type Orderi
 import { useUpdateTask } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { ProjectSwatch, StatusIcon } from "./glyphs"
-import { TaskAssigneeButton, TaskDueButton, TaskPriorityButton } from "./task-properties"
+import { TaskAssigneeButton, TaskDueButton, TaskPriorityButton, useWaitingOn } from "./task-properties"
 
 /**
  * The board: one column per status. Dragging a card to another column changes
@@ -161,6 +161,7 @@ function CardBody({ task, overlay = false, showProject = true }: { task: Task; o
   const projects = useProjectMap()
   const project = task.project_id ? projects.get(task.project_id) : null
   const closed = !STATUS_META[task.status as Status]?.open
+  const waiting = useWaitingOn(task)
   return (
     <article
       className={cn(
@@ -176,6 +177,7 @@ function CardBody({ task, overlay = false, showProject = true }: { task: Task; o
         </span>
       </div>
       <p className={cn("line-clamp-2 text-sm leading-5", closed ? "text-fg-3" : "text-fg")}>{task.title}</p>
+      {waiting && <p className={cn("-mt-1 text-xs", waiting.you ? "font-medium text-brand" : "text-fg-3")}>{waiting.text}</p>}
       <div className="flex min-h-6 items-center gap-1.5">
         <TaskPriorityButton task={task} className="-ml-1" />
         <TaskDueButton task={task} />
