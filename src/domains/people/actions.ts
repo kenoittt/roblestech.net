@@ -15,6 +15,11 @@ type Result = { ok: true; message?: string } | { ok: false; error: string }
 
 const RANK: Record<Role, number> = { staff: 1, admin: 2, super_admin: 3 }
 
+/** One of the PPM's three roles, and nothing else ("client" belongs to the portal). */
+function isRole(value: unknown): value is Role {
+  return typeof value === "string" && Object.hasOwn(RANK, value)
+}
+
 async function caller() {
   const supabase = await createSupabaseServer()
   const { data } = await supabase.auth.getClaims()
@@ -46,7 +51,7 @@ export async function inviteMember(input: { email: string; fullName: string; rol
   if (!me || RANK[me.role] < RANK.admin) return { ok: false, error: "Only admins can invite people." }
   const email = input.email.trim().toLowerCase()
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That doesn't look like an email address." }
-  if (!(input.role in RANK)) return { ok: false, error: "Choose a role." }
+  if (!isRole(input.role)) return { ok: false, error: "Choose a role." }
   if (RANK[input.role] >= RANK.admin && me.role !== "super_admin") {
     return { ok: false, error: "Only a super admin can invite an admin." }
   }
@@ -79,6 +84,7 @@ export async function changeRole(userId: string, role: Role): Promise<Result> {
   const me = await caller()
   if (!me) return { ok: false, error: "Sign in again." }
   if (userId === me.uid) return { ok: false, error: "You can't change your own role. Ask another admin." }
+  if (!isRole(role)) return { ok: false, error: "Choose a role." }
   const them = await target(userId)
   if (!them) return { ok: false, error: "That person wasn't found." }
   if (!mayManage(me.role, them.role) || !mayManage(me.role, role)) {
@@ -110,6 +116,10 @@ export async function deactivateMember(userId: string, reassignTo: string | null
   const them = await target(userId)
   if (!them) return { ok: false, error: "That person wasn't found." }
   if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can deactivate an admin." }
+  if (reassignTo) {
+    const to = reassignTo === userId ? null : await target(reassignTo)
+    if (!to || to.deactivated_at || !isRole(to.role)) return { ok: false, error: "Hand their work to someone who's still on the team." }
+  }
 
   // Hand over open work as the person doing it, so the history says who did.
   if (reassignTo !== undefined) {
