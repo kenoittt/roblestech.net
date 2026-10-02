@@ -140,6 +140,7 @@ export type NewTask = {
   is_private?: boolean
   reviewer_id?: string | null
   completion_policy?: string
+  repeat?: string | null
 }
 
 export function useCreateTask() {

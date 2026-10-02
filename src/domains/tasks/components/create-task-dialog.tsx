@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Cancel01Icon, LockKeyIcon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon, LockKeyIcon, RepeatIcon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { dueLabel } from "@/lib/dates"
 import { useMemberMap, useProjectMap, useToday } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
-import { taskKey } from "../config"
+import { REPEAT_META, taskKey, type Repeat } from "../config"
 import { useCreateTask, type NewTask } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { ProjectSwatch } from "./glyphs"
@@ -26,13 +26,14 @@ import {
   chipClass,
   policyOptions,
   priorityOptions,
+  repeatOptions,
   statusOptions,
   usePeopleOptions,
   useProjectOptions,
 } from "./pickers"
 
 type Draft = Required<Pick<NewTask, "status" | "priority" | "completion_policy">> &
-  Pick<NewTask, "assignee_id" | "project_id" | "due_date" | "reviewer_id"> & { is_private: boolean }
+  Pick<NewTask, "assignee_id" | "project_id" | "due_date" | "reviewer_id" | "repeat"> & { is_private: boolean }
 
 const EMPTY: Draft = {
   status: "todo",
@@ -42,6 +43,7 @@ const EMPTY: Draft = {
   project_id: null,
   due_date: null,
   reviewer_id: null,
+  repeat: null,
   is_private: false,
 }
 
@@ -75,6 +77,7 @@ export function CreateTaskDialog() {
   const reviewers = usePeopleOptions({ projectId: draft.project_id, noneLabel: "No reviewer" })
   const projectOpts = useProjectOptions()
   const policyOpts = useMemo(() => policyOptions(), [])
+  const repeatOpts = useMemo(() => repeatOptions(), [])
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }))
 
   const submit = async () => {
@@ -182,6 +185,26 @@ export function CreateTaskDialog() {
               triggerClassName={chipClass}
               trigger={draft.due_date ? dueLabel(draft.due_date, today) : "Due date"}
             />
+            {(draft.due_date || draft.repeat) && (
+              <PickerMenu
+                triggerLabel="Repeat"
+                triggerClassName={cn(chipClass, draft.repeat && "border-brand/50 text-fg")}
+                trigger={
+                  draft.repeat ? (
+                    <>
+                      <Icon icon={RepeatIcon} size={13} />
+                      {REPEAT_META[draft.repeat as Repeat]?.label}
+                    </>
+                  ) : (
+                    "Repeat"
+                  )
+                }
+                options={repeatOpts}
+                value={draft.repeat ?? "none"}
+                placeholder="Repeat…"
+                onSelect={(v) => set({ repeat: v === "none" ? null : v })}
+              />
+            )}
             <PickerMenu triggerLabel="Who can mark it done" triggerClassName={chipClass} trigger={<PolicyChip value={draft.completion_policy} />}
               options={policyOpts} value={draft.completion_policy} placeholder="Who can mark it done?" width="w-80"
               onSelect={(completion_policy) => set({ completion_policy })} />
