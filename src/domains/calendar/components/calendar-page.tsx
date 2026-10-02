@@ -254,11 +254,11 @@ export function CalendarPage() {
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-72">
-              <DropdownMenuLabel>What the team sees this week</DropdownMenuLabel>
               <DropdownMenuRadioGroup
                 value={weekMode === "mixed" ? "" : weekMode}
                 onValueChange={(v) => setRange.mutate({ startsOn: days[0], endsOn: days[6], mode: v as "public" | "busy" | "private" })}
               >
+                <DropdownMenuLabel>What the team sees this week</DropdownMenuLabel>
                 <DropdownMenuRadioItem value="public" className="items-start py-1.5">
                   <span className="flex flex-col"><span className="text-fg">Everything</span><span className="text-xs text-fg-3">Each entry's own setting applies</span></span>
                 </DropdownMenuRadioItem>
@@ -346,8 +346,8 @@ function DayHeader({
             <Icon icon={hidden === "private" ? LockKeyIcon : hidden === "busy" ? ViewOffIcon : ViewIcon} size={13} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>{weekdayName(day, true)}: what the team sees</DropdownMenuLabel>
             <DropdownMenuRadioGroup value={hidden} onValueChange={(v) => onHide(v as "public" | "busy" | "private")}>
+              <DropdownMenuLabel>{weekdayName(day, true)}: what the team sees</DropdownMenuLabel>
               <DropdownMenuRadioItem value="public">Everything</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="busy">Only that I'm busy</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="private">Nothing</DropdownMenuRadioItem>

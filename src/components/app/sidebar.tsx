@@ -285,19 +285,21 @@ function AccountMenu({ name, id, role }: { name: string; id: string; role: Role 
                 Switch account
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-60">
-                <DropdownMenuLabel>Sample accounts</DropdownMenuLabel>
-                {members
-                  .filter((m) => m.id !== id && !m.deactivated_at && m.email)
-                  .map((m) => (
-                    <DropdownMenuItem
-                      key={m.id}
-                      onClick={() => startTransition(() => switchAccount(m.email!))}
-                    >
-                      <Avatar id={m.id} name={displayName(m)} size="sm" />
-                      <span className="truncate">{displayName(m)}</span>
-                      <span className="ml-auto text-xs text-fg-3">{ROLE_META[m.role as Role]?.label}</span>
-                    </DropdownMenuItem>
-                  ))}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Sample accounts</DropdownMenuLabel>
+                  {members
+                    .filter((m) => m.id !== id && !m.deactivated_at && m.email)
+                    .map((m) => (
+                      <DropdownMenuItem
+                        key={m.id}
+                        onClick={() => startTransition(() => switchAccount(m.email!))}
+                      >
+                        <Avatar id={m.id} name={displayName(m)} size="sm" />
+                        <span className="truncate">{displayName(m)}</span>
+                        <span className="ml-auto text-xs text-fg-3">{ROLE_META[m.role as Role]?.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </>

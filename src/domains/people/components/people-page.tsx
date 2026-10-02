@@ -218,7 +218,6 @@ function RoleCell({ member, editable, viewerIsSuper }: { member: Member; editabl
         <svg viewBox="0 0 10 10" className="size-2.5 text-fg-4"><path d="M2.5 4 5 6.5 7.5 4" stroke="currentColor" fill="none" strokeWidth="1.3" strokeLinecap="round" /></svg>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Role</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={role}
           onValueChange={(v) =>
@@ -232,6 +231,7 @@ function RoleCell({ member, editable, viewerIsSuper }: { member: Member; editabl
             })
           }
         >
+          <DropdownMenuLabel>Role</DropdownMenuLabel>
           {choices.map((r) => (
             <DropdownMenuRadioItem key={r} value={r} className="items-start py-1.5">
               <span className="flex flex-col">
