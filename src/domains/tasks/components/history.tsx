@@ -23,7 +23,7 @@ export function describeEvent(e: TaskEvent, members: Map<string, Member>, projec
       return <>assigned it to {strong(displayName(members.get(to)))}</>
     }
     case "status_changed":
-      if (e.to_status === "done") return "marked it done"
+      if (e.to_status === "done") return meta.as_admin ? "signed it off as an admin" : "marked it done"
       if (e.from_status === "done") return <>reopened it as {strong(statusLabel(e.to_status))}</>
       if (e.to_status === "in_review") return "sent it for sign-off"
       return (

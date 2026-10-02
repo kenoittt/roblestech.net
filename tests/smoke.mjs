@@ -174,6 +174,18 @@ const priv = execSync(`curl -s "http://127.0.0.1:54321/rest/v1/ppm_tasks?select=
 check("Someone else's private task is invisible to staff", priv.trim() === "[]", priv.slice(0, 60))
 check("Staff can't promote themselves", sql(`select role from profiles where id = '00000000-0000-4000-a000-000000000005'`) === "staff", roleRes.slice(0, 80))
 
+// An admin can still sign off in the reviewer's place, and the history says so (on this run's own task)
+{
+  const kyanLogin = JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"kyan@rtc.test","password":"rtc-demo-2026"}'`).toString())
+  const own = sql(`select number from ppm_tasks where title = '${title}'`)
+  const patchOwn = (body) =>
+    execSync(`curl -s -X PATCH "http://127.0.0.1:54321/rest/v1/ppm_tasks?number=eq.${own}" -H "apikey: ${anon}" -H "Authorization: Bearer ${kyanLogin.access_token}" -H "Content-Type: application/json" -d '${JSON.stringify(body)}'`).toString()
+  patchOwn({ completion_policy: "reviewer", reviewer_id: "00000000-0000-4000-a000-000000000002" })
+  patchOwn({ status: "done" })
+  const asAdmin = own ? sql(`select e.meta->>'as_admin' from ppm_task_events e join ppm_tasks t on t.id = e.task_id where t.number = ${own} and e.to_status = 'done'`) : ""
+  check("An admin signing off in the reviewer's place is recorded as such", asAdmin === "true", `RTC-${own}`)
+}
+
 
 // ---------------------------------------------------------------- Live updates: one person's change reaches another's screen
 {

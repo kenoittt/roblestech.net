@@ -7,7 +7,7 @@ import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { useMe, useMemberMap, useProjectMap } from "@/domains/workspace/provider"
 import { displayName, firstName } from "@/domains/workspace/types"
-import { canComplete, signOffPeople, type Task } from "../config"
+import { canComplete, signOffPeople, signsOffAsAdmin, type Task } from "../config"
 import { useUpdateTask } from "../data"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import {
@@ -39,9 +39,22 @@ export function useDoneBlock(task: Task): string | null {
   return `Only ${names.join(" or ")} can mark this done. Move it to In review.`
 }
 
+/** For an admin about to sign off in someone else's place: whose sign-off it was. */
+export function useAdminSignOffNote(task: Task): string | null {
+  const me = useMe()
+  const members = useMemberMap()
+  if (!signsOffAsAdmin(task, me.id, me.role)) return null
+  const names = signOffPeople(task)
+    .map((id) => firstName(members.get(id)))
+    .filter(Boolean)
+  const who = task.completion_policy === "not_assignee" ? "Someone other than the assignee" : names.length ? names.join(" or ") : "Someone else"
+  return `${who} signs this off. As an admin you can too, and the history will say so.`
+}
+
 export function TaskStatusButton({ task, size = 14, className }: { task: Task; size?: number; className?: string }) {
   const update = useUpdateTask()
   const block = useDoneBlock(task)
+  const adminNote = useAdminSignOffNote(task)
   const options = useMemo(() => statusOptions(block), [block])
   return (
     <PickerMenu
@@ -52,7 +65,7 @@ export function TaskStatusButton({ task, size = 14, className }: { task: Task; s
       value={task.status}
       placeholder="Change status…"
       onSelect={(status) => status !== task.status && update.mutate({ id: task.id, patch: { status } })}
-      footer={block ?? undefined}
+      footer={block ?? adminNote ?? undefined}
     />
   )
 }

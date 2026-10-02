@@ -62,8 +62,8 @@ export const POLICY_META: Record<Policy, { label: string; hint: string }> = {
   specific:     { label: "Chosen people",    hint: "Only the people you pick" },
 }
 
-export function canComplete(task: Task, uid: string, role: string): boolean {
-  if (role === "admin" || role === "super_admin") return true
+/** Whether the task's own sign-off rule lets this person mark it done, admins aside. Mirrors ppm_rule_allows. */
+export function ruleAllows(task: Task, uid: string): boolean {
   switch (task.completion_policy as Policy) {
     case "not_assignee":
       return task.assignee_id !== uid
@@ -76,6 +76,16 @@ export function canComplete(task: Task, uid: string, role: string): boolean {
     default:
       return true
   }
+}
+
+/** Admins can mark any task done, in place of the person its rule names; the history notes it. */
+export function canComplete(task: Task, uid: string, role: string): boolean {
+  return role === "admin" || role === "super_admin" || ruleAllows(task, uid)
+}
+
+/** An admin marking done a task whose rule names someone else. */
+export function signsOffAsAdmin(task: Task, uid: string, role: string): boolean {
+  return (role === "admin" || role === "super_admin") && !ruleAllows(task, uid)
 }
 
 /** Who the UI should name when someone can't sign a task off. */

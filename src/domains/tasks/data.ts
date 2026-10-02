@@ -3,9 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { getSupabase } from "@/lib/supabase/client"
-import { useUid } from "@/domains/workspace/provider"
+import { useMe, useMemberMap, useUid } from "@/domains/workspace/provider"
+import { firstName } from "@/domains/workspace/types"
 import { nudgeDelivery } from "@/domains/inbox/deliver"
-import { TASK_COLUMNS, taskKey, type Task, type TaskPatch, type TaskRow } from "./config"
+import { TASK_COLUMNS, signOffPeople, signsOffAsAdmin, taskKey, type Task, type TaskPatch, type TaskRow } from "./config"
 
 // Every write is optimistic: the screen changes at once, the database decides,
 // and if it says no (a rule, a permission) the change rolls back with the reason.
@@ -39,6 +40,8 @@ function applyPatch(task: Task, patch: TaskPatch, uid: string): Task {
 export function useUpdateTask() {
   const qc = useQueryClient()
   const uid = useUid()
+  const me = useMe()
+  const members = useMemberMap()
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: TaskPatch }) => {
       const { data, error } = await getSupabase()
@@ -53,17 +56,27 @@ export function useUpdateTask() {
     onMutate: async ({ id, patch }) => {
       await qc.cancelQueries({ queryKey: ["tasks"] })
       const previous = qc.getQueryData<Task[]>(["tasks"])
+      const before = previous?.find((t) => t.id === id)
+      // Signing off in someone else's place as an admin: say so once it's saved.
+      const inPlaceOf =
+        patch.status === "done" && before && before.status !== "done" && signsOffAsAdmin(before, me.id, me.role)
+          ? signOffPeople(before).map((p) => firstName(members.get(p))).filter(Boolean)
+          : null
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => (t.id === id ? applyPatch(t, patch, uid) : t)))
-      return { previous }
+      return { previous, inPlaceOf }
     },
     onError: (error, _vars, ctx) => {
       if (ctx?.previous) qc.setQueryData(["tasks"], ctx.previous)
       toast.error(explain(error))
     },
-    onSuccess: (row) => {
+    onSuccess: (row, _vars, ctx) => {
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => (t.id === row.id ? row : t)))
       qc.invalidateQueries({ queryKey: ["task", row.id] })
       nudgeDelivery()
+      if (ctx?.inPlaceOf) {
+        const who = ctx.inPlaceOf.length ? ` in place of ${ctx.inPlaceOf.join(" or ")}` : ""
+        toast(`Signed off as an admin${who}`, { description: `Noted in ${taskKey(row)}'s history.` })
+      }
     },
   })
 }

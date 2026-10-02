@@ -37,6 +37,7 @@ import {
   STATUS_META,
   canComplete,
   isOpen,
+  signsOffAsAdmin,
   taskKey,
   type Policy,
   type Priority,
@@ -59,7 +60,7 @@ import { CommentComposer, withMentions } from "./comment-composer"
 import { TaskFiles } from "./task-files"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
-import { useDoneBlock } from "./task-properties"
+import { useAdminSignOffNote, useDoneBlock } from "./task-properties"
 
 export function TaskPanel() {
   return (
@@ -143,11 +144,13 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
 
   const closed = !isOpen(task.status)
   const canDone = canComplete(task, me.id, me.role)
+  const asAdmin = signsOffAsAdmin(task, me.id, me.role)
+  const adminNote = useAdminSignOffNote(task)
   const primary = (() => {
-    if (task.status === "done") return { label: "Reopen", patch: { status: "todo" } }
-    if (task.status === "cancelled") return { label: "Restore", patch: { status: "todo" } }
-    if (canDone) return { label: "Mark done", patch: { status: "done" } }
-    if (task.status !== "in_review") return { label: "Request sign-off", patch: { status: "in_review" } }
+    if (task.status === "done") return { label: "Reopen", patch: { status: "todo" }, done: false }
+    if (task.status === "cancelled") return { label: "Restore", patch: { status: "todo" }, done: false }
+    if (canDone) return { label: asAdmin ? "Sign off as admin" : "Mark done", patch: { status: "done" }, done: true }
+    if (task.status !== "in_review") return { label: "Request sign-off", patch: { status: "in_review" }, done: false }
     return null
   })()
 
@@ -176,14 +179,15 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
             <button
               type="button"
               onClick={() => update.mutate({ id: task.id, patch: primary.patch })}
+              title={primary.done && adminNote ? adminNote : undefined}
               className={cn(
                 "pressable mr-1.5 inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium whitespace-nowrap",
-                primary.label === "Mark done"
+                primary.done
                   ? "bg-brand-solid text-white hover:bg-brand-solid-hover"
                   : "border border-line text-fg-2 hover:bg-hover hover:text-fg",
               )}
             >
-              {primary.label === "Mark done" && <StatusIcon status="done" size={13} className="[&_circle]:fill-white [&_path]:stroke-[var(--brand-solid)]" />}
+              {primary.done && <StatusIcon status="done" size={13} className="[&_circle]:fill-white [&_path]:stroke-[var(--brand-solid)]" />}
               {primary.label}
             </button>
           )}
@@ -348,6 +352,7 @@ function Properties({ task }: { task: Task }) {
   const today = useToday()
   const now = useNow()
   const block = useDoneBlock(task)
+  const adminNote = useAdminSignOffNote(task)
   const statusOpts = useMemo(() => statusOptions(block), [block])
   const priorityOpts = useMemo(() => priorityOptions(), [])
   const people = usePeopleOptions({ projectId: task.project_id })
@@ -374,7 +379,7 @@ function Properties({ task }: { task: Task }) {
           value={task.status}
           placeholder="Change status…"
           onSelect={(status) => status !== task.status && patch({ status })}
-          footer={block ?? undefined}
+          footer={block ?? adminNote ?? undefined}
         />
       </Prop>
       <Prop label="Priority">

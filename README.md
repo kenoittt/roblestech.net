@@ -12,7 +12,7 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date.
 - **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
 - **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, project, reviewer, sign-off rule, description (Markdown), checklist, files (up to 25 MB each, private to whoever can see the task), history and comments, with @mentions that notify the person.
-- **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it.
+- **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it. Admins can sign off in that person's place (say, when a reviewer is away): the button reads "Sign off as admin" and the history records it as such.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
 - **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. "Copy my plan" puts your day on the clipboard for the team chat.
@@ -77,10 +77,11 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 ### Check it works
 
 ```bash
-npm run test:smoke   # with npm run dev running: 19 end-to-end checks, about a minute
+npm run test:smoke   # with npm run dev running: 21 end-to-end checks, about a minute
+npm run test:menus   # opens every menu, popover and picker on every screen, as three roles; a few minutes
 ```
 
-It signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules, and live updates.
+The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (including an admin signing off in someone's place), and live updates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
 
 ## A ten-minute demo
 
@@ -88,10 +89,10 @@ It signs in as different people and checks the main flows against the database: 
 2. Open **All tasks**. Switch List, Board, Calendar; the choice is remembered. Group by assignee from Display.
 3. Press **C** to create a task. Assign it: the menu shows everyone's open and late work, and who has the most room. The email lands at http://127.0.0.1:54324.
 4. Click a task: the panel opens beside the list. Change its status, comment, open the sign-off rule.
-5. On the **board**, drag a card to In review. Dragging one that needs someone else's sign-off to Done is refused, with the reason.
+5. On the **board**, drag a card to In review. As an admin, Kyan can still mark it done in the reviewer's place: the panel's button says "Sign off as admin", and the history says so.
 6. Open the **calendar**. My week: drag down an empty slot to block time. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
 7. Open **People**. Invite someone, open the email in the mail catcher, and set their password.
-8. Switch to **Carl** (staff) from the account menu. He can't change roles, and Christian's report needs Kenneth's sign-off.
+8. Switch to **Carl** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
 9. Open a **project**: health, what's late, who's carrying it, then its board.
 10. Open a second browser window as **Kenneth** and rename a task: it changes in Kyan's window by itself.
 
