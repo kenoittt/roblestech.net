@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { createSupabaseServer } from "@/lib/supabase/server"
 import { DEMO_MODE } from "@/lib/env"
+import { safeNext } from "@/lib/utils"
 
 export type SignInState = { error?: string; email?: string }
 
@@ -20,7 +21,7 @@ export async function signIn(_prev: SignInState, form: FormData): Promise<SignIn
       error: error.message === "Invalid login credentials" ? "That email and password don't match." : error.message,
     }
   }
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/")
+  redirect(safeNext(next))
 }
 
 export async function signOut() {
