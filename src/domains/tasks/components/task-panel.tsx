@@ -13,6 +13,7 @@ import {
   Link01Icon,
   LockKeyIcon,
   MoreHorizontalIcon,
+  RepeatIcon,
   ViewIcon,
 } from "@hugeicons/core-free-icons"
 import {
@@ -34,13 +35,16 @@ import { displayName, firstName, type Member } from "@/domains/workspace/types"
 import {
   POLICY_META,
   PRIORITY_META,
+  REPEAT_META,
   STATUS_META,
   canComplete,
   isOpen,
   signsOffAsAdmin,
   taskKey,
+  upcomingDue,
   type Policy,
   type Priority,
+  type Repeat,
   type Status,
   type Task,
 } from "../config"
@@ -59,7 +63,7 @@ import { describeEvent } from "./history"
 import { CommentComposer, withMentions } from "./comment-composer"
 import { TaskFiles } from "./task-files"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
-import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
+import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, repeatOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
 import { useAdminSignOffNote, useDoneBlock } from "./task-properties"
 
 export function TaskPanel() {
@@ -360,6 +364,8 @@ function Properties({ task }: { task: Task }) {
   const approvers = usePeopleOptions({ projectId: task.project_id, includeNone: false })
   const projectOpts = useProjectOptions()
   const policyOpts = useMemo(() => policyOptions(), [])
+  const repeatOpts = useMemo(() => repeatOptions(), [])
+  const nextOne = isOpen(task.status) ? upcomingDue(task, today) : null
   const patch = (p: Parameters<typeof update.mutate>[0]["patch"]) => update.mutate({ id: task.id, patch: p })
 
   const assignee = task.assignee_id ? members.get(task.assignee_id) : null
@@ -433,6 +439,31 @@ function Properties({ task }: { task: Task }) {
           value={task.project_id ?? "none"}
           placeholder="Move to project…"
           onSelect={(v) => patch({ project_id: v === "none" ? null : v })}
+        />
+      </Prop>
+      <Prop label="Repeats">
+        <PickerMenu
+          triggerLabel="Repeats"
+          triggerClassName={valueButton}
+          trigger={
+            task.repeat ? (
+              <>
+                <Icon icon={RepeatIcon} size={14} className="text-fg-3" />
+                <span>{REPEAT_META[task.repeat as Repeat]?.label}</span>
+              </>
+            ) : (
+              <span className="text-fg-3">Doesn't repeat</span>
+            )
+          }
+          options={repeatOpts}
+          value={task.repeat ?? "none"}
+          placeholder="Repeat…"
+          onSelect={(v) => patch({ repeat: v === "none" ? null : v })}
+          footer={
+            nextOne
+              ? `When it's done, the next one is made for you, due ${shortDate(nextOne, today)}.`
+              : "When a repeating task is done, the next one is made for you."
+          }
         />
       </Prop>
       <Prop label="Reviewer">

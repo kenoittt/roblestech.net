@@ -11,7 +11,7 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 - **Home:** your work first (overdue, today, the next 7 days), your plan for today, what's waiting for your sign-off. Then the team: workload per person, tasks finished over 14 days, project health, what's late, recent activity.
 - **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date.
 - **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
-- **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, project, reviewer, sign-off rule, description (Markdown), checklist, files (up to 25 MB each, private to whoever can see the task), history and comments, with @mentions that notify the person.
+- **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, a repeat (every day, weekday, week, two weeks or month: finishing one makes the next, with the same people and rules), project, reviewer, sign-off rule, description (Markdown), checklist, files (up to 25 MB each, private to whoever can see the task), history and comments, with @mentions that notify the person.
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it. Admins can sign off in that person's place (say, when a reviewer is away): the button reads "Sign off as admin" and the history records it as such.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
@@ -77,11 +77,11 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 ### Check it works
 
 ```bash
-npm run test:smoke   # with npm run dev running: 21 end-to-end checks, about a minute
+npm run test:smoke   # with npm run dev running: 22 end-to-end checks, about a minute
 npm run test:menus   # opens every menu, popover and picker on every screen, as three roles; about seven minutes
 ```
 
-The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (including an admin signing off in someone's place), and live updates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
+The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (including an admin signing off in someone's place), repeating tasks, and live updates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
 
 ## A ten-minute demo
 

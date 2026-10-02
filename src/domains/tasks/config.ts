@@ -1,4 +1,5 @@
 import type { Database } from "@/lib/supabase/database.types"
+import { addDays, weekday } from "@/lib/dates"
 
 export type TaskRow = Database["public"]["Tables"]["ppm_tasks"]["Row"]
 /** A task as lists hold it: everything except the description, which the panel loads. */
@@ -8,7 +9,7 @@ export type TaskPatch = Database["public"]["Tables"]["ppm_tasks"]["Update"]
 export const TASK_COLUMNS =
   "id,number,title,status,priority,project_id,assignee_id,created_by,assigned_by,reviewer_id," +
   "due_date,start_date,completed_at,completed_by,created_at,updated_at,is_private,sort_order," +
-  "completion_policy,completion_approvers,deleted_at,deleted_by"
+  "completion_policy,completion_approvers,deleted_at,deleted_by,repeat"
 
 // ---------------------------------------------------------------------------
 // Statuses: six, each with one meaning (see the handbook's "What each status means")
@@ -51,6 +52,51 @@ export const PRIORITY_META: Record<Priority, { label: string; rank: number }> = 
 // ---------------------------------------------------------------------------
 // Who may mark a task done (enforced by the database; mirrored here for the UI)
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Repeating: when a repeating task is done, the database makes the next one
+// (see the recurring_tasks migration).
+
+export const REPEATS = ["daily", "weekdays", "weekly", "biweekly", "monthly"] as const
+export type Repeat = (typeof REPEATS)[number]
+
+export const REPEAT_META: Record<Repeat, { label: string }> = {
+  daily:    { label: "Every day" },
+  weekdays: { label: "Every weekday" },
+  weekly:   { label: "Every week" },
+  biweekly: { label: "Every two weeks" },
+  monthly:  { label: "Every month" },
+}
+
+/** The next date after `day` in a pattern. Mirrors ppm_next_due in the database. */
+export function nextDue(day: string, repeat: Repeat): string {
+  switch (repeat) {
+    case "daily":
+      return addDays(day, 1)
+    case "weekdays": {
+      const w = weekday(day) // 0 is Monday
+      return addDays(day, w === 4 ? 3 : w === 5 ? 2 : 1)
+    }
+    case "weekly":
+      return addDays(day, 7)
+    case "biweekly":
+      return addDays(day, 14)
+    case "monthly": {
+      // Same day next month, or its last day when it's shorter (Jan 31 to Feb 28).
+      const [y, m, d] = day.split("-").map(Number)
+      const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate()
+      return new Date(Date.UTC(y, m, Math.min(d, last))).toISOString().slice(0, 10)
+    }
+  }
+}
+
+/** When the next one would be due if this task were finished today. */
+export function upcomingDue(task: Pick<Task, "due_date" | "repeat">, today: string): string | null {
+  if (!task.repeat) return null
+  let due = nextDue(task.due_date ?? today, task.repeat as Repeat)
+  while (due < today) due = nextDue(due, task.repeat as Repeat)
+  return due
+}
+
 export const POLICIES = ["anyone", "not_assignee", "assigner", "reviewer", "specific"] as const
 export type Policy = (typeof POLICIES)[number]
 

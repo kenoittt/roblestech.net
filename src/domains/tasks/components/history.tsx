@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { shortDate } from "@/lib/dates"
+import { isoDay, shortDate } from "@/lib/dates"
 import { displayName, type Member } from "@/domains/workspace/types"
 import { POLICY_META, PRIORITY_META, STATUS_META, type Policy, type Priority, type Status } from "../config"
 import type { TaskEvent } from "../data"
@@ -15,7 +15,14 @@ export function describeEvent(e: TaskEvent, members: Map<string, Member>, projec
   const strong = (s: ReactNode) => <span className="text-fg-2">{s}</span>
   switch (e.type) {
     case "created":
-      return "created the task"
+      return meta.repeat_of ? <>made it, as the next of {strong(`RTC-${meta.repeat_of}`)}</> : "created the task"
+    case "repeated":
+      return (
+        <>
+          made the next one, {strong(`RTC-${meta.number}`)}
+          {typeof meta.due_date === "string" ? <>, due {strong(shortDate(meta.due_date, isoDay()))}</> : null}
+        </>
+      )
     case "assigned": {
       const to = meta.assignee_id as string | null
       if (!to) return "removed the assignee"

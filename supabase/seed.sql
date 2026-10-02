@@ -401,6 +401,10 @@ begin
   end if;
 end $$;
 
+-- Two that repeat: the Promix AI check every week, the call agenda every month.
+update public.ppm_tasks set repeat = 'weekly'  where title = 'Check AI answer visibility for 20 priority questions';
+update public.ppm_tasks set repeat = 'monthly' where title = 'Prepare the monthly call agenda';
+
 alter table public.ppm_tasks          enable trigger user;
 alter table public.ppm_projects       enable trigger user;
 alter table public.ppm_task_comments  enable trigger user;

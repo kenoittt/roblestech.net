@@ -16,6 +16,8 @@ import {
   POLICY_META,
   PRIORITIES,
   PRIORITY_META,
+  REPEATS,
+  REPEAT_META,
   STATUSES,
   STATUS_META,
   type Policy,
@@ -218,6 +220,10 @@ export function useProjectOptions(): PickerOption[] {
 
 export function policyOptions(): PickerOption[] {
   return POLICIES.map((p) => ({ value: p, label: POLICY_META[p].label, hint: POLICY_META[p].hint }))
+}
+
+export function repeatOptions(): PickerOption[] {
+  return [{ value: "none", label: "Doesn't repeat" }, ...REPEATS.map((r) => ({ value: r, label: REPEAT_META[r].label }))]
 }
 
 // ---------------------------------------------------------------------------

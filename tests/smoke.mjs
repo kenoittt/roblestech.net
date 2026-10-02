@@ -186,6 +186,30 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
   check("An admin signing off in the reviewer's place is recorded as such", asAdmin === "true", `RTC-${own}`)
 }
 
+// A repeating task: finishing it makes the next one, which keeps the series' creator and assigner
+{
+  const KENNETH = "00000000-0000-4000-a000-000000000001", CARL = "00000000-0000-4000-a000-000000000005"
+  const tokenFor = (email) =>
+    JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"${email}","password":"rtc-demo-2026"}'`).toString()).access_token
+  const rest = (token, method, path, body) =>
+    execSync(`curl -s -X ${method} "http://127.0.0.1:54321/rest/v1/${path}" -H "apikey: ${anon}" -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -H "Prefer: return=representation" -d '${JSON.stringify(body)}'`).toString()
+  const repeatTitle = `${title} repeat`
+  const today = sql("select (now() at time zone 'Asia/Manila')::date")
+  const kenneth = tokenFor("kenneth@rtc.test")
+  const [made] = JSON.parse(rest(kenneth, "POST", "ppm_tasks", { title: repeatTitle, assignee_id: CARL, repeat: "weekly", due_date: today }))
+  rest(kenneth, "POST", "ppm_task_checklist", { task_id: made?.id, title: "Step one", done: true })
+  rest(tokenFor("carl@rtc.test"), "PATCH", `ppm_tasks?id=eq.${made?.id}`, { status: "done" })
+  const next = sql(`select due_date || ' ' || (created_by = '${KENNETH}') || ' ' || (assigned_by = '${KENNETH}') || ' ' || (assignee_id = '${CARL}') || ' ' || repeat from ppm_tasks where title = '${repeatTitle}' and status = 'todo'`)
+  const expected = `${sql("select (now() at time zone 'Asia/Manila')::date + 7")} true true true weekly`
+  const old = made ? sql(`select coalesce(repeat, 'none') from ppm_tasks where id = '${made.id}'`) : ""
+  const checklist = sql(`select string_agg(c.title || ':' || c.done, ',') from ppm_task_checklist c join ppm_tasks t on t.id = c.task_id where t.title = '${repeatTitle}' and t.status = 'todo'`)
+  check(
+    "Finishing a repeating task makes the next one, with its creator and assigner kept",
+    next === expected && old === "none" && checklist === "Step one:false",
+    `${next || "no next task"} | old repeats: ${old} | checklist: ${checklist}`,
+  )
+}
+
 
 // ---------------------------------------------------------------- Live updates: one person's change reaches another's screen
 {

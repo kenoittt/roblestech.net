@@ -3,10 +3,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { getSupabase } from "@/lib/supabase/client"
-import { useMe, useMemberMap, useUid } from "@/domains/workspace/provider"
+import { shortDate } from "@/lib/dates"
+import { useMe, useMemberMap, useToday, useUid } from "@/domains/workspace/provider"
 import { firstName } from "@/domains/workspace/types"
 import { nudgeDelivery } from "@/domains/inbox/deliver"
-import { TASK_COLUMNS, signOffPeople, signsOffAsAdmin, taskKey, type Task, type TaskPatch, type TaskRow } from "./config"
+import {
+  REPEAT_META,
+  TASK_COLUMNS,
+  signOffPeople,
+  signsOffAsAdmin,
+  taskKey,
+  upcomingDue,
+  type Repeat,
+  type Task,
+  type TaskPatch,
+  type TaskRow,
+} from "./config"
 
 // Every write is optimistic: the screen changes at once, the database decides,
 // and if it says no (a rule, a permission) the change rolls back with the reason.
@@ -42,6 +54,7 @@ export function useUpdateTask() {
   const uid = useUid()
   const me = useMe()
   const members = useMemberMap()
+  const today = useToday()
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: TaskPatch }) => {
       const { data, error } = await getSupabase()
@@ -57,13 +70,17 @@ export function useUpdateTask() {
       await qc.cancelQueries({ queryKey: ["tasks"] })
       const previous = qc.getQueryData<Task[]>(["tasks"])
       const before = previous?.find((t) => t.id === id)
+      const finishing = patch.status === "done" && before !== undefined && before.status !== "done" ? before : null
       // Signing off in someone else's place as an admin: say so once it's saved.
       const inPlaceOf =
-        patch.status === "done" && before && before.status !== "done" && signsOffAsAdmin(before, me.id, me.role)
-          ? signOffPeople(before).map((p) => firstName(members.get(p))).filter(Boolean)
+        finishing && signsOffAsAdmin(finishing, me.id, me.role)
+          ? signOffPeople(finishing).map((p) => firstName(members.get(p))).filter(Boolean)
           : null
+      // A repeating task: the database makes the next one, so say when it's due.
+      const nextOne =
+        finishing?.repeat ? { due: upcomingDue(finishing, today), label: REPEAT_META[finishing.repeat as Repeat]?.label ?? "" } : null
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => (t.id === id ? applyPatch(t, patch, uid) : t)))
-      return { previous, inPlaceOf }
+      return { previous, inPlaceOf, nextOne }
     },
     onError: (error, _vars, ctx) => {
       if (ctx?.previous) qc.setQueryData(["tasks"], ctx.previous)
@@ -73,9 +90,12 @@ export function useUpdateTask() {
       qc.setQueryData<Task[]>(["tasks"], (old) => old?.map((t) => (t.id === row.id ? row : t)))
       qc.invalidateQueries({ queryKey: ["task", row.id] })
       nudgeDelivery()
+      const next = ctx?.nextOne?.due ? `The next one is due ${shortDate(ctx.nextOne.due, today)}.` : ""
       if (ctx?.inPlaceOf) {
         const who = ctx.inPlaceOf.length ? ` in place of ${ctx.inPlaceOf.join(" or ")}` : ""
-        toast(`Signed off as an admin${who}`, { description: `Noted in ${taskKey(row)}'s history.` })
+        toast(`Signed off as an admin${who}`, { description: `Noted in ${taskKey(row)}'s history.${next ? ` ${next}` : ""}` })
+      } else if (ctx?.nextOne) {
+        toast(`Done. It repeats ${ctx.nextOne.label.toLowerCase()}`, { description: next })
       }
     },
   })

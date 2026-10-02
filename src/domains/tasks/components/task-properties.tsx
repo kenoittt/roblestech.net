@@ -1,13 +1,13 @@
 "use client"
 
 import { useMemo } from "react"
-import { UserIcon } from "@hugeicons/core-free-icons"
+import { RepeatIcon, UserIcon } from "@hugeicons/core-free-icons"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { useMe, useMemberMap, useProjectMap } from "@/domains/workspace/provider"
 import { displayName, firstName } from "@/domains/workspace/types"
-import { canComplete, signOffPeople, signsOffAsAdmin, type Task } from "../config"
+import { REPEAT_META, canComplete, signOffPeople, signsOffAsAdmin, type Repeat, type Task } from "../config"
 import { useUpdateTask } from "../data"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import {
@@ -159,7 +159,20 @@ export function TaskDueButton({
         className,
       )}
       align="end"
-      trigger={task.due_date ? <DueText due={task.due_date} done={done} /> : <span className="text-xs text-fg-3">Set date</span>}
+      trigger={
+        task.due_date ? (
+          <>
+            <DueText due={task.due_date} done={done} />
+            {task.repeat && (
+              <span title={REPEAT_META[task.repeat as Repeat]?.label} aria-label={REPEAT_META[task.repeat as Repeat]?.label} className="ml-1 inline-flex text-fg-3">
+                <Icon icon={RepeatIcon} size={12} />
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="text-xs text-fg-3">Set date</span>
+        )
+      }
     />
   )
 }
