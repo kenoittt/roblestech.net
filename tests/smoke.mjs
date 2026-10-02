@@ -186,6 +186,21 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
   check("An admin signing off in the reviewer's place is recorded as such", asAdmin === "true", `RTC-${own}`)
 }
 
+// Sign-off requests go to the people the rule names: here two chosen people, not the assigner
+{
+  const tokenFor = (email) =>
+    JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"${email}","password":"rtc-demo-2026"}'`).toString()).access_token
+  const rest = (token, method, path, body) =>
+    execSync(`curl -s -X ${method} "http://127.0.0.1:54321/rest/v1/${path}" -H "apikey: ${anon}" -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -H "Prefer: return=representation" -d '${JSON.stringify(body)}'`).toString()
+  const [made] = JSON.parse(rest(tokenFor("kenneth@rtc.test"), "POST", "ppm_tasks", {
+    title: `${title} sign-off`, assignee_id: "00000000-0000-4000-a000-000000000005", status: "in_progress",
+    completion_policy: "specific", completion_approvers: ["00000000-0000-4000-a000-000000000002", "00000000-0000-4000-a000-000000000004"],
+  }))
+  rest(tokenFor("carl@rtc.test"), "PATCH", `ppm_tasks?id=eq.${made?.id}`, { status: "in_review" })
+  const asked = made ? sql(`select string_agg(split_part(p.full_name, ' ', 1), ', ' order by p.full_name) from ppm_notifications n join profiles p on p.id = n.user_id where n.task_id = '${made.id}' and n.type = 'review'`) : ""
+  check("Sending a task for sign-off asks the people its rule names", asked === "Andrei, Christian", asked || "nobody asked")
+}
+
 // A repeating task: finishing it makes the next one, which keeps the series' creator and assigner
 {
   const KENNETH = "00000000-0000-4000-a000-000000000001", CARL = "00000000-0000-4000-a000-000000000005"

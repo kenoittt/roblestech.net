@@ -25,7 +25,7 @@ import {
 } from "@/lib/dates"
 import { useMe, useMemberMap, useMembers, useNow, useProjectMap, useProjects, useTasks, useToday } from "@/domains/workspace/provider"
 import { displayName, firstName } from "@/domains/workspace/types"
-import { STATUS_META, isActive, type Status, type Task } from "@/domains/tasks/config"
+import { STATUS_META, isActive, waitsOn, type Status, type Task } from "@/domains/tasks/config"
 import { HEALTH_META, LOAD_LIMIT, isOverdue, projectStats, workload } from "@/domains/tasks/selectors"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { ProjectSwatch } from "@/domains/tasks/components/glyphs"
@@ -53,14 +53,7 @@ export function HomeDashboard() {
   const inProgress = mine.filter((t) => t.status === "in_progress")
   const waiting = useMemo(
     () =>
-      tasks.filter(
-        (t) =>
-          t.status === "in_review" &&
-          t.assignee_id !== me.id &&
-          (t.reviewer_id === me.id ||
-            t.completion_approvers.includes(me.id) ||
-            (t.completion_policy === "assigner" && (t.assigned_by ?? t.created_by) === me.id)),
-      ),
+      tasks.filter((t) => waitsOn(t, me.id)),
     [tasks, me.id],
   )
   const doneThisWeek = mine.filter(

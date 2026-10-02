@@ -148,6 +148,11 @@ export function signOffPeople(task: Task): string[] {
   }
 }
 
+/** A task in review that's waiting on this person: its sign-off rule names them. Home, My tasks and the board all use this. */
+export function waitsOn(task: Task, uid: string): boolean {
+  return task.status === "in_review" && signOffPeople(task).includes(uid)
+}
+
 export function taskKey(task: Pick<Task, "number">) {
   return `RTC-${task.number}`
 }

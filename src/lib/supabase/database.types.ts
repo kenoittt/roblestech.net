@@ -311,7 +311,7 @@ isOneToOne: false
                   ]
                 },"ppm_tasks": {
                   Row: {
-                    "assigned_by": string | null,"assignee_id": string | null,"completed_at": string | null,"completed_by": string | null,"completion_approvers": (string)[],"completion_policy": string,"created_at": string,"created_by": string | null,"deleted_at": string | null,"deleted_by": string | null,"description": string | null,"due_date": string | null,"id": string,"is_private": boolean,"number": number,"priority": string,"project_id": string | null,"repeat": string | null,"reviewer_id": string | null,"sort_order": number,"start_date": string | null,"status": string,"title": string,"updated_at": string,"ppm_completion_message": string | null
+                    "assigned_by": string | null,"assignee_id": string | null,"completed_at": string | null,"completed_by": string | null,"completion_approvers": (string)[],"completion_policy": string,"created_at": string,"created_by": string | null,"deleted_at": string | null,"deleted_by": string | null,"description": string | null,"due_date": string | null,"id": string,"is_private": boolean,"number": number,"priority": string,"project_id": string | null,"repeat": string | null,"reviewer_id": string | null,"sort_order": number,"start_date": string | null,"status": string,"title": string,"updated_at": string,"ppm_completion_message": string | null,"ppm_sign_off_ids": (string)[] | null
                   }
                   Insert: {
                     "assigned_by"?: string | null,"assignee_id"?: string | null,"completed_at"?: string | null,"completed_by"?: string | null,"completion_approvers"?: (string)[],"completion_policy"?: string,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"deleted_by"?: string | null,"description"?: string | null,"due_date"?: string | null,"id"?: string,"is_private"?: boolean,"number"?: number,"priority"?: string,"project_id"?: string | null,"repeat"?: string | null,"reviewer_id"?: string | null,"sort_order"?: number,"start_date"?: string | null,"status"?: string,"title": string,"updated_at"?: string
@@ -412,6 +412,9 @@ isOneToOne: false
                            },
 "ppm_rule_allows":
 { Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'],"uid": string }; Returns: boolean
+                           },
+"ppm_sign_off_ids":
+{ Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'] }; Returns: (string)[]
                            },
 "ppm_task_visible":
 { Args: { "tid": string }; Returns: boolean

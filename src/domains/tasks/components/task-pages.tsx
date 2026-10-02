@@ -19,7 +19,7 @@ import { PageHeader } from "@/components/app/page"
 import { useUI } from "@/components/app/ui-state"
 import { cn } from "@/lib/utils"
 import { useMe, useTasks } from "@/domains/workspace/provider"
-import { isOpen } from "../config"
+import { isOpen, waitsOn } from "../config"
 import { TaskExplorer } from "./task-explorer"
 
 function NewTaskButton({ defaults }: { defaults?: Parameters<ReturnType<typeof useUI>["openCreateTask"]>[0] }) {
@@ -116,25 +116,14 @@ export function MyTasks() {
   const scoped = useMemo(() => {
     if (tab === "assigned") return tasks.filter((t) => t.assignee_id === me.id)
     if (tab === "created") return tasks.filter((t) => t.created_by === me.id)
-    // Waiting on me: in review, and I'm the one who can sign it off.
-    return tasks.filter(
-      (t) =>
-        t.status === "in_review" &&
-        (t.reviewer_id === me.id ||
-          t.completion_approvers.includes(me.id) ||
-          (t.completion_policy === "assigner" && (t.assigned_by ?? t.created_by) === me.id)),
-    )
+    // Waiting on me: in review, and its sign-off rule names me.
+    return tasks.filter((t) => waitsOn(t, me.id))
   }, [tasks, tab, me.id])
 
   const counts = useMemo(
     () => ({
       assigned: tasks.filter((t) => t.assignee_id === me.id && isOpen(t.status)).length,
-      review: tasks.filter(
-        (t) =>
-          t.status === "in_review" &&
-          (t.reviewer_id === me.id || t.completion_approvers.includes(me.id) ||
-            (t.completion_policy === "assigner" && (t.assigned_by ?? t.created_by) === me.id)),
-      ).length,
+      review: tasks.filter((t) => waitsOn(t, me.id)).length,
       created: tasks.filter((t) => t.created_by === me.id && isOpen(t.status)).length,
     }),
     [tasks, me.id],
