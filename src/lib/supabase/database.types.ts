@@ -404,8 +404,14 @@ isOneToOne: false
 "ppm_completion_message":
 { Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'] }; Returns: string
                            },
+"ppm_next_due":
+{ Args: { "d": string,"pattern": string }; Returns: string
+                           },
 "ppm_notify":
 { Args: { "actor": string,"extra"?: Json,"kind": string,"recipient": string,"task": string }; Returns: undefined
+                           },
+"ppm_rule_allows":
+{ Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'],"uid": string }; Returns: boolean
                            },
 "ppm_task_visible":
 { Args: { "tid": string }; Returns: boolean
