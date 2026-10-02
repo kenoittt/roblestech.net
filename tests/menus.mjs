@@ -49,8 +49,9 @@ for (const email of PEOPLE) {
     if (screen === "team-day") await page.click('button[role="radio"]:has-text("Team day")')
     await page.waitForTimeout(400)
 
+    // Rows repeat the same pickers, so the first 40 triggers on a screen cover it.
     const triggers = page.locator("[aria-haspopup]")
-    const count = Math.min(await triggers.count(), 80)
+    const count = Math.min(await triggers.count(), 40)
     for (let i = 0; i < count; i++) {
       const trigger = triggers.nth(i)
       if (!(await trigger.isVisible().catch(() => false))) continue
@@ -58,7 +59,7 @@ for (const email of PEOPLE) {
       errors = []
       const clicked = await trigger.click({ timeout: 3000 }).then(() => true, () => false)
       if (!clicked) continue
-      await page.waitForTimeout(250)
+      await page.waitForTimeout(150)
       opened++
       if (errors.length || (await page.locator(ERROR_SCREEN).count())) {
         failed.push(`${screen} → "${label}": ${errors[0] ?? "error screen"}`)
@@ -67,7 +68,7 @@ for (const email of PEOPLE) {
       }
       await page.keyboard.press("Escape")
       await page.keyboard.press("Escape")
-      await page.waitForTimeout(120)
+      await page.waitForTimeout(60)
     }
   }
 

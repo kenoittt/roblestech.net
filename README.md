@@ -78,7 +78,7 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 
 ```bash
 npm run test:smoke   # with npm run dev running: 21 end-to-end checks, about a minute
-npm run test:menus   # opens every menu, popover and picker on every screen, as three roles; a few minutes
+npm run test:menus   # opens every menu, popover and picker on every screen, as three roles; about seven minutes
 ```
 
 The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (including an admin signing off in someone's place), and live updates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
@@ -88,9 +88,9 @@ The smoke test signs in as different people and checks the main flows against th
 1. Sign in as **Kyan**. Home answers "what do I do today?" first: what's overdue and due, today's plan, what waits for your sign-off. The team's load and the projects come after.
 2. Open **All tasks**. Switch List, Board, Calendar; the choice is remembered. Group by assignee from Display.
 3. Press **C** to create a task. Assign it: the menu shows everyone's open and late work, and who has the most room. The email lands at http://127.0.0.1:54324.
-4. Click a task: the panel opens beside the list. Change its status, comment, open the sign-off rule.
+4. Click a task: the panel opens beside the list. Change its status, comment (type @ to mention someone), attach a file, open the sign-off rule.
 5. On the **board**, drag a card to In review. As an admin, Kyan can still mark it done in the reviewer's place: the panel's button says "Sign off as admin", and the history says so.
-6. Open the **calendar**. My week: drag down an empty slot to block time. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
+6. Open the **calendar**. My week: drag down an empty slot to block time, drag a block to move it, or its bottom edge to change when it ends; the line under each day shows how much of the plan is done. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
 7. Open **People**. Invite someone, open the email in the mail catcher, and set their password.
 8. Switch to **Carl** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
 9. Open a **project**: health, what's late, who's carrying it, then its board.
