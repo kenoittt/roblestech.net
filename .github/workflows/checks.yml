@@ -1,6 +1,8 @@
 # Builds every app on each pull request into main.
 # Type errors are listed but don't block yet: set an app's strict to true
 # once its type check is clean, and from then on they block merging too.
+# The PPM is a Next.js app (since 2026-10): its check is tsc plus ESLint, and
+# both are clean, so it is strict.
 # Node matches production builds: 24 everywhere (engines 24.x since PR #1).
 name: Checks
 
@@ -19,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         app:
-          - { name: Public site, dir: ., node: 24, strict: false }
-          - { name: PPM, dir: ppm, node: 24, strict: false }
-          - { name: Portal, dir: portal, node: 24, strict: false }
-          - { name: WanderWise, dir: travel, node: 24, strict: false }
+          - { name: Public site, dir: ., node: 24, strict: false, check: npx astro check }
+          - { name: PPM, dir: ppm, node: 24, strict: true, check: npm run typecheck && npm run lint }
+          - { name: Portal, dir: portal, node: 24, strict: false, check: npx astro check }
+          - { name: WanderWise, dir: travel, node: 24, strict: false, check: npx astro check }
     defaults:
       run:
         working-directory: ${{ matrix.app.dir }}
@@ -38,5 +40,5 @@ jobs:
       - name: Build
         run: npm run build
       - name: Type check
-        run: npx astro check
+        run: ${{ matrix.app.check }}
         continue-on-error: ${{ !matrix.app.strict }}
