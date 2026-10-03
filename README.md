@@ -130,16 +130,4 @@ supabase/
 
 ## Before this replaces the live PPM
 
-- Back up the live database (Kenneth, from the Supabase dashboard).
-- Apply `supabase/migrations/20261002000200_ppm_revamp.sql` to production. It only adds; but new statuses and priorities may confuse the old app, so switch over the same day.
-- Production settings, in Vercel:
-
-  | Setting | What it is |
-  |---|---|
-  | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | The Supabase project (the live PPM uses the same three) |
-  | `NEXT_PUBLIC_APP_URL` | The PPM's address, for links in emails |
-  | `MS_TENANT_ID`, `MS_CLIENT_ID`, `MS_CLIENT_SECRET`, `MAIL_FROM` | Email through Microsoft 365, exactly as the live PPM sends it |
-  | `CRON_SECRET` | Protects the 8 AM reminder; Vercel sends it to the route itself |
-
-  Leave `NEXT_PUBLIC_DEMO_MODE` and `MAIL_DEV_URL` unset in production. `vercel.json` already sets Singapore and the 8 AM schedule.
-- Deploy to Vercel as its own project, try it on its own address, then point `ppm.roblestech.net` at it.
+See [DEPLOY.md](DEPLOY.md): what to fix first, a rehearsal on a copy of the live database, the switch itself in one sitting, the production settings, and how to roll back.
