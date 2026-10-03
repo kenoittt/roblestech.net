@@ -358,7 +358,8 @@ insert into public.ppm_notifications (user_id, actor_id, type, task_id, event_id
 update public.ppm_notifications set emailed_at = created_at;
 
 -- -----------------------------------------------------------------------------
--- Handbook: how to use the new PPM, plus a few shelves still to write
+-- Handbook: a few shelves still to write. The "Using the PPM" articles come from
+-- migration 20261003000100_handbook_using_the_ppm.sql, so they match production.
 -- -----------------------------------------------------------------------------
 insert into public.kb_categories (slug, title, blurb, color, sort)
 values ('using-the-ppm', 'Using the PPM', 'How we plan, assign and finish work in the PPM.', '#3992FF', 0)
@@ -368,24 +369,6 @@ insert into public.kb_articles (category_id, slug, title, summary, body, status,
 select c.id, a.slug, a.title, a.summary, a.body, a.status, a.owner, a.keywords,
        pg_temp.person(3), pg_temp.person(3), now() - interval '1 day', now() - (a.age * interval '1 hour')
 from (values
-  ('using-the-ppm', 'statuses', 'What each status means', 'Six statuses, one rule each, so everyone reads a board the same way.',
-E'Every task has one status. Each one answers a single question: where is this work right now?\n\n| Status | Means | Move it here when |\n|---|---|---|\n| **Backlog** | Worth doing, not planned yet | You capture an idea or a request |\n| **Todo** | Planned and ready to start | It has an owner and you mean to do it soon |\n| **In progress** | Someone is working on it | You start |\n| **In review** | Done, waiting for a check | You need someone to look before it counts |\n| **Done** | Finished and accepted | The work is complete |\n| **Cancelled** | Not doing it | Plans changed; the history stays |\n\n## A few habits that keep the board honest\n\n- Keep **In progress** small. If you have more than three, finish one first.\n- Move a task to **In review** when someone else signs it off. Their name goes in the Reviewer field, and they get a notification.\n- Never delete work you did. Cancel it instead, so the history stays.',
-   'ready', 'Kyan', 'status board kanban backlog todo review done cancelled', 2),
-  ('using-the-ppm', 'assigning-work', 'Assigning work', 'Give every task one owner, and see who has room before you do.',
-E'A task has exactly one assignee: the person who will move it to done. If two people share the work, split it into two tasks.\n\n## How to assign\n\n1. Open the task, or hover over it in a list.\n2. Choose **Assignee**. The list shows how many open and overdue tasks each person has, so you can see who has room.\n3. The person gets a notification in their inbox straight away.\n\nIn a list, move to a task with **J** and **K** and press **I** to assign it to yourself.\n\n## When the work changes hands\n\nReassign the task. The history keeps who had it before, and both people are notified.',
-   'ready', 'Kyan', 'assign assignee owner workload reassign', 3),
-  ('using-the-ppm', 'who-can-mark-done', 'Who can mark a task done', 'Each task can say who signs it off: anyone, someone other than the assignee, the assigner, the reviewer, or chosen people.',
-E'Some work is finished when the person doing it says so. Some needs a second pair of eyes. Each task carries its own rule, under **Sign-off** in the task panel.\n\n| Rule | Who can mark it done |\n|---|---|\n| Anyone | Anyone on the team, including the assignee. This is the default |\n| Not the assignee | Anyone except the person doing the work |\n| The assigner | Only the person who assigned it |\n| The reviewer | Only the person named as reviewer |\n| Chosen people | Only the people you pick |\n\nAdmins can always sign a task off, so nothing gets stuck when someone is away.\n\nIf you can''t mark a task done, move it to **In review**. The right person is notified.',
-   'ready', 'Kyan', 'done complete sign off review approval accountability', 4),
-  ('using-the-ppm', 'planning-your-day', 'Planning your day on the calendar', 'Block time for your tasks, see the team''s day, and keep private things private.',
-E'The calendar replaces the schedule we used to post in the group chat.\n\n## Plan your day\n\n- Drag across the day to block time. Link the block to a task, or just give it a name.\n- Tasks with a due date appear at the top of that day. Nothing else appears unless you put it there.\n- Meetings you''re invited to appear on your calendar automatically.\n\n## Who sees what\n\nEach block has a visibility:\n\n- **Public:** the team sees the title and the time.\n- **Busy:** the team sees that you''re busy, not what it is.\n- **Private:** only you see it.\n\nYou can also hide a whole day or week, as busy or private.\n\n## Ticking it off\n\nTick a block when you''ve done it. Or turn on **Tick off automatically** and it marks itself done when its time has passed.',
-   'ready', 'Kyan', 'calendar schedule block meeting privacy busy private', 5),
-  ('using-the-ppm', 'keyboard-shortcuts', 'Keyboard shortcuts', 'Everything you do often has a key.',
-E'| Key | Does |\n|---|---|\n| **Cmd K** or **Ctrl K** | Search and run any command |\n| **C** | Create a task |\n| **G** then **H** | Go home |\n| **G** then **T** | Go to tasks |\n| **G** then **P** | Go to projects |\n| **G** then **C** | Go to the calendar |\n| **J** and **K** | Move down and up a list |\n| **Enter** | Open the selected task |\n| **Esc** | Close the panel |\n\nPress **?** anywhere to see this list.',
-   'ready', 'Kyan', 'keyboard shortcuts keys hotkeys command', 6),
-  ('using-the-ppm', 'private-tasks', 'Private tasks', 'Use the PPM as your own to-do list too.',
-E'Turn on **Private** when you create a task, and only you and its assignee can see it. It still shows on your dashboard and calendar.\n\nOnly the person who created a task can make it private or public again.',
-   'ready', 'Kyan', 'private personal todo hidden', 7),
   ('standard-procedure', 'monthly-client-report', 'Monthly client report', 'How we put together and send each client''s monthly report.', '', 'needed', 'Christian', 'report monthly client', 30),
   ('standard-procedure', 'onboarding-a-new-client', 'Onboarding a new client', 'From signed contract to first deliverable.', '', 'needed', 'Kenneth', 'onboarding client kickoff', 30),
   ('seo-geo', 'blog-post-production', 'Producing a blog post', 'Research, writing, checks and publishing, step by step.', '', 'draft', 'Christian', 'blog post seo geo writing', 40),
