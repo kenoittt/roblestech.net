@@ -4,14 +4,15 @@ How the new PPM (this Next.js app) replaces the Astro PPM at **ppm.roblestech.ne
 
 ## In one page
 
-- **What happens:** this app goes into the `ppm/` folder of the website repository, the existing Vercel project builds it, and the shared database gets eight updates that only add things. The address stays the same; the portal, WanderWise and the public site don't change.
-- **How long:** one day. First Claude makes two fixes (about 2 to 3 hours). Then the switch, with Kenneth (about an hour). Then everyone gets their account.
-- **Who:** Claude writes the code and types the commands. Kenneth owns the accounts (GitHub, Vercel, Supabase, Microsoft 365), approves every step that touches the live database, and merges. Kyan hands over the code and tries the result.
+- **Where things stand:** the code is on the branch `ppm-nextjs` of the website repository, in a pull request (Step 1). Kenneth: ask your Claude to read `ppm/docs/DEPLOY.md` and follow it; it will tell you when to merge. **Don't merge before that:** merging puts the new app live at once, before the database is ready.
+- **What happens:** this app replaces the `ppm/` folder of the website repository, the existing Vercel project builds it, and the shared database gets eight updates that only add things. The address stays the same; the portal, WanderWise and the public site don't change.
+- **How long:** one day. Kenneth's Claude makes two fixes on the branch (about 2 to 3 hours). Then the switch, with Kenneth (about an hour). Then everyone gets their account.
+- **Who:** Kenneth's Claude writes the code and types the commands. Kenneth owns the accounts (GitHub, Vercel, Supabase, Microsoft 365), approves every step that touches the live database, and merges. Kyan tries the result.
 - **How hard:** mostly settings and copy-paste commands. The one delicate part is the database, because the client portal uses it too. Three things protect it: a backup, a dry run that is undone straight after, and Vercel's Instant Rollback, which brings the old PPM back in one click.
 
 ## Is it ready?
 
-Yes, after two fixes (Step 1). Every screen works and has been tested on a local copy: 23 end-to-end checks (`npm run test:smoke`), a check that opens every menu and dialog on every screen as three roles (`npm run test:menus`), and a scripted walkthrough of the demo. It hasn't yet run on real hosting (Vercel, the hosted database and Microsoft 365 email together); the checks in Step 3 cover that.
+Yes. Two fixes remain (Step 2), and one of them is needed before new people can be invited. Every screen works and has been tested on a local copy: 23 end-to-end checks (`npm run test:smoke`), a check that opens every menu and dialog on every screen as three roles (`npm run test:menus`), and a scripted walkthrough of the demo. It hasn't yet run on real hosting (Vercel, the hosted database and Microsoft 365 email together); the checks in Step 3 cover that.
 
 ## Choose a path: keep the current database, or start fresh
 
@@ -23,33 +24,22 @@ Yes, after two fixes (Step 1). Every screen works and has been tested on a local
 | Risk to the portal | Low: the updates only add things, and the portal was checked | None: the PPM moves to its own database |
 | Steps | Step 1, Step 2, Step 3A | Step 1, Step 2, Step 3B |
 
-## Step 1: two fixes first (Claude, about 2 to 3 hours)
+## Step 1: the code is in the repository (done, 2026-10-03)
 
-Details are in [backlog.md](backlog.md):
-1. **Invitation and password-reset emails** (item 1). Without it, nobody new can be invited. The database's email templates are shared with the portal, so the PPM must send these two emails itself.
-2. **The "Chosen people" selector** (item 2).
+Kyan pushed the branch `ppm-nextjs` to the website repository and opened a pull request. It replaces the `ppm/` folder with this app and changes nothing else. From the repository's root, this plan's paths are inside `ppm/`.
+
+**Don't merge it yet.** Merging puts the new app live at once, and it needs the database updates and the settings first: Step 3A.7 (or 3B.7) is the moment. Vercel builds a preview of the branch, which may show errors until the database has its updates. That's expected; don't send the team to it.
+
+`RTC-PPM`'s own history (about fifty commits that explain each step) stays in Kyan's folder; the repository has the files.
+
+## Step 2: two fixes (Kenneth's Claude, on the same branch, about 2 to 3 hours)
+
+Details are in [backlog.md](backlog.md). Commit them to `ppm-nextjs` before merging:
+1. **Invitation and password-reset emails** (item 1). Needed before anyone new can be invited; the team's existing accounts work without it. The database's email templates are shared with the portal, so the PPM must send these two emails itself.
+2. **The "Chosen people" selector** (item 2). It can also come after the switch.
 3. **One decision for Kyan** (item 3): should admins be able to sign off in someone's place?
 
-Then `npm run test:smoke` and `npm run test:menus` must pass, and the fixes go into the code before Step 2.
-
-## Step 2: put the code into the website repository (Claude)
-
-The app sits in Kyan's local folder `RTC-PPM/` for now. It goes straight into the website repository, replacing `ppm/`, through a pull request.
-
-1. **Get the code.** If Kyan can push to the website repository, he does Step 2 himself. If not, he makes a clean copy, `git -C RTC-PPM archive -o rtc-ppm.zip HEAD`, which holds the tracked files only (no keys, no build folders), and sends it to Kenneth.
-2. **On a new branch** of the website repository:
-   ```bash
-   git switch -c ppm-nextjs
-   git rm -r -q ppm && mkdir ppm
-   git -C <path to RTC-PPM> archive HEAD | tar -x -C ppm   # or: unzip rtc-ppm.zip -d ppm
-   git add ppm && git commit -m "PPM: replace the Astro app with the Next.js app"
-   git push -u origin ppm-nextjs
-   ```
-3. **Open a pull request.** Don't merge yet: that's Step 3A.7 or 3B.7. Pushing straight to `main` would put the new app live at once, before the database has its updates, and it would break.
-
-Vercel builds a preview of the branch. It may show errors until the database has its updates (Step 3): that's expected. Don't send the team to it.
-
-No other repository is needed: the code goes straight into the website repository. `RTC-PPM`'s own history (about fifty commits that explain each step) stays in Kyan's folder.
+Then `npm run test:smoke` and `npm run test:menus` must pass. They run against a local copy of the database: see `README.md`, "Run it locally".
 
 ## Step 3A: the switch, keeping the current database (Kenneth with Claude, about an hour)
 
@@ -150,7 +140,7 @@ Kenneth's Claude turns this into a one-page guide for Kenneth ([backlog.md](back
 
 ## Rules for Claude, helping Kenneth
 
-- Read this file, [backlog.md](backlog.md) and `README.md` first. Work on a branch and open a pull request; Kenneth merges.
+- Read this file, [backlog.md](backlog.md) and `README.md` first. Work on the `ppm-nextjs` branch; Kenneth merges the pull request only at Step 3A.7 (or 3B.7).
 - Before any command that changes a hosted project (`db push`, `migration repair`, SQL that writes, settings), show Kenneth the exact command and which project it targets, and wait for his yes.
 - Never delete a Supabase project, a table or data unless Kenneth asks for that exact thing, after a backup.
 - Never run `supabase db reset` or anything with `--include-seed` against a hosted project.

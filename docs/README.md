@@ -6,7 +6,7 @@ How this app was made, and how to keep working on it at the same quality, whoeve
 
 | File | What it is |
 |---|---|
-| [DEPLOY.md](DEPLOY.md) | How the new PPM replaces the Astro PPM at ppm.roblestech.net, same day: fixes first, the switch, accounts, the handbook, rollback, and rules for Claude |
+| [DEPLOY.md](DEPLOY.md) | How the new PPM replaces the Astro PPM at ppm.roblestech.net, same day: where things stand, the remaining fixes, the switch, accounts, the handbook, rollback, and rules for Claude |
 | [backlog.md](backlog.md) | What's left: fixes before going live, tasks after it, and the goals (including filling this knowledge base) |
 | [handbook-drafts/](handbook-drafts/) | Six how-to articles for the in-app Handbook, written during the build. Drafts: check them against the app before publishing |
 
