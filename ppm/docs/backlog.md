@@ -6,6 +6,8 @@ What's left to do on the PPM, newest decisions first within each part. Tick item
 
 ### 1. Invitation and password-reset emails must send themselves (blocks inviting people)
 
+**Done 2026-10-03 (Kenneth's Claude).** Invite, Resend invite and Send password reset use `generateLink` and send through `sendMail`. With no email settings they refuse up front; a failed invitation email removes the new account again. Resending to someone who already set a password returns `email_exists`, and the app suggests a reset instead. `npm run test:smoke` passes 23/23.
+
 **Why:** Supabase project A has one set of email templates and one Site URL, shared by the PPM and the client portal. The portal's "forgot password" relies on Supabase's standard link (it exchanges a `code` at `/reset`). This app expects a different link (`/auth/confirm?token_hash=…&type=…`). Changing the shared templates for the PPM would break the portal's resets; leaving them means the PPM's invitations and resets fail. Found 2026-10-03 while writing `DEPLOY.md`, by reading the portal's code.
 
 **The fix:** the PPM sends these two emails itself, through the Microsoft 365 setup it already uses for notifications, and leaves Supabase's templates alone. In `src/domains/people/actions.ts`:
@@ -18,9 +20,13 @@ What's left to do on the PPM, newest decisions first within each part. Tick item
 
 ### 2. Choosing the people for "Chosen people" (reported by Kyan, 2026-10-03)
 
+**Done 2026-10-03 (Kenneth's Claude).** Reproduced: the create dialog could save "Chosen people" with nobody chosen, and the panel saved the rule with an empty list. The create dialog now shows a people picker for that rule and won't create the task until someone is chosen; the panel saves the rule only with the first person and won't remove the last one. Checked in a browser; `test:smoke` 23/23 and `test:menus` clean.
+
 When a task's sign-off is set to "Chosen people", there's no way to pick who they are. Wanted: a selector for the people allowed to sign off, wherever "Chosen people" can be chosen, and the rule can't be saved without at least one person. Documented as Kyan asked, not reproduced yet. A hint from the build: the task panel shows a "Signed off by" picker once the rule is set; the create dialog (`src/domains/tasks/components/create-task-dialog.tsx`) has none.
 
 ### 3. A decision for Kyan: admins signing off in someone's place
+
+**Decided 2026-10-03 by Kenneth: keep it.** Admins can sign off in someone's place; nothing changes.
 
 Admins can mark any task done in place of the person its rule names, so a reviewer on leave doesn't block the team. The button says "Sign off as admin", a toast names whose sign-off it replaced, and the history records it. This came from the build, not from a decision. Keep it, or make admins follow the rule like everyone else: one line in the database function `ppm_can_complete` (and `canComplete` in `src/domains/tasks/config.ts`).
 

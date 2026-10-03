@@ -372,7 +372,12 @@ function Properties({ task }: { task: Task }) {
   const reviewer = task.reviewer_id ? members.get(task.reviewer_id) : null
   const creator = task.created_by ? members.get(task.created_by) : null
   const project = task.project_id ? projects.get(task.project_id) : null
-  const policy = task.completion_policy as Policy
+  // "Chosen people" isn't saved until someone is chosen: an empty list would leave
+  // a task only admins could finish. Until then the picker below asks for a name.
+  const [choosingFor, setChoosingFor] = useState<string | null>(null)
+  const choosingPeople = choosingFor === task.id
+  const setChoosingPeople = (on: boolean) => setChoosingFor(on ? task.id : null)
+  const policy = (choosingPeople ? "specific" : task.completion_policy) as Policy
 
   return (
     <dl className="grid grid-cols-1 gap-x-8 gap-y-0.5 border-y border-line px-6 py-3 sm:grid-cols-2">
@@ -487,7 +492,14 @@ function Properties({ task }: { task: Task }) {
           value={policy}
           placeholder="Who can mark it done?"
           width="w-80"
-          onSelect={(v) => patch({ completion_policy: v })}
+          onSelect={(v) => {
+            if (v === "specific" && !task.completion_approvers.length) {
+              setChoosingPeople(true)
+              return
+            }
+            setChoosingPeople(false)
+            patch({ completion_policy: v })
+          }}
           footer={POLICY_META[policy]?.hint}
         />
       </Prop>
@@ -501,7 +513,7 @@ function Properties({ task }: { task: Task }) {
               task.completion_approvers.length ? (
                 <span className="truncate">{task.completion_approvers.map((id) => displayName(members.get(id))).join(", ")}</span>
               ) : (
-                <span className="text-fg-3">Choose people</span>
+                <span className={choosingPeople ? "text-warning" : "text-fg-3"}>Choose people</span>
               )
             }
             options={approvers}
@@ -512,8 +524,16 @@ function Properties({ task }: { task: Task }) {
               const set = new Set(task.completion_approvers)
               if (set.has(v)) set.delete(v)
               else set.add(v)
-              patch({ completion_approvers: [...set] })
+              if (!set.size) {
+                toast.error("Keep at least one person", { description: "Or change who can mark it done." })
+                return
+              }
+              if (choosingPeople) {
+                setChoosingPeople(false)
+                patch({ completion_policy: "specific", completion_approvers: [...set] })
+              } else patch({ completion_approvers: [...set] })
             }}
+            footer={choosingPeople ? "Pick at least one person. The rule changes once you do." : undefined}
           />
         </Prop>
       ) : (

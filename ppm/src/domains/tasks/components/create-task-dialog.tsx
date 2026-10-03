@@ -32,13 +32,14 @@ import {
   useProjectOptions,
 } from "./pickers"
 
-type Draft = Required<Pick<NewTask, "status" | "priority" | "completion_policy">> &
+type Draft = Required<Pick<NewTask, "status" | "priority" | "completion_policy" | "completion_approvers">> &
   Pick<NewTask, "assignee_id" | "project_id" | "due_date" | "reviewer_id" | "repeat"> & { is_private: boolean }
 
 const EMPTY: Draft = {
   status: "todo",
   priority: "none",
   completion_policy: "anyone",
+  completion_approvers: [],
   assignee_id: null,
   project_id: null,
   due_date: null,
@@ -75,6 +76,7 @@ export function CreateTaskDialog() {
   const priorityOpts = useMemo(() => priorityOptions(), [])
   const people = usePeopleOptions({ projectId: draft.project_id })
   const reviewers = usePeopleOptions({ projectId: draft.project_id, noneLabel: "No reviewer" })
+  const approvers = usePeopleOptions({ projectId: draft.project_id, includeNone: false })
   const projectOpts = useProjectOptions()
   const policyOpts = useMemo(() => policyOptions(), [])
   const repeatOpts = useMemo(() => repeatOptions(), [])
@@ -86,8 +88,19 @@ export function CreateTaskDialog() {
       titleRef.current?.focus()
       return
     }
+    // "Chosen people" with nobody chosen would leave a task only admins could finish.
+    if (draft.completion_policy === "specific" && !draft.completion_approvers.length) {
+      toast.error("Choose who can sign it off", { description: "Pick at least one person, or change who can mark it done." })
+      return
+    }
     try {
-      const task = await create.mutateAsync({ ...draft, title: clean, description: description.trim() || null })
+      const task = await create.mutateAsync({
+        ...draft,
+        // Only "Chosen people" uses the list; any other rule starts with it empty.
+        completion_approvers: draft.completion_policy === "specific" ? draft.completion_approvers : [],
+        title: clean,
+        description: description.trim() || null,
+      })
       toast(`Created ${taskKey(task)}`, {
         description: task.title,
         action: { label: "Open", onClick: () => openTask(task.number) },
@@ -208,6 +221,29 @@ export function CreateTaskDialog() {
             <PickerMenu triggerLabel="Who can mark it done" triggerClassName={chipClass} trigger={<PolicyChip value={draft.completion_policy} />}
               options={policyOpts} value={draft.completion_policy} placeholder="Who can mark it done?" width="w-80"
               onSelect={(completion_policy) => set({ completion_policy })} />
+            {draft.completion_policy === "specific" && (
+              <PickerMenu
+                triggerLabel="People who can sign it off"
+                triggerClassName={cn(chipClass, !draft.completion_approvers.length && "border-warning/60 text-fg")}
+                multiple
+                trigger={
+                  draft.completion_approvers.length
+                    ? <span className="truncate">Signed off by {draft.completion_approvers.map((id) => displayName(members.get(id))).join(", ")}</span>
+                    : "Choose who signs off"
+                }
+                options={approvers}
+                value={draft.completion_approvers}
+                placeholder="Who can sign it off?"
+                width="w-80"
+                onSelect={(v) =>
+                  set({
+                    completion_approvers: draft.completion_approvers.includes(v)
+                      ? draft.completion_approvers.filter((id) => id !== v)
+                      : [...draft.completion_approvers, v],
+                  })
+                }
+              />
+            )}
             {(draft.completion_policy === "reviewer" || draft.reviewer_id) && (
               <PickerMenu
                 triggerLabel="Reviewer"
