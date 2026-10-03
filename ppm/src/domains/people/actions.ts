@@ -2,9 +2,9 @@
 
 import { createSupabaseAdmin } from "@/lib/supabase/admin"
 import { createSupabaseServer } from "@/lib/supabase/server"
-import { APP_URL } from "@/lib/env"
 import type { Role } from "@/domains/workspace/types"
 import { deliverNotifications } from "@/domains/inbox/actions"
+import { emailConfigured, emailLayout, sendMail } from "@/lib/email"
 
 // Managing people needs the service role (inviting, banning, changing roles),
 // which skips the database's rules. So every action here checks the caller's
@@ -46,6 +46,55 @@ function mayManage(me: Role, them: Role) {
   return me === "admin" && them === "staff"
 }
 
+
+// Invitations and password resets are emailed by the PPM itself, through the
+// same Microsoft 365 setup as its notifications. The database's own email
+// templates and Site URL belong to the client portal (both apps share Supabase
+// project A), so the PPM asks Supabase only for the link (generateLink sends
+// nothing) and builds the email here. /auth/confirm checks the token.
+const NO_EMAIL = "Email isn't set up on this server yet, so nothing can be sent. Ask Kenneth to add the Microsoft 365 settings."
+
+function authLinkEmail(kind: "invite" | "recovery", hashedToken: string, name: string | null) {
+  const path = `/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=${kind}&next=/welcome`
+  return kind === "invite"
+    ? {
+        subject: "You're invited to the RTC PPM",
+        ...emailLayout({
+          heading: "You're invited to the PPM",
+          lines: [
+            `Hi${name ? ` ${name}` : ""}, the team uses the PPM for tasks, projects and the shared calendar.`,
+            "Set your password to get started. The link works once; if it has expired, ask an admin to send a new one.",
+          ],
+          button: "Set your password",
+          path,
+          footer: "If you weren't expecting this, you can ignore it. Nothing happens until you click the link.",
+        }),
+      }
+    : {
+        subject: "Reset your RTC PPM password",
+        ...emailLayout({
+          heading: "Reset your password",
+          lines: [
+            "Someone asked to reset the password for your PPM account. Choose a new one with the link below.",
+            "The link works once and expires soon. If it has, ask an admin to send a new one.",
+          ],
+          button: "Choose a new password",
+          path,
+          footer: "If you didn't ask for this, ignore this email. Your password stays the same.",
+        }),
+      }
+}
+
+async function emailAuthLink(kind: "invite" | "recovery", to: string, hashedToken: string, name: string | null) {
+  const { subject, html, text } = authLinkEmail(kind, hashedToken, name)
+  try {
+    return await sendMail({ to, subject, html, text })
+  } catch (e) {
+    console.error(`${kind} email to ${to} failed`, e)
+    return false
+  }
+}
+
 export async function inviteMember(input: { email: string; fullName: string; role: Role; title?: string }): Promise<Result> {
   const me = await caller()
   if (!me || RANK[me.role] < RANK.admin) return { ok: false, error: "Only admins can invite people." }
@@ -56,13 +105,17 @@ export async function inviteMember(input: { email: string; fullName: string; rol
     return { ok: false, error: "Only a super admin can invite an admin." }
   }
 
+  if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
+
   const admin = createSupabaseAdmin()
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { full_name: input.fullName.trim() },
-    redirectTo: `${APP_URL}/auth/confirm?next=/welcome`,
+  const fullName = input.fullName.trim()
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: { data: { full_name: fullName } },
   })
-  if (error || !data.user) {
-    const taken = error?.message?.toLowerCase().includes("already")
+  if (error || !data.user || !data.properties?.hashed_token) {
+    const taken = error?.message?.toLowerCase().includes("already") || error?.code === "email_exists"
     return { ok: false, error: taken ? "Someone with that email already has an account." : error?.message ?? "The invitation didn't send." }
   }
 
@@ -76,6 +129,12 @@ export async function inviteMember(input: { email: string; fullName: string; rol
   if (pErr) {
     await admin.auth.admin.deleteUser(data.user.id)
     return { ok: false, error: pErr.message }
+  }
+  if (!(await emailAuthLink("invite", email, data.properties.hashed_token, fullName || null))) {
+    // Undo, so the same address can simply be invited again once email works.
+    await admin.from("profiles").delete().eq("id", data.user.id)
+    await admin.auth.admin.deleteUser(data.user.id)
+    return { ok: false, error: "The invitation email couldn't be sent, so nothing was created. Try again in a minute." }
   }
   return { ok: true, message: `Invitation sent to ${email}.` }
 }
@@ -162,11 +221,13 @@ export async function sendPasswordReset(userId: string): Promise<Result> {
   if (userId !== me.uid && !mayManage(me.role, them.role)) {
     return { ok: false, error: "Only a super admin can reset an admin's password." }
   }
+  if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
   const admin = createSupabaseAdmin()
-  const { error } = await admin.auth.resetPasswordForEmail(them.email, {
-    redirectTo: `${APP_URL}/auth/confirm?next=/welcome`,
-  })
-  if (error) return { ok: false, error: error.message }
+  const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email: them.email })
+  if (error || !data.properties?.hashed_token) return { ok: false, error: error?.message ?? "The reset link couldn't be made." }
+  if (!(await emailAuthLink("recovery", them.email, data.properties.hashed_token, them.full_name))) {
+    return { ok: false, error: "The reset email couldn't be sent. Try again in a minute." }
+  }
   return { ok: true, message: `Reset link sent to ${them.email}.` }
 }
 
@@ -189,11 +250,24 @@ export async function resendInvite(userId: string): Promise<Result> {
   const them = await target(userId)
   if (!them?.email) return { ok: false, error: "That person has no email address." }
   if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can invite an admin." }
+  if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
   const admin = createSupabaseAdmin()
-  const { error } = await admin.auth.admin.inviteUserByEmail(them.email, {
-    data: { full_name: them.full_name ?? "" },
-    redirectTo: `${APP_URL}/auth/confirm?next=/welcome`,
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email: them.email,
+    options: { data: { full_name: them.full_name ?? "" } },
   })
-  if (error) return { ok: false, error: error.message }
+  if (error || !data.properties?.hashed_token) {
+    const taken = error?.message?.toLowerCase().includes("already") || error?.code === "email_exists"
+    return {
+      ok: false,
+      error: taken
+        ? `${them.full_name ?? them.email} has already set a password. Send a password reset instead.`
+        : error?.message ?? "The invitation couldn't be made.",
+    }
+  }
+  if (!(await emailAuthLink("invite", them.email, data.properties.hashed_token, them.full_name))) {
+    return { ok: false, error: "The invitation email couldn't be sent. Try again in a minute." }
+  }
   return { ok: true, message: `A new invitation is on its way to ${them.email}.` }
 }
