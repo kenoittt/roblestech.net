@@ -130,4 +130,4 @@ supabase/
 
 ## Before this replaces the live PPM
 
-See [DEPLOY.md](DEPLOY.md): what to fix first, a rehearsal on a copy of the live database, the switch itself in one sitting, the production settings, and how to roll back.
+See [docs/DEPLOY.md](docs/DEPLOY.md): the two fixes first, the switch in one sitting (keeping the current database, or starting fresh), the production settings, accounts, the handbook, and how to roll back. What's left to do is in [docs/backlog.md](docs/backlog.md); [docs/](docs/README.md) is the project's knowledge base.
