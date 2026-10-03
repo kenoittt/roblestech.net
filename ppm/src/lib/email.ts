@@ -1,74 +1,103 @@
-/*
- * Sends email via Microsoft Graph using client-credentials (app-only) auth.
- * Requires an Entra app registration with the Mail.Send application permission
- * (admin-consented) and a sending mailbox (MAIL_FROM).
- * If credentials are absent it no-ops, so the app runs before email is set up.
- */
-import { pick } from './env';
+import "server-only"
+import { APP_URL } from "@/lib/env"
 
-const TENANT = pick('MS_TENANT_ID');
-const CLIENT_ID = pick('MS_CLIENT_ID');
-const CLIENT_SECRET = pick('MS_CLIENT_SECRET');
-const MAIL_FROM = pick('MAIL_FROM');
+// One way to send email, three ways it travels:
+// - production: Microsoft Graph, as the live PPM does (MS_TENANT_ID, MS_CLIENT_ID,
+//   MS_CLIENT_SECRET, MAIL_FROM: an Entra app with the Mail.Send permission);
+// - local: the Supabase stack's mail catcher (MAIL_DEV_URL), so nothing leaves the machine;
+// - neither set: nothing is sent, and the app works without email.
 
-export const emailConfigured = () => !!(TENANT && CLIENT_ID && CLIENT_SECRET && MAIL_FROM);
+const graph = {
+  tenant: process.env.MS_TENANT_ID,
+  client: process.env.MS_CLIENT_ID,
+  secret: process.env.MS_CLIENT_SECRET,
+  from: process.env.MAIL_FROM,
+}
+const devUrl = process.env.MAIL_DEV_URL
 
-async function graphToken(): Promise<string> {
-  const res = await fetch(`https://login.microsoftonline.com/${TENANT}/oauth2/v2.0/token`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      scope: 'https://graph.microsoft.com/.default',
-      grant_type: 'client_credentials',
-    }),
-  });
-  if (!res.ok) throw new Error(`Graph token failed: ${res.status} ${await res.text()}`);
-  const j = (await res.json()) as { access_token?: string };
-  if (!j.access_token) throw new Error('No Graph access_token');
-  return j.access_token;
+export function emailConfigured() {
+  return Boolean((graph.tenant && graph.client && graph.secret && graph.from) || devUrl)
 }
 
-/** Send an HTML email. Returns true if sent, false if email isn't configured. */
-export async function sendMail(to: string | string[], subject: string, html: string): Promise<boolean> {
-  if (!emailConfigured()) return false;
-  const recipients = (Array.isArray(to) ? to : [to])
-    .filter(Boolean)
-    .map((address) => ({ emailAddress: { address } }));
-  if (recipients.length === 0) return false;
+async function graphToken() {
+  const res = await fetch(`https://login.microsoftonline.com/${graph.tenant}/oauth2/v2.0/token`, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: graph.client!,
+      client_secret: graph.secret!,
+      scope: "https://graph.microsoft.com/.default",
+      grant_type: "client_credentials",
+    }),
+  })
+  if (!res.ok) throw new Error(`Graph token failed: ${res.status}`)
+  const json = (await res.json()) as { access_token?: string }
+  if (!json.access_token) throw new Error("Graph returned no token")
+  return json.access_token
+}
 
-  const token = await graphToken();
-  const res = await fetch(
-    `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(MAIL_FROM)}/sendMail`,
-    {
-      method: 'POST',
-      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+export async function sendMail({ to, subject, html, text }: { to: string; subject: string; html: string; text: string }) {
+  if (graph.tenant && graph.client && graph.secret && graph.from) {
+    const token = await graphToken()
+    const res = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(graph.from)}/sendMail`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
       body: JSON.stringify({
-        message: {
-          subject,
-          body: { contentType: 'HTML', content: html },
-          toRecipients: recipients,
-        },
+        message: { subject, body: { contentType: "HTML", content: html }, toRecipients: [{ emailAddress: { address: to } }] },
         saveToSentItems: false,
       }),
-    }
-  );
-  if (!res.ok) throw new Error(`Graph sendMail failed: ${res.status} ${await res.text()}`);
-  return true;
+    })
+    if (!res.ok) throw new Error(`Graph sendMail failed: ${res.status}`)
+    return true
+  }
+  if (devUrl) {
+    const res = await fetch(`${devUrl}/api/v1/send`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        From: { Email: "ppm@roblestech.net", Name: "RTC PPM" },
+        To: [{ Email: to }],
+        Subject: subject,
+        HTML: html,
+        Text: text,
+      }),
+    })
+    return res.ok
+  }
+  return false
 }
 
-/** Small helper for consistent notification wrapping. */
-export function notifyHtml(title: string, bodyLines: string[], linkUrl: string): string {
-  const lines = bodyLines.map((l) => `<p style="margin:0 0 10px;color:#33405c;font-size:15px;">${l}</p>`).join('');
-  return `<div style="font-family:'Segoe UI',system-ui,sans-serif;max-width:520px;margin:0 auto;">
-    <div style="background:#032C7C;padding:18px 24px;border-radius:12px 12px 0 0;">
-      <span style="color:#fff;font-weight:800;font-size:16px;">Robles Tech · PPM</span>
-    </div>
-    <div style="border:1px solid #e6e9f0;border-top:0;border-radius:0 0 12px 12px;padding:24px;">
-      <h2 style="margin:0 0 14px;color:#032C7C;font-size:19px;">${title}</h2>
-      ${lines}
-      <a href="${linkUrl}" style="display:inline-block;margin-top:12px;background:#0464DD;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 22px;border-radius:8px;">Open PPM →</a>
-    </div>
-  </div>`;
+const escape = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+/**
+ * The one email layout: a short heading, a few lines, one button. Every value
+ * is escaped (the live PPM's emails weren't: issue S-05).
+ */
+export function emailLayout({
+  heading,
+  lines,
+  button,
+  path,
+  footer,
+}: {
+  heading: string
+  lines: string[]
+  button: string
+  path: string
+  footer?: string
+}) {
+  const url = `${APP_URL}${path}`
+  const body = lines
+    .map((l) => `<p style="font-size:14px;line-height:22px;margin:0 0 10px;color:#4a515e;">${escape(l)}</p>`)
+    .join("")
+  const html = `<div style="font-family:-apple-system,'Segoe UI',Inter,Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#11141a;">
+  <p style="font-size:13px;color:#737a88;margin:0 0 24px;">Robles Technologies Corp. · PPM</p>
+  <h1 style="font-size:18px;font-weight:600;line-height:26px;margin:0 0 12px;">${escape(heading)}</h1>
+  ${body}
+  <a href="${url}" style="display:inline-block;margin-top:12px;background:#0464dd;color:#ffffff;text-decoration:none;font-size:14px;font-weight:500;padding:10px 16px;border-radius:6px;">${escape(button)}</a>
+  <p style="font-size:12px;line-height:18px;color:#a4aab4;margin:32px 0 0;">${escape(footer ?? "You get these because you're on the RTC team. Turn them off in Settings, under Notifications.")}</p>
+</div>`
+  const text = [heading, "", ...lines, "", `${button}: ${url}`].join("\n")
+  return { html, text }
 }

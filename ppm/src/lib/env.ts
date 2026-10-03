@@ -1,10 +1,10 @@
-// Settings, read on the server at request time. getSecret() keeps values out
-// of the build output; Astro 6 and later bake import.meta.env into the build.
-import { getSecret } from 'astro:env/server';
+// Public settings, read once. Server-only secrets live in lib/supabase/admin.ts.
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321"
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
-export const pick = (key: string): string => getSecret(key) ?? '';
+/** Local demos only: the account switcher and the "sample data" note. */
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true"
 
-export const SUPABASE_URL = pick('PUBLIC_SUPABASE_URL');
-export const SUPABASE_ANON_KEY = pick('PUBLIC_SUPABASE_ANON_KEY');
-export const SUPABASE_SERVICE_ROLE_KEY = pick('SUPABASE_SERVICE_ROLE_KEY');
-export const APP_URL = pick('PUBLIC_APP_URL') || 'https://ppm.roblestech.net';
+/** The team works in Manila; every "today" and every date on screen uses it. */
+export const TIMEZONE = "Asia/Manila"

@@ -1,0 +1,434 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =============================================================================
+   RTC PPM design tokens
+   One place for every colour, size and curve. Components use the semantic
+   names below (bg-surface, text-fg-2, border-line, ...), never raw values, so
+   a change here is a one-line change everywhere.
+
+   Brand: RTC's navy and blues lead; RTC green is kept for one meaning only,
+   "done". Dark is the primary theme; light follows the same structure.
+   ============================================================================= */
+
+:root {
+  /* Surfaces, from the window frame inwards */
+  --canvas: #f3f4f6;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-inset: #f7f8fa;
+  --hover: rgb(15 23 42 / 0.04);
+  --selected: rgb(15 23 42 / 0.065);
+
+  /* Lines */
+  --line: rgb(15 23 42 / 0.085);
+  --line-strong: rgb(15 23 42 / 0.14);
+
+  /* Text, from primary to faint */
+  --fg: #11141a;
+  --fg-2: #4a515e;
+  --fg-3: #656c7a;
+  --fg-4: #878d99;
+
+  /* Brand */
+  --brand: #0464dd;
+  --brand-solid: #0464dd;
+  --brand-solid-hover: #0b59c2;
+  --brand-soft: rgb(4 100 221 / 0.09);
+  --navy: #032c7c;
+
+  /* Meaning */
+  --danger: #d23c3c;
+  --danger-soft: rgb(210 60 60 / 0.09);
+  --warning: #9a6a00;
+  --success: #3f8a1f;
+
+  /* Task statuses */
+  --status-backlog: #a4aab4;
+  --status-todo: #7a818f;
+  --status-in-progress: #a87700;
+  --status-in-review: #5864ff;
+  --status-done: #4b9a26;
+  --status-cancelled: #a4aab4;
+
+  --priority-urgent: #e5762a;
+
+  /* Charts: RTC blues first, then the status colours */
+  --chart-1: #0464dd;
+  --chart-2: #3992ff;
+  --chart-3: #5864ff;
+  --chart-4: #9cc5ff;
+  --chart-5: #2f58a3;
+  --chart-track: rgb(15 23 42 / 0.06);
+
+  --shadow-popover: 0 0 0 1px var(--line), 0 10px 32px -8px rgb(15 23 42 / 0.16), 0 2px 6px -2px rgb(15 23 42 / 0.08);
+  --shadow-sheet: 0 0 0 1px var(--line), 0 1px 2px rgb(15 23 42 / 0.04);
+
+  /* shadcn's semantic names, mapped onto ours */
+  --background: var(--surface);
+  --foreground: var(--fg);
+  --card: var(--surface);
+  --card-foreground: var(--fg);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--fg);
+  --primary: var(--brand-solid);
+  --primary-foreground: #ffffff;
+  --secondary: rgb(15 23 42 / 0.05);
+  --secondary-foreground: var(--fg);
+  --muted: rgb(15 23 42 / 0.045);
+  --muted-foreground: var(--fg-3);
+  --accent: var(--selected);
+  --accent-foreground: var(--fg);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand);
+  --radius: 0.5rem;
+  --sidebar: var(--canvas);
+  --sidebar-foreground: var(--fg-2);
+  --sidebar-primary: var(--brand-solid);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--selected);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
+
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: #08090c;
+  --surface: #0e1015;
+  --surface-raised: #161921;
+  --surface-inset: #0b0d11;
+  --hover: rgb(255 255 255 / 0.04);
+  --selected: rgb(255 255 255 / 0.07);
+
+  --line: rgb(255 255 255 / 0.07);
+  --line-strong: rgb(255 255 255 / 0.115);
+
+  --fg: #eceef2;
+  --fg-2: #a3aab7;
+  --fg-3: #7d8494;
+  --fg-4: #626977;
+
+  --brand: #4d9bff;
+  --brand-solid: #1a6ff0;
+  --brand-solid-hover: #2b7bf5;
+  --brand-soft: rgb(57 146 255 / 0.13);
+  --navy: #032c7c;
+
+  --danger: #f07070;
+  --danger-soft: rgb(240 112 112 / 0.12);
+  --warning: #f0b33d;
+  --success: #aee37b;
+
+  --status-backlog: #656c79;
+  --status-todo: #9aa1ad;
+  --status-in-progress: #f0c04c;
+  --status-in-review: #8590ff;
+  --status-done: #aee37b;
+  --status-cancelled: #656c79;
+
+  --priority-urgent: #f2994a;
+
+  --chart-1: #3992ff;
+  --chart-2: #1a6ff0;
+  --chart-3: #8590ff;
+  --chart-4: #9cc5ff;
+  --chart-5: #2f58a3;
+  --chart-track: rgb(255 255 255 / 0.06);
+
+  --shadow-popover: 0 0 0 1px var(--line-strong), 0 14px 40px -10px rgb(0 0 0 / 0.6), 0 2px 8px -2px rgb(0 0 0 / 0.4);
+  --shadow-sheet: 0 0 0 1px var(--line);
+
+  --secondary: rgb(255 255 255 / 0.06);
+  --muted: rgb(255 255 255 / 0.05);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  /* Fonts: Inter for everything; system mono for IDs and keys */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* Type scale: 14px body, 13px for most UI, 12px for meta */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.375rem;
+  --text-md: 0.9375rem;
+  --text-md--line-height: 1.5rem;
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+
+  /* Motion (Emil Kowalski): strong ease-out for things that enter,
+     ease-in-out for things that move, a drawer curve for panels. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-inset: var(--surface-inset);
+  --color-hover: var(--hover);
+  --color-selected: var(--selected);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-fg-4: var(--fg-4);
+  --color-brand: var(--brand);
+  --color-brand-solid: var(--brand-solid);
+  --color-brand-solid-hover: var(--brand-solid-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-navy: var(--navy);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-status-backlog: var(--status-backlog);
+  --color-status-todo: var(--status-todo);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-in-review: var(--status-in-review);
+  --color-status-done: var(--status-done);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-priority-urgent: var(--priority-urgent);
+  --color-chart-track: var(--chart-track);
+
+  --shadow-popover: var(--shadow-popover);
+  --shadow-sheet: var(--shadow-sheet);
+
+  /* shadcn */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Radius ladder: 4 for chips, 6 for controls, 8 for menus, 12 for the sheet */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.4375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-line outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv01", "cv09", "cv11", "ss03";
+  }
+  body {
+    @apply bg-canvas text-fg text-base;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 32%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: default;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Floating layers: menus, popovers, selects, tooltips
+   Transitions, not keyframes, so a quick open-close-open never restarts from
+   zero. They grow from their trigger (--transform-origin) and leave faster
+   than they arrive.
+   ----------------------------------------------------------------------------- */
+@utility ui-popup {
+  background: var(--surface-raised);
+  color: var(--fg);
+  box-shadow: var(--shadow-popover);
+  border-radius: var(--radius-lg);
+  transform-origin: var(--transform-origin);
+  transition-property: opacity, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+  &[data-starting-style] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.98);
+    transition-duration: 100ms;
+  }
+}
+
+@utility ui-tooltip {
+  transform-origin: var(--transform-origin);
+  transition-property: opacity, transform;
+  transition-duration: 125ms;
+  transition-timing-function: var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  &[data-instant] {
+    transition-duration: 0ms;
+  }
+}
+
+/* Modals stay centred; they only fade and settle. */
+@utility ui-dialog {
+  transition-property: opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-out);
+  &[data-starting-style] {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.985);
+    transition-duration: 120ms;
+  }
+}
+
+@utility ui-backdrop {
+  transition: opacity 200ms var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+/* The task panel slides in from the right on the drawer curve. */
+@utility ui-panel {
+  transition: transform 280ms var(--ease-drawer), opacity 200ms var(--ease-out);
+  &[data-starting-style],
+  &[data-ending-style] {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  &[data-ending-style] {
+    transition-duration: 160ms;
+  }
+}
+
+/* Anything pressable gives way slightly under the finger. */
+@utility pressable {
+  transition-property: transform, background-color, color, box-shadow, border-color;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+  &:active:not(:disabled):not([aria-haspopup]) {
+    transform: scale(0.97);
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum", "cv01", "cv09", "cv11", "ss03";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Rendered Markdown: task descriptions, comments and handbook articles.
+   Quiet and readable; size and spacing do the work, not decoration.
+   ----------------------------------------------------------------------------- */
+@utility prose-app {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--fg-2);
+  & > * + * { margin-top: 0.6em; }
+  & p { color: var(--fg-2); }
+  & strong { color: var(--fg); font-weight: 600; }
+  & a { color: var(--brand); text-decoration: underline; text-decoration-color: color-mix(in oklab, var(--brand) 40%, transparent); text-underline-offset: 2px; }
+  & a:hover { text-decoration-color: var(--brand); }
+  & ul { list-style: disc; padding-left: 1.25em; }
+  & ol { list-style: decimal; padding-left: 1.4em; }
+  & li { margin-top: 0.2em; padding-left: 0.15em; }
+  & li::marker { color: var(--fg-4); }
+  & h1, & h2, & h3, & h4 { color: var(--fg); font-weight: 600; letter-spacing: -0.01em; }
+  & h2 { font-size: 1.05rem; margin-top: 1.4em; }
+  & h3 { font-size: 0.95rem; margin-top: 1.2em; }
+  & code { font-family: var(--font-mono); font-size: 0.85em; background: var(--hover); border: 1px solid var(--line); border-radius: 4px; padding: 0.05em 0.3em; color: var(--fg); }
+  & pre { background: var(--surface-inset); border: 1px solid var(--line); border-radius: 8px; padding: 0.75em 1em; overflow-x: auto; }
+  & pre code { background: none; border: 0; padding: 0; }
+  & blockquote { border-left: 2px solid var(--line-strong); padding-left: 0.9em; color: var(--fg-3); }
+  & hr { border: 0; border-top: 1px solid var(--line); margin: 1.4em 0; }
+  & table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  & th { text-align: left; font-weight: 500; color: var(--fg-3); border-bottom: 1px solid var(--line-strong); padding: 0.45em 0.75em 0.45em 0; }
+  & td { border-bottom: 1px solid var(--line); padding: 0.55em 0.75em 0.55em 0; vertical-align: top; color: var(--fg-2); }
+}
+
+/* Long-form articles: a little larger and roomier than task descriptions. */
+@utility prose-article {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  & h2 { font-size: 1.15rem; margin-top: 2em; scroll-margin-top: 1.5rem; }
+  & h3 { font-size: 1rem; margin-top: 1.6em; scroll-margin-top: 1.5rem; }
+  & > * + * { margin-top: 0.85em; }
+  & table { margin-top: 1.2em; }
+}

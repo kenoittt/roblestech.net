@@ -1,0 +1,15 @@
+<div style="font-family: -apple-system, 'Segoe UI', Inter, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #11141a;">
+  <p style="font-size: 13px; color: #737a88; margin: 0 0 24px;">Robles Technologies Corp.</p>
+  <h1 style="font-size: 20px; font-weight: 600; margin: 0 0 12px;">You're invited to the PPM</h1>
+  <p style="font-size: 14px; line-height: 22px; margin: 0 0 24px; color: #4a515e;">
+    Hi {{ .Data.full_name }}, the team uses the PPM for tasks, projects and the shared calendar.
+    Set your password to get started. The link works once and expires in a day.
+  </p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/welcome"
+     style="display: inline-block; background: #0464dd; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 500; padding: 10px 16px; border-radius: 6px;">
+    Set your password
+  </a>
+  <p style="font-size: 12px; line-height: 18px; color: #a4aab4; margin: 32px 0 0;">
+    If you weren't expecting this, you can ignore it. Nothing happens until you click the link.
+  </p>
+</div>

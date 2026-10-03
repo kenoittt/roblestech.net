@@ -9,7 +9,7 @@ Four apps in one public repo. `main` is production for all of them.
 | Folder | App | Runs on |
 |---|---|---|
 | root (`src/`, `public/`) | Public site, roblestech.net | Static Astro on GitHub Pages, deployed by GitHub Actions on every push to `main` |
-| `ppm/` | Internal PPM and team handbook | Astro on Vercel, Supabase project A |
+| `ppm/` | Internal PPM and team handbook | Next.js on Vercel, Supabase project A (Kyan's revamp; see `ppm/README.md` and `ppm/docs/`) |
 | `portal/` | Client portal | Astro on Vercel, Supabase project A |
 | `travel/` | WanderWise (dormant) | Astro on Vercel, Supabase project B |
 
@@ -42,7 +42,7 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 - **Row-level security helpers that read `profiles` must be `SECURITY DEFINER`** with a fixed `search_path`, or they recurse until the database stops them.
 - **Build on the Node version production uses:** the `engines` field in each app's `package.json`. The 2026-09-25 outage only happened on production's older Node.
 - **Don't add React or animation libraries for what plain HTML can do.** That's how a menu took the PPM down.
-- **Database changes:** never paste SQL into the live project without Kenneth's OK. Never re-run `portal/supabase/schema.sql` or `ppm/supabase/schema.sql`; they would remove super admins' access. New changes go in new, numbered files.
+- **Database changes:** never paste SQL into the live project without Kenneth's OK. Never re-run `portal/supabase/schema.sql`; it would remove super admins' access. PPM changes go in new, timestamped files in `ppm/supabase/migrations/`.
 - **API routes write with the service role key,** which skips row-level security, so every route must check the role itself.
-- **Secrets:** read them at request time with `getSecret()` from `astro:env/server`. From Astro 6 on, `import.meta.env` values are baked into the build. Never commit `.env` files, and never print key values.
+- **Secrets:** in the Astro apps, read them at request time with `getSecret()` from `astro:env/server` (from Astro 6 on, `import.meta.env` values are baked into the build). In the PPM, only `NEXT_PUBLIC_*` values may reach the browser. Never commit `.env` files, and never print key values.
 - **This repo is public.** Nothing goes in it that you wouldn't show a stranger: no secrets, client data or internal notes.
