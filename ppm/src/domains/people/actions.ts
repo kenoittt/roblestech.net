@@ -259,12 +259,15 @@ export async function resendInvite(userId: string): Promise<Result> {
   })
   if (error || !data.properties?.hashed_token) {
     const taken = error?.message?.toLowerCase().includes("already") || error?.code === "email_exists"
-    return {
-      ok: false,
-      error: taken
-        ? `${them.full_name ?? them.email} has already set a password. Send a password reset instead.`
-        : error?.message ?? "The invitation couldn't be made.",
+    if (!taken) return { ok: false, error: error?.message ?? "The invitation couldn't be made." }
+    // They already have a password (say, someone from before the revamp who hasn't opened the new
+    // PPM yet), so an invitation can't be made: send them a password reset instead.
+    const { data: reset, error: rErr } = await admin.auth.admin.generateLink({ type: "recovery", email: them.email })
+    if (rErr || !reset.properties?.hashed_token) return { ok: false, error: rErr?.message ?? "The reset link couldn't be made." }
+    if (!(await emailAuthLink("recovery", them.email, reset.properties.hashed_token, them.full_name))) {
+      return { ok: false, error: "The reset email couldn't be sent. Try again in a minute." }
     }
+    return { ok: true, message: `${them.full_name ?? them.email} already has an account, so a password reset link was sent instead.` }
   }
   if (!(await emailAuthLink("invite", them.email, data.properties.hashed_token, them.full_name))) {
     return { ok: false, error: "The invitation email couldn't be sent. Try again in a minute." }

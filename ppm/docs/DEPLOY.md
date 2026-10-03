@@ -2,9 +2,18 @@
 
 How the new PPM (this Next.js app) replaces the Astro PPM at **ppm.roblestech.net**, for Kenneth, for Kenneth's Claude, and for anyone helping. Written 2026-10-03, after Kenneth gave the go-ahead; the plan is to switch in a day and give the team accounts straight away.
 
+## Where things stand (2026-10-03, Kenneth's Claude)
+
+- **Steps 1 and 2 are done** on the website repository's branch `claude/ppm-nextjs`. Kyan's branch `revamp/ppm-nextjs` held only this app, with no history in common with `main`, so it was never merged; its files went into `ppm/` instead, unchanged (commit 3833d71). The pull request's checks build the PPM as Next.js, with tsc and ESLint blocking.
+- **Both fixes are in** (backlog items 1 and 2), and Kenneth kept admins signing off in someone's place (item 3). `npm run test:smoke` passes 23/23 and `npm run test:menus` opens every menu cleanly, on the local stack.
+- **Two more database updates, both data only:** `20261003000100` adds the Handbook's "Using the PPM" shelf (skips anything already there), and `20261003000200` fills each existing person's new `last_seen_at` from their last sign-in, so the People screen doesn't show the whole current team as "Invited". So there are **ten** updates now, not eight: `20261002000200` to `20261002000900`, then `20261003000100` and `20261003000200`.
+- **Kenneth chose path A** (keep the current database).
+- **Vercel:** the PPM is the project `roblestech-net-8a7c`. It already has every setting this app needs except three, which are the same values under new names: `NEXT_PUBLIC_SUPABASE_URL` (from `PUBLIC_SUPABASE_URL`), `NEXT_PUBLIC_SUPABASE_ANON_KEY` (from `PUBLIC_SUPABASE_ANON_KEY`) and `NEXT_PUBLIC_APP_URL` (from `PUBLIC_APP_URL`). `SUPABASE_SERVICE_ROLE_KEY`, the four Microsoft 365 settings and `CRON_SECRET` keep their names. `vercel.json` sets the framework to Next.js, so the project's Astro preset doesn't matter.
+- **One change of order for Step 3A:** after the database updates (3A.4) and the settings (3A.6, for Production and Preview), redeploy this pull request's preview and sign in to it before merging. The old PPM keeps working on the updated database, so the new one can be tried on real data first.
+
 ## In one page
 
-- **What happens:** this app goes into the `ppm/` folder of the website repository, the existing Vercel project builds it, and the shared database gets eight updates that only add things. The address stays the same; the portal, WanderWise and the public site don't change.
+- **What happens:** this app goes into the `ppm/` folder of the website repository, the existing Vercel project builds it, and the shared database gets ten updates that only add things. The address stays the same; the portal, WanderWise and the public site don't change.
 - **How long:** one day. First Claude makes two fixes (about 2 to 3 hours). Then the switch, with Kenneth (about an hour). Then everyone gets their account.
 - **Who:** Claude writes the code and types the commands. Kenneth owns the accounts (GitHub, Vercel, Supabase, Microsoft 365), approves every step that touches the live database, and merges. Kyan hands over the code and tries the result.
 - **How hard:** mostly settings and copy-paste commands. The one delicate part is the database, because the client portal uses it too. Three things protect it: a backup, a dry run that is undone straight after, and Vercel's Instant Rollback, which brings the old PPM back in one click.
@@ -58,10 +67,10 @@ No other repository is needed: the code goes straight into the website repositor
    - The whole database: the dashboard's backups if the plan includes them, and a copy with the Supabase CLI, following Supabase's guide "Backup and restore using the CLI" (roles, schema and data). Check the guide's commands are current.
    - The handbook on its own: in Supabase, Table Editor, export `kb_articles`, `kb_categories` and `kb_topics` as CSV.
    - Keep both privately, never in the repository: they hold personal data and internal content.
-3. **Dry run, five minutes.** Run the eight updates inside a transaction, then undo it. This tests them against the real data and changes nothing:
+3. **Dry run, five minutes.** Run the ten updates inside a transaction, then undo it. This tests them against the real data and changes nothing:
    ```bash
    cd ppm
-   { echo "begin;"; cat supabase/migrations/20261002000[2-9]00_*.sql; echo "rollback;"; } > /tmp/dry-run.sql
+   { echo "begin;"; cat $(ls supabase/migrations/*.sql | grep -v baseline); echo "rollback;"; } > /tmp/dry-run.sql
    psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/dry-run.sql
    ```
    `DATABASE_URL` is the database's connection string (Supabase, Connect), with the password from Kenneth, passed as a setting and never printed. It must end with `ROLLBACK` and no `ERROR`. If there's an error, stop and look at it; nothing has changed. Without psql, paste the file's contents into Supabase's SQL Editor and run it. Tables are locked for the few seconds it runs, so pick a quiet moment.
@@ -69,7 +78,7 @@ No other repository is needed: the code goes straight into the website repositor
    ```bash
    npx supabase link --project-ref <the live project's ref>
    npx supabase migration repair --status applied 20261002000100
-   npx supabase db push --dry-run    # must list exactly eight files, 20261002000200 to 20261002000900
+   npx supabase db push --dry-run    # must list exactly ten files, 20261002000200 to 20261003000200
    npx supabase db push
    ```
    The first file is a copy of the live schema, which is already there; `repair` marks it as applied. Then open the old PPM: it still works.
