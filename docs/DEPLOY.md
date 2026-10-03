@@ -45,11 +45,11 @@ The app sits in Kyan's local folder `RTC-PPM/` for now. It goes straight into th
    git add ppm && git commit -m "PPM: replace the Astro app with the Next.js app"
    git push -u origin ppm-nextjs
    ```
-3. **Open a pull request.** Don't merge yet: that's Step 3A.7 or 3B.7.
+3. **Open a pull request.** Don't merge yet: that's Step 3A.7 or 3B.7. Pushing straight to `main` would put the new app live at once, before the database has its updates, and it would break.
 
 Vercel builds a preview of the branch. It may show errors until the database has its updates (Step 3): that's expected. Don't send the team to it.
 
-Optional: to keep `RTC-PPM`'s own history (about fifty commits that explain each step), push it to a private repository as an archive. The website repository only needs the files.
+No other repository is needed: the code goes straight into the website repository. `RTC-PPM`'s own history (about fifty commits that explain each step) stays in Kyan's folder.
 
 ## Step 3A: the switch, keeping the current database (Kenneth with Claude, about an hour)
 
