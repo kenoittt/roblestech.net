@@ -112,7 +112,7 @@ No other repository is needed: the code goes straight into the website repositor
 3. **Build it:**
    ```bash
    npx supabase link --project-ref <the new project's ref>
-   npx supabase db push --dry-run    # must list all nine files, 20261002000100 to 20261002000900
+   npx supabase db push --dry-run    # must list all eleven files, 20261002000100 to 20261003000200
    npx supabase db push
    ```
    Never add `--include-seed`: `supabase/seed.sql` is sample data for local use.
