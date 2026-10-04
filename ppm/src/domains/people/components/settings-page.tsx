@@ -8,11 +8,13 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
+import { PasswordInput } from "@/components/app/password-input"
 import { PageBody, PageHeader } from "@/components/app/page"
 import { cn } from "@/lib/utils"
 import { getSupabase } from "@/lib/supabase/client"
 import { useMe } from "@/domains/workspace/provider"
 import { ROLE_META, displayName, type Role } from "@/domains/workspace/types"
+import { TemplatesSettings } from "@/domains/templates/components/templates-settings"
 
 const input =
   "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
@@ -127,15 +129,23 @@ export function SettingsPage() {
             </label>
           </Block>
 
+          <Block
+            id="templates"
+            title="Templates"
+            description="Tasks and calendar entries you make again and again, ready in a couple of clicks. Yours first, then the team's."
+          >
+            <TemplatesSettings />
+          </Block>
+
           <Block title="Password" description="At least 10 characters. Nobody else, admins included, ever sees it.">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">New password</span>
-                <input type="password" autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={input} />
+                <PasswordInput autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={input} />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Type it again</span>
-                <input type="password" autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className={input} />
+                <PasswordInput autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className={input} />
               </label>
             </div>
             <div className="mt-4 flex justify-end">
@@ -148,9 +158,9 @@ export function SettingsPage() {
   )
 }
 
-function Block({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+function Block({ id, title, description, children }: { id?: string; title: string; description: string; children: ReactNode }) {
   return (
-    <section className="mt-10 border-t border-line pt-8">
+    <section id={id} className="mt-10 scroll-mt-6 border-t border-line pt-8">
       <h3 className="text-sm font-semibold text-fg">{title}</h3>
       <p className="mt-0.5 mb-4 text-xs text-fg-3">{description}</p>
       {children}

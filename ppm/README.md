@@ -7,17 +7,18 @@ The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboa
 
 ## What works today
 
-- **Sign-in** with the same roles as the live PPM: super admin, admin, staff. Clients are refused.
+- **Sign-in** with the same roles as the live PPM: super admin, admin, staff. Clients are refused. Every password field has an eye to show what you typed.
 - **Home:** your work first (overdue, today, the next 7 days), your plan for today, what's waiting for your sign-off. Then the team: workload per person, tasks finished over 14 days, project health, what's late, recent activity.
 - **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date. On the board, a card in review says who it's waiting on.
 - **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
+- **Templates:** save a task you make again and again (⋯, Save as template), then make the next one from Templates in the new-task dialog, or from ⌘K. A template keeps the title, description, checklist, people, project and sign-off rule; it can go to whoever uses it and be due a set number of days after it's made. Yours, or shared with the team; Settings lists them.
 - **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, a repeat (every day, weekday, week, two weeks or month: finishing one makes the next, with the same people and rules), project, reviewer, sign-off rule, description (Markdown), checklist, files (up to 25 MB each, private to whoever can see the task), history and comments, with @mentions that notify the person.
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it. Sending a task for sign-off notifies the people the rule names. Admins can sign off in that person's place (say, when a reviewer is away): the button reads "Sign off as admin" and the history records it as such.
-- **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins.
-- **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks.
-- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. "Copy my plan" puts your day on the clipboard for the team chat.
+- **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins, and a refusal says which role you're signed in as.
+- **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks. Archive a project to hide it everywhere (Undo, or Restore later); admins can delete one, keeping its tasks or deleting them too.
+- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. "Copy my plan" puts your day on the clipboard for the team chat. Templates: save an entry (Edit, Save as template), then the arrow beside Plan time puts a block on the day in two clicks, or opens a meeting filled in.
 - **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
-- **Inbox, activity log, command menu (Cmd K: pages, tasks, projects, people, handbook articles), keyboard shortcuts, settings** (including a profile photo).
+- **Inbox, activity log, command menu (Cmd K: pages, tasks, projects, people, handbook articles, templates), keyboard shortcuts, settings** (including a profile photo and your templates).
 - **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
 - **Import and export:** tasks from a CSV, checked in a preview first; all tasks to a CSV.
 - **Live updates:** someone else's change appears without a refresh, in about half a second.
@@ -69,6 +70,20 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 | Emails (invitations, resets) land here | http://127.0.0.1:54324 |
 | Database browser (Supabase Studio) | http://127.0.0.1:54323 |
 
+### In a Claude Code cloud session
+
+The container differs from a Mac in four ways (found 2026-10-04):
+
+- **Node:** it may have an older Node. Download Node 24 (the `engines` version) from nodejs.org into a scratch folder and put its `bin` first on `PATH`.
+- **Docker:** the client is installed but the daemon isn't running. Start it with `dockerd` (in the background), then check `docker info`.
+- **Images:** downloads from GitHub's registry are blocked, so tell the Supabase CLI to use Docker Hub, and leave out what the app doesn't use:
+  ```bash
+  SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io npx supabase start -x studio,imgproxy,vector,logflare,edge-runtime,supavisor
+  ```
+  If the first start fails with "address already in use" on port 54322, start it again.
+- **`.env.local`:** fill it from `npx supabase status -o env` as above, without printing the keys, and add `MAIL_DEV_URL` (the `MAILPIT_URL` it prints) so invitation emails reach the mail catcher.
+- **Tests:** they default to a Mac's Chrome. Run them with `CHROME_PATH=/opt/pw-browsers/chromium`.
+
 ### If something hangs on a Mac
 
 - **`npx supabase …` prints nothing and never finishes:** macOS is asking whether the Supabase tool may read your Documents folder, and the prompt may be hidden behind other windows. Allow it in System Settings, Privacy and Security, Files and Folders.
@@ -77,11 +92,11 @@ The people are RTC's team; the tasks, comments and calendar entries are made up.
 ### Check it works
 
 ```bash
-npm run test:smoke   # with npm run dev running: 23 end-to-end checks, about a minute
+npm run test:smoke   # with npm run dev running: 32 end-to-end checks, about two minutes
 npm run test:menus   # opens every menu, popover and picker on every screen, as three roles; about seven minutes
 ```
 
-The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (who is asked to sign off, and an admin signing off in someone's place), repeating tasks, and live updates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
+The smoke test signs in as different people and checks the main flows against the database: creating and assigning, the panel, comments, delete and undo, dragging on the board and the calendar, the invitation email through to setting a password, the sign-off rules (who is asked to sign off, and an admin signing off in someone's place), repeating tasks, live updates, and (since 2026-10-04) role refusals, the password eye, archiving and deleting projects, and task and calendar templates. The menu test catches a menu that breaks its screen when opened, which the smoke test can miss; it changes no data.
 
 ## A ten-minute demo
 

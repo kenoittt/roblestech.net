@@ -2,6 +2,43 @@
 
 What's left to do on the PPM, newest decisions first within each part. Tick items off with the date, and keep the detail: the next person or Claude session starts from here.
 
+## From Kyan's brief of 2026-10-04
+
+The brief and what was done with it: [briefs/2026-10-04-kyan-voice-brief.md](briefs/2026-10-04-kyan-voice-brief.md), [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md). Branch `kyan/feat/ppm-templates-and-archive`.
+
+### 9. Kenneth: check your role on the live PPM (blocks making Kyan a super admin)
+
+Role changes were refused because the live database almost certainly doesn't have Kenneth as a super admin; the code is right (report, Task 1). Look at the bottom-left of the sidebar: your role is under your name. If it says Admin: Christian can change it from People, if Christian is a super admin; otherwise it takes one line of SQL, given in the report, run by Kenneth.
+
+### 10. Kenneth: apply two database updates, then merge
+
+`20261004000100_project_archive_and_delete.sql` and `20261004000200_templates.sql`, before merging the branch: see `DEPLOY.md`, "Database updates after the switch". Then check archive, restore and delete on a test project, and save and use a template.
+
+### 11. A decision for Kyan: the "Chosen people" chip
+
+Its amber border warns before anything is wrong, and amber means time and risk elsewhere in the app. Recommended (report, "The Chosen people orange border"): open the people picker as soon as the rule is chosen, keep the chip neutral, and show an error at the chip only if someone tries to create the task without choosing anyone.
+
+### 12. A decision for Kenneth: a way back if nobody is a super admin
+
+If the live database has no super admin, nobody can make one from the app; it takes SQL. A safe way back (a one-time setup link, say) is a security decision, so it waits for Kenneth.
+
+### 13. A decision: may a project's owner delete it while it has no tasks?
+
+Today owners archive and only admins delete, as the revamp decided. Allowing owners to delete a project that's still empty would cover the "I made a test project" case without an admin. One database rule and one line in the app.
+
+### 14. The Handbook: templates and archiving projects
+
+Two short articles for the "Using the PPM" shelf: "Templates for work you repeat" and "Archiving or deleting a project", checked against the app.
+
+### 15. Templates, if the team asks
+
+- Add a block to every weekday of the week at once (the Monday-morning planning case).
+- A task template that also blocks time for the task. Only works when the task is yours, which is why it waited.
+
+### 16. Kenneth: the branch-name pattern
+
+`git-conventions.md` proposes `<owner>/<type>/<app>-<topic>`. Adopting it repository-wide is one line in the shared `CLAUDE.md`.
+
 ## Before going live
 
 ### 1. Invitation and password-reset emails must send themselves (blocks inviting people)
@@ -43,6 +80,8 @@ Once invitations work (item 1), write Kenneth a short guide: who already has an 
 ## Goals (not started)
 
 ### 6. Fill this knowledge base (Kyan, 2026-10-03)
+
+**Started 2026-10-04:** `briefs/`, `reports/` and `git-conventions.md`. The 2026-10-04 report ends with what a session without the private notes most needed: design rules (colour meanings, states, form validation, which component for what), a permissions table, production facts, a decisions log and how the team uses the PPM day to day.
 
 So that anyone, a person or a Claude session, can keep building at the same quality. Record what mattered in making the PPM:
 - **Decisions and why:** the framework, the database rules, sign-off, privacy, what was ruled out.

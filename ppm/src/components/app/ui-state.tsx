@@ -8,8 +8,9 @@ import type { NewTask } from "@/domains/tasks/data"
 type UIState = {
   commandOpen: boolean
   setCommandOpen: (open: boolean) => void
-  createTask: { open: boolean; defaults: Partial<NewTask> }
-  openCreateTask: (defaults?: Partial<NewTask>) => void
+  /** templateId: start from that template (the command menu offers them). */
+  createTask: { open: boolean; defaults: Partial<NewTask>; templateId?: string }
+  openCreateTask: (defaults?: Partial<NewTask>, templateId?: string) => void
   closeCreateTask: () => void
   shortcutsOpen: boolean
   setShortcutsOpen: (open: boolean) => void
@@ -25,7 +26,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
 
-  const openCreateTask = useCallback((defaults: Partial<NewTask> = {}) => setCreateTask({ open: true, defaults }), [])
+  const openCreateTask = useCallback(
+    (defaults: Partial<NewTask> = {}, templateId?: string) => setCreateTask({ open: true, defaults, templateId }),
+    [],
+  )
   const closeCreateTask = useCallback(() => setCreateTask((s) => ({ ...s, open: false })), [])
 
   const value = useMemo(

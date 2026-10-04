@@ -16,6 +16,9 @@ import { HEALTH_META, projectStats } from "@/domains/tasks/selectors"
 import { ProjectSwatch } from "@/domains/tasks/components/glyphs"
 import { PROJECT_STATUSES, PROJECT_STATUS_META, type ProjectStatus } from "../data"
 import { ProjectForm } from "./project-form"
+import { ProjectMenu } from "./project-menu"
+
+type Tab = ProjectStatus | "all" | "archived"
 
 /** The portfolio: every project, its health, its progress and who's on it. */
 export function ProjectsPage() {
@@ -23,20 +26,22 @@ export function ProjectsPage() {
   const tasks = useTasks()
   const members = useMemberMap()
   const today = useToday()
-  const [tab, setTab] = useState<ProjectStatus | "all">("active")
+  const [tab, setTab] = useState<Tab>("active")
   const [creating, setCreating] = useState(false)
 
+  // Archived projects live in their own tab; every other tab leaves them out.
   const rows = useMemo(
     () =>
       projects
-        .filter((p) => (tab === "all" ? true : p.status === tab))
+        .filter((p) => (tab === "archived" ? p.archived : !p.archived && (tab === "all" || p.status === tab)))
         .map((p) => ({ p, s: projectStats(p, tasks, today) }))
         .sort((a, b) => a.p.name.localeCompare(b.p.name)),
     [projects, tasks, today, tab],
   )
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: projects.length }
-    for (const s of PROJECT_STATUSES) c[s] = projects.filter((p) => p.status === s).length
+    const live = projects.filter((p) => !p.archived)
+    const c: Record<string, number> = { all: live.length, archived: projects.length - live.length }
+    for (const s of PROJECT_STATUSES) c[s] = live.filter((p) => p.status === s).length
     return c
   }, [projects])
 
@@ -53,7 +58,7 @@ export function ProjectsPage() {
         }
       />
       <div className="flex h-11 shrink-0 items-center gap-1 border-b border-line px-3 sm:px-4">
-        {(["active", "planned", "paused", "closed", "all"] as const).map((t) => (
+        {(["active", "planned", "paused", "closed", "all", "archived"] as const).map((t) => (
           <button
             key={t}
             type="button"
@@ -63,14 +68,22 @@ export function ProjectsPage() {
               tab === t ? "bg-selected text-fg" : "text-fg-3 hover:bg-hover hover:text-fg",
             )}
           >
-            {t === "all" ? "All" : PROJECT_STATUS_META[t].label}
+            {t === "all" ? "All" : t === "archived" ? "Archived" : PROJECT_STATUS_META[t].label}
             <span className="text-fg-3 tabular">{counts[t]}</span>
           </button>
         ))}
       </div>
       <PageBody>
         {rows.length === 0 ? (
-          <EmptyState icon={Folder02Icon} title="No projects here" description="Projects group tasks for a client or an internal goal." />
+          <EmptyState
+            icon={Folder02Icon}
+            title={tab === "archived" ? "Nothing is archived" : "No projects here"}
+            description={
+              tab === "archived"
+                ? "Archive a project from its ⋯ menu to hide it everywhere without losing anything."
+                : "Projects group tasks for a client or an internal goal."
+            }
+          />
         ) : (
           <table className="w-full min-w-[920px] border-collapse text-sm">
             <thead>
@@ -82,7 +95,8 @@ export function ProjectsPage() {
                 <th className="w-20 font-normal">Late</th>
                 <th className="w-40 font-normal">Owner</th>
                 <th className="w-32 font-normal">Members</th>
-                <th className="w-28 pr-6 font-normal">Ends</th>
+                <th className="w-28 font-normal">Ends</th>
+                <th className="w-12" />
               </tr>
             </thead>
             <tbody>
@@ -90,7 +104,7 @@ export function ProjectsPage() {
                 const owner = p.owner_id ? members.get(p.owner_id) : null
                 const daysLeft = p.target_date ? diffDays(p.target_date, today) : null
                 return (
-                  <tr key={p.id} className="h-14 border-b border-line/60 hover:bg-hover">
+                  <tr key={p.id} className="group h-14 border-b border-line/60 hover:bg-hover">
                     <td className="pl-4 sm:pl-6">
                       <Link href={`/projects/${p.id}`} className="flex min-w-0 items-center gap-3">
                         <ProjectSwatch color={p.color} size={10} />
@@ -99,6 +113,7 @@ export function ProjectsPage() {
                           <span className="block truncate text-xs text-fg-3">
                             {p.kind === "client" ? `Client · ${p.client_name ?? "Unnamed"}` : "Internal"}
                             {p.status !== "active" && ` · ${PROJECT_STATUS_META[p.status as ProjectStatus].label}`}
+                            {p.archived && " · Archived"}
                           </span>
                         </span>
                       </Link>
@@ -123,7 +138,7 @@ export function ProjectsPage() {
                     <td>
                       <AvatarStack people={p.members.map((m) => ({ id: m.user_id, name: displayName(members.get(m.user_id)) }))} />
                     </td>
-                    <td className="pr-6 text-xs tabular">
+                    <td className="text-xs tabular">
                       {p.target_date ? (
                         <span className={cn(daysLeft !== null && daysLeft < 0 && p.status !== "closed" ? "text-danger" : "text-fg-2")}>
                           {shortDate(p.target_date, today)}
@@ -131,6 +146,12 @@ export function ProjectsPage() {
                       ) : (
                         <span className="text-fg-4">Ongoing</span>
                       )}
+                    </td>
+                    <td className="pr-3">
+                      <ProjectMenu
+                        project={p}
+                        triggerClassName="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100"
+                      />
                     </td>
                   </tr>
                 )

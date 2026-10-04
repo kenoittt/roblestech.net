@@ -172,3 +172,20 @@ Kenneth's Claude turns this into a one-page guide for Kenneth ([backlog.md](back
 - Delete the backup copies once you're sure they aren't needed, or move them somewhere private and safe.
 - After a week, remove the Astro PPM's old settings in Vercel.
 - What's next is in [backlog.md](backlog.md).
+
+## Database updates after the switch
+
+A pull request that adds files to `supabase/migrations/` needs them on the live database **before** it's merged: a merge deploys the new code at once, and code that expects a table the database doesn't have yet fails. Updates only add things, so the live PPM keeps working once they're applied, before the code that uses them arrives.
+
+1. **Kenneth's yes first.** Show Kenneth the files and the exact commands below (the "Rules for Claude" above apply).
+2. **See what would run.** From `ppm/`, on the pull request's branch:
+   ```bash
+   npx supabase link --project-ref <the live project's ref>   # once per machine
+   npx supabase db push --dry-run    # must list only the pull request's new files
+   ```
+3. **Apply them:** `npx supabase db push`. Then open the live PPM: it still works.
+4. **Merge the pull request,** and check the new feature on production.
+
+If the dry run lists anything else, stop: the live database and the repository disagree, and that needs looking at first.
+
+**Waiting as of 2026-10-04** (branch `kyan/feat/ppm-templates-and-archive`): `20261004000100_project_archive_and_delete.sql` (a function to delete a project, and its tasks if asked, in one step) and `20261004000200_templates.sql` (two tables for task and calendar templates, with their access rules). Both only add. Details: [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md).

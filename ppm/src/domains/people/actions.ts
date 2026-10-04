@@ -46,6 +46,16 @@ function mayManage(me: Role, them: Role) {
   return me === "admin" && them === "staff"
 }
 
+/**
+ * A refusal that names the role the database has for you. Someone who believes
+ * they're a super admin but isn't (say, their role was never set on the live
+ * database) then sees the cause, not just the rule.
+ */
+function refusal(me: Role, action: string) {
+  if (me === "staff") return "You're signed in as staff, and only admins manage people."
+  return `You're signed in as an admin. Only a super admin can ${action}.`
+}
+
 
 // Invitations and password resets are emailed by the PPM itself, through the
 // same Microsoft 365 setup as its notifications. The database's own email
@@ -102,7 +112,7 @@ export async function inviteMember(input: { email: string; fullName: string; rol
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That doesn't look like an email address." }
   if (!isRole(input.role)) return { ok: false, error: "Choose a role." }
   if (RANK[input.role] >= RANK.admin && me.role !== "super_admin") {
-    return { ok: false, error: "Only a super admin can invite an admin." }
+    return { ok: false, error: refusal(me.role, "invite an admin") }
   }
 
   if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
@@ -147,7 +157,7 @@ export async function changeRole(userId: string, role: Role): Promise<Result> {
   const them = await target(userId)
   if (!them) return { ok: false, error: "That person wasn't found." }
   if (!mayManage(me.role, them.role) || !mayManage(me.role, role)) {
-    return { ok: false, error: "Only a super admin can make or change an admin." }
+    return { ok: false, error: refusal(me.role, "make or change an admin") }
   }
 
   const admin = createSupabaseAdmin()
@@ -174,7 +184,7 @@ export async function deactivateMember(userId: string, reassignTo: string | null
   if (userId === me.uid) return { ok: false, error: "You can't deactivate yourself." }
   const them = await target(userId)
   if (!them) return { ok: false, error: "That person wasn't found." }
-  if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can deactivate an admin." }
+  if (!mayManage(me.role, them.role)) return { ok: false, error: refusal(me.role, "deactivate an admin") }
   if (reassignTo) {
     const to = reassignTo === userId ? null : await target(reassignTo)
     if (!to || to.deactivated_at || !isRole(to.role)) return { ok: false, error: "Hand their work to someone who's still on the team." }
@@ -204,7 +214,7 @@ export async function reactivateMember(userId: string): Promise<Result> {
   if (!me) return { ok: false, error: "Sign in again." }
   const them = await target(userId)
   if (!them) return { ok: false, error: "That person wasn't found." }
-  if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can reactivate an admin." }
+  if (!mayManage(me.role, them.role)) return { ok: false, error: refusal(me.role, "reactivate an admin") }
   const admin = createSupabaseAdmin()
   const { error } = await admin.from("profiles").update({ deactivated_at: null }).eq("id", userId)
   if (error) return { ok: false, error: error.message }
@@ -219,7 +229,7 @@ export async function sendPasswordReset(userId: string): Promise<Result> {
   const them = await target(userId)
   if (!them?.email) return { ok: false, error: "That person has no email address." }
   if (userId !== me.uid && !mayManage(me.role, them.role)) {
-    return { ok: false, error: "Only a super admin can reset an admin's password." }
+    return { ok: false, error: refusal(me.role, "reset an admin's password") }
   }
   if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
   const admin = createSupabaseAdmin()
@@ -249,7 +259,7 @@ export async function resendInvite(userId: string): Promise<Result> {
   if (!me || RANK[me.role] < RANK.admin) return { ok: false, error: "Only admins can invite people." }
   const them = await target(userId)
   if (!them?.email) return { ok: false, error: "That person has no email address." }
-  if (!mayManage(me.role, them.role)) return { ok: false, error: "Only a super admin can invite an admin." }
+  if (!mayManage(me.role, them.role)) return { ok: false, error: refusal(me.role, "invite an admin") }
   if (!emailConfigured()) return { ok: false, error: NO_EMAIL }
   const admin = createSupabaseAdmin()
   const { data, error } = await admin.auth.admin.generateLink({

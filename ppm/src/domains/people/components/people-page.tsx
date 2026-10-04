@@ -223,10 +223,10 @@ function RoleCell({ member, editable, viewerIsSuper }: { member: Member; editabl
             start(async () => {
               const res = await changeRole(member.id, v as Role)
               if (!res.ok) toast.error(res.error)
-              else {
-                toast(`${displayName(member)} is now ${ROLE_META[v as Role].label.toLowerCase()}`)
-                qc.invalidateQueries({ queryKey: ["members"] })
-              }
+              else toast(`${displayName(member)} is now ${ROLE_META[v as Role].label.toLowerCase()}`)
+              // Either way, show the roles as the database has them now: a refusal can
+              // mean this screen was out of date (someone's role changed since it loaded).
+              qc.invalidateQueries({ queryKey: ["members"] })
             })
           }
         >
@@ -240,7 +240,7 @@ function RoleCell({ member, editable, viewerIsSuper }: { member: Member; editabl
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
-        {!viewerIsSuper && <p className="px-2 pt-1 pb-1.5 text-xs text-fg-4">Only a super admin can make someone an admin.</p>}
+        {!viewerIsSuper && <p className="px-2 pt-1 pb-1.5 text-xs text-fg-4">You're an admin. Only a super admin can make someone an admin.</p>}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -253,10 +253,8 @@ function RowMenu({ member, onDeactivate, self }: { member: Member; onDeactivate:
     start(async () => {
       const res = await fn()
       if (!res.ok) toast.error(res.error)
-      else {
-        if (res.message) toast(res.message)
-        qc.invalidateQueries({ queryKey: ["members"] })
-      }
+      else if (res.message) toast(res.message)
+      qc.invalidateQueries({ queryKey: ["members"] })
     })
   return (
     <DropdownMenu>
@@ -384,7 +382,7 @@ function InviteDialog({ open, onClose, viewerRole }: { open: boolean; onClose: (
               </label>
             ))}
           </div>
-          {viewerRole !== "super_admin" && <p className="text-xs text-fg-4">Only a super admin can invite an admin.</p>}
+          {viewerRole !== "super_admin" && <p className="text-xs text-fg-4">You're an admin. Only a super admin can invite an admin.</p>}
         </fieldset>
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">

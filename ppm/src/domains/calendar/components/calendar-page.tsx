@@ -1,23 +1,31 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   Add01Icon,
+  ArrowDown01Icon,
   Copy01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Calendar03Icon,
+  LayoutTemplateIcon,
   LockKeyIcon,
+  Settings01Icon,
+  UserGroupIcon,
   ViewIcon,
   ViewOffIcon,
 } from "@hugeicons/core-free-icons"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
@@ -45,8 +53,9 @@ import { isOpen, taskKey, type Task } from "@/domains/tasks/config"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
+import { sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
 import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
-import { durationLabel } from "../layout"
+import { durationLabel, formatMinute } from "../layout"
 import { EventDialog, type EventDraft } from "./event-dialog"
 import { TimeGrid, type GridColumn } from "./time-grid"
 
@@ -67,8 +76,10 @@ export function CalendarPage() {
   const [anchor, setAnchor] = useState(today)
   const [draft, setDraft] = useState<EventDraft | null>(null)
   const [editing, setEditing] = useState<CalEvent | null>(null)
-  const { setRange } = useCalendarActions()
+  const { setRange, create, remove } = useCalendarActions()
   const { data: ranges } = usePrivacyRanges()
+  const { data: templates = [] } = useEventTemplates()
+  const router = useRouter()
 
   // On a phone, "my week" becomes one day at a time: seven columns don't fit.
   const narrow = useIsNarrow()
@@ -181,10 +192,37 @@ export function CalendarPage() {
     }
   }
 
+  // The day "Plan time" means: today when it's on screen, else the first day shown.
+  const planDay = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
+  const planDayLabel = planDay === today ? "today" : `${weekdayName(planDay, true)}, ${monthName(planDay)} ${Number(planDay.slice(8))}`
+
   const newBlock = (taskId?: string) => {
-    const base = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
-    const start = base === today ? Math.min(20 * 60, Math.ceil(minutesOfDay(now) / 30) * 30 + 30) : 9 * 60
-    setDraft({ day: base, start, end: start + 60, taskId: taskId ?? null })
+    const start = planDay === today ? Math.min(20 * 60, Math.ceil(minutesOfDay(now) / 30) * 30 + 30) : 9 * 60
+    setDraft({ day: planDay, start, end: start + 60, taskId: taskId ?? null })
+  }
+
+  // From a template: a block goes straight onto the day, with Undo. A meeting
+  // opens filled in instead, because it invites people and tells them.
+  const fromTemplate = async (t: EventTemplate) => {
+    if (t.kind === "meeting") return setDraft({ day: planDay, start: t.start_minute, end: t.end_minute, template: t })
+    try {
+      const id = await create.mutateAsync({
+        kind: "block",
+        title: t.title,
+        notes: t.notes,
+        starts_at: manilaInstant(planDay, t.start_minute),
+        ends_at: manilaInstant(planDay, t.end_minute),
+        task_id: null,
+        visibility: t.visibility as CalEvent["visibility"],
+        auto_complete: t.auto_complete,
+      })
+      toast(`Added ${t.title}`, {
+        description: `${planDay === today ? "Today" : planDayLabel}, ${formatMinute(t.start_minute)} to ${formatMinute(t.end_minute)}.`,
+        action: { label: "Undo", onClick: () => remove.mutate(id) },
+      })
+    } catch {
+      // The mutation shows the reason.
+    }
   }
 
   return (
@@ -193,10 +231,47 @@ export function CalendarPage() {
         title="Calendar"
         icon={Calendar03Icon}
         actions={
-          <Button size="sm" onClick={() => newBlock()} className="h-7 gap-1.5 px-2.5">
-            <Icon icon={Add01Icon} size={14} />
-            Plan time
-          </Button>
+          <div className="flex items-center">
+            <Button size="sm" onClick={() => newBlock()} className="h-7 gap-1.5 rounded-r-none px-2.5">
+              <Icon icon={Add01Icon} size={14} />
+              Plan time
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="Plan time from a template"
+                className="pressable inline-flex h-7 w-7 items-center justify-center rounded-r-[min(var(--radius-md),12px)] border-l border-white/20 bg-primary text-primary-foreground hover:bg-primary/80 data-popup-open:bg-primary/80"
+              >
+                <Icon icon={ArrowDown01Icon} size={14} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>From a template, on {planDayLabel}</DropdownMenuLabel>
+                  {sortTemplates(templates, me.id).map((t) => (
+                    <DropdownMenuItem key={t.id} onClick={() => fromTemplate(t)} className="py-1.5">
+                      <Icon icon={t.kind === "meeting" ? UserGroupIcon : LayoutTemplateIcon} className="text-fg-3" />
+                      <span className="min-w-0 flex-1 truncate">
+                        {t.name}
+                        {t.kind === "meeting" && "…"}
+                      </span>
+                      <span className="shrink-0 text-xs text-fg-3 tabular">
+                        {formatMinute(t.start_minute)} to {formatMinute(t.end_minute)}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+                {templates.length === 0 && (
+                  <p className="px-1.5 pt-0.5 pb-1.5 text-xs leading-5 text-fg-3">
+                    None yet. Open one of your entries, then Edit and Save as template. A block then lands here in two clicks.
+                  </p>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/settings#templates")}>
+                  <Icon icon={Settings01Icon} className="text-fg-3" />
+                  Manage templates
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         }
       />
       <div className="flex min-h-11 shrink-0 flex-wrap items-center gap-2 border-b border-line px-3 py-1.5 sm:px-4">
@@ -281,7 +356,7 @@ export function CalendarPage() {
         <TimeGrid
           columns={columns}
           today={today}
-          onCreate={(day, start, end) => setDraft({ day, start, end })}
+          onCreate={(day, start, end) => setDraft({ day, start, end, explicitTime: true })}
           onEdit={(e) => setEditing(e)}
         />
         {mode === "week" && <PlanRail days={days} events={events} onPlan={(taskId) => newBlock(taskId)} />}

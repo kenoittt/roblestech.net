@@ -437,7 +437,7 @@ function ProjectsHealth() {
   const today = useToday()
   const members = useMemberMap()
   const rows = projects
-    .filter((p) => p.status === "active")
+    .filter((p) => p.status === "active" && !p.archived)
     .map((p) => ({ p, s: projectStats(p, tasks, today) }))
     .sort((a, b) => b.s.overdue - a.s.overdue || b.s.open - a.s.open)
 

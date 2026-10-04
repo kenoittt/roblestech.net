@@ -10,6 +10,7 @@ import {
   ArrowUp01Icon,
   Cancel01Icon,
   Delete02Icon,
+  LayoutTemplateIcon,
   Link01Icon,
   LockKeyIcon,
   MoreHorizontalIcon,
@@ -65,6 +66,7 @@ import { TaskFiles } from "./task-files"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, repeatOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
 import { useAdminSignOffNote, useDoneBlock } from "./task-properties"
+import { SaveTaskTemplateDialog } from "@/domains/templates/components/save-task-template"
 
 export function TaskPanel() {
   return (
@@ -109,6 +111,7 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const update = useUpdateTask()
   const del = useDeleteTask()
   const detail = useTaskDetail(task.id)
+  const [savingTemplate, setSavingTemplate] = useState(false)
   const block = useDoneBlock(task)
   const { data: notifications } = useNotifications()
   const markRead = useMarkRead()
@@ -215,6 +218,10 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <Icon icon={Link01Icon} className="text-fg-3" />
                 Copy link
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSavingTemplate(true)}>
+                <Icon icon={LayoutTemplateIcon} className="text-fg-3" />
+                Save as template…
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
@@ -231,6 +238,12 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <HeaderButton label="Close" shortcut="Esc" icon={Cancel01Icon} onClick={onClose} />
         </div>
       </header>
+      <SaveTaskTemplateDialog
+        task={savingTemplate ? task : null}
+        description={detail.data?.task.description ?? null}
+        checklist={(detail.data?.checklist ?? []).map((c) => c.title)}
+        onClose={() => setSavingTemplate(false)}
+      />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-6 pt-5 pb-4">

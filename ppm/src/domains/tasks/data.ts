@@ -148,14 +148,24 @@ export function useCreateTask() {
   const qc = useQueryClient()
   const uid = useUid()
   return useMutation({
-    mutationFn: async (input: NewTask) => {
-      const { data, error } = await getSupabase()
+    /** checklist: lines to add once the task exists (a template's steps). */
+    mutationFn: async ({ checklist = [], ...input }: NewTask & { checklist?: string[] }) => {
+      const supabase = getSupabase()
+      const { data, error } = await supabase
         .from("ppm_tasks")
         .insert({ ...input, created_by: uid })
         .select(TASK_COLUMNS)
         .single()
       if (error) throw error
-      return data as unknown as Task
+      const task = data as unknown as Task
+      if (checklist.length) {
+        const { error: cErr } = await supabase
+          .from("ppm_task_checklist")
+          .insert(checklist.map((title, i) => ({ task_id: task.id, title, sort: i + 1 })))
+        // The task exists either way; failing here would invite a duplicate.
+        if (cErr) toast.error(`${taskKey(task)} was made without its checklist`, { description: explain(cErr) })
+      }
+      return task
     },
     onSuccess: (row) => {
       qc.setQueryData<Task[]>(["tasks"], (old = []) => (old.some((t) => t.id === row.id) ? old : [...old, row]))
