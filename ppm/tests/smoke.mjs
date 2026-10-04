@@ -226,6 +226,106 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
 }
 
 
+// ---------------------------------------------------------------- Added 2026-10-04: roles, passwords, projects, templates
+{
+  const KENNETH = "00000000-0000-4000-a000-000000000001", CARL = "00000000-0000-4000-a000-000000000005"
+  const today = sql("select (now() at time zone 'Asia/Manila')::date")
+  const tokenFor = (email) =>
+    JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"${email}","password":"rtc-demo-2026"}'`).toString()).access_token
+  const rest = (token, method, path, body) =>
+    execSync(`curl -s -X ${method} "http://127.0.0.1:54321/rest/v1/${path}" -H "apikey: ${anon}" -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -H "Prefer: return=representation"${body ? ` -d '${JSON.stringify(body)}'` : ""}`).toString()
+  sql("delete from ppm_projects where name like 'E2E%'")
+  sql(`delete from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
+  try {
+    // A refused role change says which role the database has for you. Live, Kenneth's screen
+    // offered Super admin while the database said otherwise; this recreates that.
+    {
+      const { ctx, page } = await session("kenneth@rtc.test")
+      await page.goto(BASE + "/people", { waitUntil: "networkidle" })
+      sql(`update profiles set role = 'admin' where id = '${KENNETH}'`)
+      await page.click('tr:has-text("Carl") td:nth-child(2) button')
+      await page.click('[role="menuitemradio"]:has(span.text-fg:text-is("Super admin"))')
+      await page.waitForTimeout(1500)
+      const said = (await page.locator("[data-sonner-toast]").allInnerTexts()).join(" ")
+      sql(`update profiles set role = 'super_admin' where id = '${KENNETH}'`)
+      check("A refused role change names the role the database has", said.includes("signed in as an admin") && sql(`select role from profiles where id = '${CARL}'`) === "staff", said.slice(0, 70))
+      await ctx.close()
+    }
+
+    // The eye on a password field
+    {
+      const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, colorScheme: "dark" })
+      const p = await ctx.newPage()
+      await p.goto(BASE + "/login", { waitUntil: "networkidle" })
+      await p.fill('input[name="password"]', "abc")
+      await p.click('button[aria-label="Show password"]')
+      const shown = await p.getAttribute('input[name="password"]', "type")
+      await p.click('button[aria-label="Hide password"]')
+      check("The eye on a password field shows it, then hides it", shown === "text" && (await p.getAttribute('input[name="password"]', "type")) === "password")
+      await ctx.close()
+    }
+
+    // Projects: staff can't delete one; an admin deletes a throwaway one and its tasks together
+    {
+      const pid = sql(`insert into ppm_projects (name, owner_id, created_by) values ('E2E throwaway', '${CARL}', '${CARL}') returning id`).split("\n")[0]
+      sql(`insert into ppm_tasks (title, project_id, created_by) values ('${title} in a throwaway project', '${pid}', '${CARL}')`)
+      const refused = rest(tokenFor("carl@rtc.test"), "POST", "rpc/ppm_delete_project", { pid, delete_tasks: true })
+      check("Staff can't delete a project, even its owner", refused.includes("Only admins can delete") && sql(`select count(*) from ppm_projects where id = '${pid}'`) === "1" && sql(`select count(*) from ppm_tasks where project_id = '${pid}' and deleted_at is null`) === "1")
+      const { ctx, page } = await session("carl@rtc.test")
+      await page.goto(BASE + "/projects", { waitUntil: "networkidle" })
+      const row = page.locator('tr:has-text("E2E throwaway")')
+      await row.hover()
+      await row.locator('button[aria-label^="Actions for"]').click()
+      await page.click('[role="menuitem"]:has-text("Archive project")')
+      await page.waitForTimeout(1200)
+      check("The owner archives a project; it leaves the portfolio", sql(`select archived from ppm_projects where id = '${pid}'`) === "t" && (await page.locator('tr:has-text("E2E throwaway")').count()) === 0)
+      await ctx.close()
+      const gone = rest(tokenFor("kyan@rtc.test"), "POST", "rpc/ppm_delete_project", { pid, delete_tasks: true })
+      check("An admin deletes a project and its tasks in one go", gone.trim() === "1" && sql(`select count(*) from ppm_projects where id = '${pid}'`) === "0" && sql(`select count(*) from ppm_tasks where title = '${title} in a throwaway project' and deleted_at is not null`) === "1", gone.slice(0, 60))
+    }
+
+    // Templates: the team's shared one reaches Carl; Kyan's own stays his
+    {
+      const names = JSON.parse(rest(tokenFor("carl@rtc.test"), "GET", "ppm_task_templates?select=name")).map((t) => t.name)
+      check("Shared templates reach the team; someone's own stay theirs", names.includes("Daily outreach") && !names.includes("Weekly SEO report"), names.join(", "))
+      const { ctx, page } = await session("carl@rtc.test")
+      await page.goto(BASE + "/tasks", { waitUntil: "networkidle" })
+      await page.keyboard.press("c")
+      await page.waitForSelector('input[aria-label="Task title"]')
+      await page.click('[role="dialog"] button[aria-label="Templates"]')
+      await page.keyboard.type("Daily outreach")
+      await page.keyboard.press("Enter")
+      await page.waitForTimeout(300)
+      await page.fill('input[aria-label="Task title"]', `${title} outreach`)
+      await page.keyboard.press("Meta+Enter")
+      await page.waitForTimeout(1500)
+      const made = sql(`select coalesce(assignee_id::text, '') || '|' || coalesce(due_date::text, '') || '|' || (select count(*) from ppm_task_checklist c where c.task_id = t.id) from ppm_tasks t where t.title = '${title} outreach'`)
+      check("A task from a template: for whoever uses it, due today, with its checklist", made === `${CARL}|${today}|4`, made)
+
+      // Calendar: the team's outreach block, onto today in two clicks; then tick it off from its details
+      await page.goto(BASE + "/calendar", { waitUntil: "networkidle" })
+      await page.click('button[aria-label="Plan time from a template"]')
+      await page.click('[role="menuitem"]:has-text("Outreach block")')
+      await page.waitForTimeout(1500)
+      const block = sql(`select to_char(starts_at at time zone 'Asia/Manila', 'YYYY-MM-DD HH24:MI') || ' ' || to_char(ends_at at time zone 'Asia/Manila', 'HH24:MI') from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
+      check("Plan time from a template puts the block on today", block === `${today} 09:00 11:00`, block)
+      await page.locator('[data-event]:has-text("Outreach emails")').first().click()
+      await page.waitForTimeout(400)
+      await page.click('[data-slot="popover-content"] button:has-text("Tick off")')
+      await page.waitForTimeout(1200)
+      check("Tick off in an entry's details ticks it off (and opens nothing else)", sql(`select completed_at is not null from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`) === "t" && (await page.locator('[role="dialog"]:has-text("Plan time")').count()) === 0)
+      await page.screenshot({ path: `${OUT}/e2e-templates.png` })
+      await ctx.close()
+    }
+  } catch (e) {
+    check("the 2026-10-04 checks ran to the end", false, e.message.split("\n")[0])
+  } finally {
+    sql(`update profiles set role = 'super_admin' where id = '${KENNETH}'`)
+    sql(`delete from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
+    sql("delete from ppm_projects where name like 'E2E%'")
+  }
+}
+
 // ---------------------------------------------------------------- Live updates: one person's change reaches another's screen
 {
   const kyan = await (await session("kyan@rtc.test")).page
