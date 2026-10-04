@@ -304,7 +304,7 @@ In order of how much each would have saved:
 
 ## Process notes
 
-- **One branch, at Kyan's request.** `CLAUDE.md` prefers small, single-purpose pull requests. Kyan asked for one branch; to keep review easy, it's eight commits in conventional form (three fixes, three features, the tests, the docs), each with a body that says why and how it was checked. If Kenneth prefers separate pull requests, they can be split by cherry-picking: the role fix, the password eye and the calendar fix stand alone; templates and projects each carry their own migration (`94629ed` belongs with the projects commit).
+- **One branch, at Kyan's request.** `CLAUDE.md` prefers small, single-purpose pull requests. Kyan asked for one branch; to keep review easy, it's a series of small commits in conventional form (three fixes, three features, the tests and the docs), each with a body that says why and how it was checked. If Kenneth prefers separate pull requests, they can be split by cherry-picking: the role fix, the password eye and the calendar fix stand alone; templates and projects each carry their own migration (`94629ed` belongs with the projects commit).
 - **The branch name** follows the proposal in [../git-conventions.md](../git-conventions.md): `kyan/feat/ppm-templates-and-archive`. `CLAUDE.md` asks for `kyan/<topic>`; this keeps that prefix and adds the type and the app.
 - **Not touched:** the portal, WanderWise, the public site, the live database, Vercel.
 
