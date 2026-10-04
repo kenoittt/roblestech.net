@@ -240,7 +240,7 @@ A test project shouldn't be marked Closed: that would claim finished work. It sh
 - **Archive project / Restore project,** for whoever can manage the project: its owner, an owner-member, or an admin (the same people who can edit it; the database already enforced this). Reversible, so it doesn't ask first: the confirmation offers **Undo** and says how many open tasks the project has, since those stay in All tasks.
 - **An archived project** leaves the portfolio's tabs for a new **Archived** tab (after All), and the home dashboard, the command menu, the sidebar and the project pickers. Its page still opens, with a quiet bar: "This project is archived…" and **Restore**.
 - **Delete project…,** for admins only. It can't be undone, so it asks first: the dialog says what goes, suggests archiving instead, and asks about the project's tasks: **Keep them** (the default; they stay in All tasks, with no project) or **Delete them too** (for a test project; they're deleted like any task). The red button says exactly what it will do: "Delete project and 2 tasks".
-- **The database (migration `20261004000100`):** `ppm_delete_project(pid, delete_tasks)` does it in one transaction, so it never stops halfway. It checks the caller is an admin, deletes tasks the app's usual way (hidden, with a "deleted" line in their history), and never touches tasks the caller can't see. Signed-out calls are refused outright.
+- **The database (migration `20261004000100`):** `ppm_delete_project(pid, delete_tasks)` does it in one transaction, so it never stops halfway. It checks the caller is an admin before anything else (so nobody else learns even whether a project exists), deletes tasks the app's usual way (hidden, with a "deleted" line in their history), and never touches tasks the caller can't see. Signed-out calls are refused outright.
 
 ### Considered and not done
 
@@ -317,6 +317,7 @@ All on Node 24.21.0 (the `engines` version), against the local stack with the sa
 - `npm run test:menus`: **all menus open cleanly**: 261, 293 and 265 menus and pop-ups on 16 screens, as Kenneth, Kyan and Carl. It covers the new ones on the portfolio, project pages and the calendar; the pickers inside the new-task and Plan time dialogs are covered by the smoke test instead.
 - `supabase db reset`: all thirteen migrations and the seed apply cleanly from empty.
 - In a browser, with screenshots, dark and light where it matters: every flow in this report, as staff, admin and super admin.
+- **Client** (the fourth role in `CLAUDE.md`'s rule): clients can't open the PPM at all, so a throwaway client account was checked against the API. It sees no templates, can't save one, can't archive a project, and is refused deleting one with the same message as staff. That check found the delete function looking for the project before checking the caller, which told a client "That project no longer exists"; the order was swapped before the migration was applied anywhere but locally.
 
 **Couldn't verify:** anything on the live PPM (its data, Vercel, Microsoft 365). In particular, the cause of Task 1 is a strong inference, not an observation: Kenneth's 10-second check settles it.
 

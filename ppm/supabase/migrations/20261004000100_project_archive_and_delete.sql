@@ -21,11 +21,12 @@ language plpgsql security invoker set search_path = public as $$
 declare
   hidden integer := 0;
 begin
-  if not exists (select 1 from public.ppm_projects where id = pid) then
-    raise exception 'That project no longer exists.' using errcode = 'P0002';
-  end if;
+  -- Who's asking comes first, so nobody else learns anything, even whether it exists.
   if not public.is_admin() then
     raise exception 'Only admins can delete a project. You can archive it instead.' using errcode = '42501';
+  end if;
+  if not exists (select 1 from public.ppm_projects where id = pid) then
+    raise exception 'That project no longer exists.' using errcode = 'P0002';
   end if;
 
   if delete_tasks then
