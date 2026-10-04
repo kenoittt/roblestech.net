@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
+import { PasswordInput } from "@/components/app/password-input"
 import { PageBody, PageHeader } from "@/components/app/page"
 import { cn } from "@/lib/utils"
 import { getSupabase } from "@/lib/supabase/client"
@@ -131,11 +132,11 @@ export function SettingsPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">New password</span>
-                <input type="password" autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={input} />
+                <PasswordInput autoComplete="new-password" value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} className={input} />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Type it again</span>
-                <input type="password" autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className={input} />
+                <PasswordInput autoComplete="new-password" value={pw.confirm} onChange={(e) => setPw({ ...pw, confirm: e.target.value })} className={input} />
               </label>
             </div>
             <div className="mt-4 flex justify-end">

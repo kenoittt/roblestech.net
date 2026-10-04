@@ -3,6 +3,7 @@
 import { useActionState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
+import { PasswordInput } from "@/components/app/password-input"
 import { signIn, type SignInState } from "../actions"
 
 const SAMPLE_ACCOUNTS = [
@@ -41,10 +42,9 @@ export function LoginForm({ next, demo }: { next: string; demo: boolean }) {
           />
         </Field>
         <Field label="Password">
-          <input
+          <PasswordInput
             ref={password}
             name="password"
-            type="password"
             autoComplete="current-password"
             required
             className="h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors focus:border-brand"
