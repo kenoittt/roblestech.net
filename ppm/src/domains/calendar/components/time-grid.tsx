@@ -191,6 +191,9 @@ export function TimeGrid({
                 key={c.key}
                 className={cn("relative min-w-0 flex-1 border-l border-line", mine && "cursor-cell", c.day === today && columns.length > 1 && c.ownerId === undefined && "bg-hover/40")}
                 onPointerDown={(e) => {
+                  // Presses inside an entry's details (Tick off, Edit, delete) reach this column
+                  // through React, though the details float outside it: they mustn't start a drag.
+                  if (!e.currentTarget.contains(e.target as Node)) return
                   if (!mine || e.button !== 0 || (e.target as HTMLElement).closest("[data-event]")) return
                   const m = pointerMinute(e)
                   e.currentTarget.setPointerCapture(e.pointerId)
