@@ -12,7 +12,7 @@ The session had no access to Kyan's private notes, design guide or plans. Everyt
 | 2 | Templatable tasks | Done. Save any task as a template from its ⋯ menu; use one from the new-task dialog (Templates, top right) or ⌘K. | `0a3c5a1` |
 | 2b | Templatable time blocks and meetings | Done, in the same commit. The arrow beside Plan time adds a block in two clicks; meetings open filled in for review. | `0a3c5a1` |
 | 3 | Eye icon on password fields | Done, on all five password fields (sign-in, the welcome page, Settings). | `bfba64f` |
-| 4 | Delete or archive projects | Done. Archive for whoever manages a project; delete for admins, with a choice about the tasks. | `22e5772` |
+| 4 | Delete or archive projects | Done. Archive for whoever manages a project; delete for admins, with a choice about the tasks. | `22e5772`, `94629ed` |
 | 5 | "Chosen people" orange border | Analysed, not changed (as asked). Why it's there, what Kenneth's Claude knew and lacked, and a recommendation: [below](#the-chosen-people-orange-border). | none |
 | 6 | Conventional commits | Every commit follows the cheat sheet. Linked and adapted in [../git-conventions.md](../git-conventions.md), with a branch-naming proposal. | `docs` commit |
 | | Found on the way | The buttons in a calendar entry's details (Tick off, Edit, delete) didn't work: they opened a new Plan time dialog. Fixed. | `b00c18f` |
@@ -304,7 +304,7 @@ In order of how much each would have saved:
 
 ## Process notes
 
-- **One branch, at Kyan's request.** `CLAUDE.md` prefers small, single-purpose pull requests. Kyan asked for one branch; to keep review easy, it's six independent commits (plus docs), in conventional form, each with a body that says why and how it was checked. If Kenneth prefers separate pull requests, they can be split by cherry-picking: the role fix, the password eye and the calendar fix stand alone; templates and projects each carry their own migration.
+- **One branch, at Kyan's request.** `CLAUDE.md` prefers small, single-purpose pull requests. Kyan asked for one branch; to keep review easy, it's eight commits in conventional form (three fixes, three features, the tests, the docs), each with a body that says why and how it was checked. If Kenneth prefers separate pull requests, they can be split by cherry-picking: the role fix, the password eye and the calendar fix stand alone; templates and projects each carry their own migration (`94629ed` belongs with the projects commit).
 - **The branch name** follows the proposal in [../git-conventions.md](../git-conventions.md): `kyan/feat/ppm-templates-and-archive`. `CLAUDE.md` asks for `kyan/<topic>`; this keeps that prefix and adds the type and the app.
 - **Not touched:** the portal, WanderWise, the public site, the live database, Vercel.
 
