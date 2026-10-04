@@ -8,7 +8,7 @@ The brief and what was done with it: [briefs/2026-10-04-kyan-voice-brief.md](bri
 
 ### 9. Kenneth: check your role on the live PPM (blocks making Kyan a super admin)
 
-Role changes were refused because the live database almost certainly doesn't have Kenneth as a super admin; the code is right (report, Task 1). Look at the bottom-left of the sidebar: your role is under your name. If it says Admin: Christian can change it from People if he's a super admin; otherwise it takes one line of SQL, given in the report, run by Kenneth.
+Role changes were refused because the live database almost certainly doesn't have Kenneth as a super admin; the code is right (report, Task 1). Look at the bottom-left of the sidebar: your role is under your name. If it says Admin: Christian can change it from People, if Christian is a super admin; otherwise it takes one line of SQL, given in the report, run by Kenneth.
 
 ### 10. Kenneth: apply two database updates, then merge
 

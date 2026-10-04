@@ -177,7 +177,7 @@ Kenneth's Claude turns this into a one-page guide for Kenneth ([backlog.md](back
 
 A pull request that adds files to `supabase/migrations/` needs them on the live database **before** it's merged: a merge deploys the new code at once, and code that expects a table the database doesn't have yet fails. Updates only add things, so the live PPM keeps working once they're applied, before the code that uses them arrives.
 
-1. **Kenneth's yes first.** Show him the files and the exact commands below (the "Rules for Claude" above apply).
+1. **Kenneth's yes first.** Show Kenneth the files and the exact commands below (the "Rules for Claude" above apply).
 2. **See what would run.** From `ppm/`, on the pull request's branch:
    ```bash
    npx supabase link --project-ref <the live project's ref>   # once per machine

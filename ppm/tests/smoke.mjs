@@ -284,7 +284,7 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
       check("An admin deletes a project and its tasks in one go", gone.trim() === "1" && sql(`select count(*) from ppm_projects where id = '${pid}'`) === "0" && sql(`select count(*) from ppm_tasks where title = '${title} in a throwaway project' and deleted_at is not null`) === "1", gone.slice(0, 60))
     }
 
-    // Templates: the team's shared one reaches Carl; Kyan's own stays his
+    // Templates: the team's shared one reaches Carl; Kyan's own stays Kyan's
     {
       const names = JSON.parse(rest(tokenFor("carl@rtc.test"), "GET", "ppm_task_templates?select=name")).map((t) => t.name)
       check("Shared templates reach the team; someone's own stay theirs", names.includes("Daily outreach") && !names.includes("Weekly SEO report"), names.join(", "))

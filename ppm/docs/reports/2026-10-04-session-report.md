@@ -58,21 +58,21 @@ Kenneth, a super admin on the live PPM, tried to make Kyan a super admin. The PP
 - **Where each side reads the role.** The screen's role menu offers Super admin only when the signed-in person's profile says `super_admin` (`useMe()`, from the same `profiles` table). The server action reads `profiles.role` for the session's user too. Same table, same row, same session; no caching in between. No role is hard-coded anywhere in the app's code (the sample accounts on the sign-in page are display-only, and only in local demo mode).
 - **History.** `changeRole` and `mayManage` haven't changed since they were written; production runs this code.
 - **Running it.** Locally, as Kenneth (super admin), every change worked, both ways: Carl staff to admin to super admin to staff, Kyan admin to staff to admin, Christian super admin to admin and back.
-- **Reproducing the live symptom.** Kenneth opened People as a super admin; then, behind the screen's back, the database was changed to make him an admin; then he changed Carl's role. Result: exactly the reported refusal. That's the only way found to produce it.
+- **Reproducing the live symptom.** Kenneth's account opened People as a super admin; then, behind the screen's back, the database was changed to make that account an admin; then the same screen changed Carl's role. Result: exactly the reported refusal. That's the only way found to produce it.
 
 ### What it most likely is
 
 The live database has Kenneth's role as something other than `super_admin` (most likely `admin`). Two ways that could have happened:
 
-- **The "hard-coding" Kyan remembered.** Super admins were set once, by SQL: `portal/supabase/roles-and-approvals.sql`, step 2, copied into the PPM's baseline migration, does `update profiles set role = 'super_admin'` for the accounts whose email is `kenneth@roblestech.net` or `christian@roblestech.net`. If Kenneth signs in with any other address, that line never touched his account. (On the live database, the baseline migration was marked as applied, not run again: `DEPLOY.md`, path A, step 4.)
-- **A screen loaded before a role change.** If his role changed after the page loaded, the menu would still offer what it offered when it loaded. Less likely, but the fix below covers it too.
+- **The "hard-coding" Kyan remembered.** Super admins were set once, by SQL: `portal/supabase/roles-and-approvals.sql`, step 2, copied into the PPM's baseline migration, does `update profiles set role = 'super_admin'` for the accounts whose email is `kenneth@roblestech.net` or `christian@roblestech.net`. If Kenneth signs in with any other address, that line never touched Kenneth's account. (On the live database, the baseline migration was marked as applied, not run again: `DEPLOY.md`, path A, step 4.)
+- **A screen loaded before a role change.** If Kenneth's role changed after the page loaded, the menu would still offer what it offered when it loaded. Less likely, but the fix below covers it too.
 
-An admin sees only "Staff" in a staff member's role menu, with the line "Only a super admin can make someone an admin." Kenneth may have seen that line rather than the server's message; it reads almost the same. Either way the cause is the same: the database doesn't have him as a super admin.
+An admin sees only "Staff" in a staff member's role menu, with the line "Only a super admin can make someone an admin." Kenneth may have seen that line rather than the server's message; it reads almost the same. Either way the cause is the same: the database doesn't have Kenneth as a super admin.
 
 ### How to confirm and fix it (Kenneth)
 
 1. **Confirm:** the sidebar's account button (bottom left) shows the role under the name. So does People, in the Role column.
-2. **If Christian is a super admin,** he can make Kenneth one from People. No SQL needed.
+2. **If Christian is a super admin,** Christian can make Kenneth one from People. No SQL needed.
 3. **If nobody is a super admin,** it takes SQL, run by Kenneth in Supabase's SQL editor, on the live project. First, read-only, to see the roles:
 
    ```sql
@@ -244,7 +244,7 @@ A test project shouldn't be marked Closed: that would claim finished work. It sh
 
 ### Considered and not done
 
-- **Letting a project's owner delete it while it's empty.** That would let Kyan (staff) delete his own test project. Reasonable, but it changes the permission model from the revamp ("delete: admins"). Owners can archive, which hides it everywhere; an admin can delete. In the backlog as an option.
+- **Letting a project's owner delete it while it's empty.** That would let Kyan (staff) delete the test project Kyan made. Reasonable, but it changes the permission model from the revamp ("delete: admins"). Owners can archive, which hides it everywhere; an admin can delete. In the backlog as an option.
 - **Hiding archived projects' tasks.** Tasks are the record of work; open work silently disappearing from All tasks would be worse than a few tasks with an archived project's name.
 
 ## Found on the way: the calendar entry buttons
