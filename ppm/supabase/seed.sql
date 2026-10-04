@@ -388,6 +388,35 @@ end $$;
 update public.ppm_tasks set repeat = 'weekly'  where title = 'Check AI answer visibility for 20 priority questions';
 update public.ppm_tasks set repeat = 'monthly' where title = 'Prepare the monthly call agenda';
 
+-- -----------------------------------------------------------------------------
+-- Templates: Christian's shared outreach routine (a task and its time block),
+-- Kenneth's Monday stand-up, and two of Kyan's own.
+-- -----------------------------------------------------------------------------
+insert into public.ppm_task_templates
+  (name, created_by, shared, title, description, priority, project_id, assign_to_user, completion_policy,
+   reviewer_id, due_in_days, checklist)
+values
+  ('Daily outreach', '00000000-0000-4000-a000-000000000002', true,
+   'Send today''s outreach emails',
+   'Ten personal emails to new leads from the outreach list. Log each one in the CRM sheet.',
+   'medium', '20000000-0000-4000-a000-000000000005', true, 'anyone', null, 0,
+   array['Pick ten leads from the list', 'Personalise each email', 'Send them', 'Log them in the CRM sheet']),
+  ('Weekly SEO report', '00000000-0000-4000-a000-000000000003', false,
+   'Write the weekly SEO report for Promix',
+   'Rankings, traffic and what changed in AI answers this week.',
+   'high', '20000000-0000-4000-a000-000000000001', true, 'reviewer', '00000000-0000-4000-a000-000000000002', 2,
+   array['Pull the numbers from Search Console', 'Write the summary', 'Send it for review']);
+
+insert into public.cal_event_templates
+  (name, created_by, shared, kind, title, notes, start_minute, end_minute, visibility, auto_complete, attendee_ids)
+values
+  ('Outreach block', '00000000-0000-4000-a000-000000000002', true, 'block', 'Outreach emails', null, 540, 660, 'public', true, '{}'),
+  ('Monday stand-up', '00000000-0000-4000-a000-000000000001', true, 'meeting', 'Team stand-up',
+   'What you finished, what''s next, what''s in the way.', 570, 585, 'public', false,
+   array['00000000-0000-4000-a000-000000000001', '00000000-0000-4000-a000-000000000002', '00000000-0000-4000-a000-000000000003',
+         '00000000-0000-4000-a000-000000000004', '00000000-0000-4000-a000-000000000005']::uuid[]),
+  ('Lunch', '00000000-0000-4000-a000-000000000003', false, 'block', 'Lunch', null, 720, 780, 'busy', true, '{}');
+
 alter table public.ppm_tasks          enable trigger user;
 alter table public.ppm_projects       enable trigger user;
 alter table public.ppm_task_comments  enable trigger user;

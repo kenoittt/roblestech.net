@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Cancel01Icon, Task01Icon } from "@hugeicons/core-free-icons"
+import { Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
@@ -13,8 +15,10 @@ import { getSupabase } from "@/lib/supabase/client"
 import { useMe, useMembers, useTasks } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
 import { isOpen, taskKey } from "@/domains/tasks/config"
-import { PickerMenu, type PickerOption } from "@/domains/tasks/components/pickers"
+import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
+import { canEditTemplate, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
+import { EventTemplatePicker } from "@/domains/templates/components/template-pickers"
 import { useCalendarActions, type CalEvent } from "../data"
 import { durationLabel, formatMinute } from "../layout"
 
@@ -24,6 +28,10 @@ export type EventDraft = {
   end: number
   taskId?: string | null
   kind?: "block" | "meeting"
+  /** Dragged out on the calendar: a template fills in the rest but keeps this time. */
+  explicitTime?: boolean
+  /** Start from this template (a meeting from the Plan time menu, to check before inviting). */
+  template?: EventTemplate
 }
 
 const VISIBILITY = [
@@ -53,7 +61,7 @@ export function EventDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="ui-backdrop fixed inset-0 z-50 bg-black/45" />
         <DialogPrimitive.Popup className="ui-dialog fixed top-[8vh] left-1/2 z-50 flex max-h-[86vh] w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 flex-col rounded-xl bg-raised shadow-popover outline-none">
-          {open && <Form key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}`} draft={draft} event={event} onClose={onClose} />}
+          {open && <Form key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}-${draft?.template?.id}`} draft={draft} event={event} onClose={onClose} />}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
@@ -67,17 +75,37 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const { create, update, remove } = useCalendarActions()
 
   const linked = tasks.find((t) => t.id === (event?.task_id ?? draft?.taskId))
-  const [kind, setKind] = useState<"block" | "meeting">(event?.kind ?? draft?.kind ?? "block")
-  const [title, setTitle] = useState(event?.title ?? linked?.title ?? "")
+  const preset = draft?.template
+  // A meeting's people, less whoever is planning it (they own it) and anyone who has left.
+  const invitees = (ids: string[]) => ids.filter((id) => id !== me.id && members.some((m) => m.id === id && !m.deactivated_at))
+  const [kind, setKind] = useState<"block" | "meeting">(event?.kind ?? (preset?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
+  const [title, setTitle] = useState(event?.title ?? preset?.title ?? linked?.title ?? "")
   const [taskId, setTaskId] = useState<string | null>(event?.task_id ?? draft?.taskId ?? null)
   const [day, setDay] = useState(event ? isoDay(event.starts_at) : draft!.day)
   const [start, setStart] = useState(event ? minutesOfDay(event.starts_at) : draft!.start)
   const [end, setEnd] = useState(event ? minutesOfDay(event.ends_at) : draft!.end)
-  const [visibility, setVisibility] = useState<CalEvent["visibility"]>(event?.visibility ?? "public")
-  const [auto, setAuto] = useState(event?.auto_complete ?? false)
-  const [notes, setNotes] = useState(event?.notes ?? "")
-  const [attendees, setAttendees] = useState<string[]>(event?.attendee_ids.filter((a) => a !== me.id) ?? [])
+  const [visibility, setVisibility] = useState<CalEvent["visibility"]>(event?.visibility ?? (preset?.visibility as CalEvent["visibility"] | undefined) ?? "public")
+  const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
+  const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
+  const [attendees, setAttendees] = useState<string[]>(event ? event.attendee_ids.filter((a) => a !== me.id) : invitees(preset?.attendee_ids ?? []))
+  const [templateId, setTemplateId] = useState<string | null>(preset?.id ?? null)
   const [error, setError] = useState<string | null>(null)
+
+  // A template fills in what the entry is. A time dragged out on the calendar
+  // stays; otherwise the template's time of day is used, on the chosen day.
+  const applyTemplate = (t: EventTemplate | null) => {
+    setTemplateId(t?.id ?? null)
+    setKind((t?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
+    setTitle(t?.title ?? linked?.title ?? "")
+    setNotes(t?.notes ?? "")
+    setVisibility((t?.visibility as CalEvent["visibility"] | undefined) ?? "public")
+    setAuto(t?.auto_complete ?? false)
+    setAttendees(invitees(t?.attendee_ids ?? []))
+    if (!draft?.explicitTime) {
+      setStart(t?.start_minute ?? draft!.start)
+      setEnd(t?.end_minute ?? draft!.end)
+    }
+  }
 
   const taskOptions: PickerOption[] = useMemo(
     () => [
@@ -138,9 +166,18 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         <DialogPrimitive.Title className="text-md font-semibold text-fg">
           {event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
         </DialogPrimitive.Title>
-        <DialogPrimitive.Close aria-label="Close" className="pressable inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg">
-          <Icon icon={Cancel01Icon} />
-        </DialogPrimitive.Close>
+        <div className="flex items-center gap-1">
+          {!event && (
+            <EventTemplatePicker
+              value={templateId}
+              onSelect={applyTemplate}
+              triggerClassName={cn(chipClass, templateId && "border-brand/50 text-fg")}
+            />
+          )}
+          <DialogPrimitive.Close aria-label="Close" className="pressable inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg">
+            <Icon icon={Cancel01Icon} />
+          </DialogPrimitive.Close>
+        </div>
       </div>
       <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pt-3 pb-5">
         <div className="flex gap-1 rounded-md bg-hover p-0.5" role="radiogroup" aria-label="Kind">
@@ -276,10 +313,123 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
             Delete
           </Button>
         )}
+        {event && event.owner_id === me.id && (
+          <SaveEventTemplate
+            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end, visibility, auto, attendees: [me.id, ...attendees] }}
+          />
+        )}
         <span className="flex-1" />
         <Button variant="ghost" onClick={onClose}>Cancel</Button>
         <Button onClick={save} disabled={create.isPending || update.isPending}>{event ? "Save" : kind === "meeting" ? "Send invites" : "Add to calendar"}</Button>
       </div>
     </>
+  )
+}
+
+/**
+ * Save what's in the form as a template: what it is, its time of day, who sees
+ * it, and a meeting's people. Saving under the name of a template you can
+ * change replaces it.
+ */
+function SaveEventTemplate({
+  entry,
+}: {
+  entry: { kind: "block" | "meeting"; title: string; notes: string | null; start: number; end: number; visibility: string; auto: boolean; attendees: string[] }
+}) {
+  const me = useMe()
+  const { data: templates = [] } = useEventTemplates()
+  const { saveEvent } = useTemplateActions()
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState(entry.title)
+  const [sharedChoice, setShared] = useState<boolean | null>(null)
+  const same = sortTemplates(templates, me.id).find(
+    (t) => t.name.trim().toLowerCase() === name.trim().toLowerCase() && canEditTemplate(t, me),
+  )
+  const othersShared = Boolean(same && same.created_by !== me.id)
+  const shared = sharedChoice ?? same?.shared ?? false
+
+  const save = async () => {
+    const clean = name.trim()
+    if (!clean) return toast.error("Give the template a name.")
+    if (!entry.title) return toast.error("Give the entry a title first.")
+    if (entry.end <= entry.start) return toast.error("It has to end after it starts.")
+    try {
+      await saveEvent.mutateAsync({
+        id: same?.id,
+        input: {
+          name: clean,
+          shared: othersShared ? same!.shared : shared,
+          kind: entry.kind,
+          title: entry.title,
+          notes: entry.notes,
+          start_minute: entry.start,
+          end_minute: entry.end,
+          visibility: entry.visibility,
+          auto_complete: entry.kind === "block" && entry.auto,
+          attendee_ids: entry.kind === "meeting" ? entry.attendees : [],
+        },
+      })
+      toast(same ? `Updated the template "${clean}"` : `Saved "${clean}" as a template`, {
+        description: "Next time, use the arrow beside Plan time, or Templates when you drag out time.",
+      })
+      setOpen(false)
+    } catch {
+      // The mutation shows the reason.
+    }
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next) {
+          setName(entry.title)
+          setShared(null)
+        }
+        setOpen(next)
+      }}
+    >
+      <PopoverTrigger className="pressable inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
+        <Icon icon={LayoutTemplateIcon} size={14} className="text-fg-3" />
+        Save as template
+      </PopoverTrigger>
+      <PopoverContent side="top" align="start" className="w-80 gap-3 p-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            save()
+          }}
+          className="flex flex-col gap-3"
+        >
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg-2">Template name</span>
+            <input autoFocus value={name} maxLength={120} onFocus={(e) => e.target.select()} onChange={(e) => setName(e.target.value)} className={input} />
+            {same && <span className="text-xs text-fg-3">Replaces {othersShared ? "the team's" : "your"} template with this name.</span>}
+          </label>
+          {!othersShared && (
+            <label className="flex items-center justify-between gap-3 text-sm text-fg-2">
+              <span>
+                Share with the team
+                <span className="block text-xs text-fg-3">Everyone can use it; only you, or an admin, can change it.</span>
+              </span>
+              <Switch checked={shared} onCheckedChange={setShared} />
+            </label>
+          )}
+          <p className="text-xs leading-5 text-fg-3">
+            Keeps the title, {formatMinute(entry.start)} to {formatMinute(entry.end)}, who sees it
+            {entry.kind === "meeting" ? ", who's invited" : entry.auto ? ", ticking itself off" : ""}
+            {entry.notes ? " and the notes" : ""}. Not the day or a linked task.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" size="sm" disabled={saveEvent.isPending}>
+              {saveEvent.isPending ? "Saving…" : same ? "Replace template" : "Save template"}
+            </Button>
+          </div>
+        </form>
+      </PopoverContent>
+    </Popover>
   )
 }

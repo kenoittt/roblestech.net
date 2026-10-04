@@ -11,8 +11,10 @@ import { Kbd } from "@/components/app/page"
 import { useUI } from "@/components/app/ui-state"
 import { cn } from "@/lib/utils"
 import { dueLabel } from "@/lib/dates"
-import { useMemberMap, useProjectMap, useToday } from "@/domains/workspace/provider"
+import { useMe, useMemberMap, useProjectMap, useToday } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
+import { taskFromTemplate, useTaskTemplates, type TaskTemplate } from "@/domains/templates/data"
+import { TaskTemplatePicker } from "@/domains/templates/components/template-pickers"
 import { REPEAT_META, taskKey, type Repeat } from "../config"
 import { useCreateTask, type NewTask } from "../data"
 import { useTaskPanel } from "../panel-state"
@@ -53,14 +55,40 @@ export function CreateTaskDialog() {
   const { createTask, closeCreateTask } = useUI()
   const { open: openTask } = useTaskPanel()
   const create = useCreateTask()
+  const me = useMe()
   const members = useMemberMap()
   const projects = useProjectMap()
   const today = useToday()
+  const { data: templates } = useTaskTemplates()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [draft, setDraft] = useState<Draft>(EMPTY)
   const [more, setMore] = useState(false)
+  // A template's checklist, added once the task exists.
+  const [checklist, setChecklist] = useState<string[]>([])
+  const [templateId, setTemplateId] = useState<string | null>(null)
+  const [pendingTemplate, setPendingTemplate] = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
+
+  // A template fills in what the task is. What its opener already chose (the
+  // project page it's on, the board column, the day on the calendar, "for me")
+  // still wins: that's where the task is being made.
+  const applyTemplate = (t: TaskTemplate | null) => {
+    setTemplateId(t?.id ?? null)
+    const defaults = createTask.defaults as Partial<Draft>
+    if (!t) {
+      setDraft({ ...EMPTY, ...defaults })
+      setTitle(createTask.defaults.title ?? "")
+      setDescription("")
+      setChecklist([])
+      return
+    }
+    const made = taskFromTemplate(t, { uid: me.id, today, members, projects })
+    setDraft({ ...EMPTY, ...(made.draft as Partial<Draft>), ...defaults })
+    setTitle(made.draft.title)
+    setDescription(made.draft.description ?? "")
+    setChecklist(made.checklist)
+  }
 
   // Each time the dialog opens, start from the defaults its opener passed.
   const [openedWith, setOpenedWith] = useState<typeof createTask.defaults | null>(null)
@@ -69,8 +97,17 @@ export function CreateTaskDialog() {
     setDraft({ ...EMPTY, ...(createTask.defaults as Partial<Draft>) })
     setTitle(createTask.defaults.title ?? "")
     setDescription("")
+    setChecklist([])
+    setTemplateId(null)
+    setPendingTemplate(createTask.templateId ?? null)
   }
   if (!createTask.open && openedWith !== null) setOpenedWith(null)
+  // Opened from a template (the command menu): apply it once the list is here.
+  if (pendingTemplate && templates) {
+    setPendingTemplate(null)
+    const t = templates.find((x) => x.id === pendingTemplate)
+    if (t) applyTemplate(t)
+  }
 
   const statusOpts = useMemo(() => statusOptions(), [])
   const priorityOpts = useMemo(() => priorityOptions(), [])
@@ -100,14 +137,20 @@ export function CreateTaskDialog() {
         completion_approvers: draft.completion_policy === "specific" ? draft.completion_approvers : [],
         title: clean,
         description: description.trim() || null,
+        checklist,
       })
       toast(`Created ${taskKey(task)}`, {
         description: task.title,
         action: { label: "Open", onClick: () => openTask(task.number) },
       })
       if (more) {
-        setTitle("")
-        setDescription("")
+        // Another one like it: from a template, the next starts from the template again.
+        const applied = templates?.find((t) => t.id === templateId)
+        if (applied) applyTemplate(applied)
+        else {
+          setTitle("")
+          setDescription("")
+        }
         titleRef.current?.focus()
       } else {
         closeCreateTask()
@@ -150,9 +193,15 @@ export function CreateTaskDialog() {
             />
             <span className="text-xs text-fg-4">›</span>
             <DialogPrimitive.Title className="text-xs font-medium text-fg-2">New task</DialogPrimitive.Title>
+            <span className="ml-auto" />
+            <TaskTemplatePicker
+              value={templateId}
+              onSelect={applyTemplate}
+              triggerClassName={cn(chipClass, templateId && "border-brand/50 text-fg")}
+            />
             <DialogPrimitive.Close
               aria-label="Close"
-              className="pressable ml-auto inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg"
+              className="pressable inline-flex size-7 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg"
             >
               <Icon icon={Cancel01Icon} />
             </DialogPrimitive.Close>
@@ -175,6 +224,29 @@ export function CreateTaskDialog() {
               rows={3}
               className="mt-1.5 w-full resize-none bg-transparent text-sm leading-6 text-fg-2 outline-none placeholder:text-fg-4"
             />
+            {checklist.length > 0 && (
+              <div className="mt-1 mb-1">
+                <p className="text-xs font-medium text-fg-3">
+                  Checklist <span className="tabular text-fg-4">{checklist.length}</span>
+                </p>
+                <ul className="mt-1 flex max-h-40 flex-col overflow-y-auto">
+                  {checklist.map((item, i) => (
+                    <li key={`${i}-${item}`} className="group/item -mx-1.5 flex h-7 items-center gap-2 rounded-md px-1.5 text-sm text-fg-2 hover:bg-hover">
+                      <span aria-hidden className="size-3.5 shrink-0 rounded-[4px] border border-line-strong" />
+                      <span className="min-w-0 flex-1 truncate">{item}</span>
+                      <button
+                        type="button"
+                        aria-label={`Leave out "${item}"`}
+                        onClick={() => setChecklist((c) => c.filter((_, j) => j !== i))}
+                        className="text-fg-4 opacity-0 group-hover/item:opacity-100 hover:text-fg focus-visible:opacity-100"
+                      >
+                        <Icon icon={Cancel01Icon} size={12} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3.5">

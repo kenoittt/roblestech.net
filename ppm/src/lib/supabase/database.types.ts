@@ -42,6 +42,19 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"cal_event_templates": {
+                  Row: {
+                    "attendee_ids": (string)[],"auto_complete": boolean,"created_at": string,"created_by": string | null,"end_minute": number,"id": string,"kind": string,"name": string,"notes": string | null,"shared": boolean,"start_minute": number,"title": string,"updated_at": string,"visibility": string
+                  }
+                  Insert: {
+                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"created_at"?: string,"created_by"?: string | null,"end_minute": number,"id"?: string,"kind"?: string,"name": string,"notes"?: string | null,"shared"?: boolean,"start_minute": number,"title": string,"updated_at"?: string,"visibility"?: string
+                  }
+                  Update: {
+                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"created_at"?: string,"created_by"?: string | null,"end_minute"?: number,"id"?: string,"kind"?: string,"name"?: string,"notes"?: string | null,"shared"?: boolean,"start_minute"?: number,"title"?: string,"updated_at"?: string,"visibility"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"cal_events": {
                   Row: {
                     "all_day": boolean,"auto_complete": boolean,"completed_at": string | null,"created_at": string,"ends_at": string,"id": string,"kind": string,"location": string | null,"notes": string | null,"owner_id": string,"starts_at": string,"task_id": string | null,"title": string,"updated_at": string,"visibility": string
@@ -306,6 +319,25 @@ isOneToOne: false
       columns: ["task_id"]
 isOneToOne: false
       referencedRelation: "ppm_tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ppm_task_templates": {
+                  Row: {
+                    "assign_to_user": boolean,"assignee_id": string | null,"checklist": (string)[],"completion_approvers": (string)[],"completion_policy": string,"created_at": string,"created_by": string | null,"description": string | null,"due_in_days": number | null,"id": string,"is_private": boolean,"name": string,"priority": string,"project_id": string | null,"reviewer_id": string | null,"shared": boolean,"status": string,"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "assign_to_user"?: boolean,"assignee_id"?: string | null,"checklist"?: (string)[],"completion_approvers"?: (string)[],"completion_policy"?: string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"due_in_days"?: number | null,"id"?: string,"is_private"?: boolean,"name": string,"priority"?: string,"project_id"?: string | null,"reviewer_id"?: string | null,"shared"?: boolean,"status"?: string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "assign_to_user"?: boolean,"assignee_id"?: string | null,"checklist"?: (string)[],"completion_approvers"?: (string)[],"completion_policy"?: string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"due_in_days"?: number | null,"id"?: string,"is_private"?: boolean,"name"?: string,"priority"?: string,"project_id"?: string | null,"reviewer_id"?: string | null,"shared"?: boolean,"status"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ppm_task_templates_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "ppm_projects"
       referencedColumns: ["id"]
     }
                   ]

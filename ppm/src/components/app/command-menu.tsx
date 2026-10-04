@@ -16,6 +16,7 @@ import {
   Folder02Icon,
   Home06Icon,
   InboxIcon,
+  LayoutTemplateIcon,
   Moon02Icon,
   Search01Icon,
   Settings01Icon,
@@ -29,6 +30,7 @@ import { useMe, useMembers, useProjects, useTasks } from "@/domains/workspace/pr
 import { displayName, isAdminRole } from "@/domains/workspace/types"
 import { taskKey } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
+import { sortTemplates, useTaskTemplates } from "@/domains/templates/data"
 import { ProjectSwatch, StatusIcon } from "@/domains/tasks/components/glyphs"
 import { Avatar } from "./avatar"
 import { Icon, type IconSvgElement } from "./icon"
@@ -64,6 +66,12 @@ function Palette({ onClose }: { onClose: () => void }) {
   const { open } = useTaskPanel()
   const { setTheme } = useTheme()
   const [query, setQuery] = useState("")
+  const { data: templates = [] } = useTaskTemplates()
+  // Your templates first. With nothing typed, the first five; typing searches them all.
+  const templateItems = useMemo(() => {
+    const sorted = sortTemplates(templates, me.id)
+    return query.trim() ? sorted : sorted.slice(0, 5)
+  }, [templates, me.id, query])
   // Handbook titles, fetched once per session the first time the menu opens.
   const { data: articles = [] } = useQuery({
     queryKey: ["handbook", "titles"],
@@ -119,6 +127,11 @@ function Palette({ onClose }: { onClose: () => void }) {
         <Group heading="Create">
           <Item value="new task create" onSelect={() => run(() => openCreateTask())} icon={Add01Icon} shortcut="C">New task</Item>
           <Item value="assign myself new task" onSelect={() => run(() => openCreateTask({ assignee_id: me.id }))} icon={TaskDone01Icon}>New task for me</Item>
+          {templateItems.map((t) => (
+            <Item key={t.id} value={`template new task from ${t.name} ${t.title}`} onSelect={() => run(() => openCreateTask({}, t.id))} icon={LayoutTemplateIcon}>
+              <span className="truncate">New task from <span className="text-fg">{t.name}</span></span>
+            </Item>
+          ))}
           <Item value="plan time calendar block" onSelect={() => go("/calendar")} icon={Calendar03Icon}>Plan time on the calendar</Item>
           {isAdminRole(me.role) && <Item value="invite person member" onSelect={() => go("/people")} icon={UserAdd01Icon}>Invite someone</Item>}
         </Group>
