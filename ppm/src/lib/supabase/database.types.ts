@@ -404,6 +404,9 @@ isOneToOne: false
 "ppm_completion_message":
 { Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'] }; Returns: string
                            },
+"ppm_delete_project":
+{ Args: { "delete_tasks"?: boolean,"pid": string }; Returns: number
+                           },
 "ppm_next_due":
 { Args: { "d": string,"pattern": string }; Returns: string
                            },

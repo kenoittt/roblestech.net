@@ -148,7 +148,7 @@ function Palette({ onClose }: { onClose: () => void }) {
         )}
 
         <Group heading="Projects">
-          {projects.filter((p) => p.status !== "closed").map((p) => (
+          {projects.filter((p) => p.status !== "closed" && !p.archived).map((p) => (
             <Item key={p.id} value={`project ${p.name} ${p.client_name ?? ""}`} onSelect={() => go(`/projects/${p.id}`)}>
               <ProjectSwatch color={p.color} size={9} className="mx-[3.5px]" />
               {p.name}

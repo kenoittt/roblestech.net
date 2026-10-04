@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Add01Icon, Edit02Icon, Folder02Icon } from "@hugeicons/core-free-icons"
+import { Add01Icon, Archive02Icon, Edit02Icon, Folder02Icon } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
 import { Ring, StackedBar } from "@/components/app/charts"
@@ -11,15 +11,16 @@ import { useUI } from "@/components/app/ui-state"
 import { cn } from "@/lib/utils"
 import { diffDays, shortDate } from "@/lib/dates"
 import { useMe, useMemberMap, useProjects, useTasks, useToday } from "@/domains/workspace/provider"
-import { displayName, isAdminRole } from "@/domains/workspace/types"
+import { displayName } from "@/domains/workspace/types"
 import { isActive, type ViewKind } from "@/domains/tasks/config"
 import { HEALTH_META, isOverdue, projectStats } from "@/domains/tasks/selectors"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { ProjectSwatch } from "@/domains/tasks/components/glyphs"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { TaskExplorer } from "@/domains/tasks/components/task-explorer"
-import { PROJECT_STATUS_META, type ProjectStatus } from "../data"
+import { PROJECT_STATUS_META, canManageProject, useProjectActions, type ProjectStatus } from "../data"
 import { ProjectForm } from "./project-form"
+import { ProjectMenu } from "./project-menu"
 
 /** A project's own dashboard: how it's going, what's late, who's carrying it, then its tasks. */
 export function ProjectPage({ id }: { id: string }) {
@@ -30,6 +31,7 @@ export function ProjectPage({ id }: { id: string }) {
   const today = useToday()
   const { openCreateTask } = useUI()
   const { open } = useTaskPanel()
+  const { setArchived } = useProjectActions()
   const [editing, setEditing] = useState(false)
   const project = projects.find((p) => p.id === id)
   const theirs = useMemo(() => tasks.filter((t) => t.project_id === id), [tasks, id])
@@ -59,7 +61,7 @@ export function ProjectPage({ id }: { id: string }) {
 
   const s = projectStats(project, theirs, today)
   const owner = project.owner_id ? members.get(project.owner_id) : null
-  const canEdit = isAdminRole(me.role) || project.owner_id === me.id || project.members.some((m) => m.user_id === me.id && m.role === "owner")
+  const canEdit = canManageProject(project, me)
   const daysLeft = project.target_date ? diffDays(project.target_date, today) : null
   const late = theirs.filter((t) => isOverdue(t, today)).sort((a, b) => (a.due_date! < b.due_date! ? -1 : 1))
   const maxLoad = Math.max(4, ...carrying.map(([, r]) => sum(r)))
@@ -81,9 +83,24 @@ export function ProjectPage({ id }: { id: string }) {
               <Icon icon={Add01Icon} size={14} />
               New task
             </Button>
+            <ProjectMenu project={project} afterDelete="/projects" />
           </>
         }
       />
+
+      {project.archived && (
+        <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-inset px-5 py-2.5 sm:px-8">
+          <Icon icon={Archive02Icon} size={15} className="text-fg-3" />
+          <p className="min-w-0 flex-1 text-sm text-fg-2">
+            This project is archived. It&apos;s hidden from the sidebar, the portfolio and the project pickers; nothing in it has changed.
+          </p>
+          {canEdit && (
+            <Button size="sm" variant="outline" onClick={() => setArchived.mutate({ project, archived: false })} className="h-7 px-2.5">
+              Restore
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="max-h-[44vh] shrink-0 overflow-y-auto border-b border-line">
         <div className="grid grid-cols-1 gap-8 px-5 py-6 sm:px-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
