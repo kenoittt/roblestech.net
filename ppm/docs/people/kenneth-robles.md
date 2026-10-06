@@ -4,7 +4,7 @@ Co-founder and CEO of Robles Technologies Corp.
 
 ## His part in the PPM
 
-- **Owns the accounts:** the GitHub repository, Vercel, Supabase and Microsoft 365.
+- **Owns the accounts and the infrastructure:** the GitHub repository, Vercel, Supabase, Microsoft 365, and the roblestech.net domain, its DNS and hosting. Anything that needs one of them goes on his page.
 - **Merges to `main`,** after checking the preview. Every app deploys from `main`.
 - **Changes the live database,** or lets his Claude do it with his OK: migrations go in before the merge ([database.md](../guides/database.md)).
 - **Decides security and access questions,** like how to recover if nobody is a super admin.
@@ -16,4 +16,4 @@ Co-founder and CEO of Robles Technologies Corp.
 - Pull requests that say plainly what he has to do before merging.
 - Nothing done on the live database, Vercel or the domain without his OK.
 
-His open items are in [`../for-humans/kenneth.md`](../for-humans/kenneth.md).
+His open items are in [the repository's `docs/for-humans/kenneth.md`](../../../docs/for-humans/kenneth.md).

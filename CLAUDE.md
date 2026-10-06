@@ -36,11 +36,11 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 - **`docs/private/` and `ppm/docs/private/` are git-ignored** (the PPM's keeps only its README): each person's own briefs and notes, on their own computer. Never commit them or force them in with `git add -f`, and never run `git clean -x` or `-X` here: it deletes them, and every `.env` file.
 - **Working from a brief in a `private/` folder?** Re-read it at the start of each task.
 - **Start with `docs/README.md`:** how the repository's knowledge bases work (an index, a log, guides, decisions, raw sources, pages for humans, reports). Each app can have its own; the PPM's starts at `ppm/docs/index.md`.
-- **How we think:** `docs/how-we-work.md`. Objective over agreeable; a senior engineer and an expert product designer at once; past the industry standard; the fewest clicks; built to scale.
+- **How we think:** `docs/how-we-work.md`. Objective over agreeable; a senior engineer and an expert product designer at once; past the industry standard; the fewest clicks; built to scale. UI and UX are weighed in every change, in every app: `docs/ux-principles.md`.
 - **Give goals, not steps:** a task comes with its goal, why, limits and a done you can check. A written checklist only when the work outlasts the session or has many asks (`docs/how-we-work.md`).
-- **Searching:** if `qmd` is installed, `qmd vsearch "<question>"` first and `qmd search` for exact words; otherwise the indexes and `grep` (`docs/references/qmd.md`).
+- **Searching:** if `qmd` is installed, ask questions with `qmd query`, writing its intent, lex, vec and hyde lines yourself (the most accurate search, 13 to 27 s), and read the top few results, not only the first; use `qmd search` or `grep` for exact names. Without qmd, the indexes and `grep`. How and why: `docs/references/qmd.md`.
 - **Commits are short and warm** and pull requests a short walkthrough: `docs/git-conventions.md`.
-- **Log only what's substantial, write a report only for large work or when asked,** and put anything only a person can do in a `for-humans/` page.
+- **Log only what's substantial, write a report only for large work or when asked,** and put anything only a person can do in a `for-humans/` page. What needs Kenneth's accounts (Vercel, Supabase, the domain, hosting) goes on `docs/for-humans/kenneth.md`.
 
 ## Rules the history taught
 

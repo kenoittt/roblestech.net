@@ -10,7 +10,7 @@ The Plan time dialog lists every teammate as a chip to invite to a meeting. That
 
 ### 18. Templates don't work on the live PPM (reported by Kyan)
 
-Kyan found that templates didn't work after the 2026-10-04 merge. First check item 10: the two database updates may not be on the live database ([`for-humans/kenneth.md`](for-humans/kenneth.md), item 1). Kyan will add the details.
+Kyan found that templates didn't work after the 2026-10-04 merge. First check item 10: the two database updates may not be on the live database ([`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1). Kyan will add the details.
 
 ### 19. A made-up client name in sample data and placeholders
 
@@ -26,7 +26,7 @@ Role changes were refused because the live database almost certainly doesn't hav
 
 ### 10. Kenneth: apply two database updates, then merge
 
-**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](for-humans/kenneth.md), item 1.
+**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1.
 
 `20261004000100_project_archive_and_delete.sql` and `20261004000200_templates.sql`, before merging the branch: see `DEPLOY.md`, "Database updates after the switch". Then check archive, restore and delete on a test project, and save and use a template.
 
@@ -116,6 +116,8 @@ So that anyone, a person or a Claude session, can keep building at the same qual
 Good sources: the git history (the commit messages explain each step), `README.md`, `DEPLOY.md`, this backlog. Kyan's own planning notes are kept privately; copy from them only with his OK, since this repository is public.
 
 ### 7. A consistent, scalable folder structure (Kyan, 2026-10-03)
+
+**Decided 2026-10-06:** domain-driven design, with one shape for every domain ([0011](decisions/0011-domain-driven-folders.md)). The refactor itself is still to do.
 
 Domain-driven all the way: each domain holds its own types, constants, data access, hooks, contexts and components in the same layout, so every number and rule has one source of truth; shared pieces live in one place; no barrel files (index files that re-export a folder: they slow builds and blur imports); the single global stylesheet stays. Today each domain mixes loose files with inconsistent names (`tasks/config.ts`, `workspace/types.ts`, `calendar/layout.ts`, data hooks in `data.ts`) beside `components/`.
 

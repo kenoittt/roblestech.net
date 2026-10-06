@@ -76,7 +76,7 @@ When you add or change a rule, update this table in the same commit.
 4. **Regenerate the types:** `npm run db:types`.
 5. **Update the code that mirrors the rule** (a comment says "Mirrors …") and the permissions table above.
 6. **Test as every role:** add a smoke check for a new rule, then `npm run test:smoke` and `npm run test:menus` ([testing.md](testing.md)).
-7. **Say so in the pull request:** name the migration, and add it to [`for-humans/kenneth.md`](../for-humans/kenneth.md) so it's applied before the merge.
+7. **Say so in the pull request:** name the migration, and add it to [`for-humans/kenneth.md`](../../../docs/for-humans/kenneth.md) so it's applied before the merge.
 
 ## Production facts
 
