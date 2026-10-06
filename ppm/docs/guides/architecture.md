@@ -17,7 +17,7 @@ The stack, the folders, how data moves, and where the rules live. For the databa
 
 ## The folders
 
-Folders follow the business, not the framework (domain-driven):
+Folders follow the business, not the framework: domain-driven design ([decision 0011](../decisions/0011-domain-driven-folders.md)).
 
 ```
 src/
@@ -38,14 +38,9 @@ supabase/               migrations, local sample data (seed.sql), local email te
 tests/                  smoke.mjs (end to end) and menus.mjs (every menu opens)
 ```
 
-Inside a domain, the usual files are:
-- `data.ts`: the queries and changes, as TanStack Query hooks.
-- `actions.ts`: server actions, for privileged work. Each checks the caller's role first.
-- `server.ts`: loaders that run only on the server.
-- `config.ts` or `types.ts`: types, labels and small pure rules (for example `canComplete` in `tasks/config.ts`).
-- `components/`: the area's screens and pieces.
+Every domain has the same shape ([decision 0011](../decisions/0011-domain-driven-folders.md)): `types.ts` (types and small pure rules), `constants.ts`, `data.ts` (TanStack Query hooks), `actions.ts` (server actions; each checks the caller's role first), `server.ts` (server-only loaders), `hooks/`, `contexts/` and `components/`.
 
-**Known debt:** the names and shapes aren't consistent yet across domains (`config.ts` in one, `types.ts` in another, `layout.ts` in the calendar), and nothing yet says where hooks and contexts go. Making every domain the same shape is a goal in the [backlog](../backlog.md). Until then, follow the nearest existing domain, and don't add barrel files (index files that only re-export).
+**Known debt:** the existing domains don't have that shape yet. Types and rules sit in `config.ts` in one domain (`canComplete` is in `tasks/config.ts`), in `types.ts` in another and in `layout.ts` in the calendar. New code follows the decision; the existing domains move in one refactor ([backlog](../backlog.md), goal 7). Don't add barrel files (index files that only re-export).
 
 ## How data moves
 
