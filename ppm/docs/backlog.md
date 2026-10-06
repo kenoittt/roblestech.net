@@ -2,15 +2,31 @@
 
 What's left to do on the PPM, newest decisions first within each part. Tick items off with the date, and keep the detail: the next person or Claude session starts from here.
 
+## From Kyan, 2026-10-06
+
+### 17. A people picker that scales, for meetings
+
+The Plan time dialog lists every teammate as a chip to invite to a meeting. That works for a few people, and fails for many, or for long names. Replace it with a searchable multi-select that shows photos and names, like the picker for "Chosen people" (`PickerMenu` with `multiple`), and look for any other place that lists everyone at once. The principle is in [`guides/ux-principles.md`](guides/ux-principles.md#scale).
+
+### 18. Templates don't work on the live PPM (reported by Kyan)
+
+Kyan found that templates didn't work after the 2026-10-04 merge. First check item 10: the two database updates may not be on the live database ([`for-humans/kenneth.md`](for-humans/kenneth.md), item 1). Kyan will add the details.
+
+### 19. A made-up client name in sample data and placeholders
+
+The local sample data (`supabase/seed.sql`) and two input hints ("For example, Promix Nutrition", in the project form and the import dialog) use a real client's name. The name was already public through the portal's history, but sample data shouldn't name real clients: swap in an invented one. Found 2026-10-06; small.
+
 ## From Kyan's brief of 2026-10-04
 
-The brief and what was done with it: [briefs/2026-10-04-kyan-voice-brief.md](briefs/2026-10-04-kyan-voice-brief.md), [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md). Branch `kyan/feat/ppm-templates-and-archive`.
+The brief and what was done with it: [raw/2026-10-04-kyan-voice-brief.md](raw/2026-10-04-kyan-voice-brief.md), [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md). Branch `kyan/feat/ppm-templates-and-archive`.
 
 ### 9. Kenneth: check your role on the live PPM (blocks making Kyan a super admin)
 
 Role changes were refused because the live database almost certainly doesn't have Kenneth as a super admin; the code is right (report, Task 1). Look at the bottom-left of the sidebar: your role is under your name. If it says Admin: Christian can change it from People, if Christian is a super admin; otherwise it takes one line of SQL, given in the report, run by Kenneth.
 
 ### 10. Kenneth: apply two database updates, then merge
+
+**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](for-humans/kenneth.md), item 1.
 
 `20261004000100_project_archive_and_delete.sql` and `20261004000200_templates.sql`, before merging the branch: see `DEPLOY.md`, "Database updates after the switch". Then check archive, restore and delete on a test project, and save and use a template.
 
@@ -37,7 +53,7 @@ Two short articles for the "Using the PPM" shelf: "Templates for work you repeat
 
 ### 16. Kenneth: the branch-name pattern
 
-`git-conventions.md` proposes `<owner>/<type>/<app>-<topic>`. Adopting it repository-wide is one line in the shared `CLAUDE.md`.
+The repository's [`docs/git-conventions.md`](../../docs/git-conventions.md) proposes `<owner>/<type>/<app>-<topic>`. Adopting it repository-wide is one line in the shared `CLAUDE.md`.
 
 ## Before going live
 
@@ -71,17 +87,23 @@ Admins can mark any task done in place of the person its rule names, so a review
 
 ### 4. A one-page guide for Kenneth: giving the team accounts
 
+**Done 2026-10-03 (Kenneth's Claude):** now [`for-humans/giving-the-team-accounts.md`](for-humans/giving-the-team-accounts.md).
+
 Once invitations work (item 1), write Kenneth a short guide: who already has an account, how to invite someone (People, Invite), what the three roles allow, what the invited person sees, and how to send a password reset. `DEPLOY.md`, "Accounts for the team", has the facts.
 
 ### 5. A concise, step-by-step Handbook
 
+**Done 2026-10-03 (Kenneth's Claude):** seven articles on the "Using the PPM" shelf, published by migration `20261003000100`. Edit them in the app from now on.
+
 `docs/handbook-drafts/` holds six how-to articles written during the build. Turn them into a short, instructional set on the Handbook's "Using the PPM" shelf: one task per article, numbered steps, checked against the app (some features came after the drafts). Keep the articles Kenneth already has.
 
-## Goals (not started)
+## Goals
 
 ### 6. Fill this knowledge base (Kyan, 2026-10-03)
 
-**Started 2026-10-04:** `briefs/`, `reports/` and `git-conventions.md`. The 2026-10-04 report ends with what a session without the private notes most needed: design rules (colour meanings, states, form validation, which component for what), a permissions table, production facts, a decisions log and how the team uses the PPM day to day.
+**Shaped and filled 2026-10-06** (Kyan's local Claude): [`index.md`](index.md), [`log.md`](log.md), the guides (design system, UX principles, architecture, database with a permissions table, testing, workflow, limitations), ten decisions, people, `for-humans/`, references, and the repository-wide `docs/` (how we work, commit style, the knowledge-base conventions). **Still to add:** how the team uses the PPM day to day (what each person does in it each morning, what Christian and Kenneth check), which needs the team's input.
+
+**Started 2026-10-04:** `briefs/` (now `raw/`), `reports/` and `git-conventions.md` (now in the repository's `docs/`). The 2026-10-04 report ends with what a session without the private notes most needed: design rules (colour meanings, states, form validation, which component for what), a permissions table, production facts, a decisions log and how the team uses the PPM day to day.
 
 So that anyone, a person or a Claude session, can keep building at the same quality. Record what mattered in making the PPM:
 - **Decisions and why:** the framework, the database rules, sign-off, privacy, what was ruled out.

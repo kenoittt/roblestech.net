@@ -1,9 +1,8 @@
-# RTC PPM (the revamp)
+# RTC PPM
 
-The new PPM for Robles Technologies Corp.: tasks people can find, a home dashboard, projects, the team calendar and the handbook, in one fast workspace. It replaces the Astro PPM at `ppm.roblestech.net` once it's ready to deploy.
+The PPM for Robles Technologies Corp.: tasks people can find, a home dashboard, projects, the team calendar and the handbook, in one fast workspace. Live at `ppm.roblestech.net` since 2026-10-03, when it replaced the Astro PPM.
 
-**Kind:** CODE, with this README as its MAINTAINED guide. Plan and decisions: `../RTC-Website-Notes/docs/plans/ppm-build-plan.md`.
-**Started:** 2026-10-02, by Kyan and Claude, from Kyan's voice plan (`../RTC-Website-Notes/docs/raw/2026-10-02_Kyan-voice-plan-for-the-revamp.md`).
+**Built** from 2026-10-02 by Kyan and Claude. **How it was made, and how to keep working on it:** the knowledge base, starting at [docs/index.md](docs/index.md).
 
 ## What works today
 
@@ -143,6 +142,6 @@ supabase/
 
 **Data:** the server loads the team, projects and live tasks in one round of parallel queries; after that the browser keeps them in a cache, so views switch instantly and edits show at once while they save. Writes go through row-level security and database triggers, which also write each task's history and the notifications.
 
-## Before this replaces the live PPM
+## The knowledge base
 
-See [docs/DEPLOY.md](docs/DEPLOY.md): the two fixes first, the switch in one sitting (keeping the current database, or starting fresh), the production settings, accounts, the handbook, and how to roll back. What's left to do is in [docs/backlog.md](docs/backlog.md); [docs/](docs/README.md) is the project's knowledge base.
+Start at [docs/index.md](docs/index.md): the design system, UX principles, architecture, the database and who may do what, testing, the workflow, decisions and their reasons, and what's left to do ([docs/backlog.md](docs/backlog.md)). How the PPM replaced the Astro PPM, and how database updates reach the live database, is in [docs/DEPLOY.md](docs/DEPLOY.md).
