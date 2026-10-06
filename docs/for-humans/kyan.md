@@ -13,3 +13,9 @@ Started 2026-10-07. Tick each one off here, with the date, when it's done. Thing
 **Why:** the local sample data now has the real team, an invented client, and data for every option (colours, blocks over midnight and days, crowded hours, templates of each kind). A local database only gets it when it's reset.
 
 **How:** from `ppm/`, `npx supabase db reset`. It only touches your local database.
+
+## 3. Build decision 0013: owners delete their empty projects
+
+**Why:** Kenneth decided on 2026-10-07 that a project's owner may delete it while it has no tasks ([0013](../../ppm/docs/decisions/0013-owners-delete-empty-projects.md), backlog item 13), and he'd like you to build it.
+
+**How:** one new database rule (the owner may delete a project with no tasks, deleted ones included, so nobody's history goes with it) and Delete offered to that owner in the app. The migration has to reach the live database before the merge, through Kenneth (`ppm/docs/DEPLOY.md`).
