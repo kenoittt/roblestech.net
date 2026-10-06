@@ -370,9 +370,10 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
 
         <div className="flex flex-col gap-2">
           {/* A template keeps a time of day; the day is chosen when it's used. */}
-          <div className={cn("grid gap-2", asTemplate ? "grid-cols-2" : "grid-cols-[1.3fr_1fr_1fr]")}>
+          {/* On a phone the day takes its own row, so the times have room. */}
+          <div className={cn("grid grid-cols-2 gap-2", !asTemplate && "sm:grid-cols-[1.3fr_1fr_1fr]")}>
             {!asTemplate && (
-            <label className="flex flex-col gap-1.5">
+            <label className="col-span-2 flex flex-col gap-1.5 sm:col-span-1">
               <span className="text-xs font-medium text-fg-2">Day</span>
               <input
                 type="date"
@@ -421,8 +422,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
             </label>
           </div>
           {endDay !== day && !asTemplate && (
-            <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
-              <label className="flex flex-col gap-1.5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.3fr_1fr_1fr]">
+              <label className="col-span-2 flex flex-col gap-1.5 sm:col-span-1">
                 <span className="text-xs font-medium text-fg-2">Ends on</span>
                 <input
                   type="date"
@@ -505,7 +506,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         )}
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       </div>
-      <div className="flex items-center gap-2 border-t border-line px-5 py-3">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-line px-5 py-3">
         {event && (
           <Button variant="destructive" onClick={() => { remove.mutate(event.id); onClose() }}>
             Delete
@@ -517,26 +518,28 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           />
         )}
         {!event && !editing && (
-          <label className={cn("flex items-center gap-2 text-xs text-fg-3", missing && "opacity-60")} title={missing ? TEMPLATES_MISSING : "Saves a template for next time, and adds nothing to the calendar"}>
+          <label className={cn("flex items-center gap-2 text-xs whitespace-nowrap text-fg-3", missing && "opacity-60")} title={missing ? TEMPLATES_MISSING : "Saves a template for next time, and adds nothing to the calendar"}>
             <Switch checked={asTemplate} onCheckedChange={switchToTemplate} disabled={missing} />
             Save as template
           </label>
         )}
-        <span className="flex-1" />
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button onClick={save} disabled={create.isPending || update.isPending || saveEvent.isPending}>
-          {asTemplate
-            ? saveEvent.isPending
-              ? "Saving…"
-              : same
-                ? "Replace template"
-                : "Save template"
-            : event
-              ? "Save"
-              : kind === "meeting"
-                ? "Send invites"
-                : "Add to calendar"}
-        </Button>
+        {/* Kept together and to the right, on whichever line they land on a phone. */}
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={create.isPending || update.isPending || saveEvent.isPending}>
+            {asTemplate
+              ? saveEvent.isPending
+                ? "Saving…"
+                : same
+                  ? "Replace template"
+                  : "Save template"
+              : event
+                ? "Save"
+                : kind === "meeting"
+                  ? "Send invites"
+                  : "Add to calendar"}
+          </Button>
+        </div>
       </div>
     </>
   )
