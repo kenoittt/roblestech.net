@@ -61,6 +61,7 @@ All written by Kyan's Claude: 0001 to 0011 on 2026-10-06, from the history and t
 | [references/README.md](references/README.md) | Design and engineering references, and what to take from each | Kyan's Claude, 2026-10-06 |
 | [raw/2026-10-04-kyan-voice-brief.md](raw/2026-10-04-kyan-voice-brief.md) | Kyan's brief to a cloud session, word for word (raw: never edited) | A cloud session, 2026-10-04 |
 | [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md) | What that session built (templates, archive and delete, the password eye, role messages) and why, and what it lacked | A cloud session, 2026-10-04 |
+| [reports/2026-10-07-session-report.md](reports/2026-10-07-session-report.md) | What this round built (templates in the dialogs, the all-day calendar, colours, the people picker, Copy my plan your way, shared components, full sample data) and why, and what Kenneth applies first | Kyan's Claude, 2026-10-07 |
 | [private/README.md](private/README.md) | Your own notes, on your computer only: git ignores everything here except this README | Kyan's Claude, 2026-10-06 |
 | [handbook-drafts/](handbook-drafts/) | The source of the Handbook's "Using the PPM" shelf. Superseded: the published articles (migration `20261003000100`) are the current version, edited in the app | Kyan's Claude, 2026-10-03 |
 

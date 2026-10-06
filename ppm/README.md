@@ -50,7 +50,7 @@ colima start --cpu 4 --memory 6
 
 # 2. The local database: the live schema, the revamp's additions and sample data
 npx supabase start          # first run downloads images; a few minutes
-# Optional, to start over with fresh sample data:
+# After pulling, or to start over: the latest migrations and sample data
 npx supabase db reset
 
 # 3. The app
@@ -71,10 +71,10 @@ Every sample account uses the password `rtc-demo-2026`. The sign-in page lists t
 | Kenneth Robles | kenneth@rtc.test | Super admin |
 | Christian Panes | christian@rtc.test | Super admin |
 | Kyan Lumanog | kyan@rtc.test | Admin |
-| Andrei | andrei@rtc.test | Admin |
-| Carl | carl@rtc.test | Staff |
+| Joshua | joshua@rtc.test | Staff |
+| Carl John | carl@rtc.test | Staff |
 
-The people are RTC's team; the tasks, comments and calendar entries are made up. Dates are relative to the day the sample data loads, so the demo always looks current.
+The people are RTC's team; the clients (Northline Nutrition, Brightwater Dental), tasks, comments and calendar entries are made up. Dates are relative to the day the sample data loads, so the demo always looks current. The sample data shows every option the PPM has: coloured blocks, blocks past midnight and over several days, an hour with five things at once, a day with seven tasks due, each sign-off rule, private and repeating tasks, planned and archived projects, and templates of each kind. When you add a feature, add data for it in `supabase/seed.sql` (the repository's `CLAUDE.md`, rule 7).
 
 ### Local tools
 
@@ -121,7 +121,7 @@ The smoke test signs in as different people and checks the main flows against th
 5. On the **board**, drag a card to In review. As an admin, Kyan can still mark it done in the reviewer's place: the panel's button says "Sign off as admin", and the history says so.
 6. Open the **calendar**. My week: drag down an empty slot to block time, drag a block to move it, or its bottom edge to change when it ends; the line under each day shows how much of the plan is done. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
 7. Open **People**. Invite someone, open the email in the mail catcher, and set their password.
-8. Switch to **Carl** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
+8. Switch to **Carl John** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
 9. Open a **project**: health, what's late, who's carrying it, then its board.
 10. Open a second browser window as **Kenneth** and rename a task: it changes in Kyan's window by itself.
 

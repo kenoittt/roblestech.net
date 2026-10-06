@@ -40,7 +40,18 @@ Built 2026-10-07 by Kyan's local Claude, on the branch `kyan/feat/ppm-templates-
 
 ### 28. The calendar runs all day, and blocks cross midnight
 
-**Done 2026-10-07.** The day runs from 12 AM to midnight and opens just before the current time (8 AM on other weeks). A block can end the next day ("1 AM · next day" in To) or days later ("Ends on"), and each day shows its own piece, with its title kept in view. Pieces that cross midnight change in their details, not by dragging.
+**Done 2026-10-07.** The day runs from 12 AM to midnight and opens just before the current time (8 AM on other weeks). A block can end the next day or days later: Plan time shows Starts and Ends, each a date and a time (item 32), and each day shows its own piece, with its title kept in view. Pieces that cross midnight change in their details, not by dragging.
+
+### 32. Follow-ups from Kyan's review, 2026-10-07
+
+**Done 2026-10-07.**
+- **Multi-day blocks weren't findable:** "Ends on" only appeared after picking a next-day time. Plan time now always shows **Starts** and **Ends**, each a date and a time, as calendars usually do.
+- **The select arrow sat on the edge** (on a Mac): every select is now `NativeSelect` (`src/components/ui/field.tsx`), with the app's arrow inset like any icon. The form field style is defined once there too (`fieldClass`), in place of twelve copies.
+- **Two colour pickers for one job:** projects and time blocks share `SwatchPicker` (`src/components/app/swatch-picker.tsx`), beside the name in both.
+- **"Template shared with the team" spilled out of its chip:** now "For the team" or "Just for you", and no chip wraps any more.
+- **The first card on the board lost its top edge:** the column's list now leaves room for the card's ring.
+- **Cmd+Enter didn't save in Plan time:** it does, and the button shows the shortcut.
+- **Sample data:** the real team (Christian, Kenneth, Joshua, Kyan, Carl John), an invented client, and data for every option ([`README.md`](../README.md), "Sample accounts").
 
 ### 31. Search in the filter menu's longer lists
 
@@ -61,6 +72,8 @@ Kyan found that templates didn't work after the 2026-10-04 merge. First check it
 **Checked 2026-10-07 (Kyan's Claude), as far as possible without the live database:** templates work end to end locally, on a fresh copy of every migration (the smoke test's template checks pass). The only local problem was missing sample templates, because that database was seeded before templates existed. So the code is very likely fine, and the cause is almost certainly the missing database update. Only Kenneth's `db push --dry-run` can confirm it. Until it's applied, the app now says "Templates aren't available yet: the database needs an update first" instead of showing an empty list.
 
 ### 19. A made-up client name in sample data and placeholders
+
+**Done 2026-10-07:** the sample client is now Northline Nutrition, and the hints in the project form and the import dialog use it too. The baseline migration still mentions the old name, since migrations that have run on the live database are never edited.
 
 The local sample data (`supabase/seed.sql`) and two input hints ("For example, Promix Nutrition", in the project form and the import dialog) use a real client's name. The name was already public through the portal's history, but sample data shouldn't name real clients: swap in an invented one. Found 2026-10-06; small.
 
@@ -176,6 +189,10 @@ Kenneth's idea: keep one Handbook article open while browsing the rest of the PP
 ### 30. A Gantt chart view (Kyan, 2026-10-06)
 
 Projects and tasks on a timeline, with their dates and how they overlap. Kyan: it "deserves a specific session", since a good Gantt chart is hard to get right (dragging, dependencies, scale from a week to a year). The tasks already have start and due dates. Not started.
+
+### 33. Share what's shared: audit the code for components and styles to reuse (Kyan, 2026-10-07)
+
+Look for things written more than once that mean the same thing, and make each one a shared component or style, so a change reaches every place at once ([`how-we-work.md`](../../docs/how-we-work.md#build-for-scale-in-three-ways)). Building blocks belong in `components/ui/`, the app's own pieces in `components/app/`, and a domain can wrap a shared piece when it needs more. Keep a component in its domain when only that domain uses it, and don't merge things that only look alike. Found so far, 2026-10-07: the textareas' style, repeated like the field style was; the segmented controls ("Time block · Meeting", "Who sees it", "What's done"), each written out by hand; `PickerMenu`, which lives in the tasks domain but is used by every domain; and the unused shadcn `Input` and `Select` beside our own.
 
 ### 8. From earlier
 

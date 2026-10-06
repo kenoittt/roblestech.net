@@ -84,6 +84,8 @@ Choosing:
 | You need | Use | Example |
 |---|---|---|
 | Pick one value from a list | `PickerMenu` (`src/domains/tasks/components/pickers.tsx`): search, arrow keys, Enter, a hint in its footer | Status, priority, assignee, project |
+| A form's text field, or a choice from a short list in a form | `fieldClass` and `NativeSelect` (`src/components/ui/field.tsx`). Never a bare `<select>`: the browser's arrow sits on the edge | Title, Starts and Ends, a project's status |
+| A colour for something | `SwatchPicker` (`src/components/app/swatch-picker.tsx`), beside the field it belongs to, with each thing's own colours | A project's colour, a time block's colour |
 | Pick several | `PickerMenu` with `multiple`, showing photos and names; it clears its search after each choice | Chosen people who may sign off |
 | Pick several people, as a form field | `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): who's chosen as photos and names in the field, a searchable list behind it, chosen people first when it opens | Meeting guests, project members |
 | More than fits | Show what fits, then "N more" or "+N", which opens the full list | A busy day in the month view, crowded hours, a day's due tasks |

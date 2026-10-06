@@ -27,9 +27,9 @@ src/
     api/                the photo route, and the 8 AM reminder (cron)
     auth/confirm/       where invitation and reset links land
   proxy.ts              refreshes the session on every request; /login, /auth/* and /api/cron/* are public
-  components/ui/        building blocks (shadcn on Base UI), restyled to our tokens
+  components/ui/        building blocks (shadcn on Base UI), restyled to our tokens; field (the form field style, NativeSelect)
   components/app/       app-wide pieces: shell, sidebar, page frame, ModalShell, Avatar, Icon, charts,
-                        the command menu, shortcuts, PasswordInput, splitButton, ui-state (which dialogs are open)
+                        the command menu, shortcuts, PasswordInput, splitButton, SwatchPicker, ui-state (which dialogs are open)
   domains/<area>/       one folder per business area: auth, calendar, dashboard, handbook, inbox,
                         people, projects, tasks, templates, workspace
   lib/                  shared helpers: Supabase clients (client, server, admin), dates in Manila time,

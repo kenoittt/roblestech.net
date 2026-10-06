@@ -69,3 +69,9 @@ Four colour tokens for time blocks, chosen to avoid the colours that mean someth
 
 ## [2026-10-07] feature | Copy my plan reads the way each person likes
 A message before and after, which parts show, and how finished entries look, saved in each person's preferences; it copies rich text so Teams keeps a strikethrough.
+
+## [2026-10-07] design | One field style, one select, one colour picker
+`fieldClass` and `NativeSelect` (`src/components/ui/field.tsx`) replace twelve copies of the field style and the browser's edge-hugging select arrow; `SwatchPicker` serves projects and time blocks alike. Plan time shows Starts and Ends, each a date and a time. Auditing the rest of the code for what should be shared is goal 33 ([backlog](backlog.md)).
+
+## [2026-10-07] process | Local data shows every option; messages reach their person
+The sample data has the real team, an invented client and data for every option, and every new feature adds its own (the repository's `CLAUDE.md`, rule 7). Anything someone else must do goes on their page in `docs/for-humans/`, which their Claude reads when a session starts (rule 10).

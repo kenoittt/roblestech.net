@@ -15,6 +15,8 @@ What to run, when, and what each check catches. Running the PPM locally is in [`
 
 Both tests need the local database (`npx supabase start`), the app (`npm run dev`) and Google Chrome (or `CHROME_PATH` pointing to a Chromium).
 
+**The sample data is part of testing.** `supabase/seed.sql` fills the local database with every option the PPM has, so each screen can be checked at a realistic size: coloured blocks, blocks past midnight and over days, an hour with five things at once, a day with seven tasks due, each sign-off rule, templates of each kind. Run `npx supabase db reset` after pulling. When you add a feature, add data for it to the seed (the repository's `CLAUDE.md`, rule 7). The smoke test relies on a few seed facts (RTC-18 and RTC-36, the "Daily outreach" and "Outreach block" templates, nothing in Kyan's evenings); the seed says so where it matters.
+
 ## What the smoke test covers
 
 Creating and assigning a task; the panel (status, history, comments); deleting and Undo; dragging on the board and the calendar; an invitation, from the email in the mail catcher through to setting a password; sign-off rules (staff refused, an admin signing off in someone's place, requests going to the people the rule names); private tasks; role limits and the message when a change is refused; the password eye; archiving and deleting projects; templates for tasks and the calendar, and saving one straight from the new-task dialog; a calendar entry's buttons; a block that runs past midnight, for a task made in Plan time; a task's blocks ticked off when it's done and unticked when it's reopened; live updates between two people.
