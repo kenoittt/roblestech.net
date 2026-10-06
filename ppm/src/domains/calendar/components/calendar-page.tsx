@@ -28,8 +28,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
+import { splitButton } from "@/components/app/split-button"
 import { Icon } from "@/components/app/icon"
 import { PageHeader } from "@/components/app/page"
 import { Progress } from "@/components/app/charts"
@@ -79,6 +79,7 @@ export function CalendarPage() {
   const { setRange, create, remove } = useCalendarActions()
   const { data: ranges } = usePrivacyRanges()
   const { data: templates = [] } = useEventTemplates()
+  const split = splitButton("primary")
   const router = useRouter()
 
   // On a phone, "my week" becomes one day at a time: seven columns don't fit.
@@ -233,16 +234,15 @@ export function CalendarPage() {
         title="Calendar"
         icon={Calendar03Icon}
         actions={
-          <div className="flex items-center">
-            <Button size="sm" onClick={() => newBlock()} className="h-7 gap-1.5 rounded-r-none px-2.5">
+          // One button in two parts: Plan time, and its templates behind the arrow.
+          <div className={split.group}>
+            <button type="button" onClick={() => newBlock()} className={split.main}>
               <Icon icon={Add01Icon} size={14} />
               Plan time
-            </Button>
+            </button>
+            <span aria-hidden className={split.seam} />
             <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label="Plan time from a template"
-                className="pressable inline-flex h-7 w-7 items-center justify-center rounded-r-[min(var(--radius-md),12px)] border-l border-white/20 bg-primary text-primary-foreground hover:bg-primary/80 data-popup-open:bg-primary/80"
-              >
+              <DropdownMenuTrigger aria-label="Plan time from a template" className={split.arrow}>
                 <Icon icon={ArrowDown01Icon} size={14} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
