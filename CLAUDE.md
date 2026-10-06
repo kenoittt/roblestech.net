@@ -33,8 +33,14 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 ## Docs
 
 - **`docs/` is shared, and public like the rest of the repo.** Reports go in `docs/reports/`. Nothing goes in `docs/` that you wouldn't show a stranger.
-- **`docs/private/` is git-ignored:** each person's own briefs and notes, on their own computer. Never commit it, or force it in with `git add -f`.
-- **Working from a brief in `docs/private/`?** Re-read it at the start of each task.
+- **`docs/private/` and `ppm/docs/private/` are git-ignored** (the PPM's keeps only its README): each person's own briefs and notes, on their own computer. Never commit them or force them in with `git add -f`, and never run `git clean -x` or `-X` here: it deletes them, and every `.env` file.
+- **Working from a brief in a `private/` folder?** Re-read it at the start of each task.
+- **Start with `docs/README.md`:** how the repository's knowledge bases work (an index, a log, guides, decisions, raw sources, pages for humans, reports). Each app can have its own; the PPM's starts at `ppm/docs/index.md`.
+- **How we think:** `docs/how-we-work.md`. Objective over agreeable; a senior engineer and an expert product designer at once; past the industry standard; the fewest clicks; built to scale.
+- **Give goals, not steps:** a task comes with its goal, why, limits and a done you can check. A written checklist only when the work outlasts the session or has many asks (`docs/how-we-work.md`).
+- **Searching:** if `qmd` is installed, `qmd vsearch "<question>"` first and `qmd search` for exact words; otherwise the indexes and `grep` (`docs/references/qmd.md`).
+- **Commits are short and warm** and pull requests a short walkthrough: `docs/git-conventions.md`.
+- **Log only what's substantial, write a report only for large work or when asked,** and put anything only a person can do in a `for-humans/` page.
 
 ## Rules the history taught
 
