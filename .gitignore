@@ -18,3 +18,7 @@ npm-debug.log*
 .DS_Store
 __pycache__/
 docs/private/
+
+# your own Claude Code files
+CLAUDE.local.md
+.claude/settings.local.json

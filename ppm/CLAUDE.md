@@ -2,7 +2,7 @@
 
 # Working on the PPM
 
-Read `docs/index.md` first: it lists the PPM's knowledge base. Then the repository's `docs/how-we-work.md` (the mindset), the guides your task needs in `docs/guides/`, and `docs/backlog.md` with the latest entries of `docs/log.md`.
+Read `docs/index.md` first: it lists the PPM's knowledge base. Then the repository's `docs/how-we-work.md` (the mindset), the guides your task needs in `docs/guides/`, and `docs/backlog.md` with the latest entries of `docs/log.md`. Your own notes, if you keep any, are in `docs/private/` (start at its `index.md`); git ignores them.
 
 What matters most here:
 

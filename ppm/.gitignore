@@ -42,3 +42,7 @@ next-env.d.ts
 
 # smoke test screenshots
 /test-results
+
+# docs/private: each person's own notes. Only the README is shared.
+/docs/private/*
+!/docs/private/README.md

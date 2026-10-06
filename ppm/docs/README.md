@@ -11,7 +11,7 @@ How the PPM was made, and how to keep working on it at the same quality, whoever
 
 ## How it's organised
 
-It follows the repository's conventions ([`docs/README.md`](../../docs/README.md)): `index.md` and `log.md`; `guides/`; `decisions/`; `people/`; `for-humans/` (things only a person can do); `references/`; `raw/` (what people gave us, kept as given); `reports/` (for large pieces of work only).
+It follows the repository's conventions ([`docs/README.md`](../../docs/README.md)): `index.md` and `log.md`; `guides/`; `decisions/`; `people/`; `for-humans/` (things only a person can do); `references/`; `raw/` (what people gave us, kept as given); `reports/` (for large pieces of work only); `private/` (each person's own notes: git ignores all but its README).
 
 ## Rules
 

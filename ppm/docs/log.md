@@ -48,3 +48,6 @@ All work on the PPM happens in this repository; the separate build folder was ar
 
 ## [2026-10-06] docs | The knowledge base takes its shape
 An index, this log, guides, decisions, people, `for-humans/`, references and raw sources, following the LLM wiki pattern, with the repository-wide part in `docs/` ([0010](decisions/0010-the-knowledge-base.md)).
+
+## [2026-10-06] process | A private folder for each person's notes
+`docs/private/` keeps your own notes on your computer: git ignores everything in it except its README ([private/README.md](private/README.md)).
