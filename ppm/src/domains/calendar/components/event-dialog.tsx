@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
-import { isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
+import { addDays, diffDays, isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { getSupabase } from "@/lib/supabase/client"
 import { useMe, useMembers, useTasks } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
@@ -20,7 +20,7 @@ import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { canEditTemplate, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
 import { EventTemplatePicker } from "@/domains/templates/components/template-pickers"
 import { useCalendarActions, type CalEvent } from "../data"
-import { durationLabel, formatMinute } from "../layout"
+import { DAY_END, durationLabel, formatMinute } from "../layout"
 
 export type EventDraft = {
   day: string
@@ -40,7 +40,21 @@ const VISIBILITY = [
   { value: "private", label: "Private", hint: "Only you see it." },
 ] as const
 
-const TIMES = Array.from({ length: (24 - 6) * 4 }, (_, i) => 6 * 60 + i * 15)
+// Every quarter hour of the day. An entry may end at midnight or later.
+const TIMES = Array.from({ length: 24 * 4 }, (_, i) => i * 15)
+const steps = (from: number, to: number) => Array.from({ length: Math.max(0, Math.floor((to - from) / 15) + 1) }, (_, i) => from + i * 15)
+const timeLabel = (t: number) => (t === DAY_END ? "Midnight" : formatMinute(t))
+
+/**
+ * Where an entry ends, kept as a day and minutes after that day's midnight.
+ * Midnight itself stays on the day it closes (1440), so "until midnight"
+ * doesn't read as the next day.
+ */
+function endOf(day: string, minutes: number) {
+  const days = Math.floor(minutes / DAY_END)
+  const rest = minutes % DAY_END
+  return rest === 0 && days > 0 ? { endDay: addDays(day, days - 1), end: DAY_END } : { endDay: addDays(day, days), end: rest }
+}
 
 const input =
   "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
@@ -83,7 +97,13 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const [taskId, setTaskId] = useState<string | null>(event?.task_id ?? draft?.taskId ?? null)
   const [day, setDay] = useState(event ? isoDay(event.starts_at) : draft!.day)
   const [start, setStart] = useState(event ? minutesOfDay(event.starts_at) : draft!.start)
-  const [end, setEnd] = useState(event ? minutesOfDay(event.ends_at) : draft!.end)
+  // The end can be on a later day: a block from 9 PM to 1 AM, or over several days.
+  const [{ endDay, end }, setEndAt] = useState(() =>
+    event ? endOf(day, diffDays(isoDay(event.ends_at), day) * DAY_END + minutesOfDay(event.ends_at)) : endOf(draft!.day, draft!.end),
+  )
+  /** Minutes from the start to the end. */
+  const span = diffDays(endDay, day) * DAY_END + end - start
+  const setEnd = (minutes: number) => setEndAt(endOf(day, minutes))
   const [visibility, setVisibility] = useState<CalEvent["visibility"]>(event?.visibility ?? (preset?.visibility as CalEvent["visibility"] | undefined) ?? "public")
   const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
   const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
@@ -128,13 +148,13 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const save = async () => {
     setError(null)
     if (!title.trim()) return setError("Give it a title.")
-    if (end <= start) return setError("It has to end after it starts.")
+    if (span <= 0) return setError("It has to end after it starts.")
     const row = {
       kind,
       title: title.trim(),
       notes: notes.trim() || null,
       starts_at: manilaInstant(day, start),
-      ends_at: manilaInstant(day, end),
+      ends_at: manilaInstant(endDay, end),
       task_id: taskId,
       visibility,
       auto_complete: auto,
@@ -219,27 +239,73 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           />
         </div>
 
-        <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">Day</span>
-            <input type="date" value={day} onChange={(e) => e.target.value && setDay(e.target.value)} className={input} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">From</span>
-            <select value={start} onChange={(e) => {
-              const s = Number(e.target.value)
-              setEnd((old) => (old <= s ? s + (end - start) : old))
-              setStart(s)
-            }} className={input}>
-              {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{end > start ? durationLabel(end - start) : ""}</span></span>
-            <select value={end} onChange={(e) => setEnd(Number(e.target.value))} className={input}>
-              {TIMES.filter((t) => t > start).map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
-            </select>
-          </label>
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">Day</span>
+              <input
+                type="date"
+                value={day}
+                onChange={(e) => {
+                  const next = e.target.value
+                  if (!next) return
+                  // Moving the day moves the end with it: the entry keeps its length.
+                  setEndAt(endOf(next, start + span))
+                  setDay(next)
+                }}
+                className={input}
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">From</span>
+              <select
+                value={start}
+                onChange={(e) => {
+                  const s = Number(e.target.value)
+                  setEnd(s + span)
+                  setStart(s)
+                }}
+                className={input}
+              >
+                {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{span > 0 ? durationLabel(span) : ""}</span></span>
+              {endDay === day ? (
+                // Later today, or on into the night: past midnight is one choice away.
+                <select value={end} onChange={(e) => setEnd(Number(e.target.value))} className={input}>
+                  {steps(start + 15, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+                  {steps(DAY_END + 15, start + DAY_END).map((t) => (
+                    <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
+                  ))}
+                </select>
+              ) : (
+                <select value={end} onChange={(e) => setEndAt({ endDay, end: Number(e.target.value) })} className={input}>
+                  {steps(0, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+                </select>
+              )}
+            </label>
+          </div>
+          {endDay !== day && (
+            <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-medium text-fg-2">Ends on</span>
+                <input
+                  type="date"
+                  value={endDay}
+                  min={day}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    if (!next || next < day) return
+                    // Back to the same day: keep an end that comes after the start.
+                    setEndAt(next === day && end <= start ? endOf(day, Math.min(start + 60, DAY_END)) : { endDay: next, end })
+                  }}
+                  className={input}
+                />
+              </label>
+            </div>
+          )}
         </div>
 
         {kind === "meeting" && (
@@ -315,7 +381,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         )}
         {event && event.owner_id === me.id && (
           <SaveEventTemplate
-            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end, visibility, auto, attendees: [me.id, ...attendees] }}
+            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end: start + span, visibility, auto, attendees: [me.id, ...attendees] }}
           />
         )}
         <span className="flex-1" />
@@ -353,6 +419,7 @@ function SaveEventTemplate({
     if (!clean) return toast.error("Give the template a name.")
     if (!entry.title) return toast.error("Give the entry a title first.")
     if (entry.end <= entry.start) return toast.error("It has to end after it starts.")
+    if (entry.end > DAY_END) return toast.error("A template keeps one day", { description: "Make it end by midnight, then save it as a template." })
     try {
       await saveEvent.mutateAsync({
         id: same?.id,

@@ -55,7 +55,7 @@ import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
 import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
-import { durationLabel, formatMinute } from "../layout"
+import { DAY_END, durationLabel, formatMinute, minutesOn } from "../layout"
 import { EventDialog, type EventDraft } from "./event-dialog"
 import { TimeGrid, type GridColumn } from "./time-grid"
 
@@ -106,10 +106,9 @@ export function CalendarPage() {
     mode === "week"
       ? days.map((day) => {
           const mine = events.filter((e) => e.owner_id === me.id || e.attendee_ids.includes(me.id))
-          const ofDay = mine.filter((e) => isoDay(e.starts_at) === day)
-          const length = (e: CalEvent) => minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)
-          const planned = ofDay.reduce((s, e) => s + length(e), 0)
-          const done = ofDay.filter((e) => isEventDone(e, now)).reduce((s, e) => s + length(e), 0)
+          // A block that runs past midnight counts on each day for the part it covers.
+          const planned = mine.reduce((s, e) => s + minutesOn(e, day), 0)
+          const done = mine.filter((e) => isEventDone(e, now)).reduce((s, e) => s + minutesOn(e, day), 0)
           const hidden = modeFor(day)
           return {
             key: day,
@@ -131,7 +130,7 @@ export function CalendarPage() {
         })
       : active.map((m) => {
           const theirs = events.filter((e) => e.owner_id === m.id || e.attendee_ids.includes(m.id))
-          const planned = theirs.reduce((s, e) => s + Math.max(0, minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)), 0)
+          const planned = theirs.reduce((s, e) => s + minutesOn(e, anchor), 0)
           const done = theirs.filter((e) => isEventDone(e, now)).length
           return {
             key: m.id,
@@ -197,8 +196,11 @@ export function CalendarPage() {
   const planDayLabel = planDay === today ? "today" : `${weekdayName(planDay, true)}, ${monthName(planDay)} ${Number(planDay.slice(8))}`
 
   const newBlock = (taskId?: string) => {
-    const start = planDay === today ? Math.min(20 * 60, Math.ceil(minutesOfDay(now) / 30) * 30 + 30) : 9 * 60
-    setDraft({ day: planDay, start, end: start + 60, taskId: taskId ?? null })
+    // Today: the next half hour. Late at night that's already tomorrow.
+    const next = planDay === today ? Math.ceil(minutesOfDay(now) / 30) * 30 + 30 : 9 * 60
+    const day = next >= DAY_END ? addDays(planDay, 1) : planDay
+    const start = next % DAY_END
+    setDraft({ day, start, end: start + 60, taskId: taskId ?? null })
   }
 
   // From a template: a block goes straight onto the day, with Undo. A meeting

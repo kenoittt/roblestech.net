@@ -6,14 +6,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
-import { clockTime, manilaInstant, minutesOfDay } from "@/lib/dates"
+import { isoDay, longDate, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { useMe, useMemberMap, useNow, useTasks } from "@/domains/workspace/provider"
 import { displayName } from "@/domains/workspace/types"
 import { taskKey, type Task } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { isEventDone, useCalendarActions, type CalEvent } from "../data"
-import { DAY_END, DAY_START, PX_PER_MIN, SNAP, durationLabel, formatMinute, minuteToY, placeEvents, yToMinute, type Placed } from "../layout"
+import {
+  DAY_END,
+  DAY_START,
+  PX_PER_MIN,
+  SNAP,
+  durationLabel,
+  entryMinutes,
+  entryTimes,
+  formatMinute,
+  minuteToY,
+  placeEvents,
+  yToMinute,
+  type Placed,
+} from "../layout"
 
 type MoveState = {
   id: string
@@ -131,14 +144,17 @@ export function TimeGrid({
     window.addEventListener("pointercancel", onCancel)
   }
 
-  // Start the view at 8 AM, where the day begins.
+  const nowMinute = minutesOfDay(now)
+  const showsToday = columns.some((c) => c.day === today)
+  // The day has all 24 hours, so open where it matters: just before now when
+  // today is on screen, otherwise at 8 AM.
+  const [opening] = useState(() => (showsToday ? Math.max(DAY_START, nowMinute - 90) : 8 * 60))
   useEffect(() => {
-    if (scroller.current) scroller.current.scrollTop = minuteToY(8 * 60) - 12
-  }, [])
+    if (scroller.current) scroller.current.scrollTop = minuteToY(opening) - 12
+  }, [opening])
 
   const hours: number[] = []
   for (let m = DAY_START; m <= DAY_END; m += 60) hours.push(m)
-  const nowMinute = minutesOfDay(now)
   const height = (DAY_END - DAY_START) * PX_PER_MIN
   const hasDue = columns.some((c) => c.due.length > 0)
 
@@ -179,7 +195,7 @@ export function TimeGrid({
           <div className="relative w-14 shrink-0">
             {hours.map((m) => (
               <span key={m} className="absolute right-2 -translate-y-1/2 text-[10px] text-fg-4 tabular" style={{ top: minuteToY(m) }}>
-                {m === DAY_START ? "" : formatMinute(m).replace(":00", "")}
+                {m === DAY_START || m === DAY_END ? "" : formatMinute(m)}
               </span>
             ))}
           </div>
@@ -301,7 +317,7 @@ function EventBlock({
   onBeginMove: (e: React.PointerEvent, mode: "move" | "resize") => void
   justMovedRef: React.RefObject<string | null>
 }) {
-  const { event, top, height, lane, lanes, start, end } = placed
+  const { event, top, height, lane, lanes, before, after } = placed
   const [detailsOpen, setDetailsOpen] = useState(false)
   const me = useMe()
   const members = useMemberMap()
@@ -331,15 +347,12 @@ function EventBlock({
         {mine && event.visibility === "busy" && <Icon icon={ViewOffIcon} size={11} className="shrink-0 text-fg-3" />}
         <span className="truncate">{event.title}</span>
       </span>
-      {!short && (
-        <span className="block truncate text-fg-3 tabular">
-          {formatMinute(start)} to {formatMinute(end)}
-        </span>
-      )}
+      {!short && <span className="block truncate text-fg-3 tabular">{entryTimes(event, { compact: true })}</span>}
     </>
   )
 
-  const draggable = mine && !event.masked
+  // An entry that runs over midnight changes in its details (Edit), not by dragging one piece of it.
+  const draggable = mine && !event.masked && !before && !after
   return (
     <Popover
       open={detailsOpen}
@@ -356,15 +369,20 @@ function EventBlock({
         data-event
         onPointerDown={(e) => (draggable ? onBeginMove(e, "move") : e.stopPropagation())}
         className={cn(
-          "absolute z-[1] flex flex-col items-stretch justify-start overflow-hidden rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          // overflow-clip, not hidden: hidden would stop the title sticking to the top of the day as you scroll.
+          "absolute z-[1] flex flex-col items-stretch justify-start overflow-clip rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
           tone,
+          // Square where it carries on from the day before or into the next.
+          before && "rounded-t-none",
+          after && "rounded-b-none",
           done && "opacity-55",
           draggable && "cursor-grab active:cursor-grabbing",
           moving && "opacity-30",
         )}
         style={{ top, height, width, left }}
       >
-        {body}
+        {/* A long block keeps its title in view while you scroll through it. */}
+        <span className="sticky top-1 flex min-w-0 flex-col">{body}</span>
         {draggable && height >= 28 && (
           <span
             aria-hidden
@@ -377,8 +395,13 @@ function EventBlock({
         <div>
           <p className="text-sm font-medium text-fg">{event.title}</p>
           <p className="mt-0.5 text-xs text-fg-3 tabular">
-            {clockTime(event.starts_at)} to {clockTime(event.ends_at)} · {durationLabel(end - start)}
+            {entryTimes(event)} · {durationLabel(entryMinutes(event))}
           </p>
+          {(before || after) && (
+            <p className="text-xs text-fg-3">
+              {longDate(isoDay(event.starts_at))} to {longDate(isoDay(event.ends_at))}
+            </p>
+          )}
         </div>
         {event.masked ? (
           <p className="text-xs text-fg-3">{displayName(owner)} shares only that they're busy.</p>

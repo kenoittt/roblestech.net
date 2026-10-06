@@ -114,10 +114,16 @@ try {
   const before = Number(sql(`select count(*) from cal_events where owner_id = '00000000-0000-4000-a000-000000000003'`))
   const cols = page.locator("div.cursor-cell")
   const col = cols.nth(0)
+  // The day has all 24 hours and opens near the current time, so bring 5 PM to the top first.
+  await page.evaluate(() => {
+    const scroller = document.querySelector("div.cursor-cell")?.closest(".overflow-y-auto")
+    if (scroller) scroller.scrollTop = 17 * 56
+  })
+  await page.waitForTimeout(200)
   const box = await col.boundingBox()
   if (box) {
     // Monday, roughly 6 PM: well clear of the sample entries
-    const y = box.y + (18 * 60 - 7 * 60) * (56 / 60) - (await page.evaluate(() => 0))
+    const y = box.y + 18 * 56
     await page.mouse.move(box.x + box.width / 2, Math.min(y, box.y + box.height - 80))
     await page.mouse.down()
     await page.mouse.move(box.x + box.width / 2, Math.min(y, box.y + box.height - 80) + 60, { steps: 6 })
