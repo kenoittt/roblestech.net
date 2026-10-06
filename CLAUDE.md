@@ -35,6 +35,10 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 - **`docs/` is shared, and public like the rest of the repo.** Reports go in `docs/reports/`. Nothing goes in `docs/` that you wouldn't show a stranger.
 - **`docs/private/` is git-ignored:** each person's own briefs and notes, on their own computer. Never commit it, or force it in with `git add -f`.
 - **Working from a brief in `docs/private/`?** Re-read it at the start of each task.
+- **Start with `docs/README.md`:** how the repository's knowledge bases work (an index, a log, guides, decisions, raw sources, pages for humans, reports). Each app can have its own; the PPM's starts at `ppm/docs/index.md`.
+- **How we think:** `docs/how-we-work.md`. Objective over agreeable; a senior engineer and an expert product designer at once; past the industry standard; the fewest clicks; built to scale.
+- **Commits are short and warm** and pull requests a short walkthrough: `docs/git-conventions.md`.
+- **Log only what's substantial, write a report only for large work or when asked,** and put anything only a person can do in a `for-humans/` page.
 
 ## Rules the history taught
 
