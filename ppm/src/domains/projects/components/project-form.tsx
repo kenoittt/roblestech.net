@@ -70,7 +70,7 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
             <div className="flex items-end gap-3">
               <label className="flex flex-1 flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Name</span>
-                <input autoFocus value={draft.name} onChange={(e) => set({ name: e.target.value })} placeholder="For example, Promix Nutrition" className={input} />
+                <input autoFocus value={draft.name} onChange={(e) => set({ name: e.target.value })} placeholder="For example, Northline Nutrition" className={input} />
               </label>
               <SwatchPicker
                 options={PROJECT_COLORS.map((c) => ({ value: c, label: PROJECT_COLOR_NAMES[c] ?? c, color: c }))}

@@ -204,7 +204,7 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
   }))
   rest(tokenFor("carl@rtc.test"), "PATCH", `ppm_tasks?id=eq.${made?.id}`, { status: "in_review" })
   const asked = made ? sql(`select string_agg(split_part(p.full_name, ' ', 1), ', ' order by p.full_name) from ppm_notifications n join profiles p on p.id = n.user_id where n.task_id = '${made.id}' and n.type = 'review'`) : ""
-  check("Sending a task for sign-off asks the people its rule names", asked === "Andrei, Christian", asked || "nobody asked")
+  check("Sending a task for sign-off asks the people its rule names", asked === "Christian, Joshua", asked || "nobody asked")
 }
 
 // A repeating task: finishing it makes the next one, which keeps the series' creator and assigner
