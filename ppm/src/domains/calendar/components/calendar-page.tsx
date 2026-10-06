@@ -52,7 +52,7 @@ import { DueText } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { TEMPLATES_MISSING, isMissingTable, sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
-import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
+import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type BlockColor, type CalEvent } from "../data"
 import { DAY_END, durationLabel, entryTimes, formatMinute, minutesOn } from "../layout"
 import type { PlanEntry } from "../plan-text"
 import { CopyPlan } from "./copy-plan"
@@ -205,6 +205,7 @@ export function CalendarPage() {
         task_id: null,
         visibility: t.visibility as CalEvent["visibility"],
         auto_complete: t.auto_complete,
+        ...(t.color ? { color: t.color as BlockColor } : {}),
       })
       toast(`Added ${t.title}`, {
         description: `${planDay === today ? "Today" : planDayLabel}, ${formatMinute(t.start_minute)} to ${formatMinute(t.end_minute)}.`,

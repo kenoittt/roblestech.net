@@ -8,6 +8,7 @@ import { addDays, diffDays, isoDay } from "@/lib/dates"
 import { useUid } from "@/domains/workspace/provider"
 import { isAdminRole, type Member, type Project } from "@/domains/workspace/types"
 import { explain, type NewTask } from "@/domains/tasks/data"
+import { withoutMissingColour } from "@/domains/calendar/data"
 import type { Task } from "@/domains/tasks/config"
 
 // Templates keep the details of a task or a calendar entry that people make
@@ -195,11 +196,13 @@ export function useTemplateActions() {
   const saveEvent = useMutation({
     mutationFn: async ({ id, input }: { id?: string; input: EventTemplateInput }) => {
       const supabase = getSupabase()
-      const { data, error } = id
-        ? await supabase.from("cal_event_templates").update(input).eq("id", id).select("*").single()
-        : await supabase.from("cal_event_templates").insert({ ...input, created_by: uid }).select("*").single()
-      if (error) throw error
-      return data as EventTemplate
+      return withoutMissingColour(input, async (row) => {
+        const { data, error } = id
+          ? await supabase.from("cal_event_templates").update(row).eq("id", id).select("*").single()
+          : await supabase.from("cal_event_templates").insert({ ...row, created_by: uid }).select("*").single()
+        if (error) throw error
+        return data as EventTemplate
+      })
     },
     onSuccess: () => refresh("event"),
     onError: (e) => toast.error(explain(e)),

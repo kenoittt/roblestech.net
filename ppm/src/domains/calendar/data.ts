@@ -25,6 +25,47 @@ export type CalEvent = {
   /** True when you're seeing only that the person is busy. */
   masked: boolean
   attendee_ids: string[]
+  /** A block's colour, by name; empty is the usual blue. Hidden when masked. */
+  color: BlockColor | null
+}
+
+export type BlockColor = "teal" | "purple" | "pink" | "slate"
+
+/**
+ * The colours a block can have, with what each looks like. Mirrors the check
+ * on cal_events.color. The shades are tokens, so each theme draws its own.
+ */
+export const BLOCK_COLORS: { value: BlockColor | null; label: string; swatch: string; tone: string; bar: string }[] = [
+  { value: null, label: "Blue", swatch: "bg-brand", tone: "border-brand/70 bg-[color-mix(in_oklab,var(--brand)_14%,var(--surface))]", bar: "bg-brand" },
+  { value: "teal", label: "Teal", swatch: "bg-cal-teal", tone: "border-cal-teal/70 bg-[color-mix(in_oklab,var(--cal-teal)_14%,var(--surface))]", bar: "bg-cal-teal" },
+  { value: "purple", label: "Purple", swatch: "bg-cal-purple", tone: "border-cal-purple/70 bg-[color-mix(in_oklab,var(--cal-purple)_14%,var(--surface))]", bar: "bg-cal-purple" },
+  { value: "pink", label: "Pink", swatch: "bg-cal-pink", tone: "border-cal-pink/70 bg-[color-mix(in_oklab,var(--cal-pink)_14%,var(--surface))]", bar: "bg-cal-pink" },
+  { value: "slate", label: "Slate", swatch: "bg-cal-slate", tone: "border-cal-slate/70 bg-[color-mix(in_oklab,var(--cal-slate)_14%,var(--surface))]", bar: "bg-cal-slate" },
+]
+
+export function blockColor(color: string | null | undefined) {
+  return BLOCK_COLORS.find((c) => c.value === (color ?? null)) ?? BLOCK_COLORS[0]
+}
+
+/**
+ * Colours came with a database update (20261007000200). Until it's on a
+ * database, a block saved with a colour is saved without one, and says so.
+ */
+function colourMissing(error: unknown) {
+  const e = error as { code?: string; message?: string } | null
+  return e?.code === "PGRST204" && Boolean(e.message?.includes("'color'"))
+}
+
+export async function withoutMissingColour<R extends { color?: string | null }, T>(row: R, write: (row: R) => Promise<T>): Promise<T> {
+  try {
+    return await write(row)
+  } catch (error) {
+    if (!("color" in row) || !colourMissing(error)) throw error
+    const rest = { ...row }
+    delete rest.color
+    toast("Saved without its colour", { description: "Colours need a database update first. Let an admin know." })
+    return write(rest)
+  }
 }
 
 export type PrivacyRange = { id: string; user_id: string; starts_on: string; ends_on: string; mode: "busy" | "private" }
@@ -74,6 +115,7 @@ export type NewEvent = {
   visibility: "public" | "busy" | "private"
   auto_complete: boolean
   attendees?: string[]
+  color?: BlockColor | null
 }
 
 export function useCalendarActions() {
@@ -85,12 +127,15 @@ export function useCalendarActions() {
     mutationFn: async (input: NewEvent) => {
       const supabase = getSupabase()
       const { attendees = [], ...row } = input
-      const { data, error } = await supabase
-        .from("cal_events")
-        .insert({ ...row, owner_id: uid })
-        .select("id")
-        .single()
-      if (error) throw error
+      const data = await withoutMissingColour(row, async (r) => {
+        const { data, error } = await supabase
+          .from("cal_events")
+          .insert({ ...r, owner_id: uid })
+          .select("id")
+          .single()
+        if (error) throw error
+        return data
+      })
       const others = attendees.filter((a) => a !== uid)
       if (input.kind === "meeting") {
         const { error: aErr } = await supabase
@@ -109,8 +154,10 @@ export function useCalendarActions() {
 
   const update = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<Omit<NewEvent, "attendees">> & { completed_at?: string | null } }) => {
-      const { error } = await getSupabase().from("cal_events").update(patch).eq("id", id)
-      if (error) throw error
+      await withoutMissingColour(patch, async (p) => {
+        const { error } = await getSupabase().from("cal_events").update(p).eq("id", id)
+        if (error) throw error
+      })
     },
     onMutate: async ({ id, patch }) => {
       await qc.cancelQueries({ queryKey: ["calendar"] })

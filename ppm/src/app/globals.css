@@ -56,6 +56,13 @@
 
   --priority-urgent: #e5762a;
 
+  /* Time block colours, chosen per block; the usual blue is --brand. None of
+     them is green, amber, red or orange: those already mean something. */
+  --cal-teal: #0d8f86;
+  --cal-purple: #9333ea;
+  --cal-pink: #db2777;
+  --cal-slate: #64748b;
+
   /* Charts: RTC blues first, then the status colours */
   --chart-1: #0464dd;
   --chart-2: #3992ff;
@@ -135,6 +142,11 @@
 
   --priority-urgent: #f2994a;
 
+  --cal-teal: #2dd4bf;
+  --cal-purple: #c084fc;
+  --cal-pink: #f472b6;
+  --cal-slate: #94a3b8;
+
   --chart-1: #3992ff;
   --chart-2: #1a6ff0;
   --chart-3: #8590ff;
@@ -211,6 +223,10 @@
   --color-status-done: var(--status-done);
   --color-status-cancelled: var(--status-cancelled);
   --color-priority-urgent: var(--priority-urgent);
+  --color-cal-teal: var(--cal-teal);
+  --color-cal-purple: var(--cal-purple);
+  --color-cal-pink: var(--cal-pink);
+  --color-cal-slate: var(--cal-slate);
   --color-chart-track: var(--chart-track);
 
   --shadow-popover: var(--shadow-popover);

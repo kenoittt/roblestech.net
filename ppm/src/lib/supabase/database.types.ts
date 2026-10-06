@@ -44,26 +44,26 @@ isOneToOne: false
                   ]
                 },"cal_event_templates": {
                   Row: {
-                    "attendee_ids": (string)[],"auto_complete": boolean,"created_at": string,"created_by": string | null,"end_minute": number,"id": string,"kind": string,"name": string,"notes": string | null,"shared": boolean,"start_minute": number,"title": string,"updated_at": string,"visibility": string
+                    "attendee_ids": (string)[],"auto_complete": boolean,"color": string | null,"created_at": string,"created_by": string | null,"end_minute": number,"id": string,"kind": string,"name": string,"notes": string | null,"shared": boolean,"start_minute": number,"title": string,"updated_at": string,"visibility": string
                   }
                   Insert: {
-                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"created_at"?: string,"created_by"?: string | null,"end_minute": number,"id"?: string,"kind"?: string,"name": string,"notes"?: string | null,"shared"?: boolean,"start_minute": number,"title": string,"updated_at"?: string,"visibility"?: string
+                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"color"?: string | null,"created_at"?: string,"created_by"?: string | null,"end_minute": number,"id"?: string,"kind"?: string,"name": string,"notes"?: string | null,"shared"?: boolean,"start_minute": number,"title": string,"updated_at"?: string,"visibility"?: string
                   }
                   Update: {
-                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"created_at"?: string,"created_by"?: string | null,"end_minute"?: number,"id"?: string,"kind"?: string,"name"?: string,"notes"?: string | null,"shared"?: boolean,"start_minute"?: number,"title"?: string,"updated_at"?: string,"visibility"?: string
+                    "attendee_ids"?: (string)[],"auto_complete"?: boolean,"color"?: string | null,"created_at"?: string,"created_by"?: string | null,"end_minute"?: number,"id"?: string,"kind"?: string,"name"?: string,"notes"?: string | null,"shared"?: boolean,"start_minute"?: number,"title"?: string,"updated_at"?: string,"visibility"?: string
                   }
                   Relationships: [
                     
                   ]
                 },"cal_events": {
                   Row: {
-                    "all_day": boolean,"auto_complete": boolean,"completed_at": string | null,"created_at": string,"ends_at": string,"id": string,"kind": string,"location": string | null,"notes": string | null,"owner_id": string,"starts_at": string,"task_id": string | null,"title": string,"updated_at": string,"visibility": string
+                    "all_day": boolean,"auto_complete": boolean,"color": string | null,"completed_at": string | null,"created_at": string,"ends_at": string,"id": string,"kind": string,"location": string | null,"notes": string | null,"owner_id": string,"starts_at": string,"task_id": string | null,"title": string,"updated_at": string,"visibility": string
                   }
                   Insert: {
-                    "all_day"?: boolean,"auto_complete"?: boolean,"completed_at"?: string | null,"created_at"?: string,"ends_at": string,"id"?: string,"kind"?: string,"location"?: string | null,"notes"?: string | null,"owner_id"?: string,"starts_at": string,"task_id"?: string | null,"title": string,"updated_at"?: string,"visibility"?: string
+                    "all_day"?: boolean,"auto_complete"?: boolean,"color"?: string | null,"completed_at"?: string | null,"created_at"?: string,"ends_at": string,"id"?: string,"kind"?: string,"location"?: string | null,"notes"?: string | null,"owner_id"?: string,"starts_at": string,"task_id"?: string | null,"title": string,"updated_at"?: string,"visibility"?: string
                   }
                   Update: {
-                    "all_day"?: boolean,"auto_complete"?: boolean,"completed_at"?: string | null,"created_at"?: string,"ends_at"?: string,"id"?: string,"kind"?: string,"location"?: string | null,"notes"?: string | null,"owner_id"?: string,"starts_at"?: string,"task_id"?: string | null,"title"?: string,"updated_at"?: string,"visibility"?: string
+                    "all_day"?: boolean,"auto_complete"?: boolean,"color"?: string | null,"completed_at"?: string | null,"created_at"?: string,"ends_at"?: string,"id"?: string,"kind"?: string,"location"?: string | null,"notes"?: string | null,"owner_id"?: string,"starts_at"?: string,"task_id"?: string | null,"title"?: string,"updated_at"?: string,"visibility"?: string
                   }
                   Relationships: [
                     {
@@ -412,7 +412,7 @@ isOneToOne: false
                            },
 "cal_team_events":
 { Args: { "range_end": string,"range_start": string }; Returns: {
-              "all_day": boolean,"attendee_ids": (string)[],"auto_complete": boolean,"completed_at": string,"ends_at": string,"id": string,"kind": string,"location": string,"masked": boolean,"notes": string,"owner_id": string,"starts_at": string,"task_id": string,"title": string,"visibility": string
+              "all_day": boolean,"attendee_ids": (string)[],"auto_complete": boolean,"color": string,"completed_at": string,"ends_at": string,"id": string,"kind": string,"location": string,"masked": boolean,"notes": string,"owner_id": string,"starts_at": string,"task_id": string,"title": string,"visibility": string
             }[]
                            },
 "is_admin":

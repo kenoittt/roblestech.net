@@ -12,7 +12,7 @@ import { displayName, firstName, namesLine } from "@/domains/workspace/types"
 import { taskKey, type Task } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
-import { isEventDone, useCalendarActions, type CalEvent } from "../data"
+import { blockColor, isEventDone, useCalendarActions, type CalEvent } from "../data"
 import {
   DAY_END,
   DAY_START,
@@ -45,6 +45,7 @@ type MoveState = {
   moved: boolean
   kind: "block" | "meeting"
   title: string
+  color: string | null
 }
 
 export type GridColumn = {
@@ -110,7 +111,7 @@ export function TimeGrid({
     let state: MoveState = {
       id: placed.event.id, mode, col, newCol: col,
       start: placed.start, end: placed.end, newStart: placed.start, newEnd: placed.end, moved: false,
-      kind: placed.event.kind, title: placed.event.title,
+      kind: placed.event.kind, title: placed.event.title, color: placed.event.color,
     }
     setMove(state)
 
@@ -273,7 +274,7 @@ export function TimeGrid({
                       "pointer-events-none absolute inset-x-1 z-20 rounded-md border-l-2 px-1.5 py-1 text-[11px] leading-4 shadow-popover",
                       move.kind === "meeting"
                         ? "border-status-in-review bg-[color-mix(in_oklab,var(--status-in-review)_22%,var(--surface))]"
-                        : "border-brand bg-[color-mix(in_oklab,var(--brand)_20%,var(--surface))]",
+                        : blockColor(move.color).tone,
                     )}
                     style={{ top: minuteToY(move.newStart), height: Math.max(20, minuteToY(move.newEnd) - minuteToY(move.newStart) - 2) }}
                   >
@@ -415,7 +416,7 @@ function toneOf(event: CalEvent) {
     ? "border-line-strong border-dashed bg-hover text-fg-3"
     : event.kind === "meeting"
       ? "border-status-in-review/70 bg-[color-mix(in_oklab,var(--status-in-review)_16%,var(--surface))] text-fg"
-      : "border-brand/70 bg-[color-mix(in_oklab,var(--brand)_14%,var(--surface))] text-fg"
+      : `${blockColor(event.color).tone} text-fg`
 }
 
 /** An entry's details: when, who, the task it's for, notes, and for your own, its buttons. */
@@ -547,7 +548,7 @@ function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: Ca
                       onClick={() => setChosen(e.id)}
                       className="flex w-full min-w-0 items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-xs hover:bg-hover"
                     >
-                      <span className={cn("h-4 w-0.5 shrink-0 rounded-full", e.masked ? "bg-line-strong" : e.kind === "meeting" ? "bg-status-in-review" : "bg-brand", done && "opacity-40")} />
+                      <span className={cn("h-4 w-0.5 shrink-0 rounded-full", e.masked ? "bg-line-strong" : e.kind === "meeting" ? "bg-status-in-review" : blockColor(e.color).bar, done && "opacity-40")} />
                       <span className={cn("min-w-0 flex-1 truncate", e.masked ? "text-fg-3" : "text-fg", done && "line-through decoration-fg-4")}>{e.title}</span>
                       <span className="shrink-0 text-fg-3 tabular">{entryTimes(e, { compact: true })}</span>
                     </button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useId, useMemo, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Add01Icon, Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
@@ -20,7 +20,7 @@ import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/compon
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { TEMPLATES_MISSING, canEditTemplate, isMissingTable, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
 import { EventTemplatePicker } from "@/domains/templates/components/template-pickers"
-import { useCalendarActions, type CalEvent } from "../data"
+import { BLOCK_COLORS, useCalendarActions, type BlockColor, type CalEvent } from "../data"
 import { DAY_END, durationLabel, formatMinute } from "../layout"
 
 export type EventDraft = {
@@ -126,6 +126,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const [visibility, setVisibility] = useState<CalEvent["visibility"]>(event?.visibility ?? (preset?.visibility as CalEvent["visibility"] | undefined) ?? "public")
   const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
   const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
+  const [color, setColor] = useState<BlockColor | null>((event?.color ?? (preset?.color as BlockColor | null | undefined)) ?? null)
+  const titleId = useId()
   const [attendees, setAttendees] = useState<string[]>(event ? event.attendee_ids.filter((a) => a !== me.id) : invitees(preset?.attendee_ids ?? []))
   const [templateId, setTemplateId] = useState<string | null>(draft?.template?.id ?? null)
   const [error, setError] = useState<string | null>(null)
@@ -151,6 +153,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
     setKind((t?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
     setTitle(t?.title ?? linked?.title ?? "")
     setNotes(t?.notes ?? "")
+    setColor((t?.color as BlockColor | null | undefined) ?? null)
     setVisibility((t?.visibility as CalEvent["visibility"] | undefined) ?? "public")
     setAuto(t?.auto_complete ?? false)
     setAttendees(invitees(t?.attendee_ids ?? []))
@@ -199,6 +202,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           end_minute: start + span,
           visibility,
           auto_complete: kind === "block" && auto,
+          // Sent only when there's a colour to keep, so templates work on a database without colours.
+          ...(kind === "block" && (color || editing?.color) ? { color: color ?? null } : {}),
           attendee_ids: kind === "meeting" ? [...new Set([owner, ...attendees])] : [],
         },
       })
@@ -228,6 +233,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
       task_id: taskId,
       visibility,
       auto_complete: auto,
+      // Sent only when it's set or changed, so blocks save on a database without colours.
+      ...(kind === "block" && color !== (event?.color ?? null) ? { color } : {}),
     }
     try {
       if (newTask) {
@@ -306,10 +313,13 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           ))}
         </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-fg-2">Title</span>
-          <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
-        </label>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor={titleId} className="text-xs font-medium text-fg-2">Title</label>
+            {kind === "block" && <ColourChoice value={color} onChange={setColor} />}
+          </div>
+          <input id={titleId} autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
+        </div>
 
         {!asTemplate && (
         <div className="flex flex-col gap-1.5">
@@ -503,7 +513,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         )}
         {event && event.owner_id === me.id && (
           <SaveEventTemplate
-            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end: start + span, visibility, auto, attendees: [me.id, ...attendees] }}
+            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end: start + span, visibility, auto, attendees: [me.id, ...attendees], color }}
           />
         )}
         {!event && !editing && (
@@ -540,7 +550,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
 function SaveEventTemplate({
   entry,
 }: {
-  entry: { kind: "block" | "meeting"; title: string; notes: string | null; start: number; end: number; visibility: string; auto: boolean; attendees: string[] }
+  entry: { kind: "block" | "meeting"; title: string; notes: string | null; start: number; end: number; visibility: string; auto: boolean; attendees: string[]; color: BlockColor | null }
 }) {
   const me = useMe()
   const { data: templates = [] } = useEventTemplates()
@@ -574,6 +584,7 @@ function SaveEventTemplate({
           visibility: entry.visibility,
           auto_complete: entry.kind === "block" && entry.auto,
           attendee_ids: entry.kind === "meeting" ? entry.attendees : [],
+          ...(entry.kind === "block" && entry.color ? { color: entry.color } : {}),
         },
       })
       toast(same ? `Updated the template "${clean}"` : `Saved "${clean}" as a template`, {
@@ -638,5 +649,29 @@ function SaveEventTemplate({
         </form>
       </PopoverContent>
     </Popover>
+  )
+}
+
+/** A block's colour: five swatches, the usual blue first. */
+function ColourChoice({ value, onChange }: { value: BlockColor | null; onChange: (color: BlockColor | null) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Colour" className="flex items-center gap-1.5">
+      {BLOCK_COLORS.map((c) => (
+        <button
+          key={c.label}
+          type="button"
+          role="radio"
+          aria-checked={value === c.value}
+          aria-label={c.value ? c.label : `${c.label}, the usual`}
+          title={c.label}
+          onClick={() => onChange(c.value)}
+          className={cn(
+            "size-3.5 rounded-full ring-offset-2 ring-offset-raised transition-shadow",
+            c.swatch,
+            value === c.value ? "ring-2 ring-fg-2" : "hover:ring-2 hover:ring-line-strong",
+          )}
+        />
+      ))}
+    </div>
   )
 }
