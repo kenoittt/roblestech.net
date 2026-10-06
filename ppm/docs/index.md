@@ -42,8 +42,9 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [decisions/0009-one-copy-of-the-code.md](decisions/0009-one-copy-of-the-code.md) | All work happens in this repository (2026-10-06) |
 | [decisions/0010-the-knowledge-base.md](decisions/0010-the-knowledge-base.md) | These docs, and their shape (2026-10-06) |
 | [decisions/0011-domain-driven-folders.md](decisions/0011-domain-driven-folders.md) | The folders follow domain-driven design, one shape for every domain (2026-10-06) |
+| [decisions/0012-templates-are-made-where-work-is-made.md](decisions/0012-templates-are-made-where-work-is-made.md) | Templates are made in the new-task dialog and Plan time, and changed there (2026-10-07) |
 
-All written by Kyan's Claude on 2026-10-06, from the history and the people who decided.
+All written by Kyan's Claude: 0001 to 0011 on 2026-10-06, from the history and the people who decided; 0012 on 2026-10-07.
 
 ## People and their tasks
 

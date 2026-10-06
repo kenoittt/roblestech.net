@@ -63,7 +63,11 @@ The server loads the team, projects and tasks in one round of parallel queries; 
 
 ## Scale
 
-The shared rules are in [`docs/ux-principles.md`](../../../docs/ux-principles.md#scale). In the PPM, a list of people uses a searchable multi-select (`PickerMenu` with `multiple`), never a row of chips. A known example to fix: the meeting attendee picker in the calendar shows every teammate as a chip ([backlog](../backlog.md)).
+The shared rules are in [`docs/ux-principles.md`](../../../docs/ux-principles.md#scale). In the PPM:
+
+- **A list of people** uses a searchable multi-select (`PeoplePicker` as a form field, `PickerMenu` with `multiple` as a chip), never a row of chips. Meeting guests and project members moved to it on 2026-10-07.
+- **A view that fills up** shows what fits and folds the rest behind "N more" or "+N", which opens the full list: a month day's tasks, entries that overlap, a day's due tasks. Never slivers, and never one cell running into the next.
+- **Still to do:** the Filter menu's people and projects have no search yet ([backlog](../backlog.md), item 31), and Team day shows a column per person, which scrolls sideways for a large team.
 
 ## Before you call it done
 

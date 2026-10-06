@@ -12,7 +12,8 @@ What the PPM doesn't do, or doesn't do well yet, and why. Knowing these saves re
 
 ## Not built yet
 
-- **The meeting attendee picker shows every teammate as a chip.** Fine for a small team; it won't scale to many people or long names. A searchable multi-select is in the [backlog](../backlog.md).
+- **The Filter menu has no search** in its people and projects lists ([backlog](../backlog.md), item 31), and **Team day** shows a column per person, which scrolls sideways for a large team.
+- **An entry that crosses midnight can't be dragged;** change its times in its details. **A calendar template keeps one day,** so it can't run past midnight.
 - **Templates can't add a block to every weekday at once,** and a task template can't also block time for the task ([backlog](../backlog.md), item 15).
 - **No way back if nobody is a super admin.** Today it takes SQL on the live database ([backlog](../backlog.md), item 12).
 - **Project owners can't delete an empty project;** only admins delete ([backlog](../backlog.md), item 13).

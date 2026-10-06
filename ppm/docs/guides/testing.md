@@ -9,7 +9,7 @@ What to run, when, and what each check catches. Running the PPM locally is in [`
 | Types | `npm run typecheck` | Type errors | Every change |
 | Lint | `npm run lint` | Mistakes, including the React Compiler's rules | Every change |
 | Build | `npm run build` | Anything that only breaks when built | Before a pull request |
-| Smoke test | `npm run test:smoke` | 32 checks of the main flows, end to end, against the local app and database (below) | Before every pull request |
+| Smoke test | `npm run test:smoke` | 35 checks of the main flows, end to end, against the local app and database (below) | Before every pull request |
 | Menu test | `npm run test:menus` | Any menu, popover or picker that breaks its screen when opened: 16 screens, as a super admin, an admin and staff. About seven minutes | When you change the interface |
 | Your eyes | A browser | Layout, alignment, truncation, contrast, focus, empty and error states | Anything visual |
 
@@ -17,7 +17,7 @@ Both tests need the local database (`npx supabase start`), the app (`npm run dev
 
 ## What the smoke test covers
 
-Creating and assigning a task; the panel (status, history, comments); deleting and Undo; dragging on the board and the calendar; an invitation, from the email in the mail catcher through to setting a password; sign-off rules (staff refused, an admin signing off in someone's place, requests going to the people the rule names); private tasks; role limits and the message when a change is refused; the password eye; archiving and deleting projects; templates for tasks and the calendar; a calendar entry's buttons; live updates between two people.
+Creating and assigning a task; the panel (status, history, comments); deleting and Undo; dragging on the board and the calendar; an invitation, from the email in the mail catcher through to setting a password; sign-off rules (staff refused, an admin signing off in someone's place, requests going to the people the rule names); private tasks; role limits and the message when a change is refused; the password eye; archiving and deleting projects; templates for tasks and the calendar, and saving one straight from the new-task dialog; a calendar entry's buttons; a block that runs past midnight, for a task made in Plan time; a task's blocks ticked off when it's done and unticked when it's reopened; live updates between two people.
 
 ## Checking in a browser
 

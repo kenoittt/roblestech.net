@@ -54,3 +54,18 @@ An index, this log, guides, decisions, people, `for-humans/`, references and raw
 
 ## [2026-10-06] decision | Domain-driven folders
 Kyan settled the folder structure: domain-driven design, with one shape for every domain ([0011](decisions/0011-domain-driven-folders.md)). The refactor is still to do (backlog, goal 7).
+
+## [2026-10-07] feature | Templates are made where the work is made
+A Save as template switch in the new-task dialog and Plan time; New and Edit in Settings; the task's ⋯ menu opens the same dialog. The app says when the database has no templates yet ([0012](decisions/0012-templates-are-made-where-work-is-made.md)).
+
+## [2026-10-07] feature | The calendar runs all day, and blocks can cross midnight
+12 AM to midnight, opening near the current time; an entry can end the next day or days later, shown as one piece per day. Crowded hours fold into "+N", and the month view into "N more", so no view runs into slivers or spills over ([backlog](backlog.md), items 24 to 28).
+
+## [2026-10-07] database | A task's time blocks follow it to done
+The `cal_blocks_follow_task` trigger ticks off a task's blocks when it's done and unticks them when it's reopened (migration `20261007000100`). It runs as the database's owner, since the person finishing a task often doesn't own its blocks ([database.md](guides/database.md#how-the-rules-work)).
+
+## [2026-10-07] design | Block colours, a split button and a people picker
+Four colour tokens for time blocks, chosen to avoid the colours that mean something (`cal-teal`, `cal-purple`, `cal-pink`, `cal-slate`; migration `20261007000200`); `splitButton()` for a main action with variants; `PeoplePicker` wherever several people are chosen ([design-system.md](guides/design-system.md)).
+
+## [2026-10-07] feature | Copy my plan reads the way each person likes
+A message before and after, which parts show, and how finished entries look, saved in each person's preferences; it copies rich text so Teams keeps a strikethrough.

@@ -28,6 +28,8 @@ The PPM's database: how changes are made, who may do what, and how the rules wor
 | `20261003000200_last_seen_from_sign_ins` | Fills "last active" from each person's last sign-in, so the team doesn't show as "Invited" (data) |
 | `20261004000100_project_archive_and_delete` | `ppm_delete_project`: delete a project, and its tasks if asked, in one step |
 | `20261004000200_templates` | Task and calendar templates |
+| `20261007000100_blocks_follow_their_task` | Finishing a task ticks off its time blocks; reopening unticks them. An index on `cal_events.task_id` |
+| `20261007000200_block_colours` | A colour for time blocks and calendar templates; `cal_team_events()` returns it, hidden when an entry is masked |
 
 ## Who may do what
 
@@ -52,7 +54,8 @@ The PPM has three roles: **super admin**, **admin** and **staff**. "A PPM user" 
 | **Projects:** delete | Admins only, with or without their tasks | `ppm_delete_project` (checks the caller first) |
 | **Templates** | You see your own and every shared one, and change your own. Admins may also rename or delete a shared one, but not take it over | `ppm_task_templates`, `cal_event_templates` policies, and a trigger |
 | **Calendar:** your entries | You create, change and delete your own; you see your own and those you're invited to; you can leave a meeting | `cal_events`, `cal_event_attendees` policies |
-| **Calendar:** others' entries | As each person chose: everything, only "busy", or nothing, per entry, day or week | `cal_team_events()`, which masks entries before they leave the database |
+| **Calendar:** others' entries | As each person chose: everything, only "busy", or nothing, per entry, day or week. A masked entry's colour is hidden too | `cal_team_events()`, which masks entries before they leave the database |
+| **Calendar:** a task's blocks | Finishing a task ticks off its blocks, whoever owns them and whoever finishes it; reopening unticks exactly those | The `cal_blocks_follow_task` trigger |
 | **Handbook** | PPM users read; admins write articles, shelves and topics; each person their own votes | `kb_*` policies |
 | **Notifications** | Only your own | `ppm_notifications` policies |
 
@@ -64,6 +67,7 @@ When you add or change a rule, update this table in the same commit.
 - **`ppm_tasks_before`** (a trigger before every insert and update of a task): takes the creator and assigner from the session, so nobody can write someone else's name; checks the sign-off rule when a task moves to Done; stops anyone but the creator changing privacy; stamps when and by whom a task was finished or deleted.
 - **`ppm_tasks_after`** (after every change): writes the history (`ppm_task_events`) and the notifications: assigned, sent for sign-off (to the people the rule names, through `ppm_sign_off_ids`; when the rule names nobody, to the reviewer, or else whoever assigned it), finished, reopened.
 - **`ppm_tasks_repeat`:** when a repeating task is finished, makes the next one, keeping the series' creator and assigner (set from inside the database only, under an internal flag the app can't set), with the checklist unticked. The series moves to the new task, so finishing the old one again makes no duplicate.
+- **`cal_blocks_follow_task`** (after a task's status changes): when it moves to done, its blocks that aren't ticked off get the task's finishing time; when it's reopened, blocks with exactly that time are unticked, so a block someone ticked off themselves stays ticked. It runs as the database's owner, because blocks belong to whoever planned them.
 - **Comments** have their own trigger: @mentioned people get a "mention", the others involved a "comment".
 - **Notifications are emailed once:** the app claims unsent rows by setting `emailed_at`.
 - **Storage:** `avatars` holds one file per person, named by their id; `task-files` keeps each task's files in a folder named by the task's id, readable by whoever can see the task.
