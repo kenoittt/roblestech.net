@@ -128,7 +128,7 @@ The interface talks like a helpful colleague: plain, short and kind. Sentence ca
 
 ## Design tools in this repository
 
-The repository includes a design skill for AI sessions, `ui-ux-pro-max` (in `.claude/skills/`, since 2026-07-22), with general styles, palettes, fonts and UX guidelines. Use it for checks, like accessibility and interaction, never to pick colours, fonts or styles for the PPM: this page and its tokens decide the look. If it suggests something better, propose it as a change to the system (below).
+This page and the tokens in `globals.css` decide the PPM's look. A general design skill or library brings its own styles, palettes and fonts, and none of them overrides the system. The repository includes one such skill, `ui-ux-pro-max` (in `.claude/skills/`, since 2026-07-22), which tells sessions to generate a fresh design system for new pages: don't, for the PPM. If an outside source suggests something better, propose it as a change to the system (below).
 
 ## Changing the system
 
