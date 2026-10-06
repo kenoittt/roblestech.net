@@ -16,3 +16,9 @@ Commits follow the conventional form, scoped by app ([git-conventions.md](git-co
 
 ## [2026-10-06] docs | A knowledge base for the repository
 `docs/` gets its shape (an index, this log, how we work, commit style, references) and the PPM gets the first full app knowledge base. Commits become short and warm; logs keep only what's substantial; reports only for large work.
+
+## [2026-10-06] process | Goals, not steps
+A task comes with its goal, why, limits and a done you can check. A written checklist only when the work outlasts the session, has many asks, or people follow along ([how-we-work.md](how-we-work.md#give-goals-not-steps)).
+
+## [2026-10-06] process | Search with qmd where it's installed
+`qmd vsearch` first, `qmd search` for exact words. The docs still never depend on it ([references/qmd.md](references/qmd.md)).

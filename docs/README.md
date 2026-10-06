@@ -29,6 +29,7 @@ Every docs folder follows the same shape, so you always know where to look. Not 
 | `for-humans/` | Things only a person can do (an account setting, a database update, a decision), each with what to do, why, and how | Written for that person, in plain words |
 | `reports/` | What a large piece of work did, what it considered and why | Only for large work, or when someone asks for one. Not for every task |
 | `backlog.md` | What's left to do | One list, so nothing is tracked in two places |
+| `private/` | Each person's own briefs and notes, on their own computer | Git ignores what's inside. Never force a file in with `git add -f`, and never run `git clean -x` here: it deletes ignored files |
 
 ## What belongs in a log
 
@@ -41,11 +42,16 @@ Each entry starts with `## [YYYY-MM-DD] type | title`, where the type is one of 
 
 ## Rules for every page
 
-- **It's public.** The whole repository is public. No keys, passwords, database dumps, client data, personal details or internal notes. Each person's private briefs and notes go in `docs/private/`, which git ignores.
+- **It's public.** The whole repository is public. No keys, passwords, database dumps, client data, personal details or internal notes. Each person's private briefs and notes go in a `private/` folder, which git ignores.
 - **Write like a teammate showing someone around.** Warm, plain, straight to the point. Short sentences. Explain a term the first time it appears. Dates as 2026-10-06. No em dashes or en dashes: use a full stop, a comma, a colon or brackets.
 - **Keep it true.** When the code changes, change the page that describes it in the same commit. Date what you check. Say plainly what you couldn't check.
 - **Link, don't copy.** One fact lives on one page; others link to it.
 
 ## Searching the docs
 
-At this size, `index.md` and `grep` are enough. If the docs grow to hundreds of pages, a local search tool like [qmd](https://github.com/tobi/qmd) can help: see [references/qmd.md](references/qmd.md) for what it's good at and when it's worth it.
+Start with the `index.md` of the folder you're in. Then:
+
+- **If [qmd](https://github.com/tobi/qmd) is installed** (it is on Kyan's Mac), use it first. `qmd vsearch "your question"` searches by meaning, so it finds the page even when the page uses other words, in about two seconds. `qmd search "word"` finds exact words at once. Which to use, and what we measured: [references/qmd.md](references/qmd.md).
+- **Otherwise,** `grep` for the words you expect.
+
+The docs never depend on qmd: Kenneth's sessions and cloud sessions don't have it.

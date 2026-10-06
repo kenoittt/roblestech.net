@@ -38,6 +38,26 @@ The industry standard is the floor, not the goal. Look at what good tools do (Li
 - **Change the system on purpose, not by accident.** If something in the system should change, change it in one place, record the decision, and update everything that uses it.
 - **Don't be radical without context.** A session that lacks the background should play it safe: follow the existing system closely and ask when unsure.
 
+## Give goals, not steps
+
+When you hand over a task, to a teammate or an AI session, give the goal, why it matters, the limits, and what done looks like. Leave the how to whoever does it. A step-by-step script can't foresee what the work will turn up, and it rules out the better way they might find. Anthropic's guidance for its current models says the same: prefer general instructions over prescriptive steps, because the model's reasoning often goes further than the steps a person would write ([prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)).
+
+For example: "Staff can't open the handbook. They should: it's where the team's procedures live. Don't change what admins see. Done when a staff account can open every article."
+
+- **The goal and the why** let the work aim at the real problem, not only at the words of the request.
+- **The limits** are what must not change or break, and what needs someone's OK first: the live database, `main`, anything public.
+- **Done is something you can check:** a test that passes, a page that loads for the right role, a build that succeeds. "It looks done" isn't a check.
+
+## Checklists only when they help
+
+Don't require one for every task. Current Claude models keep track of multi-step work without a written list, and Claude Code leaves its to-do tools off for them by default, since the tools take up context ([tools reference](https://code.claude.com/docs/en/tools-reference)). Write one when it earns its place:
+
+- **The work will outlast the session,** like a feature over several days, a migration or an audit. A short list of what's done and what's left, in the pull request's description or your `private/` folder, survives summaries and handovers, and the next session starts from it.
+- **A request has many separate asks.** List them, so none gets dropped.
+- **People want to follow progress.**
+
+When you write one, list outcomes you can check, not steps, and change it freely as you learn. It's a memory, not a script.
+
 ## Write like a teammate
 
 Every document, commit and pull request reads like a teammate walking someone through something: warm, plain and straight to the point. For example: "This is what we made for the team. You sign in like this: type your email in the first box, your password in the next, and press Sign in." Short sentences, no jargon without an explanation, and no em dashes. The details for a later reader belong in the docs; commits stay short ([git-conventions.md](git-conventions.md)).
