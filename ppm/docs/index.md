@@ -41,15 +41,17 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [decisions/0008-archive-closed-and-delete.md](decisions/0008-archive-closed-and-delete.md) | Three ways a project ends (2026-10-04) |
 | [decisions/0009-one-copy-of-the-code.md](decisions/0009-one-copy-of-the-code.md) | All work happens in this repository (2026-10-06) |
 | [decisions/0010-the-knowledge-base.md](decisions/0010-the-knowledge-base.md) | These docs, and their shape (2026-10-06) |
+| [decisions/0011-domain-driven-folders.md](decisions/0011-domain-driven-folders.md) | The folders follow domain-driven design, one shape for every domain (2026-10-06) |
+| [decisions/0012-templates-are-made-where-work-is-made.md](decisions/0012-templates-are-made-where-work-is-made.md) | Templates are made in the new-task dialog and Plan time, and changed there (2026-10-07) |
 
-All written by Kyan's Claude on 2026-10-06, from the history and the people who decided.
+All written by Kyan's Claude: 0001 to 0011 on 2026-10-06, from the history and the people who decided; 0012 on 2026-10-07.
 
 ## People and their tasks
 
 | Page | What it's for | By, when |
 |---|---|---|
 | [people/](people/README.md) | Kenneth, Christian and Kyan: their part, and what helps them | Kyan's Claude, 2026-10-06 |
-| [for-humans/kenneth.md](for-humans/kenneth.md) | Kenneth's open items, in order | Kyan's Claude, 2026-10-06 |
+| [Kenneth's open items](../../docs/for-humans/kenneth.md) | His open items, in order, for every app (in the repository's `docs/for-humans/`) | Kyan's Claude, 2026-10-06 |
 | [for-humans/giving-the-team-accounts.md](for-humans/giving-the-team-accounts.md) | Accounts: roles, inviting, resets, someone leaving | Kenneth's Claude, 2026-10-03 |
 
 ## Sources and records
@@ -59,6 +61,7 @@ All written by Kyan's Claude on 2026-10-06, from the history and the people who 
 | [references/README.md](references/README.md) | Design and engineering references, and what to take from each | Kyan's Claude, 2026-10-06 |
 | [raw/2026-10-04-kyan-voice-brief.md](raw/2026-10-04-kyan-voice-brief.md) | Kyan's brief to a cloud session, word for word (raw: never edited) | A cloud session, 2026-10-04 |
 | [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md) | What that session built (templates, archive and delete, the password eye, role messages) and why, and what it lacked | A cloud session, 2026-10-04 |
+| [reports/2026-10-07-session-report.md](reports/2026-10-07-session-report.md) | What this round built (templates in the dialogs, the all-day calendar, colours, the people picker, Copy my plan your way, shared components, full sample data) and why, and what Kenneth applies first | Kyan's Claude, 2026-10-07 |
 | [private/README.md](private/README.md) | Your own notes, on your computer only: git ignores everything here except this README | Kyan's Claude, 2026-10-06 |
 | [handbook-drafts/](handbook-drafts/) | The source of the Handbook's "Using the PPM" shelf. Superseded: the published articles (migration `20261003000100`) are the current version, edited in the app | Kyan's Claude, 2026-10-03 |
 

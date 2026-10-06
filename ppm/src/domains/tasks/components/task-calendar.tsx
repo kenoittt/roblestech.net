@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useLayoutEffect, useMemo, useRef, useState } from "react"
 import {
   DndContext,
   DragOverlay,
@@ -12,17 +12,21 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core"
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
-import { addDays, addMonths, monthName, startOfMonth, startOfWeek } from "@/lib/dates"
+import { addDays, addMonths, longDate, monthName, startOfMonth, startOfWeek } from "@/lib/dates"
 import { useToday } from "@/domains/workspace/provider"
 import { useUI } from "@/components/app/ui-state"
-import { STATUS_META, type Status, type Task } from "../config"
+import { STATUS_META, taskKey, type Status, type Task } from "../config"
 import { useUpdateTask } from "../data"
 import { useTaskPanel } from "../panel-state"
 import { StatusIcon } from "./glyphs"
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+// A day cell: 12px of padding and the date's 22px row, then 26px per line (a 24px chip and its gap).
+const CELL_CHROME = 34
+const CHIP_ROW = 26
 
 /**
  * Tasks on the days they're due. Only tasks with a due date appear (Kyan,
@@ -54,10 +58,26 @@ export function TaskCalendar({ tasks }: { tasks: Task[] }) {
       if (list) list.push(t)
       else map.set(t.due_date, [t])
     }
+    // Open work takes the lines a day has room for; finished work comes last.
+    const closed = (t: Task) => (STATUS_META[t.status as Status]?.open ? 0 : 1)
+    for (const list of map.values()) list.sort((a, b) => closed(a) - closed(b))
     return map
   }, [tasks])
 
   const undated = tasks.filter((t) => !t.due_date && STATUS_META[t.status as Status]?.open).length
+
+  // How many tasks fit in a day: every row is the same height, so measuring one cell is enough.
+  const gridRef = useRef<HTMLDivElement>(null)
+  const [fits, setFits] = useState(3)
+  useLayoutEffect(() => {
+    const cell = gridRef.current?.firstElementChild as HTMLElement | null
+    if (!cell) return
+    const measure = () => setFits(Math.max(2, Math.floor((cell.clientHeight - CELL_CHROME) / CHIP_ROW)))
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(cell)
+    return () => observer.disconnect()
+  }, [days.length])
 
   const onDragEnd = (e: DragEndEvent) => {
     setDragging(null)
@@ -94,9 +114,10 @@ export function TaskCalendar({ tasks }: { tasks: Task[] }) {
         ))}
       </div>
       <DndContext id="task-calendar" sensors={sensors} onDragStart={(e) => setDragging(tasks.find((t) => t.id === e.active.id) ?? null)} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
-        <div className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 overflow-y-auto">
+        {/* Weeks share the height, but never shrink below a readable row: then the month scrolls. */}
+        <div ref={gridRef} className="grid min-h-0 flex-1 auto-rows-[minmax(7.5rem,1fr)] grid-cols-7 overflow-y-auto">
           {days.map((day) => (
-            <DayCell key={day} day={day} tasks={byDay.get(day) ?? []} inMonth={day.slice(0, 7) === month.slice(0, 7)} today={today} />
+            <DayCell key={day} day={day} tasks={byDay.get(day) ?? []} inMonth={day.slice(0, 7) === month.slice(0, 7)} today={today} fits={fits} />
           ))}
         </div>
         <DragOverlay dropAnimation={null}>{dragging ? <Chip task={dragging} overlay /> : null}</DragOverlay>
@@ -105,18 +126,18 @@ export function TaskCalendar({ tasks }: { tasks: Task[] }) {
   )
 }
 
-function DayCell({ day, tasks, inMonth, today }: { day: string; tasks: Task[]; inMonth: boolean; today: string }) {
+function DayCell({ day, tasks, inMonth, today, fits }: { day: string; tasks: Task[]; inMonth: boolean; today: string; fits: number }) {
   const { setNodeRef, isOver } = useDroppable({ id: day })
   const { openCreateTask } = useUI()
-  const [expanded, setExpanded] = useState(false)
-  const shown = expanded ? tasks : tasks.slice(0, 4)
+  // When they don't all fit, the last line says how many more there are.
+  const shown = tasks.length > fits ? tasks.slice(0, Math.max(0, fits - 1)) : tasks
   const isToday = day === today
   return (
     <div
       ref={setNodeRef}
       onDoubleClick={() => openCreateTask({ due_date: day })}
       className={cn(
-        "flex min-h-28 flex-col gap-0.5 border-r border-b border-line p-1.5 transition-colors [&:nth-child(7n)]:border-r-0",
+        "flex min-h-0 flex-col gap-0.5 overflow-hidden border-r border-b border-line p-1.5 transition-colors [&:nth-child(7n)]:border-r-0",
         !inMonth && "bg-inset/60",
         isOver && "bg-selected",
       )}
@@ -134,12 +155,46 @@ function DayCell({ day, tasks, inMonth, today }: { day: string; tasks: Task[]; i
       {shown.map((t) => (
         <DraggableChip key={t.id} task={t} />
       ))}
-      {tasks.length > 4 && !expanded && (
-        <button type="button" onClick={() => setExpanded(true)} className="px-1.5 text-left text-xs text-fg-3 hover:text-fg">
-          {tasks.length - 4} more
-        </button>
-      )}
+      {shown.length < tasks.length && <MoreTasks day={day} tasks={tasks} hidden={tasks.length - shown.length} />}
     </div>
+  )
+}
+
+/** "3 more": every task due that day, in a list anchored to the day. */
+function MoreTasks({ day, tasks, hidden }: { day: string; tasks: Task[]; hidden: number }) {
+  const { open } = useTaskPanel()
+  const [isOpen, setOpen] = useState(false)
+  return (
+    <Popover open={isOpen} onOpenChange={setOpen}>
+      <PopoverTrigger
+        onDoubleClick={(e) => e.stopPropagation()}
+        className="flex h-6 shrink-0 items-center rounded-[5px] px-1.5 text-left text-xs font-medium text-fg-3 hover:bg-hover hover:text-fg data-popup-open:bg-hover data-popup-open:text-fg"
+      >
+        {hidden} more
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 gap-1 p-1.5" onDoubleClick={(e) => e.stopPropagation()}>
+        <p className="px-1.5 pt-0.5 pb-1 text-xs font-medium text-fg-3">
+          {longDate(day)} · {tasks.length} due
+        </p>
+        <ul className="flex max-h-80 flex-col overflow-y-auto">
+          {tasks.map((t) => (
+            <li key={t.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  open(t.number)
+                }}
+                className="w-full rounded-[5px] text-left"
+                title={`${taskKey(t)} · ${t.title}`}
+              >
+                <Chip task={t} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </PopoverContent>
+    </Popover>
   )
 }
 

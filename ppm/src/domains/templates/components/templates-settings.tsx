@@ -1,15 +1,20 @@
 "use client"
 
 import { useEffect, useState, type ReactNode } from "react"
-import { Delete02Icon, LayoutTemplateIcon, UserGroupIcon } from "@hugeicons/core-free-icons"
+import { Add01Icon, Delete02Icon, Edit02Icon, LayoutTemplateIcon, UserGroupIcon } from "@hugeicons/core-free-icons"
 import { Switch } from "@/components/ui/switch"
 import { Icon } from "@/components/app/icon"
+import { useUI } from "@/components/app/ui-state"
 import { cn } from "@/lib/utils"
-import { useMe, useMemberMap, useProjectMap } from "@/domains/workspace/provider"
+import { useMe, useMemberMap, useProjectMap, useToday } from "@/domains/workspace/provider"
 import { displayName, firstName } from "@/domains/workspace/types"
+import { EventDialog, type EventDraft } from "@/domains/calendar/components/event-dialog"
 import {
+  TEMPLATES_MISSING,
   canEditTemplate,
   describeTaskTemplate,
+  editTemplateArgs,
+  isMissingTable,
   sortTemplates,
   useEventTemplates,
   useTaskTemplates,
@@ -20,24 +25,30 @@ import {
 import { eventLine } from "./template-pickers"
 
 /**
- * Settings, Templates: every template you can use, yours first. Rename one by
- * clicking its name; share yours with the team; delete what you no longer
- * need. Changing what a template makes happens where it was made: save a task
- * (or an entry) as a template under the same name and it's replaced.
+ * Settings, Templates: every template you can use, yours first. Make one with
+ * New; change one with Edit, in the same dialog it was made in; rename one by
+ * clicking its name; share yours with the team; delete what you no longer need.
  */
 export function TemplatesSettings() {
   const me = useMe()
   const members = useMemberMap()
   const projects = useProjectMap()
-  const { data: tasks = [], isLoading: loadingTasks } = useTaskTemplates()
-  const { data: events = [], isLoading: loadingEvents } = useEventTemplates()
+  const today = useToday()
+  const { openCreateTask } = useUI()
+  const { data: tasks = [], isLoading: loadingTasks, error: tasksError } = useTaskTemplates()
+  const { data: events = [], isLoading: loadingEvents, error: eventsError } = useEventTemplates()
+  const [eventDraft, setEventDraft] = useState<EventDraft | null>(null)
+  const missing = isMissingTable(tasksError) || isMissingTable(eventsError)
+
+  if (missing) return <p className="py-2 text-sm text-fg-3">{TEMPLATES_MISSING}</p>
 
   return (
     <div className="flex flex-col gap-6">
       <List
         heading="Tasks"
         loading={loadingTasks}
-        empty="None yet. Open any task, then ⋯ and Save as template. Use one with C, then Templates, or from ⌘K."
+        empty="None yet. Make one with New, or press C and turn on Save as template. Use one with C, then Templates, or from ⌘K."
+        onNew={() => openCreateTask({}, { asTemplate: {} })}
       >
         {sortTemplates(tasks, me.id).map((t) => (
           <Row
@@ -49,13 +60,15 @@ export function TemplatesSettings() {
               person: displayName(members.get(t.assignee_id ?? "")),
               project: t.project_id ? projects.get(t.project_id)?.name : undefined,
             })}
+            onEdit={() => openCreateTask(...editTemplateArgs(t))}
           />
         ))}
       </List>
       <List
         heading="Calendar"
         loading={loadingEvents}
-        empty="None yet. Open one of your entries, then Edit and Save as template. Use one from the arrow beside Plan time."
+        empty="None yet. Make one with New, or turn on Save as template in Plan time. Use one from the arrow beside Plan time."
+        onNew={() => setEventDraft({ day: today, start: 9 * 60, end: 10 * 60, asTemplate: true })}
       >
         {sortTemplates(events, me.id).map((t) => (
           <Row
@@ -64,17 +77,42 @@ export function TemplatesSettings() {
             template={t}
             icon={t.kind === "meeting" ? UserGroupIcon : LayoutTemplateIcon}
             line={`${eventLine(t)}${t.kind === "meeting" && t.attendee_ids.length > 1 ? ` with ${t.attendee_ids.length - 1} ${t.attendee_ids.length === 2 ? "other" : "others"}` : ""}`}
+            onEdit={() => setEventDraft({ day: today, start: t.start_minute, end: t.end_minute, editTemplate: t })}
           />
         ))}
       </List>
+      <EventDialog draft={eventDraft} event={null} onClose={() => setEventDraft(null)} />
     </div>
   )
 }
 
-function List({ heading, loading, empty, children }: { heading: string; loading: boolean; empty: string; children: ReactNode[] }) {
+function List({
+  heading,
+  loading,
+  empty,
+  onNew,
+  children,
+}: {
+  heading: string
+  loading: boolean
+  empty: string
+  onNew: () => void
+  children: ReactNode[]
+}) {
   return (
     <div>
-      <h4 className="mb-1 text-xs font-medium text-fg-3">{heading}</h4>
+      <div className="mb-1 flex items-center justify-between">
+        <h4 className="text-xs font-medium text-fg-3">{heading}</h4>
+        <button
+          type="button"
+          onClick={onNew}
+          className="pressable inline-flex h-6 items-center gap-1 rounded-md px-1.5 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
+        >
+          <Icon icon={Add01Icon} size={13} />
+          New
+          <span className="sr-only"> {heading.toLowerCase()} template</span>
+        </button>
+      </div>
       {loading ? (
         <div className="h-12" />
       ) : children.length ? (
@@ -91,11 +129,13 @@ function Row({
   template,
   icon,
   line,
+  onEdit,
 }: {
   kind: "task" | "event"
   template: TaskTemplate | EventTemplate
   icon: typeof LayoutTemplateIcon
   line: string
+  onEdit: () => void
 }) {
   const me = useMe()
   const members = useMemberMap()
@@ -162,6 +202,17 @@ function Row({
             onCheckedChange={(shared) => update.mutate({ kind, id: template.id, patch: { shared } })}
           />
         </label>
+      )}
+      {editable && (
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Edit ${template.name}`}
+          title="Edit"
+          className="pressable inline-flex size-7 shrink-0 items-center justify-center rounded-md text-fg-3 hover:bg-hover hover:text-fg"
+        >
+          <Icon icon={Edit02Icon} size={14} />
+        </button>
       )}
       {editable && (
         <button

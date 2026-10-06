@@ -114,10 +114,16 @@ try {
   const before = Number(sql(`select count(*) from cal_events where owner_id = '00000000-0000-4000-a000-000000000003'`))
   const cols = page.locator("div.cursor-cell")
   const col = cols.nth(0)
+  // The day has all 24 hours and opens near the current time, so bring 5 PM to the top first.
+  await page.evaluate(() => {
+    const scroller = document.querySelector("div.cursor-cell")?.closest(".overflow-y-auto")
+    if (scroller) scroller.scrollTop = 17 * 56
+  })
+  await page.waitForTimeout(200)
   const box = await col.boundingBox()
   if (box) {
     // Monday, roughly 6 PM: well clear of the sample entries
-    const y = box.y + (18 * 60 - 7 * 60) * (56 / 60) - (await page.evaluate(() => 0))
+    const y = box.y + 18 * 56
     await page.mouse.move(box.x + box.width / 2, Math.min(y, box.y + box.height - 80))
     await page.mouse.down()
     await page.mouse.move(box.x + box.width / 2, Math.min(y, box.y + box.height - 80) + 60, { steps: 6 })
@@ -198,7 +204,7 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
   }))
   rest(tokenFor("carl@rtc.test"), "PATCH", `ppm_tasks?id=eq.${made?.id}`, { status: "in_review" })
   const asked = made ? sql(`select string_agg(split_part(p.full_name, ' ', 1), ', ' order by p.full_name) from ppm_notifications n join profiles p on p.id = n.user_id where n.task_id = '${made.id}' and n.type = 'review'`) : ""
-  check("Sending a task for sign-off asks the people its rule names", asked === "Andrei, Christian", asked || "nobody asked")
+  check("Sending a task for sign-off asks the people its rule names", asked === "Christian, Joshua", asked || "nobody asked")
 }
 
 // A repeating task: finishing it makes the next one, which keeps the series' creator and assigner
@@ -323,6 +329,72 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
     sql(`update profiles set role = 'super_admin' where id = '${KENNETH}'`)
     sql(`delete from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
     sql("delete from ppm_projects where name like 'E2E%'")
+  }
+}
+
+// ---------------------------------------------------------------- Added 2026-10-07: blocks follow their task, templates made in the dialogs, past midnight
+{
+  const CARL = "00000000-0000-4000-a000-000000000005"
+  const tokenFor = (email) =>
+    JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"${email}","password":"rtc-demo-2026"}'`).toString()).access_token
+  const rest = (token, method, path, body) =>
+    execSync(`curl -s -X ${method} "http://127.0.0.1:54321/rest/v1/${path}" -H "apikey: ${anon}" -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -H "Prefer: return=representation"${body ? ` -d '${JSON.stringify(body)}'` : ""}`).toString()
+  sql("delete from ppm_task_templates where name like 'E2E%'")
+  sql("delete from cal_event_templates where name like 'E2E%'")
+  try {
+    // Finishing a task ticks off its blocks, even when someone else finishes it; reopening unticks them
+    {
+      const carl = tokenFor("carl@rtc.test")
+      const [task] = JSON.parse(rest(carl, "POST", "ppm_tasks", { title: `${title} with time set aside`, assignee_id: CARL }))
+      const at = (h) => new Date(Date.now() + h * 3600_000).toISOString()
+      rest(carl, "POST", "cal_events", { title: "E2E block for a task", kind: "block", starts_at: at(1), ends_at: at(2), task_id: task?.id })
+      const kenneth = tokenFor("kenneth@rtc.test")
+      rest(kenneth, "PATCH", `ppm_tasks?id=eq.${task?.id}`, { status: "done" })
+      const ticked = sql(`select (completed_at is not null)::text from cal_events where title = 'E2E block for a task'`)
+      rest(kenneth, "PATCH", `ppm_tasks?id=eq.${task?.id}`, { status: "todo" })
+      const unticked = sql(`select (completed_at is null)::text from cal_events where title = 'E2E block for a task'`)
+      check("Finishing a task ticks off its blocks, and reopening it unticks them", ticked === "true" && unticked === "true", `ticked ${ticked}, unticked ${unticked}`)
+    }
+
+    const { ctx, page } = await session("carl@rtc.test")
+
+    // The new-task dialog saves a template, and makes no task
+    await page.goto(BASE + "/my-tasks", { waitUntil: "networkidle" })
+    await page.keyboard.press("c")
+    await page.waitForSelector('input[aria-label="Task title"]')
+    await page.fill('input[aria-label="Task title"]', `${title} template only`)
+    await page.click('[role="dialog"] label:has-text("Save as template") [role="switch"]')
+    await page.fill('input[aria-label="Template name"]', "E2E check routine")
+    await page.fill('input[aria-label="Add a checklist step"]', "First step")
+    await page.keyboard.press("Enter")
+    await page.keyboard.press("Meta+Enter")
+    await page.waitForTimeout(1500)
+    const made = sql(`select assign_to_user || '|' || array_length(checklist, 1) from ppm_task_templates where name = 'E2E check routine' and created_by = '${CARL}'`)
+    const noTask = sql(`select count(*) from ppm_tasks where title = '${title} template only'`)
+    check("Save as template in the new-task dialog saves a template and makes no task", made === "true|1" && noTask === "0", `${made || "no template"}, tasks: ${noTask}`)
+
+    // Plan time: a block from 10 PM to 2 AM ends the next day; a new task named in "For a task" is made and linked
+    await page.goto(BASE + "/calendar", { waitUntil: "networkidle" })
+    await page.click('button:has-text("Plan time")')
+    await page.waitForTimeout(500)
+    await page.fill('input[placeholder="What will you work on?"]', "E2E overnight block")
+    await page.click('button[aria-label="Link a task"]')
+    await page.keyboard.type(`${title} planned from a block`)
+    await page.locator('[cmdk-item]:has-text("New task")').click()
+    const selects = page.locator('[role="dialog"] select')
+    await selects.nth(0).selectOption({ label: "10 PM" })
+    await selects.nth(1).selectOption({ label: "2 AM · next day" })
+    await page.click('button:has-text("Add to calendar")')
+    await page.waitForTimeout(1500)
+    const overnight = sql(`select ((ends_at at time zone 'Asia/Manila')::date - (starts_at at time zone 'Asia/Manila')::date) || ' ' || to_char(ends_at at time zone 'Asia/Manila', 'HH24:MI') || ' ' || (t.assignee_id = '${CARL}') from cal_events e join ppm_tasks t on t.id = e.task_id where e.title = 'E2E overnight block'`)
+    check("Plan time: a block can end after midnight, for a task made right there", overnight === "1 02:00 true", overnight || "no block")
+    await page.screenshot({ path: `${OUT}/e2e-2026-10-07.png` })
+    await ctx.close()
+  } catch (e) {
+    check("the 2026-10-07 checks ran to the end", false, e.message.split("\n")[0])
+  } finally {
+    sql("delete from ppm_task_templates where name like 'E2E%'")
+    sql("delete from cal_event_templates where name like 'E2E%'")
   }
 }
 

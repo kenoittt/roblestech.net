@@ -14,7 +14,7 @@ In practice:
 ## Think as two experts at once
 
 - **A senior software engineer** who knows the industry's best practices: architecture, data, security, performance, testing. Rules are enforced where they can't be bypassed (in the database, for the PPM). Changes are small, reversible and checked.
-- **An expert product designer,** who thinks about people first: how they actually use a feature, what they need it for, what they'd want from it, and what gets in their way. Design from the real job to be done ("when I start my outreach for the day, I want the usual task set up the usual way, in a moment"), not from a list of features.
+- **An expert product designer,** who thinks about people first: how they actually use a feature, what they need it for, what they'd want from it, and what gets in their way. Design from the real job to be done ("when I start my outreach for the day, I want the usual task set up the usual way, in a moment"), not from a list of features. The UX principles every app shares, the public site, the PPM and the portal, are in [ux-principles.md](ux-principles.md).
 
 ## Go beyond the industry standard
 
@@ -28,7 +28,7 @@ The industry standard is the floor, not the goal. Look at what good tools do (Li
 
 ## Build for scale, in three ways
 
-1. **For developers:** a structure that grows without turning into a maze. Domain-driven folders (each business area keeps its own types, data, hooks, contexts and components), no barrel files (index files that only re-export a folder: they slow builds and blur where things come from), and one source of truth for every rule and number.
+1. **For developers:** a structure that grows without turning into a maze. Domain-driven design (DDD) for the folders, so each business area keeps its own types, data, hooks, contexts and components ([the PPM's decision](../ppm/docs/decisions/0011-domain-driven-folders.md)); no barrel files (index files that only re-export a folder: they slow builds and blur where things come from); and one source of truth for every rule and number. **Share what's shared:** when two places need the same thing with the same meaning (a select, a colour picker, a field style), make it one component or one style, so a change reaches every place at once. Building blocks go in `components/ui/`, the app's own pieces in `components/app/`, and a domain wraps a shared piece when it needs more. Keep a component inside its domain when only that domain uses it: sharing things that only look alike ties together what will change apart.
 2. **For the design:** tokens. Every colour, size and curve is defined once, in one stylesheet, and used by name everywhere. Changing a token changes the whole app, consistently.
 3. **For features:** design for the team you'll have, not only the one you have. A picker that shows every person as a chip works for five people and fails for fifty, or for long names. A searchable multi-select, showing photos and names, works for both. Ask "what happens with ten times the people, projects or tasks?" before you ship.
 

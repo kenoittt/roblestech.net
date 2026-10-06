@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/lib/supabase/database.types"
 import { TASK_COLUMNS, type Grouping, type Ordering, type Task, type ViewKind } from "@/domains/tasks/config"
+import type { CopyPlanPrefs } from "@/domains/calendar/plan-text"
 
 type Tables = Database["public"]["Tables"]
 export type Supabase = SupabaseClient<Database>
@@ -38,6 +39,8 @@ export type Prefs = {
   orderings?: Record<string, Ordering>
   showDone?: Record<string, boolean>
   collapsedProjects?: boolean
+  /** How "Copy my plan" reads. */
+  copyPlan?: CopyPlanPrefs
 }
 
 export type Bootstrap = {
@@ -54,6 +57,13 @@ export function displayName(member?: Pick<Member, "full_name" | "email"> | null)
 
 export function firstName(member?: Pick<Member, "full_name" | "email"> | null) {
   return displayName(member).split(" ")[0]
+}
+
+/** "Joshua, Christian and 3 others": a group of names, however many there are. */
+export function namesLine(names: string[], max = 3) {
+  if (names.length <= max) return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
+  const rest = names.length - max
+  return `${names.slice(0, max).join(", ")} and ${rest} ${rest === 1 ? "other" : "others"}`
 }
 
 export function isAdminRole(role: string | null | undefined) {

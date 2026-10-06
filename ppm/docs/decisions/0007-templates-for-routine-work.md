@@ -1,6 +1,6 @@
 # 0007. Templates for routine work
 
-- **Status:** decided and built
+- **Status:** decided and built; how templates are saved changed on 2026-10-07 ([0012](0012-templates-are-made-where-work-is-made.md))
 - **When:** 2026-10-04
 - **Who:** asked for by Christian (through Kyan); designed and built by a cloud session
 

@@ -2,17 +2,78 @@
 
 What's left to do on the PPM, newest decisions first within each part. Tick items off with the date, and keep the detail: the next person or Claude session starts from here.
 
+## From Kyan's brief of 2026-10-06, evening
+
+Built 2026-10-07 by Kyan's local Claude, on the branch `kyan/feat/ppm-templates-and-calendar`, which also carries the docs from the closed pull request #18. Two of the changes need database updates applied before the merge ([`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1). Smoke test 35/35.
+
+### 20. Make templates where tasks and time are planned
+
+**Done 2026-10-07.** A **Save as template** switch in the new-task dialog and in Plan time saves a template and makes nothing else; Settings, Templates has New and Edit; the arrow beside Plan time has New template…; a task's ⋯, Save as template…, opens the same dialog, filled in. Why and what was ruled out: [decision 0012](decisions/0012-templates-are-made-where-work-is-made.md).
+
+### 21. Plan time's split button looked like two buttons
+
+**Done 2026-10-07.** The arrow was 2 px taller than the button, with a dark seam and a light edge between them. It's now one shape with one hairline; the pattern is `splitButton()` in `src/components/app/split-button.tsx` ([design system](guides/design-system.md#components-which-one-for-what)).
+
+### 22. Finishing a task ticks off its time blocks
+
+**Done 2026-10-07; needs migration `20261007000100` on the live database.** When a task is done, its blocks that aren't ticked off are, whoever finished it; reopening the task unticks exactly those. Ticking a block off by itself once its time passes still works: you might work on a task without finishing it.
+
+### 23. Copy my plan, the way each person likes it
+
+**Done 2026-10-07.** The arrow beside Copy my plan: a message before and after, which parts show (the title line, times, task codes, tasks due), and how finished entries look (as they are, struck out, with ✓, with DONE), with a preview. Saved in each person's preferences. It copies rich text too, so Teams keeps the strikethrough.
+
+### 24. Crowded days and hours on the calendars
+
+**Done 2026-10-07.** The month view shows as many tasks as a day has room for, open ones first, and "N more" lists the rest; weeks no longer spill into each other. In the day and week view, entries share a column only while each stays readable, and the rest fold into a "+N" that lists them and opens any one. A day's extra due tasks open the same way.
+
+### 25. A new task from Plan time
+
+**Done 2026-10-07.** In "For a task", type a name and choose New task: it's made for you when the block is saved, already linked.
+
+### 26. The person page's month view
+
+**Done 2026-10-07**, with item 24: the dates drifted away from their cells, and the out-of-month shading landed a row too low, because the cells were taller than their rows.
+
+### 27. Colours for time blocks
+
+**Done 2026-10-07; needs migration `20261007000200` on the live database.** Blue, teal, purple, pink or slate, beside a block's title; templates keep them. Green, amber, red and orange are left out, since they mean done, time and risk, errors and urgent; meetings keep their violet.
+
+### 28. The calendar runs all day, and blocks cross midnight
+
+**Done 2026-10-07.** The day runs from 12 AM to midnight and opens just before the current time (8 AM on other weeks). A block can end the next day or days later: Plan time shows Starts and Ends, each a date and a time (item 32), and each day shows its own piece, with its title kept in view. Pieces that cross midnight change in their details, not by dragging.
+
+### 32. Follow-ups from Kyan's review, 2026-10-07
+
+**Done 2026-10-07.**
+- **Multi-day blocks weren't findable:** "Ends on" only appeared after picking a next-day time. Plan time now always shows **Starts** and **Ends**, each a date and a time, as calendars usually do.
+- **The select arrow sat on the edge** (on a Mac): every select is now `NativeSelect` (`src/components/ui/field.tsx`), with the app's arrow inset like any icon. The form field style is defined once there too (`fieldClass`), in place of twelve copies.
+- **Two colour pickers for one job:** projects and time blocks share `SwatchPicker` (`src/components/app/swatch-picker.tsx`), beside the name in both.
+- **"Template shared with the team" spilled out of its chip:** now "For the team" or "Just for you", and no chip wraps any more.
+- **The first card on the board lost its top edge:** the column's list now leaves room for the card's ring.
+- **Cmd+Enter didn't save in Plan time:** it does, and the button shows the shortcut.
+- **Sample data:** the real team (Christian, Kenneth, Joshua, Kyan, Carl John), an invented client, and data for every option ([`README.md`](../README.md), "Sample accounts").
+
+### 31. Search in the filter menu's longer lists
+
+**Done 2026-10-07** (found while looking for lists that show everyone, item 17). The Filter menu listed every person and project with no search. A category now gets a search field once it has more than eight options, so today's small lists look as they did.
+
 ## From Kyan, 2026-10-06
 
 ### 17. A people picker that scales, for meetings
+
+**Done 2026-10-07.** Meeting guests and project members are chosen with `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): the field shows who's chosen as photos and names, with a searchable list behind it. The other places that list people already search (the assignee, reviewer and sign-off pickers, ⌘K); the Filter menu now does too, once its lists are long (item 31).
 
 The Plan time dialog lists every teammate as a chip to invite to a meeting. That works for a few people, and fails for many, or for long names. Replace it with a searchable multi-select that shows photos and names, like the picker for "Chosen people" (`PickerMenu` with `multiple`), and look for any other place that lists everyone at once. The principle is in [`guides/ux-principles.md`](guides/ux-principles.md#scale).
 
 ### 18. Templates don't work on the live PPM (reported by Kyan)
 
-Kyan found that templates didn't work after the 2026-10-04 merge. First check item 10: the two database updates may not be on the live database ([`for-humans/kenneth.md`](for-humans/kenneth.md), item 1). Kyan will add the details.
+Kyan found that templates didn't work after the 2026-10-04 merge. First check item 10: the two database updates may not be on the live database ([`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1).
+
+**Checked 2026-10-07 (Kyan's Claude), as far as possible without the live database:** templates work end to end locally, on a fresh copy of every migration (the smoke test's template checks pass). The only local problem was missing sample templates, because that database was seeded before templates existed. So the code is very likely fine, and the cause is almost certainly the missing database update. Only Kenneth's `db push --dry-run` can confirm it. Until it's applied, the app now says "Templates aren't available yet: the database needs an update first" instead of showing an empty list.
 
 ### 19. A made-up client name in sample data and placeholders
+
+**Done 2026-10-07:** the sample client is now Northline Nutrition, and the hints in the project form and the import dialog use it too. The baseline migration still mentions the old name, since migrations that have run on the live database are never edited.
 
 The local sample data (`supabase/seed.sql`) and two input hints ("For example, Promix Nutrition", in the project form and the import dialog) use a real client's name. The name was already public through the portal's history, but sample data shouldn't name real clients: swap in an invented one. Found 2026-10-06; small.
 
@@ -26,7 +87,7 @@ Role changes were refused because the live database almost certainly doesn't hav
 
 ### 10. Kenneth: apply two database updates, then merge
 
-**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](for-humans/kenneth.md), item 1.
+**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1.
 
 `20261004000100_project_archive_and_delete.sql` and `20261004000200_templates.sql`, before merging the branch: see `DEPLOY.md`, "Database updates after the switch". Then check archive, restore and delete on a test project, and save and use a template.
 
@@ -44,7 +105,7 @@ Today owners archive and only admins delete, as the revamp decided. Allowing own
 
 ### 14. The Handbook: templates and archiving projects
 
-Two short articles for the "Using the PPM" shelf: "Templates for work you repeat" and "Archiving or deleting a project", checked against the app.
+Two short articles for the "Using the PPM" shelf: "Templates for work you repeat" and "Archiving or deleting a project", checked against the app. The templates article should describe the 2026-10-07 flow: Save as template in the new-task dialog and Plan time, and Edit in Settings (item 20).
 
 ### 15. Templates, if the team asks
 
@@ -117,7 +178,21 @@ Good sources: the git history (the commit messages explain each step), `README.m
 
 ### 7. A consistent, scalable folder structure (Kyan, 2026-10-03)
 
+**Decided 2026-10-06:** domain-driven design, with one shape for every domain ([0011](decisions/0011-domain-driven-folders.md)). The refactor itself is still to do.
+
 Domain-driven all the way: each domain holds its own types, constants, data access, hooks, contexts and components in the same layout, so every number and rule has one source of truth; shared pieces live in one place; no barrel files (index files that re-export a folder: they slow builds and blur imports); the single global stylesheet stays. Today each domain mixes loose files with inconsistent names (`tasks/config.ts`, `workspace/types.ts`, `calendar/layout.ts`, data hooks in `data.ts`) beside `components/`.
+
+### 29. Read a Handbook article while you work (Kenneth, 2026-10-06)
+
+Kenneth's idea: keep one Handbook article open while browsing the rest of the PPM, to follow a procedure while working through your tasks. Most useful for the "Using the PPM" articles. Worth its own design pass: a side panel like the task panel, a floating reader, or a pinned article. Not started.
+
+### 30. A Gantt chart view (Kyan, 2026-10-06)
+
+Projects and tasks on a timeline, with their dates and how they overlap. Kyan: it "deserves a specific session", since a good Gantt chart is hard to get right (dragging, dependencies, scale from a week to a year). The tasks already have start and due dates. Not started.
+
+### 33. Share what's shared: audit the code for components and styles to reuse (Kyan, 2026-10-07)
+
+Look for things written more than once that mean the same thing, and make each one a shared component or style, so a change reaches every place at once ([`how-we-work.md`](../../docs/how-we-work.md#build-for-scale-in-three-ways)). Building blocks belong in `components/ui/`, the app's own pieces in `components/app/`, and a domain can wrap a shared piece when it needs more. Keep a component in its domain when only that domain uses it, and don't merge things that only look alike. Found so far, 2026-10-07: the textareas' style, repeated like the field style was; the segmented controls ("Time block · Meeting", "Who sees it", "What's done"), each written out by hand; `PickerMenu`, which lives in the tasks domain but is used by every domain; and the unused shadcn `Input` and `Select` beside our own.
 
 ### 8. From earlier
 

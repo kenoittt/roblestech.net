@@ -8,7 +8,7 @@ The idea comes from Andrej Karpathy's LLM wiki ([references/llm-wiki.md](referen
 
 | Where | What it holds |
 |---|---|
-| `docs/` (this folder) | What applies to every app: how we think and work, how commits and pull requests are written, and how the docs themselves are organised |
+| `docs/` (this folder) | What applies to every app: how we think and work, the UX principles, how commits and pull requests are written, Kenneth's open items, and how the docs themselves are organised |
 | `<app>/docs/` | Everything about one app: its design system, architecture, database, tests, decisions, backlog and history. Today only the PPM has one: [`ppm/docs/`](../ppm/docs/index.md) |
 
 Read [how-we-work.md](how-we-work.md) first, then the app's own `docs/index.md`.
@@ -51,7 +51,7 @@ Each entry starts with `## [YYYY-MM-DD] type | title`, where the type is one of 
 
 Start with the `index.md` of the folder you're in. Then:
 
-- **If [qmd](https://github.com/tobi/qmd) is installed** (it is on Kyan's Mac), use it first. `qmd vsearch "your question"` searches by meaning, so it finds the page even when the page uses other words, in about two seconds. `qmd search "word"` finds exact words at once. Which to use, and what we measured: [references/qmd.md](references/qmd.md).
+- **If [qmd](https://github.com/tobi/qmd) is installed** (it is on Kyan's Mac), ask your question with `qmd query`, writing its search lines yourself. It combines word and meaning search and then re-ranks the results, and it was the most accurate in our tests. Read the top few results, not only the first. For an exact name, `qmd search` or `grep`. How, and what we measured: [references/qmd.md](references/qmd.md).
 - **Otherwise,** `grep` for the words you expect.
 
 The docs never depend on qmd: Kenneth's sessions and cloud sessions don't have it.

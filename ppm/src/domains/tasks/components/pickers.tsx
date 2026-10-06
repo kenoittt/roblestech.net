@@ -2,7 +2,7 @@
 
 import { useMemo, useState, type ReactNode } from "react"
 import { Command as Cmdk } from "cmdk"
-import { Tick02Icon, Search01Icon, UserIcon, Folder02Icon, Calendar03Icon } from "@hugeicons/core-free-icons"
+import { Add01Icon, Tick02Icon, Search01Icon, UserIcon, Folder02Icon, Calendar03Icon } from "@hugeicons/core-free-icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Avatar } from "@/components/app/avatar"
@@ -53,6 +53,9 @@ export function PickerMenu({
   align = "start",
   width = "w-64",
   footer,
+  onOpenChange,
+  onCreate,
+  createLabel,
 }: {
   trigger: ReactNode
   triggerClassName?: string
@@ -65,12 +68,22 @@ export function PickerMenu({
   align?: "start" | "center" | "end"
   width?: string
   footer?: ReactNode
+  onOpenChange?: (open: boolean) => void
+  /** Offer a "Create …" row for whatever was typed, below the matches. */
+  onCreate?: (query: string) => void
+  createLabel?: (query: string) => ReactNode
 }) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
   const selected = new Set(Array.isArray(value) ? value : value ? [value] : [])
+  const change = (next: boolean) => {
+    setOpen(next)
+    if (!next) setSearch("")
+    onOpenChange?.(next)
+  }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={change}>
       <PopoverTrigger
         aria-label={triggerLabel}
         className={triggerClassName}
@@ -85,12 +98,14 @@ export function PickerMenu({
             <Icon icon={Search01Icon} size={14} className="text-fg-4" />
             <Cmdk.Input
               autoFocus
+              value={search}
+              onValueChange={setSearch}
               placeholder={placeholder}
               className="h-9 w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-4"
             />
           </div>
           <Cmdk.List className="max-h-72 overflow-y-auto p-1">
-            <Cmdk.Empty className="px-3 py-5 text-center text-sm text-fg-3">No matches</Cmdk.Empty>
+            {!(onCreate && search.trim()) && <Cmdk.Empty className="px-3 py-5 text-center text-sm text-fg-3">No matches</Cmdk.Empty>}
             {options.map((o) => (
               <Cmdk.Item
                 key={o.value}
@@ -99,7 +114,9 @@ export function PickerMenu({
                 disabled={o.disabled}
                 onSelect={() => {
                   onSelect(o.value)
-                  if (!multiple) setOpen(false)
+                  // Picking several: clear the search, ready for the next name.
+                  if (multiple) setSearch("")
+                  else change(false)
                 }}
                 className="group flex h-8 cursor-default items-center gap-2.5 rounded-md px-2 text-sm text-fg-2 outline-none data-[disabled=true]:opacity-45 data-[selected=true]:bg-selected data-[selected=true]:text-fg"
                 title={o.hint}
@@ -112,6 +129,22 @@ export function PickerMenu({
                 </span>
               </Cmdk.Item>
             ))}
+            {onCreate && search.trim() && (
+              <Cmdk.Item
+                forceMount
+                value={`create ${search.trim()}`}
+                onSelect={() => {
+                  onCreate(search.trim())
+                  change(false)
+                }}
+                className="group flex h-8 cursor-default items-center gap-2.5 rounded-md px-2 text-sm text-fg-2 outline-none data-[selected=true]:bg-selected data-[selected=true]:text-fg"
+              >
+                <span className="flex size-4 items-center justify-center">
+                  <Icon icon={Add01Icon} size={14} className="text-fg-3" />
+                </span>
+                <span className="min-w-0 flex-1 truncate">{createLabel ? createLabel(search.trim()) : `Create “${search.trim()}”`}</span>
+              </Cmdk.Item>
+            )}
           </Cmdk.List>
           {footer && <div className="border-t border-line px-3 py-2 text-xs text-fg-3">{footer}</div>}
         </Cmdk>
@@ -229,8 +262,9 @@ export function repeatOptions(): PickerOption[] {
 // ---------------------------------------------------------------------------
 // Ready-made triggers for the property rows used in the create dialog
 // ---------------------------------------------------------------------------
+// One line, always: a long label truncates inside its span rather than wrapping out of the chip.
 export const chipClass =
-  "pressable inline-flex h-7 max-w-52 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:border-line-strong hover:bg-hover hover:text-fg data-popup-open:bg-hover"
+  "pressable inline-flex h-7 max-w-52 items-center gap-1.5 overflow-hidden rounded-md border border-line px-2 text-xs font-medium whitespace-nowrap text-fg-2 hover:border-line-strong hover:bg-hover hover:text-fg data-popup-open:bg-hover"
 
 export function StatusChip({ value }: { value: string }) {
   return (

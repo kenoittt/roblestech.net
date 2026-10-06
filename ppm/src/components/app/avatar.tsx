@@ -84,27 +84,30 @@ export function Avatar({
   )
 }
 
-/** Overlapping avatars for a project's members; the rest become "+3". */
+/** Overlapping avatars for a group of people; the rest become "+3". */
 export function AvatarStack({
   people,
   max = 4,
   size = "sm",
+  ringClassName = "ring-surface",
 }: {
   people: { id: string; name: string }[]
   max?: number
   size?: keyof typeof SIZES
+  /** The ring between avatars takes the colour of whatever they sit on. */
+  ringClassName?: string
 }) {
   const shown = people.slice(0, max)
   const rest = people.length - shown.length
   return (
-    <span className="flex items-center">
+    <span className="flex shrink-0 items-center">
       {shown.map((p, i) => (
         <Avatar
           key={p.id}
           id={p.id}
           name={p.name}
           size={size}
-          className={cn("ring-2 ring-surface", i > 0 && "-ml-1.5")}
+          className={cn("ring-2", ringClassName, i > 0 && "-ml-1.5")}
         />
       ))}
       {rest > 0 && <span className="ml-1.5 text-xs text-fg-3 tabular">+{rest}</span>}

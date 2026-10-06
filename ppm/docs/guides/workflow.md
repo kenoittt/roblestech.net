@@ -60,4 +60,4 @@ Run what [testing.md](testing.md) asks for. Look at the screens yourself, in bot
 2. Check the Vercel preview.
 3. Merge, then try the change on the live PPM.
 
-If a pull request adds migrations and they aren't applied first, the new code goes live against a database that lacks them: features quietly don't work. That's the most likely reason templates didn't work after the 2026-10-04 merge (not yet confirmed: [`for-humans/kenneth.md`](../for-humans/kenneth.md) says how to check).
+If a pull request adds migrations and they aren't applied first, the new code goes live against a database that lacks them: features quietly don't work. That's the most likely reason templates didn't work after the 2026-10-04 merge (not yet confirmed: [`for-humans/kenneth.md`](../../../docs/for-humans/kenneth.md) says how to check).

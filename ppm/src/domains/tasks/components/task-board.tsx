@@ -123,7 +123,8 @@ function Column({ status, tasks, showProject }: { status: Status; tasks: Task[];
           <Icon icon={Add01Icon} size={14} />
         </button>
       </header>
-      <div className="flex min-h-24 flex-1 flex-col gap-1.5 overflow-y-auto px-1 pb-2">
+      {/* Room on every side for a card's 1px ring and its 2px focus ring, which the scrolling edge would cut. */}
+      <div className="flex min-h-24 flex-1 flex-col gap-1.5 overflow-y-auto px-1 pt-1 pb-2">
         {tasks.map((t) => (
           <DraggableCard key={t.id} task={t} showProject={showProject} />
         ))}

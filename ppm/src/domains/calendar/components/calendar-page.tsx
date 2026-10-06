@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import {
   Add01Icon,
   ArrowDown01Icon,
-  Copy01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Calendar03Icon,
@@ -28,8 +27,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
+import { splitButton } from "@/components/app/split-button"
 import { Icon } from "@/components/app/icon"
 import { PageHeader } from "@/components/app/page"
 import { Progress } from "@/components/app/charts"
@@ -37,7 +36,6 @@ import { cn } from "@/lib/utils"
 import { useIsNarrow } from "@/lib/use-narrow"
 import {
   addDays,
-  clockTime,
   diffDays,
   isoDay,
   longDate,
@@ -53,9 +51,11 @@ import { isOpen, taskKey, type Task } from "@/domains/tasks/config"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
-import { sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
-import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
-import { durationLabel, formatMinute } from "../layout"
+import { TEMPLATES_MISSING, isMissingTable, sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
+import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type BlockColor, type CalEvent } from "../data"
+import { DAY_END, durationLabel, entryTimes, formatMinute, minutesOn } from "../layout"
+import type { PlanEntry } from "../plan-text"
+import { CopyPlan } from "./copy-plan"
 import { EventDialog, type EventDraft } from "./event-dialog"
 import { TimeGrid, type GridColumn } from "./time-grid"
 
@@ -78,7 +78,9 @@ export function CalendarPage() {
   const [editing, setEditing] = useState<CalEvent | null>(null)
   const { setRange, create, remove } = useCalendarActions()
   const { data: ranges } = usePrivacyRanges()
-  const { data: templates = [] } = useEventTemplates()
+  const { data: templates = [], error: templatesError } = useEventTemplates()
+  const templatesMissing = isMissingTable(templatesError)
+  const split = splitButton("primary")
   const router = useRouter()
 
   // On a phone, "my week" becomes one day at a time: seven columns don't fit.
@@ -106,10 +108,9 @@ export function CalendarPage() {
     mode === "week"
       ? days.map((day) => {
           const mine = events.filter((e) => e.owner_id === me.id || e.attendee_ids.includes(me.id))
-          const ofDay = mine.filter((e) => isoDay(e.starts_at) === day)
-          const length = (e: CalEvent) => minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)
-          const planned = ofDay.reduce((s, e) => s + length(e), 0)
-          const done = ofDay.filter((e) => isEventDone(e, now)).reduce((s, e) => s + length(e), 0)
+          // A block that runs past midnight counts on each day for the part it covers.
+          const planned = mine.reduce((s, e) => s + minutesOn(e, day), 0)
+          const done = mine.filter((e) => isEventDone(e, now)).reduce((s, e) => s + minutesOn(e, day), 0)
           const hidden = modeFor(day)
           return {
             key: day,
@@ -131,7 +132,7 @@ export function CalendarPage() {
         })
       : active.map((m) => {
           const theirs = events.filter((e) => e.owner_id === m.id || e.attendee_ids.includes(m.id))
-          const planned = theirs.reduce((s, e) => s + Math.max(0, minutesOfDay(e.ends_at) - minutesOfDay(e.starts_at)), 0)
+          const planned = theirs.reduce((s, e) => s + minutesOn(e, anchor), 0)
           const done = theirs.filter((e) => isEventDone(e, now)).length
           return {
             key: m.id,
@@ -164,41 +165,30 @@ export function CalendarPage() {
     return set.size === 1 ? [...set][0] : "mixed"
   })()
 
-  // The team posts each day's plan in the group chat. This writes it for them:
-  // public entries by name, busy-only ones as "Busy", private ones left out.
-  const copyPlan = async () => {
-    const day = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
-    const mine = events
-      .filter((e) => (e.owner_id === me.id || e.attendee_ids.includes(me.id)) && isoDay(e.starts_at) === day)
-      .filter((e) => e.visibility !== "private" || e.kind === "meeting")
-      .sort((a, b) => (a.starts_at < b.starts_at ? -1 : 1))
-    const linked = new Map(tasks.map((t) => [t.id, t]))
-    const lines = mine.map((e) => {
-      const t = e.task_id ? linked.get(e.task_id) : null
-      const what = e.visibility === "busy" && e.kind !== "meeting" ? "Busy" : `${e.title}${t ? ` (${taskKey(t)})` : ""}`
-      return `${clockTime(e.starts_at)} to ${clockTime(e.ends_at)}: ${what}`
-    })
-    const due = dueBy(day, me.id).map((t) => `${t.title} (${taskKey(t)})`)
-    const text = [
-      `${firstName(me)}'s plan for ${longDate(day)}`,
-      ...(lines.length ? lines : ["Nothing blocked yet"]),
-      ...(due.length ? ["", `Due: ${due.join(", ")}`] : []),
-    ].join("\n")
-    try {
-      await navigator.clipboard.writeText(text)
-      toast("Your plan is copied", { description: "Paste it in the group chat." })
-    } catch {
-      toast.error("Couldn't reach the clipboard. Try again.")
-    }
-  }
-
   // The day "Plan time" means: today when it's on screen, else the first day shown.
   const planDay = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
+
+  // The team posts each day's plan in the group chat. This writes it for them:
+  // public entries by name, busy-only ones as "Busy", private ones left out.
+  const linked = new Map(tasks.map((t) => [t.id, t]))
+  const planEntries: PlanEntry[] = events
+    .filter((e) => (e.owner_id === me.id || e.attendee_ids.includes(me.id)) && isoDay(e.starts_at) === planDay)
+    .filter((e) => e.visibility !== "private" || e.kind === "meeting")
+    .sort((a, b) => (a.starts_at < b.starts_at ? -1 : 1))
+    .map((e) => {
+      const t = e.task_id ? linked.get(e.task_id) : null
+      const busy = e.visibility === "busy" && e.kind !== "meeting"
+      return { times: entryTimes(e), title: busy ? "Busy" : e.title, code: busy || !t ? null : taskKey(t), done: isEventDone(e, now) }
+    })
+  const planDue = dueBy(planDay, me.id).map((t) => ({ title: t.title, code: taskKey(t) }))
   const planDayLabel = planDay === today ? "today" : `${weekdayName(planDay, true)}, ${monthName(planDay)} ${Number(planDay.slice(8))}`
 
   const newBlock = (taskId?: string) => {
-    const start = planDay === today ? Math.min(20 * 60, Math.ceil(minutesOfDay(now) / 30) * 30 + 30) : 9 * 60
-    setDraft({ day: planDay, start, end: start + 60, taskId: taskId ?? null })
+    // Today: the next half hour. Late at night that's already tomorrow.
+    const next = planDay === today ? Math.ceil(minutesOfDay(now) / 30) * 30 + 30 : 9 * 60
+    const day = next >= DAY_END ? addDays(planDay, 1) : planDay
+    const start = next % DAY_END
+    setDraft({ day, start, end: start + 60, taskId: taskId ?? null })
   }
 
   // From a template: a block goes straight onto the day, with Undo. A meeting
@@ -215,6 +205,7 @@ export function CalendarPage() {
         task_id: null,
         visibility: t.visibility as CalEvent["visibility"],
         auto_complete: t.auto_complete,
+        ...(t.color ? { color: t.color as BlockColor } : {}),
       })
       toast(`Added ${t.title}`, {
         description: `${planDay === today ? "Today" : planDayLabel}, ${formatMinute(t.start_minute)} to ${formatMinute(t.end_minute)}.`,
@@ -231,16 +222,15 @@ export function CalendarPage() {
         title="Calendar"
         icon={Calendar03Icon}
         actions={
-          <div className="flex items-center">
-            <Button size="sm" onClick={() => newBlock()} className="h-7 gap-1.5 rounded-r-none px-2.5">
+          // One button in two parts: Plan time, and its templates behind the arrow.
+          <div className={split.group}>
+            <button type="button" onClick={() => newBlock()} className={split.main}>
               <Icon icon={Add01Icon} size={14} />
               Plan time
-            </Button>
+            </button>
+            <span aria-hidden className={split.seam} />
             <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label="Plan time from a template"
-                className="pressable inline-flex h-7 w-7 items-center justify-center rounded-r-[min(var(--radius-md),12px)] border-l border-white/20 bg-primary text-primary-foreground hover:bg-primary/80 data-popup-open:bg-primary/80"
-              >
+              <DropdownMenuTrigger aria-label="Plan time from a template" className={split.arrow}>
                 <Icon icon={ArrowDown01Icon} size={14} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
@@ -261,10 +251,14 @@ export function CalendarPage() {
                 </DropdownMenuGroup>
                 {templates.length === 0 && (
                   <p className="px-1.5 pt-0.5 pb-1.5 text-xs leading-5 text-fg-3">
-                    None yet. Open one of your entries, then Edit and Save as template. A block then lands here in two clicks.
+                    {templatesMissing ? TEMPLATES_MISSING : "None yet. Save the time you plan often as a template, and it lands here in two clicks."}
                   </p>
                 )}
                 <DropdownMenuSeparator />
+                <DropdownMenuItem disabled={templatesMissing} onClick={() => setDraft({ day: planDay, start: 9 * 60, end: 10 * 60, asTemplate: true })}>
+                  <Icon icon={Add01Icon} className="text-fg-3" />
+                  New template…
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/settings#templates")}>
                   <Icon icon={Settings01Icon} className="text-fg-3" />
                   Manage templates
@@ -309,17 +303,12 @@ export function CalendarPage() {
         </div>
         <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular">{label}</h2>
 
-        <button
-          type="button"
-          onClick={copyPlan}
-          className={cn(
-            "pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg",
-            mode === "team" ? "" : "ml-auto",
-          )}
-        >
-          <Icon icon={Copy01Icon} size={14} />
-          <span className="hidden sm:inline">Copy my plan</span>
-        </button>
+        <CopyPlan
+          heading={`${firstName(me)}'s plan for ${longDate(planDay)}`}
+          entries={planEntries}
+          due={planDue}
+          className={mode === "team" ? "" : "ml-auto"}
+        />
         {mode === "week" && (
           <DropdownMenu>
             <DropdownMenuTrigger className="pressable inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">

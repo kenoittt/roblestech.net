@@ -21,4 +21,10 @@ Commits follow the conventional form, scoped by app ([git-conventions.md](git-co
 A task comes with its goal, why, limits and a done you can check. A written checklist only when the work outlasts the session, has many asks, or people follow along ([how-we-work.md](how-we-work.md#give-goals-not-steps)).
 
 ## [2026-10-06] process | Search with qmd where it's installed
-`qmd vsearch` first, `qmd search` for exact words. The docs still never depend on it ([references/qmd.md](references/qmd.md)).
+Hybrid search (`qmd query`, with the search lines written by the session) for questions, since it was the most accurate in a twelve-question test; `qmd search` or `grep` for exact names. The docs still never depend on it ([references/qmd.md](references/qmd.md)).
+
+## [2026-10-06] process | UX principles for every app
+UI and UX are weighed in every change, in the public site, the PPM and the portal alike. The shared principles moved to [ux-principles.md](ux-principles.md); the PPM's guide keeps its own patterns.
+
+## [2026-10-06] process | One page for what only Kenneth can do
+His open items now live in [for-humans/kenneth.md](for-humans/kenneth.md), for every app, since he holds the accounts: GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting.

@@ -41,7 +41,7 @@ Supabase project A's templates are shared with the portal, so invitations and re
 Templates for tasks and calendar entries ([0007](decisions/0007-templates-for-routine-work.md)); archive, restore and delete for projects ([0008](decisions/0008-archive-closed-and-delete.md)); an eye on every password field; role refusals that name your role. Smoke test 32 checks ([report](reports/2026-10-04-session-report.md)).
 
 ## [2026-10-04] process | Database updates go in before the merge
-A pull request that adds migrations needs them on the live database first ([DEPLOY.md](DEPLOY.md#database-updates-after-the-switch)). Whether this happened for 2026-10-04's two updates is unconfirmed; templates not working afterwards suggests not ([for-humans/kenneth.md](for-humans/kenneth.md)).
+A pull request that adds migrations needs them on the live database first ([DEPLOY.md](DEPLOY.md#database-updates-after-the-switch)). Whether this happened for 2026-10-04's two updates is unconfirmed; templates not working afterwards suggests not ([for-humans/kenneth.md](../../docs/for-humans/kenneth.md)).
 
 ## [2026-10-06] decision | One copy of the code
 All work on the PPM happens in this repository; the separate build folder was archived ([0009](decisions/0009-one-copy-of-the-code.md)).
@@ -51,3 +51,27 @@ An index, this log, guides, decisions, people, `for-humans/`, references and raw
 
 ## [2026-10-06] process | A private folder for each person's notes
 `docs/private/` keeps your own notes on your computer: git ignores everything in it except its README ([private/README.md](private/README.md)).
+
+## [2026-10-06] decision | Domain-driven folders
+Kyan settled the folder structure: domain-driven design, with one shape for every domain ([0011](decisions/0011-domain-driven-folders.md)). The refactor is still to do (backlog, goal 7).
+
+## [2026-10-07] feature | Templates are made where the work is made
+A Save as template switch in the new-task dialog and Plan time; New and Edit in Settings; the task's ⋯ menu opens the same dialog. The app says when the database has no templates yet ([0012](decisions/0012-templates-are-made-where-work-is-made.md)).
+
+## [2026-10-07] feature | The calendar runs all day, and blocks can cross midnight
+12 AM to midnight, opening near the current time; an entry can end the next day or days later, shown as one piece per day. Crowded hours fold into "+N", and the month view into "N more", so no view runs into slivers or spills over ([backlog](backlog.md), items 24 to 28).
+
+## [2026-10-07] database | A task's time blocks follow it to done
+The `cal_blocks_follow_task` trigger ticks off a task's blocks when it's done and unticks them when it's reopened (migration `20261007000100`). It runs as the database's owner, since the person finishing a task often doesn't own its blocks ([database.md](guides/database.md#how-the-rules-work)).
+
+## [2026-10-07] design | Block colours, a split button and a people picker
+Four colour tokens for time blocks, chosen to avoid the colours that mean something (`cal-teal`, `cal-purple`, `cal-pink`, `cal-slate`; migration `20261007000200`); `splitButton()` for a main action with variants; `PeoplePicker` wherever several people are chosen ([design-system.md](guides/design-system.md)).
+
+## [2026-10-07] feature | Copy my plan reads the way each person likes
+A message before and after, which parts show, and how finished entries look, saved in each person's preferences; it copies rich text so Teams keeps a strikethrough.
+
+## [2026-10-07] design | One field style, one select, one colour picker
+`fieldClass` and `NativeSelect` (`src/components/ui/field.tsx`) replace twelve copies of the field style and the browser's edge-hugging select arrow; `SwatchPicker` serves projects and time blocks alike. Plan time shows Starts and Ends, each a date and a time. Auditing the rest of the code for what should be shared is goal 33 ([backlog](backlog.md)).
+
+## [2026-10-07] process | Local data shows every option; messages reach their person
+The sample data has the real team, an invented client and data for every option, and every new feature adds its own (the repository's `CLAUDE.md`, rule 7). Anything someone else must do goes on their page in `docs/for-humans/`, which their Claude reads when a session starts (rule 10).

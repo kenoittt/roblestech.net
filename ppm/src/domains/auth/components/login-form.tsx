@@ -4,6 +4,7 @@ import { useActionState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
 import { PasswordInput } from "@/components/app/password-input"
+import { fieldClass } from "@/components/ui/field"
 import { signIn, type SignInState } from "../actions"
 
 const SAMPLE_ACCOUNTS = [
@@ -38,7 +39,7 @@ export function LoginForm({ next, demo }: { next: string; demo: boolean }) {
             required
             defaultValue={state.email}
             placeholder="you@roblestech.net"
-            className="h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+            className={fieldClass}
           />
         </Field>
         <Field label="Password">
@@ -47,7 +48,7 @@ export function LoginForm({ next, demo }: { next: string; demo: boolean }) {
             name="password"
             autoComplete="current-password"
             required
-            className="h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors focus:border-brand"
+            className={fieldClass}
           />
         </Field>
         {state.error && (

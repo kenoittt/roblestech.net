@@ -2,25 +2,29 @@
 
 import { useMemo, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
+import { Add01Icon, Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
+import { NativeSelect, fieldClass } from "@/components/ui/field"
+import { SwatchPicker } from "@/components/app/swatch-picker"
+import { Kbd } from "@/components/app/page"
 import { cn } from "@/lib/utils"
-import { isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
+import { addDays, diffDays, isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { getSupabase } from "@/lib/supabase/client"
 import { useMe, useMembers, useTasks } from "@/domains/workspace/provider"
-import { displayName } from "@/domains/workspace/types"
+import { PeoplePicker } from "@/domains/people/components/people-picker"
 import { isOpen, taskKey } from "@/domains/tasks/config"
+import { useCreateTask } from "@/domains/tasks/data"
+import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
-import { canEditTemplate, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
+import { TEMPLATES_MISSING, canEditTemplate, isMissingTable, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
 import { EventTemplatePicker } from "@/domains/templates/components/template-pickers"
-import { useCalendarActions, type CalEvent } from "../data"
-import { durationLabel, formatMinute } from "../layout"
+import { BLOCK_COLORS, useCalendarActions, type BlockColor, type CalEvent } from "../data"
+import { DAY_END, durationLabel, formatMinute } from "../layout"
 
 export type EventDraft = {
   day: string
@@ -32,6 +36,10 @@ export type EventDraft = {
   explicitTime?: boolean
   /** Start from this template (a meeting from the Plan time menu, to check before inviting). */
   template?: EventTemplate
+  /** Save a template instead of an entry (New template in the Plan time menu). */
+  asTemplate?: boolean
+  /** Change this template (Settings, Edit). */
+  editTemplate?: EventTemplate
 }
 
 const VISIBILITY = [
@@ -40,10 +48,23 @@ const VISIBILITY = [
   { value: "private", label: "Private", hint: "Only you see it." },
 ] as const
 
-const TIMES = Array.from({ length: (24 - 6) * 4 }, (_, i) => 6 * 60 + i * 15)
+// Every quarter hour of the day. An entry may end at midnight or later.
+const TIMES = Array.from({ length: 24 * 4 }, (_, i) => i * 15)
+const steps = (from: number, to: number) => Array.from({ length: Math.max(0, Math.floor((to - from) / 15) + 1) }, (_, i) => from + i * 15)
+const timeLabel = (t: number) => (t === DAY_END ? "Midnight" : formatMinute(t))
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+/**
+ * Where an entry ends, kept as a day and minutes after that day's midnight.
+ * Midnight itself stays on the day it closes (1440), so "until midnight"
+ * doesn't read as the next day.
+ */
+function endOf(day: string, minutes: number) {
+  const days = Math.floor(minutes / DAY_END)
+  const rest = minutes % DAY_END
+  return rest === 0 && days > 0 ? { endDay: addDays(day, days - 1), end: DAY_END } : { endDay: addDays(day, days), end: rest }
+}
+
+const input = fieldClass
 
 /** New calendar entry, or an existing one to edit. */
 export function EventDialog({
@@ -61,7 +82,14 @@ export function EventDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="ui-backdrop fixed inset-0 z-50 bg-black/45" />
         <DialogPrimitive.Popup className="ui-dialog fixed top-[8vh] left-1/2 z-50 flex max-h-[86vh] w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 flex-col rounded-xl bg-raised shadow-popover outline-none">
-          {open && <Form key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}-${draft?.template?.id}`} draft={draft} event={event} onClose={onClose} />}
+          {open && (
+            <Form
+              key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}-${draft?.template?.id}-${draft?.editTemplate?.id}-${draft?.asTemplate}`}
+              draft={draft}
+              event={event}
+              onClose={onClose}
+            />
+          )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
@@ -73,23 +101,51 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const members = useMembers()
   const tasks = useTasks()
   const { create, update, remove } = useCalendarActions()
+  const createTask = useCreateTask()
+  const { open: openTask } = useTaskPanel()
 
   const linked = tasks.find((t) => t.id === (event?.task_id ?? draft?.taskId))
-  const preset = draft?.template
-  // A meeting's people, less whoever is planning it (they own it) and anyone who has left.
-  const invitees = (ids: string[]) => ids.filter((id) => id !== me.id && members.some((m) => m.id === id && !m.deactivated_at))
+  const editing = draft?.editTemplate ?? null
+  const preset = draft?.template ?? editing ?? undefined
+  // A meeting's people, less whoever owns it and anyone who has left. A
+  // template's owner is whoever saved it; a meeting's is whoever plans it.
+  const owner = editing?.created_by ?? me.id
+  const invitees = (ids: string[]) => ids.filter((id) => id !== owner && members.some((m) => m.id === id && !m.deactivated_at))
   const [kind, setKind] = useState<"block" | "meeting">(event?.kind ?? (preset?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
   const [title, setTitle] = useState(event?.title ?? preset?.title ?? linked?.title ?? "")
   const [taskId, setTaskId] = useState<string | null>(event?.task_id ?? draft?.taskId ?? null)
+  // A task named here that doesn't exist yet: it's made, for you, when the entry is saved.
+  const [newTask, setNewTask] = useState<string | null>(null)
   const [day, setDay] = useState(event ? isoDay(event.starts_at) : draft!.day)
   const [start, setStart] = useState(event ? minutesOfDay(event.starts_at) : draft!.start)
-  const [end, setEnd] = useState(event ? minutesOfDay(event.ends_at) : draft!.end)
+  // The end can be on a later day: a block from 9 PM to 1 AM, or over several days.
+  const [{ endDay, end }, setEndAt] = useState(() =>
+    event ? endOf(day, diffDays(isoDay(event.ends_at), day) * DAY_END + minutesOfDay(event.ends_at)) : endOf(draft!.day, draft!.end),
+  )
+  /** Minutes from the start to the end. */
+  const span = diffDays(endDay, day) * DAY_END + end - start
+  const setEnd = (minutes: number) => setEndAt(endOf(day, minutes))
   const [visibility, setVisibility] = useState<CalEvent["visibility"]>(event?.visibility ?? (preset?.visibility as CalEvent["visibility"] | undefined) ?? "public")
   const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
   const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
+  const [color, setColor] = useState<BlockColor | null>((event?.color ?? (preset?.color as BlockColor | null | undefined)) ?? null)
   const [attendees, setAttendees] = useState<string[]>(event ? event.attendee_ids.filter((a) => a !== me.id) : invitees(preset?.attendee_ids ?? []))
-  const [templateId, setTemplateId] = useState<string | null>(preset?.id ?? null)
+  const [templateId, setTemplateId] = useState<string | null>(draft?.template?.id ?? null)
   const [error, setError] = useState<string | null>(null)
+  // Saving a template instead of an entry: its name and who may use it.
+  const [asTemplate, setAsTemplate] = useState(Boolean(draft?.asTemplate || editing))
+  const [name, setName] = useState(editing?.name ?? "")
+  const [shared, setShared] = useState(editing?.shared ?? false)
+  const { data: templates = [], error: templatesError } = useEventTemplates()
+  const { saveEvent } = useTemplateActions()
+  const missing = isMissingTable(templatesError)
+  const templateName = (name.trim() || title.trim()).slice(0, 120)
+  // Saving under the name of a template you can change replaces it.
+  const same = editing
+    ? null
+    : sortTemplates(templates, me.id).find((t) => templateName && t.name.trim().toLowerCase() === templateName.toLowerCase() && canEditTemplate(t, me))
+  const target = editing ?? same ?? null
+  const othersShared = Boolean(target && target.created_by !== me.id)
 
   // A template fills in what the entry is. A time dragged out on the calendar
   // stays; otherwise the template's time of day is used, on the chosen day.
@@ -98,6 +154,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
     setKind((t?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
     setTitle(t?.title ?? linked?.title ?? "")
     setNotes(t?.notes ?? "")
+    setColor((t?.color as BlockColor | null | undefined) ?? null)
     setVisibility((t?.visibility as CalEvent["visibility"] | undefined) ?? "public")
     setAuto(t?.auto_complete ?? false)
     setAttendees(invitees(t?.attendee_ids ?? []))
@@ -125,21 +182,100 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   )
   const linkedTask = tasks.find((t) => t.id === taskId)
 
+  const duration = span > 0 ? durationLabel(span) : ""
+  const startTime = (
+    <NativeSelect
+      aria-label="Start time"
+      value={start}
+      onChange={(e) => {
+        const s = Number(e.target.value)
+        setEnd(s + span)
+        setStart(s)
+      }}
+    >
+      {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
+    </NativeSelect>
+  )
+  const endTime =
+    endDay === day ? (
+      // Later the same day, or on into the night: past midnight is one choice away.
+      <NativeSelect aria-label="End time" value={end} onChange={(e) => setEnd(Number(e.target.value))}>
+        {steps(start + 15, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+        {!asTemplate &&
+          steps(DAY_END + 15, start + DAY_END).map((t) => (
+            <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
+          ))}
+      </NativeSelect>
+    ) : (
+      <NativeSelect aria-label="End time" value={end} onChange={(e) => setEndAt({ endDay, end: Number(e.target.value) })}>
+        {steps(0, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+      </NativeSelect>
+    )
+
+  const switchToTemplate = (on: boolean) => {
+    setAsTemplate(on)
+    setError(null)
+    // A template keeps one day's time: an entry that ran past midnight stops there.
+    if (on && endDay !== day) setEndAt(endOf(day, Math.min(start + span, DAY_END)))
+  }
+
+  const saveTemplate = async () => {
+    try {
+      const saved = await saveEvent.mutateAsync({
+        id: target?.id,
+        input: {
+          name: templateName,
+          shared: othersShared ? target!.shared : shared,
+          kind,
+          title: title.trim(),
+          notes: notes.trim() || null,
+          start_minute: start,
+          end_minute: start + span,
+          visibility,
+          auto_complete: kind === "block" && auto,
+          // Sent only when there's a colour to keep, so templates work on a database without colours.
+          ...(kind === "block" && (color || editing?.color) ? { color: color ?? null } : {}),
+          attendee_ids: kind === "meeting" ? [...new Set([owner, ...attendees])] : [],
+        },
+      })
+      toast(target ? `Updated the template "${saved.name}"` : `Saved "${saved.name}" as a template`, {
+        description: "Use it from the arrow beside Plan time, or Templates when you drag out time.",
+      })
+      onClose()
+    } catch {
+      // The mutation shows the reason.
+    }
+  }
+
   const save = async () => {
     setError(null)
     if (!title.trim()) return setError("Give it a title.")
-    if (end <= start) return setError("It has to end after it starts.")
+    if (span <= 0) return setError("It has to end after it starts.")
+    if (asTemplate) {
+      if (start + span > DAY_END) return setError("A template keeps one day: make it end by midnight.")
+      return saveTemplate()
+    }
     const row = {
       kind,
       title: title.trim(),
       notes: notes.trim() || null,
       starts_at: manilaInstant(day, start),
-      ends_at: manilaInstant(day, end),
+      ends_at: manilaInstant(endDay, end),
       task_id: taskId,
       visibility,
       auto_complete: auto,
+      // Sent only when it's set or changed, so blocks save on a database without colours.
+      ...(kind === "block" && color !== (event?.color ?? null) ? { color } : {}),
     }
     try {
+      if (newTask) {
+        const made = await createTask.mutateAsync({ title: newTask, assignee_id: me.id, status: "todo" })
+        row.task_id = made.id
+        toast(`Created ${taskKey(made)}, with time for it`, {
+          description: made.title,
+          action: { label: "Open", onClick: () => openTask(made.number) },
+        })
+      }
       if (event) {
         await update.mutateAsync({ id: event.id, patch: row })
         if (kind === "meeting") {
@@ -161,13 +297,23 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   }
 
   return (
-    <>
+    // Cmd+Enter (Ctrl+Enter) saves, as in the new-task dialog. Keys typed in the
+    // pickers and pop-ups inside it reach this through React but aren't in it.
+    <div
+      className="flex min-h-0 flex-1 flex-col"
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return
+        if (!e.currentTarget.contains(e.target as Node)) return
+        e.preventDefault()
+        save()
+      }}
+    >
       <div className="flex items-center justify-between px-5 pt-4">
         <DialogPrimitive.Title className="text-md font-semibold text-fg">
-          {event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
+          {editing ? "Edit template" : asTemplate ? "New template" : event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
         </DialogPrimitive.Title>
         <div className="flex items-center gap-1">
-          {!event && (
+          {!event && !asTemplate && (
             <EventTemplatePicker
               value={templateId}
               onSelect={applyTemplate}
@@ -180,6 +326,19 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         </div>
       </div>
       <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pt-3 pb-5">
+        {asTemplate && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg-2">Template name {same && <span className="font-normal text-fg-3">· replaces {same.created_by === me.id ? "your" : "the team's"} template</span>}</span>
+            <input
+              value={name}
+              maxLength={120}
+              onChange={(e) => setName(e.target.value)}
+              // Left empty, the template takes the title as its name.
+              placeholder={title.trim() || "Outreach block, Monday stand-up…"}
+              className={input}
+            />
+          </label>
+        )}
         <div className="flex gap-1 rounded-md bg-hover p-0.5" role="radiogroup" aria-label="Kind">
           {(["block", "meeting"] as const).map((k) => (
             <button
@@ -195,77 +354,137 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           ))}
         </div>
 
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-fg-2">Title</span>
-          <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
-        </label>
+        {/* Beside the title, a block's colour: the same picker as a project's beside its name. */}
+        <div className="flex items-end gap-3">
+          <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg-2">Title</span>
+            <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
+          </label>
+          {kind === "block" && (
+            <SwatchPicker
+              options={BLOCK_COLORS.map((c) => ({ value: c.value, label: c.value ? c.label : `${c.label}, the usual`, className: c.swatch }))}
+              value={color}
+              onChange={setColor}
+            />
+          )}
+        </div>
 
+        {!asTemplate && (
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-fg-2">For a task <span className="font-normal text-fg-4">(optional)</span></span>
           <PickerMenu
             triggerLabel="Link a task"
             triggerClassName="pressable flex h-9 w-full items-center gap-2 rounded-md border border-line-strong px-3 text-left text-sm text-fg hover:bg-hover"
-            trigger={linkedTask ? <><StatusIcon status={linkedTask.status} /><span className="truncate">{linkedTask.title}</span></> : <span className="text-fg-3">No task</span>}
+            trigger={
+              newTask ? (
+                <>
+                  <Icon icon={Add01Icon} size={14} className="shrink-0 text-fg-3" />
+                  <span className="min-w-0 flex-1 truncate">{newTask}</span>
+                  <span className="shrink-0 text-xs text-fg-3">New task, for you</span>
+                </>
+              ) : linkedTask ? (
+                <>
+                  <StatusIcon status={linkedTask.status} />
+                  <span className="truncate">{linkedTask.title}</span>
+                </>
+              ) : (
+                <span className="text-fg-3">No task</span>
+              )
+            }
             options={taskOptions}
-            value={taskId ?? "none"}
-            placeholder="Find one of your tasks…"
+            value={newTask ? null : (taskId ?? "none")}
+            placeholder="Find one of your tasks, or name a new one…"
             width="w-[420px]"
             onSelect={(v) => {
               const id = v === "none" ? null : v
+              setNewTask(null)
               setTaskId(id)
               const t = tasks.find((x) => x.id === id)
               if (t && !title.trim()) setTitle(t.title)
             }}
+            onCreate={(name) => {
+              setNewTask(name)
+              setTaskId(null)
+              if (!title.trim()) setTitle(name)
+            }}
+            createLabel={(name) => (
+              <>
+                New task <span className="text-fg">“{name}”</span>
+              </>
+            )}
           />
         </div>
+        )}
 
-        <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">Day</span>
-            <input type="date" value={day} onChange={(e) => e.target.value && setDay(e.target.value)} className={input} />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">From</span>
-            <select value={start} onChange={(e) => {
-              const s = Number(e.target.value)
-              setEnd((old) => (old <= s ? s + (end - start) : old))
-              setStart(s)
-            }} className={input}>
-              {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{end > start ? durationLabel(end - start) : ""}</span></span>
-            <select value={end} onChange={(e) => setEnd(Number(e.target.value))} className={input}>
-              {TIMES.filter((t) => t > start).map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
-            </select>
-          </label>
-        </div>
+        {asTemplate ? (
+          // A template keeps a time of day; the day is chosen when it's used.
+          <div className="grid grid-cols-2 gap-2">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">From</span>
+              {startTime}
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{duration}</span></span>
+              {endTime}
+            </label>
+          </div>
+        ) : (
+          // An entry starts on one day and ends on the same day, the next, or days later.
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">Starts</span>
+              <div className="grid grid-cols-[1.3fr_1fr] gap-2">
+                <input
+                  type="date"
+                  aria-label="Start date"
+                  value={day}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    if (!next) return
+                    // Moving the start moves the end with it: the entry keeps its length.
+                    setEndAt(endOf(next, start + span))
+                    setDay(next)
+                  }}
+                  className={input}
+                />
+                {startTime}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">Ends <span className="font-normal text-fg-4">{duration}</span></span>
+              <div className="grid grid-cols-[1.3fr_1fr] gap-2">
+                <input
+                  type="date"
+                  aria-label="End date"
+                  value={endDay}
+                  min={day}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    if (!next || next < day) return
+                    // Back to the start's day: keep an end that comes after the start.
+                    setEndAt(next === day && end <= start ? endOf(day, Math.min(start + 60, DAY_END)) : { endDay: next, end })
+                  }}
+                  className={input}
+                />
+                {endTime}
+              </div>
+            </div>
+          </div>
+        )}
 
         {kind === "meeting" && (
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-fg-2">Who's invited</span>
-            <div className="flex flex-wrap gap-1.5">
-              {members.filter((m) => !m.deactivated_at && m.id !== me.id).map((m) => {
-                const on = attendees.includes(m.id)
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => setAttendees(on ? attendees.filter((a) => a !== m.id) : [...attendees, m.id])}
-                    className={cn(
-                      "pressable inline-flex h-8 items-center gap-2 rounded-md border px-2 text-sm",
-                      on ? "border-brand/50 bg-brand-soft text-fg" : "border-line text-fg-3 hover:border-line-strong hover:text-fg",
-                    )}
-                  >
-                    <Avatar id={m.id} name={displayName(m)} size="sm" />
-                    {displayName(m)}
-                  </button>
-                )
-              })}
-            </div>
-            <p className="text-xs text-fg-4">It appears on their calendars, and they get a notification.</p>
+            <PeoplePicker
+              label="Who's invited"
+              placeholder="Invite people…"
+              value={attendees}
+              onChange={setAttendees}
+              exclude={[owner]}
+            />
+            <p className="text-xs text-fg-4">
+              {asTemplate ? "They're invited each time the template is used, once you've had a look." : "It appears on their calendars, and they get a notification."}
+            </p>
           </div>
         )}
 
@@ -305,9 +524,19 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Agenda, a link, anything useful"
             className="w-full resize-none rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-4 focus:border-brand" />
         </label>
+
+        {asTemplate && !othersShared && (
+          <label className="flex items-center justify-between gap-3 text-sm text-fg-2">
+            <span>
+              Share with the team
+              <span className="block text-xs text-fg-3">Everyone can use it; only you, or an admin, can change it.</span>
+            </span>
+            <Switch checked={shared} onCheckedChange={setShared} />
+          </label>
+        )}
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       </div>
-      <div className="flex items-center gap-2 border-t border-line px-5 py-3">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-line px-5 py-3">
         {event && (
           <Button variant="destructive" onClick={() => { remove.mutate(event.id); onClose() }}>
             Delete
@@ -315,14 +544,38 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         )}
         {event && event.owner_id === me.id && (
           <SaveEventTemplate
-            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end, visibility, auto, attendees: [me.id, ...attendees] }}
+            entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end: start + span, visibility, auto, attendees: [me.id, ...attendees], color }}
           />
         )}
-        <span className="flex-1" />
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button onClick={save} disabled={create.isPending || update.isPending}>{event ? "Save" : kind === "meeting" ? "Send invites" : "Add to calendar"}</Button>
+        {!event && !editing && (
+          <label className={cn("flex items-center gap-2 text-xs whitespace-nowrap text-fg-3", missing && "opacity-60")} title={missing ? TEMPLATES_MISSING : "Saves a template for next time, and adds nothing to the calendar"}>
+            <Switch checked={asTemplate} onCheckedChange={switchToTemplate} disabled={missing} />
+            Save as template
+          </label>
+        )}
+        {/* Kept together and to the right, on whichever line they land on a phone. */}
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={save} disabled={create.isPending || update.isPending || saveEvent.isPending}>
+            {asTemplate
+              ? saveEvent.isPending
+                ? "Saving…"
+                : same
+                  ? "Replace template"
+                  : "Save template"
+              : event
+                ? "Save"
+                : kind === "meeting"
+                  ? "Send invites"
+                  : "Add to calendar"}
+            <span className="ml-0.5 hidden gap-0.5 opacity-80 sm:flex">
+              <Kbd className="border-white/25 bg-white/10 text-white">⌘</Kbd>
+              <Kbd className="border-white/25 bg-white/10 text-white">↵</Kbd>
+            </span>
+          </Button>
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -334,7 +587,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
 function SaveEventTemplate({
   entry,
 }: {
-  entry: { kind: "block" | "meeting"; title: string; notes: string | null; start: number; end: number; visibility: string; auto: boolean; attendees: string[] }
+  entry: { kind: "block" | "meeting"; title: string; notes: string | null; start: number; end: number; visibility: string; auto: boolean; attendees: string[]; color: BlockColor | null }
 }) {
   const me = useMe()
   const { data: templates = [] } = useEventTemplates()
@@ -353,6 +606,7 @@ function SaveEventTemplate({
     if (!clean) return toast.error("Give the template a name.")
     if (!entry.title) return toast.error("Give the entry a title first.")
     if (entry.end <= entry.start) return toast.error("It has to end after it starts.")
+    if (entry.end > DAY_END) return toast.error("A template keeps one day", { description: "Make it end by midnight, then save it as a template." })
     try {
       await saveEvent.mutateAsync({
         id: same?.id,
@@ -367,6 +621,7 @@ function SaveEventTemplate({
           visibility: entry.visibility,
           auto_complete: entry.kind === "block" && entry.auto,
           attendee_ids: entry.kind === "meeting" ? entry.attendees : [],
+          ...(entry.kind === "block" && entry.color ? { color: entry.color } : {}),
         },
       })
       toast(same ? `Updated the template "${clean}"` : `Saved "${clean}" as a template`, {

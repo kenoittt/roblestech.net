@@ -8,6 +8,7 @@ import { addDays, diffDays, isoDay } from "@/lib/dates"
 import { useUid } from "@/domains/workspace/provider"
 import { isAdminRole, type Member, type Project } from "@/domains/workspace/types"
 import { explain, type NewTask } from "@/domains/tasks/data"
+import { withoutMissingColour } from "@/domains/calendar/data"
 import type { Task } from "@/domains/tasks/config"
 
 // Templates keep the details of a task or a calendar entry that people make
@@ -51,6 +52,20 @@ export function useEventTemplates() {
     },
   })
 }
+
+/**
+ * The database has no templates yet: its 2026-10-04 update isn't applied.
+ * The app then says so, rather than offering templates that can't be saved.
+ */
+export function isMissingTable(error: unknown) {
+  const code = (error as { code?: string } | null)?.code
+  return code === "PGRST205" || code === "42P01"
+}
+
+export const TEMPLATES_MISSING = "Templates aren't available yet: the database needs an update first. Let an admin know."
+
+/** A template starts work, so it can't start in review, done or cancelled. Mirrors the table's check. */
+export const STARTING_STATUSES: readonly string[] = ["backlog", "todo", "in_progress"]
 
 /** Yours first, then the ones the team shares; each by name. */
 export function sortTemplates<T extends { created_by: string | null; name: string }>(list: T[], uid: string): T[] {
@@ -102,7 +117,36 @@ export function taskFromTemplate(
   }
 }
 
-/** One line on what a task template keeps, for the save dialog and Settings. */
+/**
+ * Opening the new-task dialog on an existing template, to change it: its
+ * fields as the dialog's starting point, as they are (dates stay relative).
+ */
+export function editTemplateArgs(t: TaskTemplate): [Partial<NewTask>, { asTemplate: { edit: TaskTemplate; checklist: string[]; dueInDays: number | null; assign: AssignMode } }] {
+  return [
+    {
+      title: t.title,
+      description: t.description,
+      status: t.status,
+      priority: t.priority,
+      project_id: t.project_id,
+      assignee_id: t.assignee_id,
+      reviewer_id: t.reviewer_id,
+      completion_policy: t.completion_policy,
+      completion_approvers: t.completion_approvers,
+      is_private: t.is_private,
+    },
+    {
+      asTemplate: {
+        edit: t,
+        checklist: t.checklist,
+        dueInDays: t.due_in_days,
+        assign: t.assign_to_user ? "user" : t.assignee_id ? "person" : "nobody",
+      },
+    },
+  ]
+}
+
+/** One line on what a task template keeps, for Settings. */
 export function describeTaskTemplate(
   t: Pick<TaskTemplate, "checklist" | "due_in_days" | "assign_to_user" | "assignee_id" | "project_id">,
   names: { person?: string; project?: string },
@@ -110,14 +154,15 @@ export function describeTaskTemplate(
   const parts: string[] = []
   if (names.project) parts.push(names.project)
   parts.push(t.assign_to_user ? "for whoever uses it" : t.assignee_id ? `for ${names.person ?? "someone"}` : "unassigned")
-  if (t.due_in_days !== null) parts.push(dueLabel(t.due_in_days).toLowerCase())
+  if (t.due_in_days !== null) parts.push(dueInLabel(t.due_in_days).toLowerCase())
   if (t.checklist.length) parts.push(`${t.checklist.length}-step checklist`)
   return parts.join(" · ")
 }
 
 export const DUE_CHOICES = [null, 0, 1, 2, 3, 7, 14] as const
 
-export function dueLabel(days: number | null) {
+/** A template's due date, which is always relative: "Due the next day". */
+export function dueInLabel(days: number | null) {
   if (days === null) return "No due date"
   if (days === 0) return "Due the day it's made"
   if (days === 1) return "Due the next day"
@@ -151,11 +196,13 @@ export function useTemplateActions() {
   const saveEvent = useMutation({
     mutationFn: async ({ id, input }: { id?: string; input: EventTemplateInput }) => {
       const supabase = getSupabase()
-      const { data, error } = id
-        ? await supabase.from("cal_event_templates").update(input).eq("id", id).select("*").single()
-        : await supabase.from("cal_event_templates").insert({ ...input, created_by: uid }).select("*").single()
-      if (error) throw error
-      return data as EventTemplate
+      return withoutMissingColour(input, async (row) => {
+        const { data, error } = id
+          ? await supabase.from("cal_event_templates").update(row).eq("id", id).select("*").single()
+          : await supabase.from("cal_event_templates").insert({ ...row, created_by: uid }).select("*").single()
+        if (error) throw error
+        return data as EventTemplate
+      })
     },
     onSuccess: () => refresh("event"),
     onError: (e) => toast.error(explain(e)),

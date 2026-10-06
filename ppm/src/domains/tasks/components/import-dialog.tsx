@@ -34,7 +34,7 @@ type Row = {
 
 const TEMPLATE = [
   ["title", "description", "assignee_email", "priority", "status", "due_date", "project"],
-  ["Write the October SEO report", "Draft it before the client call", "christian@roblestech.net", "high", "todo", "2026-10-15", "Promix Nutrition"],
+  ["Write the October SEO report", "Draft it before the client call", "christian@roblestech.net", "high", "todo", "2026-10-15", "Northline Nutrition"],
   ["Fix the contact form", "Spam is getting through", "", "medium", "", "", ""],
   ["# priority: urgent, high, medium, low or none. status: backlog, todo, in_progress, in_review, done. due_date: YYYY-MM-DD. A new project name creates the project."],
 ]

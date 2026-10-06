@@ -128,10 +128,11 @@ function Palette({ onClose }: { onClose: () => void }) {
           <Item value="new task create" onSelect={() => run(() => openCreateTask())} icon={Add01Icon} shortcut="C">New task</Item>
           <Item value="assign myself new task" onSelect={() => run(() => openCreateTask({ assignee_id: me.id }))} icon={TaskDone01Icon}>New task for me</Item>
           {templateItems.map((t) => (
-            <Item key={t.id} value={`template new task from ${t.name} ${t.title}`} onSelect={() => run(() => openCreateTask({}, t.id))} icon={LayoutTemplateIcon}>
+            <Item key={t.id} value={`template new task from ${t.name} ${t.title}`} onSelect={() => run(() => openCreateTask({}, { templateId: t.id }))} icon={LayoutTemplateIcon}>
               <span className="truncate">New task from <span className="text-fg">{t.name}</span></span>
             </Item>
           ))}
+          <Item value="new task template save routine" onSelect={() => run(() => openCreateTask({}, { asTemplate: {} }))} icon={LayoutTemplateIcon}>New task template</Item>
           <Item value="plan time calendar block" onSelect={() => go("/calendar")} icon={Calendar03Icon}>Plan time on the calendar</Item>
           {isAdminRole(me.role) && <Item value="invite person member" onSelect={() => go("/people")} icon={UserAdd01Icon}>Invite someone</Item>}
         </Group>

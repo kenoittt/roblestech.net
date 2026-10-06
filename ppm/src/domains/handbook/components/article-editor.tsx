@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ModalShell } from "@/components/app/modal"
+import { NativeSelect, fieldClass } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
 import { getSupabase } from "@/lib/supabase/client"
 import { Markdown, slugify } from "./markdown"
 import type { KbArticle, KbCategory } from "../server"
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+const input = fieldClass
 
 /** Write in Markdown on the left; see the page as the team will on the right. */
 export function ArticleEditor({ article, categories }: { article: KbArticle | null; categories: KbCategory[] }) {
@@ -90,17 +90,17 @@ export function ArticleEditor({ article, categories }: { article: KbArticle | nu
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-fg-2">Shelf</span>
-          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={input}>
+          <NativeSelect value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-          </select>
+          </NativeSelect>
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-fg-2">Status</span>
-          <select value={status} onChange={(e) => setStatus(e.target.value as KbArticle["status"])} className={input}>
+          <NativeSelect value={status} onChange={(e) => setStatus(e.target.value as KbArticle["status"])}>
             <option value="ready">Ready: settled procedure</option>
             <option value="draft">Draft: being written</option>
             <option value="needed">Needed: not written yet</option>
-          </select>
+          </NativeSelect>
         </label>
         <label className="flex flex-col gap-1.5 sm:col-span-2">
           <span className="text-xs font-medium text-fg-2">Summary</span>

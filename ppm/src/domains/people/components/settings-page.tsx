@@ -10,14 +10,14 @@ import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
 import { PasswordInput } from "@/components/app/password-input"
 import { PageBody, PageHeader } from "@/components/app/page"
+import { fieldClass } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
 import { getSupabase } from "@/lib/supabase/client"
 import { useMe } from "@/domains/workspace/provider"
 import { ROLE_META, displayName, type Role } from "@/domains/workspace/types"
 import { TemplatesSettings } from "@/domains/templates/components/templates-settings"
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+const input = fieldClass
 
 export function SettingsPage() {
   const me = useMe()

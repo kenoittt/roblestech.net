@@ -31,7 +31,7 @@ import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { ProjectSwatch } from "@/domains/tasks/components/glyphs"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { TaskStatusButton } from "@/domains/tasks/components/task-properties"
-import { isEventDone, useCalendar } from "@/domains/calendar/data"
+import { blockColor, isEventDone, useCalendar } from "@/domains/calendar/data"
 
 /**
  * Home: your work first, then the team's. Answers, in order: what do I need
@@ -287,7 +287,7 @@ function Today() {
                 <span
                   className={cn(
                     "mt-1 w-[3px] shrink-0 self-stretch rounded-full",
-                    e.kind === "meeting" ? "bg-status-in-review" : "bg-brand",
+                    e.kind === "meeting" ? "bg-status-in-review" : blockColor(e.color).bar,
                     done && "opacity-35",
                   )}
                 />

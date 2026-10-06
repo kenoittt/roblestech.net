@@ -1,21 +1,16 @@
 # How the PPM should feel to use
 
-The product-design principles behind the PPM, each with where it shows. Use them when you design anything new, and when you judge whether something is finished. The mindset behind them is in the repository's [`docs/how-we-work.md`](../../../docs/how-we-work.md); the look is in [design-system.md](design-system.md).
+The PPM's own patterns, on top of the principles every app in the repository shares ([`docs/ux-principles.md`](../../../docs/ux-principles.md): the questions to answer before building, the general principles, scale, and when it's done). Use both when you design anything new, and when you judge whether something is finished. The look is in [design-system.md](design-system.md).
 
-## Designing a feature
+## Designing a feature in the PPM
 
-Before building, answer these, in order:
+Answer the shared questions first ([designing anything](../../../docs/ux-principles.md#designing-anything)). In the PPM, that means:
 
-1. **What's the job to be done?** Who does it, how often, and why. Write it as a sentence: "When I start my outreach for the day, I want the usual task set up the usual way, in a moment."
-2. **What do good tools do?** Linear, Asana, Notion, Trello: a quick look, not a research project. That's the floor.
-3. **What does this team actually do?** Design for that, beyond the floor.
-4. **Where does it live?** Use a surface that already exists (the panel, the create dialog, a ⋯ menu, the command menu) before adding a new page, dialog or window.
-5. **What's the fewest-step path for the common case?** Count the clicks, before and after ([an example](../reports/2026-10-04-session-report.md#click-counts-for-the-outreach-routine)).
-6. **What happens at ten times the size?** Ten times the people, projects or tasks (see "Scale" below).
-7. **Who may do it?** Decide the rule, then enforce it in the database ([database.md](database.md)).
-8. **What are its states?** Empty, loading, error, refused, done.
+- **Where it lives:** the side panel, the create dialog, a ⋯ menu or the command menu, before a new page, dialog or window.
+- **The click count:** count it before and after ([an example](../reports/2026-10-04-session-report.md#click-counts-for-the-outreach-routine)).
+- **Who may do it:** decide the rule, then enforce it in the database ([database.md](database.md)).
 
-## The principles
+## How the principles show in the PPM
 
 ### Personal first
 Home answers "what do I do today?" before anything else: what's overdue, due today and this week, today's plan, and what's waiting for your sign-off. The team's load and the projects come after. Anything new for Home should earn its place against that question.
@@ -68,18 +63,13 @@ The server loads the team, projects and tasks in one round of parallel queries; 
 
 ## Scale
 
-Design for the team you'll have, not only the one you have.
+The shared rules are in [`docs/ux-principles.md`](../../../docs/ux-principles.md#scale). In the PPM:
 
-- **Lists of people or projects** need search, and should show photos and names compactly. A picker that shows everyone as a chip works for five people and fails for fifty, or for long names. Use a searchable multi-select (`PickerMenu` with `multiple`) instead.
-- **Long text** truncates with the full text on hover, and never pushes a layout apart.
-- **Counts can grow:** a column of 3 cards and a column of 300 both need to work; so do zero.
-
-A known example to fix: the meeting attendee picker in the calendar shows every teammate as a chip ([backlog](../backlog.md)).
+- **A list of people** uses a searchable multi-select (`PeoplePicker` as a form field, `PickerMenu` with `multiple` as a chip), never a row of chips. Meeting guests and project members moved to it on 2026-10-07.
+- **A view that fills up** shows what fits and folds the rest behind "N more" or "+N", which opens the full list: a month day's tasks, entries that overlap, a day's due tasks. Never slivers, and never one cell running into the next.
+- **A long list gets a search.** The Filter menu's categories show one once they have more than eight options.
+- **Still to do:** Team day shows a column per person, which scrolls sideways for a large team ([limitations](limitations.md)).
 
 ## Before you call it done
 
-- Every state works: empty, loading, error, refused, done.
-- It works by keyboard, in dark and light, at desktop and phone width.
-- It works for every role: super admin, admin and staff (and clients are kept out).
-- The click count for the common path is as low as it can be.
-- The docs say what changed ([workflow.md](workflow.md)).
+The shared list is in [`docs/ux-principles.md`](../../../docs/ux-principles.md#before-you-call-it-done). In the PPM, "every role" means super admin, admin and staff, with clients kept out, and "dark and light" always applies.

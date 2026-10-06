@@ -36,6 +36,7 @@ Each token has one meaning. Use it for that meaning, and only that.
 | `status-backlog` … `status-cancelled` | The six task statuses | Status icons and markers only | Anything else |
 | `priority-urgent` | Urgent priority | The urgent priority icon | Warnings |
 | `chart-1` … `chart-5`, `chart-track` | Charts | Bars, rings and progress, RTC blues first | Interface states |
+| `cal-teal`, `cal-purple`, `cal-pink`, `cal-slate` | A colour someone chose for a time block | A block's edge and tint, and its bar in lists; the usual blue is `brand` | Anything else. There's no green, amber, red or orange among them on purpose: those already mean done, time and risk, errors and urgent. Meetings keep `status-in-review` |
 
 **Why green is rare:** RTC's brand has navy, blue and green. Kyan asked for more blue and less green, so the blues lead and green keeps one meaning, "done".
 
@@ -83,14 +84,19 @@ Choosing:
 | You need | Use | Example |
 |---|---|---|
 | Pick one value from a list | `PickerMenu` (`src/domains/tasks/components/pickers.tsx`): search, arrow keys, Enter, a hint in its footer | Status, priority, assignee, project |
-| Pick several | `PickerMenu` with `multiple`, showing photos and names | Chosen people who may sign off |
+| A form's text field, or a choice from a short list in a form | `fieldClass` and `NativeSelect` (`src/components/ui/field.tsx`). Never a bare `<select>`: the browser's arrow sits on the edge | Title, Starts and Ends, a project's status |
+| A colour for something | `SwatchPicker` (`src/components/app/swatch-picker.tsx`), beside the field it belongs to, with each thing's own colours | A project's colour, a time block's colour |
+| Pick several | `PickerMenu` with `multiple`, showing photos and names; it clears its search after each choice | Chosen people who may sign off |
+| Pick several people, as a form field | `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): who's chosen as photos and names in the field, a searchable list behind it, chosen people first when it opens | Meeting guests, project members |
+| More than fits | Show what fits, then "N more" or "+N", which opens the full list | A busy day in the month view, crowded hours, a day's due tasks |
 | Actions on one thing | `DropdownMenu` behind a ⋯ button | A task's or a project's menu |
 | A few fields or details, anchored to something | `Popover` | A calendar entry's details |
-| A focused decision, or a short form | `ModalShell` (`src/components/app/modal.tsx`) | Invite, Deactivate, Save as template, Delete project |
+| A focused decision, or a short form | `ModalShell` (`src/components/app/modal.tsx`) | Invite, Deactivate, Delete project |
+| Make something in another form, without a second dialog | A switch in the dialog's footer that changes what it saves; the main button says what it will do | Save as template, in the new-task dialog and Plan time |
 | Look at or edit a task | The side panel: no page load | Click any task |
 | Make a task | The create dialog (press C) | |
 | Tell people it worked | A toast (`sonner`), with **Undo** when the action can be undone | "Task deleted. Undo" |
-| A main action with quick variants | A split button | Plan time, with templates under the arrow |
+| A main action with quick variants | A split button: `splitButton()` in `src/components/app/split-button.tsx`, one shape, one hairline, each part lighting up on its own | Plan time, with templates under the arrow; Copy my plan, with how it reads |
 
 Two rules learned the hard way:
 - **A menu's label must sit inside the group it names** (`DropdownMenuLabel` inside `DropdownMenuGroup` or `DropdownMenuRadioGroup`). Outside one, Base UI throws and the screen goes down. `npm run test:menus` catches it.

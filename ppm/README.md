@@ -10,12 +10,12 @@ The PPM for Robles Technologies Corp.: tasks people can find, a home dashboard, 
 - **Home:** your work first (overdue, today, the next 7 days), your plan for today, what's waiting for your sign-off. Then the team: workload per person, tasks finished over 14 days, project health, what's late, recent activity.
 - **Tasks:** list, board and calendar views of the same tasks, switchable per screen and remembered per person. Filters, search, grouping and ordering. Every property is editable where it sits. Select several rows to change them together. Drag on the board to change status, or on the calendar to change the due date. On the board, a card in review says who it's waiting on.
 - **Assigning:** the assignee menu shows each person's open and late work, so you can see who has room before you assign.
-- **Templates:** save a task you make again and again (⋯, Save as template), then make the next one from Templates in the new-task dialog, or from ⌘K. A template keeps the title, description, checklist, people, project and sign-off rule; it can go to whoever uses it and be due a set number of days after it's made. Yours, or shared with the team; Settings lists them.
+- **Templates:** for a task you make again and again, turn on Save as template in the new-task dialog (or use ⋯, Save as template… on a task that's already right), then make the next one from Templates in the new-task dialog, or from ⌘K. A template keeps the title, description, checklist, people, project and sign-off rule; it can go to whoever uses it and be due a set number of days after it's made. Yours, or shared with the team; Settings lists them, with New and Edit.
 - **The task panel:** opens beside the list without a page load. Title, status, priority, assignee, due date, a repeat (every day, weekday, week, two weeks or month: finishing one makes the next, with the same people and rules), project, reviewer, sign-off rule, description (Markdown), checklist, files (up to 25 MB each, private to whoever can see the task), history and comments, with @mentions that notify the person.
 - **Sign-off rules:** each task says who can mark it done (anyone, not the assignee, the assigner, the reviewer, or chosen people). The database enforces it. Sending a task for sign-off notifies the people the rule names. Admins can sign off in that person's place (say, when a reviewer is away): the button reads "Sign off as admin" and the history records it as such.
 - **People:** the team with roles and workload; invite by email, change roles, deactivate with a handover of open work, send password resets. Only super admins manage admins, and a refusal says which role you're signed in as.
 - **Projects:** a portfolio with health and progress, and a page per project with what's late and who's carrying it, above its tasks. Archive a project to hide it everywhere (Undo, or Restore later); admins can delete one, keeping its tasks or deleting them too.
-- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. "Copy my plan" puts your day on the clipboard for the team chat. Templates: save an entry (Edit, Save as template), then the arrow beside Plan time puts a block on the day in two clicks, or opens a meeting filled in.
+- **Calendar:** your week and the team's day; drag to block time, drag a block to move or resize it, link a task, invite people to meetings; each entry public, busy-only or private, and whole days or weeks hidden; ticked off by hand or automatically, with a line under each day showing done against planned. The day runs all 24 hours, and a block can run past midnight or over several days; blocks can have a colour. "Copy my plan" puts your day on the clipboard for the team chat, worded the way you choose under its arrow. Templates: turn on Save as template in Plan time (or New template… under its arrow), then the arrow puts a block on the day in two clicks, or opens a meeting filled in.
 - **Handbook:** a documentation layout with search, an outline per article, "Was this helpful?", and a Markdown editor for admins.
 - **Inbox, activity log, command menu (Cmd K: pages, tasks, projects, people, handbook articles, templates), keyboard shortcuts, settings** (including a profile photo and your templates).
 - **Email:** each assignment, sign-off request, comment and meeting invitation is emailed once; an 8 AM digest of what's overdue, due and on the calendar. Locally they land in the mail catcher.
@@ -27,6 +27,21 @@ Still being built: see "Status" in the build plan.
 
 ## Run it locally
 
+### Install the tools (once)
+
+On a Mac, with [Homebrew](https://brew.sh):
+
+```bash
+brew install node@24 colima docker    # Node 24 (follow brew's note to put it on your PATH), and Docker through Colima
+git clone https://github.com/kenoittt/roblestech.net.git
+cd roblestech.net/ppm
+npm ci                                # the app's packages, exactly as locked
+```
+
+On Windows, use Docker Desktop instead of Colima, and Node 24 from nodejs.org. Then fill in `.env.local` (below) and start it.
+
+### Start it
+
 You need Node 24, and Docker for the local database. On a Mac, Colima provides Docker.
 
 ```bash
@@ -35,7 +50,7 @@ colima start --cpu 4 --memory 6
 
 # 2. The local database: the live schema, the revamp's additions and sample data
 npx supabase start          # first run downloads images; a few minutes
-# Optional, to start over with fresh sample data:
+# After pulling, or to start over: the latest migrations and sample data
 npx supabase db reset
 
 # 3. The app
@@ -45,7 +60,7 @@ npm run dev                 # or `npm run dev:poll` if the page never loads (see
 
 Then open http://localhost:3000.
 
-**`.env.local`** holds the local database's address and keys. They're the local stack's defaults, printed by `npx supabase status -o env`. Copy `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` into `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and set `NEXT_PUBLIC_DEMO_MODE=true`. Never put production keys in it.
+**`.env.local`** holds the local database's address and keys. They're the local stack's defaults, printed by `npx supabase status -o env`. Copy `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` into `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and `MAILPIT_URL` into `MAIL_DEV_URL` so invitation emails reach the local mail catcher. Then set `NEXT_PUBLIC_APP_URL=http://localhost:3000`, `NEXT_PUBLIC_DEMO_MODE=true`, and `CRON_SECRET` to any long random string. Never put production keys in it.
 
 ### Sample accounts
 
@@ -56,10 +71,10 @@ Every sample account uses the password `rtc-demo-2026`. The sign-in page lists t
 | Kenneth Robles | kenneth@rtc.test | Super admin |
 | Christian Panes | christian@rtc.test | Super admin |
 | Kyan Lumanog | kyan@rtc.test | Admin |
-| Andrei | andrei@rtc.test | Admin |
-| Carl | carl@rtc.test | Staff |
+| Joshua | joshua@rtc.test | Staff |
+| Carl John | carl@rtc.test | Staff |
 
-The people are RTC's team; the tasks, comments and calendar entries are made up. Dates are relative to the day the sample data loads, so the demo always looks current.
+The people are RTC's team; the clients (Northline Nutrition, Brightwater Dental), tasks, comments and calendar entries are made up. Dates are relative to the day the sample data loads, so the demo always looks current. The sample data shows every option the PPM has: coloured blocks, blocks past midnight and over several days, an hour with five things at once, a day with seven tasks due, each sign-off rule, private and repeating tasks, planned and archived projects, and templates of each kind. When you add a feature, add data for it in `supabase/seed.sql` (the repository's `CLAUDE.md`, rule 7).
 
 ### Local tools
 
@@ -106,7 +121,7 @@ The smoke test signs in as different people and checks the main flows against th
 5. On the **board**, drag a card to In review. As an admin, Kyan can still mark it done in the reviewer's place: the panel's button says "Sign off as admin", and the history says so.
 6. Open the **calendar**. My week: drag down an empty slot to block time, drag a block to move it, or its bottom edge to change when it ends; the line under each day shows how much of the plan is done. Team day: everyone's plan side by side; Christian's appointment shows only as "Busy".
 7. Open **People**. Invite someone, open the email in the mail catcher, and set their password.
-8. Switch to **Carl** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
+8. Switch to **Carl John** (staff) from the account menu. He can't change roles, and dragging Christian's report (RTC-18) to Done is refused, with the reason: it needs Kenneth's sign-off.
 9. Open a **project**: health, what's late, who's carrying it, then its board.
 10. Open a second browser window as **Kenneth** and rename a task: it changes in Kyan's window by itself.
 
