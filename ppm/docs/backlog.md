@@ -44,13 +44,13 @@ Built 2026-10-07 by Kyan's local Claude, on the branch `kyan/feat/ppm-templates-
 
 ### 31. Search in the filter menu's longer lists
 
-New, 2026-10-07 (found while looking for lists that show everyone, item 17). The Filter menu lists every person and project with no search; fine for a team of ten, slow for a hundred. Add a search field to a category once it has more than about eight options.
+**Done 2026-10-07** (found while looking for lists that show everyone, item 17). The Filter menu listed every person and project with no search. A category now gets a search field once it has more than eight options, so today's small lists look as they did.
 
 ## From Kyan, 2026-10-06
 
 ### 17. A people picker that scales, for meetings
 
-**Done 2026-10-07.** Meeting guests and project members are chosen with `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): the field shows who's chosen as photos and names, with a searchable list behind it. The other places that list people already search (the assignee, reviewer and sign-off pickers, ⌘K); the Filter menu doesn't yet (item 31).
+**Done 2026-10-07.** Meeting guests and project members are chosen with `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): the field shows who's chosen as photos and names, with a searchable list behind it. The other places that list people already search (the assignee, reviewer and sign-off pickers, ⌘K); the Filter menu now does too, once its lists are long (item 31).
 
 The Plan time dialog lists every teammate as a chip to invite to a meeting. That works for a few people, and fails for many, or for long names. Replace it with a searchable multi-select that shows photos and names, like the picker for "Chosen people" (`PickerMenu` with `multiple`), and look for any other place that lists everyone at once. The principle is in [`guides/ux-principles.md`](guides/ux-principles.md#scale).
 
