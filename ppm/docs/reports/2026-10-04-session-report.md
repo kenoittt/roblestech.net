@@ -1,6 +1,6 @@
 # Session report: Kyan's brief of 2026-10-04
 
-What a Claude Code cloud session did with [Kyan's brief](../briefs/2026-10-04-kyan-voice-brief.md), what it considered, what it ruled out, and why. Written for Kyan, for Kyan's local Claude (which will turn the useful parts into knowledge-base pages), and for Kenneth.
+What a Claude Code cloud session did with [Kyan's brief](../raw/2026-10-04-kyan-voice-brief.md), what it considered, what it ruled out, and why. Written for Kyan, for Kyan's local Claude (which will turn the useful parts into knowledge-base pages), and for Kenneth.
 
 The session had no access to Kyan's private notes, design guide or plans. Everything here comes from this repository: the code, `ppm/README.md`, `ppm/docs/` (the knowledge-base index, the backlog, `DEPLOY.md`, Kenneth's guide), the repository's `CLAUDE.md`, and the git history. Where that wasn't enough, the report says what was assumed.
 
@@ -14,7 +14,7 @@ The session had no access to Kyan's private notes, design guide or plans. Everyt
 | 3 | Eye icon on password fields | Done, on all five password fields (sign-in, the welcome page, Settings). | `bfba64f` |
 | 4 | Delete or archive projects | Done. Archive for whoever manages a project; delete for admins, with a choice about the tasks. | `22e5772`, `94629ed` |
 | 5 | "Chosen people" orange border | Analysed, not changed (as asked). Why it's there, what Kenneth's Claude knew and lacked, and a recommendation: [below](#the-chosen-people-orange-border). | none |
-| 6 | Conventional commits | Every commit follows the cheat sheet. Linked and adapted in [../git-conventions.md](../git-conventions.md), with a branch-naming proposal. | `docs` commit |
+| 6 | Conventional commits | Every commit follows the cheat sheet. Linked and adapted in [docs/git-conventions.md](../../../docs/git-conventions.md), with a branch-naming proposal. | `docs` commit |
 | | Found on the way | The buttons in a calendar entry's details (Tick off, Edit, delete) didn't work: they opened a new Plan time dialog. Fixed. | `b00c18f` |
 | | Tests | Nine new checks in the smoke test: `npm run test:smoke` passes 32/32 (23 before). | `f726d38` |
 
@@ -305,7 +305,7 @@ In order of how much each would have saved:
 ## Process notes
 
 - **One branch, at Kyan's request.** `CLAUDE.md` prefers small, single-purpose pull requests. Kyan asked for one branch; to keep review easy, it's a series of small commits in conventional form (three fixes, three features, the tests and the docs), each with a body that says why and how it was checked. If Kenneth prefers separate pull requests, they can be split by cherry-picking: the role fix, the password eye and the calendar fix stand alone; templates and projects each carry their own migration (`94629ed` belongs with the projects commit).
-- **The branch name** follows the proposal in [../git-conventions.md](../git-conventions.md): `kyan/feat/ppm-templates-and-archive`. `CLAUDE.md` asks for `kyan/<topic>`; this keeps that prefix and adds the type and the app.
+- **The branch name** follows the proposal in [docs/git-conventions.md](../../../docs/git-conventions.md): `kyan/feat/ppm-templates-and-archive`. `CLAUDE.md` asks for `kyan/<topic>`; this keeps that prefix and adds the type and the app.
 - **Not touched:** the portal, WanderWise, the public site, the live database, Vercel.
 
 ## Verification
@@ -332,4 +332,4 @@ All on Node 24.21.0 (the `engines` version), against the local stack with the sa
 | Calendar fix | `src/domains/calendar/components/time-grid.tsx` |
 | Both migrations | `src/lib/supabase/database.types.ts` (regenerated; before this session, regenerating reproduced the committed file exactly) |
 | Tests | `tests/smoke.mjs` |
-| Docs | this report, `../briefs/2026-10-04-kyan-voice-brief.md`, `../git-conventions.md`, `../README.md`, `../backlog.md`, `../DEPLOY.md`, `../../README.md` |
+| Docs | this report, `../raw/2026-10-04-kyan-voice-brief.md`, `../../../docs/git-conventions.md`, `../README.md`, `../backlog.md`, `../DEPLOY.md`, `../../README.md` |
