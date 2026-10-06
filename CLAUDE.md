@@ -22,7 +22,7 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 ## How changes are made
 
 1. **Never commit to `main` directly.** One branch per task, merged through a pull request.
-2. **Branch names:** `claude/<topic>` for Kenneth's sessions, `kyan/<topic>` for Kyan's.
+2. **Branch names:** `<owner>/<type>/<app>-<topic>`, for example `claude/fix/portal-sign-in-refresh`: `claude` for Kenneth's sessions, `kyan` for Kyan's, then the commit type and what's being built (`docs/git-conventions.md`).
 3. **Check for other work first:** `git fetch --all --prune`, then `git branch -r` and the open pull requests. If another branch or pull request touches the same app or files, stop and ask before going on.
 4. **Stay current:** rebase on `origin/main` before opening a pull request, and again before merging.
 5. **Keep pull requests small and single-purpose.** Say what changed, why, how you verified it, and what you couldn't verify.

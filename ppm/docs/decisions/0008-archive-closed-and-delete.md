@@ -22,4 +22,4 @@ Marking a test project "Closed" would claim finished work. Archiving is the safe
 
 ## What it means for you
 
-Whether a project's owner may delete it while it's still empty is an open question for Kenneth ([backlog](../backlog.md)).
+Whether a project's owner may delete it while it's still empty: yes, decided by Kenneth on 2026-10-07 ([0013](0013-owners-delete-empty-projects.md)); not built yet.

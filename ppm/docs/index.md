@@ -43,8 +43,10 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [decisions/0010-the-knowledge-base.md](decisions/0010-the-knowledge-base.md) | These docs, and their shape (2026-10-06) |
 | [decisions/0011-domain-driven-folders.md](decisions/0011-domain-driven-folders.md) | The folders follow domain-driven design, one shape for every domain (2026-10-06) |
 | [decisions/0012-templates-are-made-where-work-is-made.md](decisions/0012-templates-are-made-where-work-is-made.md) | Templates are made in the new-task dialog and Plan time, and changed there (2026-10-07) |
+| [decisions/0013-owners-delete-empty-projects.md](decisions/0013-owners-delete-empty-projects.md) | A project's owner may delete it while it has no tasks (2026-10-07) |
+| [decisions/0014-a-way-back-when-nobody-is-a-super-admin.md](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md) | A one-time setup link, only while there's no super admin (2026-10-07) |
 
-All written by Kyan's Claude: 0001 to 0011 on 2026-10-06, from the history and the people who decided; 0012 on 2026-10-07.
+0001 to 0012 written by Kyan's Claude: 0001 to 0011 on 2026-10-06, from the history and the people who decided; 0012 on 2026-10-07. 0013 and 0014 by Kenneth's Claude on 2026-10-07, from Kenneth's answers.
 
 ## People and their tasks
 

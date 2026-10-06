@@ -54,7 +54,7 @@ Pull requests are merged with a merge commit, so each commit keeps its message. 
 
 ## Branches
 
-The cheat sheet doesn't cover branches. A proposal (Kyan, 2026-10-04: branch names should say what's being built):
+The cheat sheet doesn't cover branches. Ours, proposed by Kyan on 2026-10-04 so a branch's name says what's being built:
 
 ```
 <owner>/<type>/<app>-<topic>
@@ -66,4 +66,4 @@ The cheat sheet doesn't cover branches. A proposal (Kyan, 2026-10-04: branch nam
 
 For example `kyan/feat/ppm-templates-and-archive` or `claude/fix/portal-sign-in-refresh`. No random suffixes: a name should still mean something in a list of twenty branches.
 
-**Not yet adopted repository-wide.** The repository's `CLAUDE.md` says `claude/<topic>` and `kyan/<topic>`; this pattern keeps those prefixes and adds the type and the app. Adopting it means changing that one line in `CLAUDE.md`, which every app shares, so it's Kenneth's call.
+**Adopted for every app on 2026-10-07** (Kenneth's decision): rule 2 in the repository's `CLAUDE.md`. It keeps the old `claude/` and `kyan/` prefixes and adds the type and the app. Branches made before then keep their names.

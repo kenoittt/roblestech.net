@@ -2,40 +2,24 @@
 
 Updated 2026-10-07. Tick each one off here, with the date, when it's done. This page is for every app in the repository: anything that needs your accounts (GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting) lands here.
 
-## 1. Bring the live database up to date, before merging the next PPM pull request
+## 1. Try saving a template on the live PPM
 
-**Why:** templates and deleting projects need two database updates that came with the 2026-10-04 pull request. If that pull request was merged before they were applied, both features quietly don't work. That's almost certainly why templates don't work on the live PPM: on 2026-10-07 they worked end to end on a local copy of every update. The next pull request (`kyan/feat/ppm-templates-and-calendar`) adds two more updates, and needs all of them in first.
+**Why:** the live database never had the 2026-10-04 updates, which is why templates didn't work there. They're applied now (below), so one template saved on the live PPM closes the problem (backlog item 18).
 
-**How, with your Claude,** from the `ppm/` folder, linked to the live project:
+**How:** New task, fill it in, then Save as template. If it doesn't work, tell Kyan.
 
-```bash
-npx supabase db push --dry-run
-```
+## 2. Check that Vercel's plan allows commercial use
 
-It should list some or all of these four, in this order, and nothing else:
+**Why:** the PPM is a company tool. Vercel's free Hobby plan is for personal, non-commercial use only; a business needs Pro.
 
-1. `20261004000100_project_archive_and_delete.sql`: deleting projects (from 2026-10-04)
-2. `20261004000200_templates.sql`: templates (from 2026-10-04)
-3. `20261007000100_blocks_follow_their_task.sql`: finishing a task ticks off its time blocks
-4. `20261007000200_block_colours.sql`: colours for time blocks
+**How:** Vercel, your team's Settings, then Billing: the plan's name is at the top.
 
-- **If it lists only these:** apply them with `npx supabase db push`, then open the live PPM: it still works, since each one only adds things. Then merge the pull request, and try saving a template.
-- **If it lists only the last two,** the 2026-10-04 updates were in already, so the templates problem has another cause. Apply these two, merge, and tell Kyan if templates still don't work.
-- **If it lists anything else, stop:** the live database and the repository disagree, and that needs a look first.
+## Done
 
-## 2. Check your role
-
-**Why:** role changes were refused for you on 2026-10-04 in a way that only happens when the database doesn't have you as a super admin.
-
-**How:** at the bottom left of the sidebar, under your name, or in the Role column on People. If it says Admin, Christian can make you a super admin from People; if nobody is a super admin, it takes one line of SQL, given in [the 2026-10-04 report](../../ppm/docs/reports/2026-10-04-session-report.md#how-to-confirm-and-fix-it-kenneth).
-
-## 3. Decisions waiting for you
-
-- **A way back if nobody is a super admin** (backlog item 12). Today it takes SQL.
-- **May a project's owner delete it while it has no tasks?** (backlog item 13). Today only admins delete; owners can archive.
-- **The branch-name pattern** in the repository's `docs/git-conventions.md` (backlog item 16): adopt it in the shared `CLAUDE.md`, or not.
-- **Vercel's plan:** check that it allows commercial use.
-
-## 4. Review the next PPM pull request
-
-**The knowledge-base pull request (#17) was merged on 2026-10-06.** Its follow-up docs (the closed #18) come with the next pull request, `kyan/feat/ppm-templates-and-calendar`: templates made in the new-task dialog and Plan time, a calendar that runs all day, blocks that cross midnight, a people picker, Copy my plan your way, block colours and more. Apply item 1 first.
+- **2026-10-07: the live database is up to date.** Applied with Claude after #19 was merged: the dry run listed exactly the four updates (deleting projects, templates, blocks that follow their task, block colours) and nothing else, and `npx supabase db push` applied them. The live database now matches the repository.
+- **2026-10-07: your role.** You're a super admin on the live database, and so are Christian and Kyan. If a role change is refused again, reload People first: a screen opened before a role change keeps its old menus.
+- **2026-10-07: decisions.**
+  - A way back if nobody is a super admin (backlog item 12): build a one-time setup link ([0014](../../ppm/docs/decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)). Until it's built, it takes SQL.
+  - A project's owner may delete it while it has no tasks (backlog item 13, [0013](../../ppm/docs/decisions/0013-owners-delete-empty-projects.md)). To build.
+  - Branch names follow `<owner>/<type>/<app>-<topic>` in every app: rule 2 in `CLAUDE.md`.
+- **2026-10-07: the next PPM pull request.** You merged #19: templates made where work is made, the all-day calendar, block colours and more.
