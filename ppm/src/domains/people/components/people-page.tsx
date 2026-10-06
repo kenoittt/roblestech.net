@@ -31,6 +31,7 @@ import { StackedBar } from "@/components/app/charts"
 import { Icon } from "@/components/app/icon"
 import { ModalShell } from "@/components/app/modal"
 import { EmptyState, PageBody, PageHeader } from "@/components/app/page"
+import { fieldClass } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
 import { ago } from "@/lib/dates"
 import { useMe, useMembers, useNow, useTasks, useToday } from "@/domains/workspace/provider"
@@ -320,8 +321,7 @@ function RoleGuide() {
 // ---------------------------------------------------------------------------
 // Dialogs
 // ---------------------------------------------------------------------------
-const inputClass =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+const inputClass = fieldClass
 
 function InviteDialog({ open, onClose, viewerRole }: { open: boolean; onClose: () => void; viewerRole: Role }) {
   const qc = useQueryClient()

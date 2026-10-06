@@ -3,10 +3,10 @@
 import { useActionState } from "react"
 import { Button } from "@/components/ui/button"
 import { PasswordInput } from "@/components/app/password-input"
+import { fieldClass } from "@/components/ui/field"
 import { setPassword, type SetPasswordState } from "../password-actions"
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors focus:border-brand"
+const input = fieldClass
 
 export function SetPasswordForm() {
   const [state, action, pending] = useActionState<SetPasswordState, FormData>(setPassword, {})

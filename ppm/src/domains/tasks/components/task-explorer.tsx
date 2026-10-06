@@ -38,6 +38,7 @@ import { TaskCalendar } from "./task-calendar"
 import { TaskList } from "./task-list"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { Avatar } from "@/components/app/avatar"
+import { NativeSelect } from "@/components/ui/field"
 
 /**
  * One component behind every task screen: all tasks, my tasks, a project, a
@@ -431,19 +432,19 @@ function DisplayMenu({
       <PopoverContent align="end" className="w-64 gap-3 p-3">
         {view === "list" && (
           <Row label="Group by">
-            <select value={grouping} onChange={(e) => onGrouping(e.target.value as Grouping)} className={selectClass}>
+            <NativeSelect variant="compact" value={grouping} onChange={(e) => onGrouping(e.target.value as Grouping)}>
               {(Object.keys(GROUP_LABEL) as Grouping[]).map((g) => (
                 <option key={g} value={g}>{GROUP_LABEL[g]}</option>
               ))}
-            </select>
+            </NativeSelect>
           </Row>
         )}
         <Row label="Order by">
-          <select value={ordering} onChange={(e) => onOrdering(e.target.value as Ordering)} className={selectClass}>
+          <NativeSelect variant="compact" value={ordering} onChange={(e) => onOrdering(e.target.value as Ordering)}>
             {(Object.keys(ORDER_LABEL) as Ordering[]).map((o) => (
               <option key={o} value={o}>{ORDER_LABEL[o]}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Row>
         <Row label="Show finished tasks">
           <Switch checked={showDone} onCheckedChange={onShowDone} />
@@ -454,8 +455,6 @@ function DisplayMenu({
   )
 }
 
-const selectClass =
-  "h-7 rounded-md border border-line bg-surface px-1.5 text-xs text-fg outline-none focus:border-line-strong"
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
