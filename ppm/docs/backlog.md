@@ -71,7 +71,7 @@ Kyan found that templates didn't work after the 2026-10-04 merge. First check it
 
 **Checked 2026-10-07 (Kyan's Claude), as far as possible without the live database:** templates work end to end locally, on a fresh copy of every migration (the smoke test's template checks pass). The only local problem was missing sample templates, because that database was seeded before templates existed. So the code is very likely fine, and the cause is almost certainly the missing database update. Only Kenneth's `db push --dry-run` can confirm it. Until it's applied, the app now says "Templates aren't available yet: the database needs an update first" instead of showing an empty list.
 
-**Cause confirmed 2026-10-07:** the live database had none of the 2026-10-04 updates. They're applied now (item 10); one template saved on the live PPM closes this ([`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1).
+**Done 2026-10-07:** the live database had none of the 2026-10-04 updates. Once they were applied (item 10), Kenneth saved a template on the live PPM, and it worked.
 
 ### 19. A made-up client name in sample data and placeholders
 
@@ -101,7 +101,7 @@ Its amber border warns before anything is wrong, and amber means time and risk e
 
 ### 12. A decision for Kenneth: a way back if nobody is a super admin
 
-**Decided 2026-10-07 (Kenneth): build a one-time setup link** ([0014](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)). Its design comes first: the decision lists what it has to answer.
+**Decided 2026-10-07 (Kenneth): nothing to build.** Whoever holds the Supabase login fixes it there ([0014](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)); the steps are in [giving the team accounts](for-humans/giving-the-team-accounts.md#if-nobody-is-a-super-admin).
 
 If the live database has no super admin, nobody can make one from the app; it takes SQL. A safe way back (a one-time setup link, say) is a security decision, so it waits for Kenneth.
 

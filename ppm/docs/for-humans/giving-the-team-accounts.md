@@ -37,3 +37,13 @@ Open **People**, then their menu, and choose **Deactivate…**. They can't sign 
 - Check their spam or junk folder first.
 - Invitations and resets go through the same Microsoft 365 setup as the PPM's notifications. If none of the PPM's emails arrive, the Microsoft 365 settings in Vercel (`MS_TENANT_ID`, `MS_CLIENT_ID`, `MS_CLIENT_SECRET`, `MAIL_FROM`) are the place to look.
 - If email isn't set up at all, the PPM says so when you press Invite, and creates nothing.
+
+## If nobody is a super admin
+
+Only a super admin can make another, so if the PPM ever has none (a role changed by mistake, people leaving), it's fixed in Supabase, by whoever holds the Supabase login ([0014](../decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)):
+
+1. Open [supabase.com](https://supabase.com), then the PPM's project, then **Table Editor**.
+2. Open the **profiles** table and find your row (the **full_name** column).
+3. Change **role** to `super_admin`, then **Save**. The PPM picks it up on your next page load.
+
+Or ask your Claude to make you a super admin on the live PPM: it shows the one-line update first (it's in the [2026-10-04 report](../reports/2026-10-04-session-report.md#how-to-confirm-and-fix-it-kenneth)) and runs it when you say yes. Then, from **People**, give the role back to whoever should have it.
