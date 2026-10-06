@@ -27,6 +27,21 @@ Still being built: see "Status" in the build plan.
 
 ## Run it locally
 
+### Install the tools (once)
+
+On a Mac, with [Homebrew](https://brew.sh):
+
+```bash
+brew install node@24 colima docker    # Node 24 (follow brew's note to put it on your PATH), and Docker through Colima
+git clone https://github.com/kenoittt/roblestech.net.git
+cd roblestech.net/ppm
+npm ci                                # the app's packages, exactly as locked
+```
+
+On Windows, use Docker Desktop instead of Colima, and Node 24 from nodejs.org. Then fill in `.env.local` (below) and start it.
+
+### Start it
+
 You need Node 24, and Docker for the local database. On a Mac, Colima provides Docker.
 
 ```bash
@@ -45,7 +60,7 @@ npm run dev                 # or `npm run dev:poll` if the page never loads (see
 
 Then open http://localhost:3000.
 
-**`.env.local`** holds the local database's address and keys. They're the local stack's defaults, printed by `npx supabase status -o env`. Copy `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` into `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and set `NEXT_PUBLIC_DEMO_MODE=true`. Never put production keys in it.
+**`.env.local`** holds the local database's address and keys. They're the local stack's defaults, printed by `npx supabase status -o env`. Copy `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` into `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, and `MAILPIT_URL` into `MAIL_DEV_URL` so invitation emails reach the local mail catcher. Then set `NEXT_PUBLIC_APP_URL=http://localhost:3000`, `NEXT_PUBLIC_DEMO_MODE=true`, and `CRON_SECRET` to any long random string. Never put production keys in it.
 
 ### Sample accounts
 
