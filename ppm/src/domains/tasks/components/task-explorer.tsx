@@ -252,9 +252,18 @@ function useFilterOptions() {
   }, [members, projects])
 }
 
+/** A category's options are searchable once there are more than this many. */
+const SEARCH_AFTER = 8
+const matching = <T extends { label: string }>(options: T[], query: string) => {
+  const q = query.trim().toLowerCase()
+  return q ? options.filter((o) => o.label.toLowerCase().includes(q)) : options
+}
+
 function FilterMenu({ filters, onChange }: { filters: TaskFilters; onChange: (f: TaskFilters) => void }) {
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState<FilterKey | null>(null)
+  // Long lists (people, projects) get a search once they're longer than a glance.
+  const [query, setQuery] = useState("")
   const options = useFilterOptions()
   const count = countFilters(filters)
 
@@ -269,7 +278,10 @@ function FilterMenu({ filters, onChange }: { filters: TaskFilters; onChange: (f:
       open={open}
       onOpenChange={(o) => {
         setOpen(o)
-        if (!o) setCategory(null)
+        if (!o) {
+          setCategory(null)
+          setQuery("")
+        }
       }}
     >
       <PopoverTrigger className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
@@ -283,7 +295,10 @@ function FilterMenu({ filters, onChange }: { filters: TaskFilters; onChange: (f:
             <button
               key={key}
               type="button"
-              onClick={() => setCategory(key)}
+              onClick={() => {
+                setCategory(key)
+                setQuery("")
+              }}
               className="flex h-8 w-full items-center justify-between rounded-md px-2 text-sm text-fg-2 hover:bg-selected hover:text-fg"
             >
               {options[key].label}
@@ -299,8 +314,21 @@ function FilterMenu({ filters, onChange }: { filters: TaskFilters; onChange: (f:
             >
               ← {options[category].label}
             </button>
+            {options[category].options.length > SEARCH_AFTER && (
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={`Find ${options[category].label.toLowerCase()}…`}
+                aria-label={`Find ${options[category].label.toLowerCase()}`}
+                className="mb-1 h-8 w-full rounded-md border border-line-strong bg-surface px-2 text-sm text-fg outline-none placeholder:text-fg-4 focus:border-brand"
+              />
+            )}
             <div className="max-h-72 overflow-y-auto">
-              {options[category].options.map((o) => {
+              {matching(options[category].options, query).length === 0 && (
+                <p className="px-2 py-3 text-center text-xs text-fg-3">No matches</p>
+              )}
+              {matching(options[category].options, query).map((o) => {
                 const checked = ((filters[category] ?? []) as string[]).includes(o.value)
                 return (
                   <button
