@@ -17,6 +17,7 @@
 | **A question, in your own words** (the default) | `qmd query` with your own intent, lex, vec and hyde lines (below) | 13 to 27 s |
 | **An exact name:** a function, a file, an error, a term | `qmd search "ppm_can_complete"`, or `grep -rn` | Instant |
 | **Every page that mentions something** | `grep -rln "word" docs ppm/docs`; qmd ranks the best matches, it doesn't list them all | Instant |
+| **Everything a topic touched**, to update it all | `grep -rln` for its names, `git log --name-only` for the files its changes touched, then a hybrid search with `--format files -n 20` for pages that discuss it in other words | Seconds |
 
 Write the hybrid search's lines yourself, rather than passing a plain question: you know the goal, the likely words and what to avoid better than the built-in model does, and it skips the slowest step.
 
@@ -45,9 +46,24 @@ Twelve questions with known answers, on Kyan's Mac (Apple M2, 16 GB), qmd 2.8.3,
 - **Labelling folders didn't help.** qmd can attach a description to each folder (`qmd context add`); we labelled the records as history, and the ranking didn't change. The labels do show up beside each result, which helps you tell a record from a current page.
 - **Speed:** re-ranking costs about 13 s per question once the models are loaded, and up to 27 s from the command line while other work runs, because each command loads the models first. A plain `qmd query "question"`, which also writes the searches itself, took 23 to 55 s and wasn't more accurate.
 
+## What it costs in tokens
+
+The searches run on your computer, so re-ranking costs time, not tokens. A session pays only for the text it reads. These are estimates from our files' sizes, not a measurement (a token is about four characters):
+
+| What a session reads | Tokens |
+|---|---|
+| Writing a hybrid search's lines | About 100 |
+| Its results with snippets (`-n 5`) | About 500 to 1,000 |
+| Its results as file names only (`--format files`) | About 15 a file |
+| `grep -rln` (file names) | About 10 a file |
+| `grep -rn` (every matching line) | 200 to 5,000 or more, depending on the word |
+| One of the PPM's guides | About 1,600 on average |
+
+So a search costs about as much as reading half a guide, and pays for itself when it saves one wrong page. Re-ranked hybrid search had the right page in the top five for 11 of 12 questions, against 8 for meaning search: roughly one wrong-page detour fewer every four questions.
+
 ## The MCP server
 
-qmd can also run as an MCP server, a connection that lets Claude call it as a tool. It offers the same hybrid search (`query`), reading documents by path or ID with line ranges (`get`, `multi_get`) and the index's health (`status`), so it adds nothing the command line lacks. What it changes: the models stay loaded between searches, which saves the few seconds each command spends loading them, but they hold about 2 GB of memory for as long as the server runs, once per session. With the command line, nothing stays in memory between searches. We use the command line; revisit if a session searches dozens of times.
+qmd can also run as an MCP server, a connection that lets Claude call it as a tool. It offers the same hybrid search (`query`), reading documents by path or ID with line ranges (`get`, `multi_get`) and the index's health (`status`), so it adds nothing the command line lacks. What it changes: the models stay loaded between searches, which saves the few seconds each command spends loading them, but they stay in memory for as long as the server runs, in every session that starts one: about 0.9 GB for the searches we use (the 318 MB meaning model and the 610 MB re-ranker), and 2.1 GB if a plain question also loads the 1.2 GB model that writes searches. With the command line, the same models load for each search and are freed when it ends. We use the command line; revisit if a session searches dozens of times.
 
 ## Keeping it current
 
