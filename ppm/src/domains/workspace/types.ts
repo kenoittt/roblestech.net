@@ -56,6 +56,13 @@ export function firstName(member?: Pick<Member, "full_name" | "email"> | null) {
   return displayName(member).split(" ")[0]
 }
 
+/** "Andrei, Christian and 3 others": a group of names, however many there are. */
+export function namesLine(names: string[], max = 3) {
+  if (names.length <= max) return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
+  const rest = names.length - max
+  return `${names.slice(0, max).join(", ")} and ${rest} ${rest === 1 ? "other" : "others"}`
+}
+
 export function isAdminRole(role: string | null | undefined) {
   return role === "admin" || role === "super_admin"
 }

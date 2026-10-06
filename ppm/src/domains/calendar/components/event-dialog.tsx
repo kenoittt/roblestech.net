@@ -7,13 +7,12 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
-import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { addDays, diffDays, isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { getSupabase } from "@/lib/supabase/client"
 import { useMe, useMembers, useTasks } from "@/domains/workspace/provider"
-import { displayName } from "@/domains/workspace/types"
+import { PeoplePicker } from "@/domains/people/components/people-picker"
 import { isOpen, taskKey } from "@/domains/tasks/config"
 import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
@@ -311,26 +310,13 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         {kind === "meeting" && (
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-fg-2">Who's invited</span>
-            <div className="flex flex-wrap gap-1.5">
-              {members.filter((m) => !m.deactivated_at && m.id !== me.id).map((m) => {
-                const on = attendees.includes(m.id)
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => setAttendees(on ? attendees.filter((a) => a !== m.id) : [...attendees, m.id])}
-                    className={cn(
-                      "pressable inline-flex h-8 items-center gap-2 rounded-md border px-2 text-sm",
-                      on ? "border-brand/50 bg-brand-soft text-fg" : "border-line text-fg-3 hover:border-line-strong hover:text-fg",
-                    )}
-                  >
-                    <Avatar id={m.id} name={displayName(m)} size="sm" />
-                    {displayName(m)}
-                  </button>
-                )
-              })}
-            </div>
+            <PeoplePicker
+              label="Who's invited"
+              placeholder="Invite people…"
+              value={attendees}
+              onChange={setAttendees}
+              exclude={[me.id]}
+            />
             <p className="text-xs text-fg-4">It appears on their calendars, and they get a notification.</p>
           </div>
         )}

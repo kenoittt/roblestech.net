@@ -53,6 +53,7 @@ export function PickerMenu({
   align = "start",
   width = "w-64",
   footer,
+  onOpenChange,
 }: {
   trigger: ReactNode
   triggerClassName?: string
@@ -65,12 +66,19 @@ export function PickerMenu({
   align?: "start" | "center" | "end"
   width?: string
   footer?: ReactNode
+  onOpenChange?: (open: boolean) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
   const selected = new Set(Array.isArray(value) ? value : value ? [value] : [])
+  const change = (next: boolean) => {
+    setOpen(next)
+    if (!next) setSearch("")
+    onOpenChange?.(next)
+  }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={change}>
       <PopoverTrigger
         aria-label={triggerLabel}
         className={triggerClassName}
@@ -85,6 +93,8 @@ export function PickerMenu({
             <Icon icon={Search01Icon} size={14} className="text-fg-4" />
             <Cmdk.Input
               autoFocus
+              value={search}
+              onValueChange={setSearch}
               placeholder={placeholder}
               className="h-9 w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-4"
             />
@@ -99,7 +109,9 @@ export function PickerMenu({
                 disabled={o.disabled}
                 onSelect={() => {
                   onSelect(o.value)
-                  if (!multiple) setOpen(false)
+                  // Picking several: clear the search, ready for the next name.
+                  if (multiple) setSearch("")
+                  else change(false)
                 }}
                 className="group flex h-8 cursor-default items-center gap-2.5 rounded-md px-2 text-sm text-fg-2 outline-none data-[disabled=true]:opacity-45 data-[selected=true]:bg-selected data-[selected=true]:text-fg"
                 title={o.hint}

@@ -8,7 +8,7 @@ import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { isoDay, longDate, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { useMe, useMemberMap, useNow, useTasks } from "@/domains/workspace/provider"
-import { displayName, firstName } from "@/domains/workspace/types"
+import { displayName, firstName, namesLine } from "@/domains/workspace/types"
 import { taskKey, type Task } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
@@ -416,13 +416,6 @@ function toneOf(event: CalEvent) {
     : event.kind === "meeting"
       ? "border-status-in-review/70 bg-[color-mix(in_oklab,var(--status-in-review)_16%,var(--surface))] text-fg"
       : "border-brand/70 bg-[color-mix(in_oklab,var(--brand)_14%,var(--surface))] text-fg"
-}
-
-/** "Andrei, Christian and 3 others": a meeting's people, however many there are. */
-function namesLine(names: string[], max = 3) {
-  if (names.length <= max) return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
-  const rest = names.length - max
-  return `${names.slice(0, max).join(", ")} and ${rest} ${rest === 1 ? "other" : "others"}`
 }
 
 /** An entry's details: when, who, the task it's for, notes, and for your own, its buttons. */

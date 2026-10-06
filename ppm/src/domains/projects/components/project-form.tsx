@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { useMe, useMembers } from "@/domains/workspace/provider"
 import { displayName, type Project } from "@/domains/workspace/types"
 import { PickerMenu, usePeopleOptions } from "@/domains/tasks/components/pickers"
+import { PeoplePicker } from "@/domains/people/components/people-picker"
 import { PROJECT_COLORS, PROJECT_STATUSES, PROJECT_STATUS_META, useProjectActions, type ProjectInput, type ProjectStatus } from "../data"
 
 const input =
@@ -151,26 +152,14 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
             </div>
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-fg-2">Members</span>
-              <div className="flex flex-wrap gap-1.5">
-                {members.filter((m) => !m.deactivated_at).map((m) => {
-                  const on = draft.memberIds.includes(m.id) || m.id === draft.owner_id
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      disabled={m.id === draft.owner_id}
-                      onClick={() => set({ memberIds: on ? draft.memberIds.filter((x) => x !== m.id) : [...draft.memberIds, m.id] })}
-                      className={cn(
-                        "pressable inline-flex h-8 items-center gap-2 rounded-md border px-2 text-sm transition-colors",
-                        on ? "border-brand/50 bg-brand-soft text-fg" : "border-line text-fg-3 hover:border-line-strong hover:text-fg",
-                      )}
-                    >
-                      <Avatar id={m.id} name={displayName(m)} size="sm" />
-                      {displayName(m)}
-                    </button>
-                  )
-                })}
-              </div>
+              <PeoplePicker
+                label="Members"
+                placeholder="Add members…"
+                value={draft.memberIds.filter((id) => id !== draft.owner_id)}
+                onChange={(ids) => set({ memberIds: [...new Set([draft.owner_id, ...ids])] })}
+                locked={[draft.owner_id]}
+                lockedNote="Owner"
+              />
               <p className="text-xs text-fg-4">The owner is always a member. Each person sets their own view; this is where new members start.</p>
             </div>
           </div>
