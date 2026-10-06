@@ -27,8 +27,10 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 4. **Stay current:** rebase on `origin/main` before opening a pull request, and again before merging.
 5. **Keep pull requests small and single-purpose.** Say what changed, why, how you verified it, and what you couldn't verify.
 6. **Check before merging:** the automatic pull-request check must pass once it exists, and `npm run build` and `npx astro check` should pass in every app you touched. Then check the Vercel preview for the three Vercel apps. The public site has no preview: build it and check it locally.
-7. **Treat previews as production data.** Assume previews use the production database and email settings unless Kenneth says otherwise. Click through, create nothing you won't delete, and send no emails to real people.
-8. **Kenneth merges.** Tag Kyan on anything that touches shared code, the database or the build.
+7. **Local databases start full.** Each app's local database is seeded (the PPM's: `ppm/supabase/seed.sql`, loaded by `npx supabase db reset`) with a realistic team and enough projects, tasks, calendar entries and templates to show every option the app has, the newest included. A feature isn't done until the seed has data for it. Never send the seed to a live database.
+8. **Treat previews as production data.** Assume previews use the production database and email settings unless Kenneth says otherwise. Click through, create nothing you won't delete, and send no emails to real people.
+9. **Kenneth merges.** Tag Kyan on anything that touches shared code, the database or the build.
+10. **Messages for people go where they'll see them.** When a task needs something from someone (Kenneth, Kyan, anyone), write it on their page in `docs/for-humans/<name>.md` (make one if there isn't one), say so in the pull request, and tell the person you're working with. At the start of a session, read your person's page (Kenneth's sessions: `kenneth.md`; Kyan's: `kyan.md`) and tell them what's waiting for them.
 
 ## Docs
 

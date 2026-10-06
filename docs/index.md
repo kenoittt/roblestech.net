@@ -9,6 +9,7 @@ What's in `docs/`, the part of the knowledge base that applies to every app. How
 | [ux-principles.md](ux-principles.md) | How every app should feel to use: the questions before building, the principles, scale, when it's done | Kyan's Claude, 2026-10-06 |
 | [for-humans/README.md](for-humans/README.md) | Things only a person can do, for any app | Kyan's Claude, 2026-10-06 |
 | [for-humans/kenneth.md](for-humans/kenneth.md) | Kenneth's open items, in order | Kyan's Claude, 2026-10-06; moved here from `ppm/docs/` the same day |
+| [for-humans/kyan.md](for-humans/kyan.md) | Kyan's open items, in order | Kyan's Claude, 2026-10-07 |
 | [git-conventions.md](git-conventions.md) | Commits (short and warm), pull requests (a walkthrough) and a branch-name proposal | A cloud session, 2026-10-04; moved here and updated by Kyan's Claude, 2026-10-06 |
 | [log.md](log.md) | The history of substantial changes across the repository | Kyan's Claude, 2026-10-06 |
 | [references/llm-wiki.md](references/llm-wiki.md) | Andrej Karpathy's LLM wiki: the pattern these docs follow (raw: kept as given) | Added by Kyan's Claude, 2026-10-06 |
