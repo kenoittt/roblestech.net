@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
+import { Add01Icon, Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -14,6 +14,8 @@ import { getSupabase } from "@/lib/supabase/client"
 import { useMe, useMembers, useTasks } from "@/domains/workspace/provider"
 import { PeoplePicker } from "@/domains/people/components/people-picker"
 import { isOpen, taskKey } from "@/domains/tasks/config"
+import { useCreateTask } from "@/domains/tasks/data"
+import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { canEditTemplate, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
@@ -86,6 +88,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const members = useMembers()
   const tasks = useTasks()
   const { create, update, remove } = useCalendarActions()
+  const createTask = useCreateTask()
+  const { open: openTask } = useTaskPanel()
 
   const linked = tasks.find((t) => t.id === (event?.task_id ?? draft?.taskId))
   const preset = draft?.template
@@ -94,6 +98,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const [kind, setKind] = useState<"block" | "meeting">(event?.kind ?? (preset?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
   const [title, setTitle] = useState(event?.title ?? preset?.title ?? linked?.title ?? "")
   const [taskId, setTaskId] = useState<string | null>(event?.task_id ?? draft?.taskId ?? null)
+  // A task named here that doesn't exist yet: it's made, for you, when the entry is saved.
+  const [newTask, setNewTask] = useState<string | null>(null)
   const [day, setDay] = useState(event ? isoDay(event.starts_at) : draft!.day)
   const [start, setStart] = useState(event ? minutesOfDay(event.starts_at) : draft!.start)
   // The end can be on a later day: a block from 9 PM to 1 AM, or over several days.
@@ -159,6 +165,14 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
       auto_complete: auto,
     }
     try {
+      if (newTask) {
+        const made = await createTask.mutateAsync({ title: newTask, assignee_id: me.id, status: "todo" })
+        row.task_id = made.id
+        toast(`Created ${taskKey(made)}, with time for it`, {
+          description: made.title,
+          action: { label: "Open", onClick: () => openTask(made.number) },
+        })
+      }
       if (event) {
         await update.mutateAsync({ id: event.id, patch: row })
         if (kind === "meeting") {
@@ -224,17 +238,43 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           <PickerMenu
             triggerLabel="Link a task"
             triggerClassName="pressable flex h-9 w-full items-center gap-2 rounded-md border border-line-strong px-3 text-left text-sm text-fg hover:bg-hover"
-            trigger={linkedTask ? <><StatusIcon status={linkedTask.status} /><span className="truncate">{linkedTask.title}</span></> : <span className="text-fg-3">No task</span>}
+            trigger={
+              newTask ? (
+                <>
+                  <Icon icon={Add01Icon} size={14} className="shrink-0 text-fg-3" />
+                  <span className="min-w-0 flex-1 truncate">{newTask}</span>
+                  <span className="shrink-0 text-xs text-fg-3">New task, for you</span>
+                </>
+              ) : linkedTask ? (
+                <>
+                  <StatusIcon status={linkedTask.status} />
+                  <span className="truncate">{linkedTask.title}</span>
+                </>
+              ) : (
+                <span className="text-fg-3">No task</span>
+              )
+            }
             options={taskOptions}
-            value={taskId ?? "none"}
-            placeholder="Find one of your tasks…"
+            value={newTask ? null : (taskId ?? "none")}
+            placeholder="Find one of your tasks, or name a new one…"
             width="w-[420px]"
             onSelect={(v) => {
               const id = v === "none" ? null : v
+              setNewTask(null)
               setTaskId(id)
               const t = tasks.find((x) => x.id === id)
               if (t && !title.trim()) setTitle(t.title)
             }}
+            onCreate={(name) => {
+              setNewTask(name)
+              setTaskId(null)
+              if (!title.trim()) setTitle(name)
+            }}
+            createLabel={(name) => (
+              <>
+                New task <span className="text-fg">“{name}”</span>
+              </>
+            )}
           />
         </div>
 
