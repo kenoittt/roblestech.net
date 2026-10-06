@@ -4,5 +4,5 @@ Things only a person can do: a setting in an account, a database update on the l
 
 | Page | For | What |
 |---|---|---|
-| [kenneth.md](kenneth.md) | Kenneth | His open items, in order |
+| [Kenneth's open items](../../../docs/for-humans/kenneth.md) | Kenneth | His open items for every app, in the repository's `docs/for-humans/` |
 | [giving-the-team-accounts.md](giving-the-team-accounts.md) | Kenneth, and any admin | Accounts in the PPM: who has one, the roles, inviting, resets, someone leaving |

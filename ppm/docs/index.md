@@ -41,6 +41,7 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [decisions/0008-archive-closed-and-delete.md](decisions/0008-archive-closed-and-delete.md) | Three ways a project ends (2026-10-04) |
 | [decisions/0009-one-copy-of-the-code.md](decisions/0009-one-copy-of-the-code.md) | All work happens in this repository (2026-10-06) |
 | [decisions/0010-the-knowledge-base.md](decisions/0010-the-knowledge-base.md) | These docs, and their shape (2026-10-06) |
+| [decisions/0011-domain-driven-folders.md](decisions/0011-domain-driven-folders.md) | The folders follow domain-driven design, one shape for every domain (2026-10-06) |
 
 All written by Kyan's Claude on 2026-10-06, from the history and the people who decided.
 
@@ -49,7 +50,7 @@ All written by Kyan's Claude on 2026-10-06, from the history and the people who 
 | Page | What it's for | By, when |
 |---|---|---|
 | [people/](people/README.md) | Kenneth, Christian and Kyan: their part, and what helps them | Kyan's Claude, 2026-10-06 |
-| [for-humans/kenneth.md](for-humans/kenneth.md) | Kenneth's open items, in order | Kyan's Claude, 2026-10-06 |
+| [Kenneth's open items](../../docs/for-humans/kenneth.md) | His open items, in order, for every app (in the repository's `docs/for-humans/`) | Kyan's Claude, 2026-10-06 |
 | [for-humans/giving-the-team-accounts.md](for-humans/giving-the-team-accounts.md) | Accounts: roles, inviting, resets, someone leaving | Kenneth's Claude, 2026-10-03 |
 
 ## Sources and records

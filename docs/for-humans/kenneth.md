@@ -1,6 +1,6 @@
 # Kenneth: your open items
 
-Updated 2026-10-06. Tick each one off here, with the date, when it's done.
+Updated 2026-10-06. Tick each one off here, with the date, when it's done. This page is for every app in the repository: anything that needs your accounts (GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting) lands here.
 
 ## 1. Check that the 2026-10-04 database updates are on the live database
 
@@ -20,7 +20,7 @@ npx supabase db push --dry-run
 
 **Why:** role changes were refused for you on 2026-10-04 in a way that only happens when the database doesn't have you as a super admin.
 
-**How:** at the bottom left of the sidebar, under your name, or in the Role column on People. If it says Admin, Christian can make you a super admin from People; if nobody is a super admin, it takes one line of SQL, given in [the 2026-10-04 report](../reports/2026-10-04-session-report.md#how-to-confirm-and-fix-it-kenneth).
+**How:** at the bottom left of the sidebar, under your name, or in the Role column on People. If it says Admin, Christian can make you a super admin from People; if nobody is a super admin, it takes one line of SQL, given in [the 2026-10-04 report](../../ppm/docs/reports/2026-10-04-session-report.md#how-to-confirm-and-fix-it-kenneth).
 
 ## 3. Decisions waiting for you
 

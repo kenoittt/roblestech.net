@@ -41,7 +41,7 @@ Supabase project A's templates are shared with the portal, so invitations and re
 Templates for tasks and calendar entries ([0007](decisions/0007-templates-for-routine-work.md)); archive, restore and delete for projects ([0008](decisions/0008-archive-closed-and-delete.md)); an eye on every password field; role refusals that name your role. Smoke test 32 checks ([report](reports/2026-10-04-session-report.md)).
 
 ## [2026-10-04] process | Database updates go in before the merge
-A pull request that adds migrations needs them on the live database first ([DEPLOY.md](DEPLOY.md#database-updates-after-the-switch)). Whether this happened for 2026-10-04's two updates is unconfirmed; templates not working afterwards suggests not ([for-humans/kenneth.md](for-humans/kenneth.md)).
+A pull request that adds migrations needs them on the live database first ([DEPLOY.md](DEPLOY.md#database-updates-after-the-switch)). Whether this happened for 2026-10-04's two updates is unconfirmed; templates not working afterwards suggests not ([for-humans/kenneth.md](../../docs/for-humans/kenneth.md)).
 
 ## [2026-10-06] decision | One copy of the code
 All work on the PPM happens in this repository; the separate build folder was archived ([0009](decisions/0009-one-copy-of-the-code.md)).
@@ -51,3 +51,6 @@ An index, this log, guides, decisions, people, `for-humans/`, references and raw
 
 ## [2026-10-06] process | A private folder for each person's notes
 `docs/private/` keeps your own notes on your computer: git ignores everything in it except its README ([private/README.md](private/README.md)).
+
+## [2026-10-06] decision | Domain-driven folders
+Kyan settled the folder structure: domain-driven design, with one shape for every domain ([0011](decisions/0011-domain-driven-folders.md)). The refactor is still to do (backlog, goal 7).
