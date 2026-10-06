@@ -262,8 +262,9 @@ export function repeatOptions(): PickerOption[] {
 // ---------------------------------------------------------------------------
 // Ready-made triggers for the property rows used in the create dialog
 // ---------------------------------------------------------------------------
+// One line, always: a long label truncates inside its span rather than wrapping out of the chip.
 export const chipClass =
-  "pressable inline-flex h-7 max-w-52 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:border-line-strong hover:bg-hover hover:text-fg data-popup-open:bg-hover"
+  "pressable inline-flex h-7 max-w-52 items-center gap-1.5 overflow-hidden rounded-md border border-line px-2 text-xs font-medium whitespace-nowrap text-fg-2 hover:border-line-strong hover:bg-hover hover:text-fg data-popup-open:bg-hover"
 
 export function StatusChip({ value }: { value: string }) {
   return (

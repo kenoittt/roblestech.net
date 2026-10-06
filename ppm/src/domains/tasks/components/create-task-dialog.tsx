@@ -558,8 +558,8 @@ export function CreateTaskDialog() {
                       : "Everyone can use it; only you, or an admin, can change it"
                 }
               >
-                <Icon icon={LayoutTemplateIcon} size={13} />
-                {(othersShared ? target!.shared : shared) ? "Template shared with the team" : "Template just for you"}
+                <Icon icon={LayoutTemplateIcon} size={13} className="shrink-0" />
+                <span className="truncate">{(othersShared ? target!.shared : shared) ? "For the team" : "Just for you"}</span>
               </button>
             )}
           </div>
