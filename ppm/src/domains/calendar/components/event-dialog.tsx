@@ -1,6 +1,6 @@
 "use client"
 
-import { useId, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { Add01Icon, Cancel01Icon, LayoutTemplateIcon, Task01Icon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { Icon } from "@/components/app/icon"
+import { NativeSelect, fieldClass } from "@/components/ui/field"
+import { SwatchPicker } from "@/components/app/swatch-picker"
+import { Kbd } from "@/components/app/page"
 import { cn } from "@/lib/utils"
 import { addDays, diffDays, isoDay, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { getSupabase } from "@/lib/supabase/client"
@@ -61,8 +64,7 @@ function endOf(day: string, minutes: number) {
   return rest === 0 && days > 0 ? { endDay: addDays(day, days - 1), end: DAY_END } : { endDay: addDays(day, days), end: rest }
 }
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+const input = fieldClass
 
 /** New calendar entry, or an existing one to edit. */
 export function EventDialog({
@@ -127,7 +129,6 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
   const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
   const [color, setColor] = useState<BlockColor | null>((event?.color ?? (preset?.color as BlockColor | null | undefined)) ?? null)
-  const titleId = useId()
   const [attendees, setAttendees] = useState<string[]>(event ? event.attendee_ids.filter((a) => a !== me.id) : invitees(preset?.attendee_ids ?? []))
   const [templateId, setTemplateId] = useState<string | null>(draft?.template?.id ?? null)
   const [error, setError] = useState<string | null>(null)
@@ -180,6 +181,36 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
     [tasks, me.id, taskId],
   )
   const linkedTask = tasks.find((t) => t.id === taskId)
+
+  const duration = span > 0 ? durationLabel(span) : ""
+  const startTime = (
+    <NativeSelect
+      aria-label="Start time"
+      value={start}
+      onChange={(e) => {
+        const s = Number(e.target.value)
+        setEnd(s + span)
+        setStart(s)
+      }}
+    >
+      {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
+    </NativeSelect>
+  )
+  const endTime =
+    endDay === day ? (
+      // Later the same day, or on into the night: past midnight is one choice away.
+      <NativeSelect aria-label="End time" value={end} onChange={(e) => setEnd(Number(e.target.value))}>
+        {steps(start + 15, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+        {!asTemplate &&
+          steps(DAY_END + 15, start + DAY_END).map((t) => (
+            <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
+          ))}
+      </NativeSelect>
+    ) : (
+      <NativeSelect aria-label="End time" value={end} onChange={(e) => setEndAt({ endDay, end: Number(e.target.value) })}>
+        {steps(0, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
+      </NativeSelect>
+    )
 
   const switchToTemplate = (on: boolean) => {
     setAsTemplate(on)
@@ -266,7 +297,17 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   }
 
   return (
-    <>
+    // Cmd+Enter (Ctrl+Enter) saves, as in the new-task dialog. Keys typed in the
+    // pickers and pop-ups inside it reach this through React but aren't in it.
+    <div
+      className="flex min-h-0 flex-1 flex-col"
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return
+        if (!e.currentTarget.contains(e.target as Node)) return
+        e.preventDefault()
+        save()
+      }}
+    >
       <div className="flex items-center justify-between px-5 pt-4">
         <DialogPrimitive.Title className="text-md font-semibold text-fg">
           {editing ? "Edit template" : asTemplate ? "New template" : event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
@@ -313,12 +354,19 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           ))}
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-3">
-            <label htmlFor={titleId} className="text-xs font-medium text-fg-2">Title</label>
-            {kind === "block" && <ColourChoice value={color} onChange={setColor} />}
-          </div>
-          <input id={titleId} autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
+        {/* Beside the title, a block's colour: the same picker as a project's beside its name. */}
+        <div className="flex items-end gap-3">
+          <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg-2">Title</span>
+            <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
+          </label>
+          {kind === "block" && (
+            <SwatchPicker
+              options={BLOCK_COLORS.map((c) => ({ value: c.value, label: c.value ? c.label : `${c.label}, the usual`, className: c.swatch }))}
+              value={color}
+              onChange={setColor}
+            />
+          )}
         </div>
 
         {!asTemplate && (
@@ -368,79 +416,61 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          {/* A template keeps a time of day; the day is chosen when it's used. */}
-          {/* On a phone the day takes its own row, so the times have room. */}
-          <div className={cn("grid grid-cols-2 gap-2", !asTemplate && "sm:grid-cols-[1.3fr_1fr_1fr]")}>
-            {!asTemplate && (
-            <label className="col-span-2 flex flex-col gap-1.5 sm:col-span-1">
-              <span className="text-xs font-medium text-fg-2">Day</span>
-              <input
-                type="date"
-                value={day}
-                onChange={(e) => {
-                  const next = e.target.value
-                  if (!next) return
-                  // Moving the day moves the end with it: the entry keeps its length.
-                  setEndAt(endOf(next, start + span))
-                  setDay(next)
-                }}
-                className={input}
-              />
-            </label>
-            )}
+        {asTemplate ? (
+          // A template keeps a time of day; the day is chosen when it's used.
+          <div className="grid grid-cols-2 gap-2">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-fg-2">From</span>
-              <select
-                value={start}
-                onChange={(e) => {
-                  const s = Number(e.target.value)
-                  setEnd(s + span)
-                  setStart(s)
-                }}
-                className={input}
-              >
-                {TIMES.map((t) => <option key={t} value={t}>{formatMinute(t)}</option>)}
-              </select>
+              {startTime}
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{span > 0 ? durationLabel(span) : ""}</span></span>
-              {endDay === day ? (
-                // Later today, or on into the night: past midnight is one choice away.
-                <select value={end} onChange={(e) => setEnd(Number(e.target.value))} className={input}>
-                  {steps(start + 15, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
-                  {!asTemplate &&
-                    steps(DAY_END + 15, start + DAY_END).map((t) => (
-                      <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
-                    ))}
-                </select>
-              ) : (
-                <select value={end} onChange={(e) => setEndAt({ endDay, end: Number(e.target.value) })} className={input}>
-                  {steps(0, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
-                </select>
-              )}
+              <span className="text-xs font-medium text-fg-2">To <span className="font-normal text-fg-4">{duration}</span></span>
+              {endTime}
             </label>
           </div>
-          {endDay !== day && !asTemplate && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.3fr_1fr_1fr]">
-              <label className="col-span-2 flex flex-col gap-1.5 sm:col-span-1">
-                <span className="text-xs font-medium text-fg-2">Ends on</span>
+        ) : (
+          // An entry starts on one day and ends on the same day, the next, or days later.
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">Starts</span>
+              <div className="grid grid-cols-[1.3fr_1fr] gap-2">
                 <input
                   type="date"
+                  aria-label="Start date"
+                  value={day}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    if (!next) return
+                    // Moving the start moves the end with it: the entry keeps its length.
+                    setEndAt(endOf(next, start + span))
+                    setDay(next)
+                  }}
+                  className={input}
+                />
+                {startTime}
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-fg-2">Ends <span className="font-normal text-fg-4">{duration}</span></span>
+              <div className="grid grid-cols-[1.3fr_1fr] gap-2">
+                <input
+                  type="date"
+                  aria-label="End date"
                   value={endDay}
                   min={day}
                   onChange={(e) => {
                     const next = e.target.value
                     if (!next || next < day) return
-                    // Back to the same day: keep an end that comes after the start.
+                    // Back to the start's day: keep an end that comes after the start.
                     setEndAt(next === day && end <= start ? endOf(day, Math.min(start + 60, DAY_END)) : { endDay: next, end })
                   }}
                   className={input}
                 />
-              </label>
+                {endTime}
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {kind === "meeting" && (
           <div className="flex flex-col gap-1.5">
@@ -538,10 +568,14 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
                 : kind === "meeting"
                   ? "Send invites"
                   : "Add to calendar"}
+            <span className="ml-0.5 hidden gap-0.5 opacity-80 sm:flex">
+              <Kbd className="border-white/25 bg-white/10 text-white">⌘</Kbd>
+              <Kbd className="border-white/25 bg-white/10 text-white">↵</Kbd>
+            </span>
           </Button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -652,29 +686,5 @@ function SaveEventTemplate({
         </form>
       </PopoverContent>
     </Popover>
-  )
-}
-
-/** A block's colour: five swatches, the usual blue first. */
-function ColourChoice({ value, onChange }: { value: BlockColor | null; onChange: (color: BlockColor | null) => void }) {
-  return (
-    <div role="radiogroup" aria-label="Colour" className="flex items-center gap-1.5">
-      {BLOCK_COLORS.map((c) => (
-        <button
-          key={c.label}
-          type="button"
-          role="radio"
-          aria-checked={value === c.value}
-          aria-label={c.value ? c.label : `${c.label}, the usual`}
-          title={c.label}
-          onClick={() => onChange(c.value)}
-          className={cn(
-            "size-3.5 rounded-full ring-offset-2 ring-offset-raised transition-shadow",
-            c.swatch,
-            value === c.value ? "ring-2 ring-fg-2" : "hover:ring-2 hover:ring-line-strong",
-          )}
-        />
-      ))}
-    </div>
   )
 }
