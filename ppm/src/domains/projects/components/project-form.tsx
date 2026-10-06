@@ -8,15 +8,16 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
+import { NativeSelect, fieldClass } from "@/components/ui/field"
+import { SwatchPicker } from "@/components/app/swatch-picker"
 import { cn } from "@/lib/utils"
 import { useMe, useMembers } from "@/domains/workspace/provider"
 import { displayName, type Project } from "@/domains/workspace/types"
 import { PickerMenu, usePeopleOptions } from "@/domains/tasks/components/pickers"
 import { PeoplePicker } from "@/domains/people/components/people-picker"
-import { PROJECT_COLORS, PROJECT_STATUSES, PROJECT_STATUS_META, useProjectActions, type ProjectInput, type ProjectStatus } from "../data"
+import { PROJECT_COLORS, PROJECT_COLOR_NAMES, PROJECT_STATUSES, PROJECT_STATUS_META, useProjectActions, type ProjectInput, type ProjectStatus } from "../data"
 
-const input =
-  "h-9 w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-fg outline-none transition-colors placeholder:text-fg-4 focus:border-brand"
+const input = fieldClass
 
 /** Create a project, or edit one: the same form, so they never drift apart. */
 export function ProjectForm({ open, onClose, project }: { open: boolean; onClose: () => void; project?: Project }) {
@@ -71,20 +72,11 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
                 <span className="text-xs font-medium text-fg-2">Name</span>
                 <input autoFocus value={draft.name} onChange={(e) => set({ name: e.target.value })} placeholder="For example, Promix Nutrition" className={input} />
               </label>
-              <div className="flex h-9 items-center gap-1" role="radiogroup" aria-label="Colour">
-                {PROJECT_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    role="radio"
-                    aria-checked={draft.color === c}
-                    aria-label={c}
-                    onClick={() => set({ color: c })}
-                    className={cn("size-5 rounded-[5px] ring-offset-2 ring-offset-raised transition-shadow", draft.color === c && "ring-2 ring-fg-2")}
-                    style={{ background: c }}
-                  />
-                ))}
-              </div>
+              <SwatchPicker
+                options={PROJECT_COLORS.map((c) => ({ value: c, label: PROJECT_COLOR_NAMES[c] ?? c, color: c }))}
+                value={draft.color ?? PROJECT_COLORS[0]}
+                onChange={(color) => set({ color })}
+              />
             </div>
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-fg-2">What it's for <span className="font-normal text-fg-4">(optional)</span></span>
@@ -106,9 +98,9 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
               </fieldset>
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Status</span>
-                <select value={draft.status} onChange={(e) => set({ status: e.target.value as ProjectStatus })} className={input}>
+                <NativeSelect value={draft.status} onChange={(e) => set({ status: e.target.value as ProjectStatus })}>
                   {PROJECT_STATUSES.map((s) => <option key={s} value={s}>{PROJECT_STATUS_META[s].label}</option>)}
-                </select>
+                </NativeSelect>
               </label>
             </div>
             {draft.kind === "client" && (
@@ -143,11 +135,11 @@ export function ProjectForm({ open, onClose, project }: { open: boolean; onClose
               </div>
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Default view</span>
-                <select value={draft.default_view} onChange={(e) => set({ default_view: e.target.value as ProjectInput["default_view"] })} className={input}>
+                <NativeSelect value={draft.default_view} onChange={(e) => set({ default_view: e.target.value as ProjectInput["default_view"] })}>
                   <option value="list">List</option>
                   <option value="board">Board</option>
                   <option value="calendar">Calendar</option>
-                </select>
+                </NativeSelect>
               </label>
             </div>
             <div className="flex flex-col gap-1.5">

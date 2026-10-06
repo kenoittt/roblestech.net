@@ -35,6 +35,12 @@ export function canDeleteProject(me: Pick<Member, "role">) {
 /** RTC's blues first; a few calm alternates for telling projects apart. */
 export const PROJECT_COLORS = ["#3992FF", "#0464DD", "#5864FF", "#2F58A3", "#16305E", "#7C8CA8", "#2BA8A0", "#AEE37B"]
 
+/** What each project colour is called, for screen readers and tooltips. */
+export const PROJECT_COLOR_NAMES: Record<string, string> = {
+  "#3992FF": "Sky", "#0464DD": "Blue", "#5864FF": "Indigo", "#2F58A3": "Steel",
+  "#16305E": "Navy", "#7C8CA8": "Slate", "#2BA8A0": "Teal", "#AEE37B": "Lime",
+}
+
 export type ProjectInput = {
   name: string
   description?: string | null
