@@ -78,11 +78,27 @@ export type Placed = {
   after: boolean
 }
 
+/** Entries that didn't fit side by side, gathered behind one "+3" in the last lane. */
+export type Overflow = {
+  key: string
+  events: CalEvent[]
+  top: number
+  height: number
+  lane: number
+  lanes: number
+}
+
+/** The narrowest an entry gets before the rest of its group folds into "+N". */
+export const MIN_LANE_PX = 60
+
 /**
  * Lays out one column's entries. Overlapping entries share the width in
  * lanes, like any calendar; entries that don't overlap get the full width.
+ * At most `maxLanes` sit side by side, so a column never turns into slivers:
+ * past that, the last lane holds a "+N" for the entries that didn't fit
+ * (an entry on its own there is simply shown).
  */
-export function placeEvents(events: CalEvent[], day: string): Placed[] {
+export function placeEvents(events: CalEvent[], day: string, maxLanes = Infinity): { placed: Placed[]; overflow: Overflow[] } {
   const items = events
     .filter((e) => !e.all_day)
     .flatMap((event) => {
@@ -94,24 +110,62 @@ export function placeEvents(events: CalEvent[], day: string): Placed[] {
     .sort((a, b) => a.start - b.start || b.end - a.end)
 
   const placed: Placed[] = []
-  let cluster: (typeof items[number] & { lane: number })[] = []
+  const overflow: Overflow[] = []
+  type Item = (typeof items)[number] & { lane: number }
+  let cluster: Item[] = []
   let clusterEnd = -1
+
+  const place = (c: Item, lane: number, lanes: number) => {
+    const top = minuteToY(c.start)
+    placed.push({
+      event: c.event,
+      start: c.start,
+      end: c.end,
+      before: c.before,
+      after: c.after,
+      top,
+      height: Math.max(20, minuteToY(c.end) - top - 2),
+      lane,
+      lanes,
+    })
+  }
 
   const flush = () => {
     const lanes = Math.max(1, ...cluster.map((c) => c.lane + 1))
-    for (const c of cluster) {
-      const top = minuteToY(c.start)
-      placed.push({
-        event: c.event,
-        start: c.start,
-        end: c.end,
-        before: c.before,
-        after: c.after,
-        top,
-        height: Math.max(20, minuteToY(c.end) - top - 2),
-        lane: c.lane,
-        lanes,
-      })
+    const cap = Math.max(2, maxLanes)
+    if (lanes <= cap) {
+      for (const c of cluster) place(c, c.lane, lanes)
+    } else {
+      // Show the first lanes as they are; fold the rest into the last one,
+      // one "+N" for each stretch of time where they overlap.
+      const last = cap - 1
+      const hidden = cluster.filter((c) => c.lane >= last)
+      for (const c of cluster) if (c.lane < last) place(c, c.lane, cap)
+      let group: Item[] = []
+      let groupEnd = -1
+      const close = () => {
+        if (group.length === 1) place(group[0], last, cap)
+        else if (group.length > 1) {
+          const start = Math.min(...group.map((g) => g.start))
+          const end = Math.max(...group.map((g) => g.end))
+          const top = minuteToY(start)
+          overflow.push({
+            key: group.map((g) => g.event.id).join(","),
+            events: group.map((g) => g.event),
+            top,
+            height: Math.max(20, minuteToY(end) - top - 2),
+            lane: last,
+            lanes: cap,
+          })
+        }
+        group = []
+      }
+      for (const h of hidden) {
+        if (group.length && h.start >= groupEnd) close()
+        group.push(h)
+        groupEnd = Math.max(group.length > 1 ? groupEnd : -1, h.end)
+      }
+      close()
     }
     cluster = []
   }
@@ -128,7 +182,7 @@ export function placeEvents(events: CalEvent[], day: string): Placed[] {
     clusterEnd = Math.max(clusterEnd, item.end)
   }
   if (cluster.length) flush()
-  return placed
+  return { placed, overflow }
 }
 
 export function formatMinute(minute: number) {

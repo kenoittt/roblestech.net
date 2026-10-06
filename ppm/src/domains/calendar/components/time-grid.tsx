@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { CheckmarkCircle02Icon, Edit02Icon, LockKeyIcon, ViewOffIcon, Delete02Icon, Task01Icon } from "@hugeicons/core-free-icons"
+import { ArrowLeft01Icon, CheckmarkCircle02Icon, Edit02Icon, LockKeyIcon, ViewOffIcon, Delete02Icon, Task01Icon } from "@hugeicons/core-free-icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Avatar } from "@/components/app/avatar"
+import { AvatarStack } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { isoDay, longDate, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { useMe, useMemberMap, useNow, useTasks } from "@/domains/workspace/provider"
-import { displayName } from "@/domains/workspace/types"
+import { displayName, firstName } from "@/domains/workspace/types"
 import { taskKey, type Task } from "@/domains/tasks/config"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
@@ -16,6 +16,7 @@ import { isEventDone, useCalendarActions, type CalEvent } from "../data"
 import {
   DAY_END,
   DAY_START,
+  MIN_LANE_PX,
   PX_PER_MIN,
   SNAP,
   durationLabel,
@@ -25,8 +26,12 @@ import {
   minuteToY,
   placeEvents,
   yToMinute,
+  type Overflow,
   type Placed,
 } from "../layout"
+
+/** Due tasks shown above a day's hours before the rest fold into "N more". */
+const DUE_SHOWN = 3
 
 type MoveState = {
   id: string
@@ -74,6 +79,18 @@ export function TimeGrid({
   const scroller = useRef<HTMLDivElement>(null)
   const grid = useRef<HTMLDivElement>(null)
   const { update } = useCalendarActions()
+  // How many entries fit side by side depends on how wide a column is.
+  const [columnWidth, setColumnWidth] = useState(0)
+  useEffect(() => {
+    const el = grid.current
+    if (!el) return
+    const measure = () => setColumnWidth((el.clientWidth - 56) / columns.length)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [columns.length])
+  const maxLanes = columnWidth ? Math.max(2, Math.floor(columnWidth / MIN_LANE_PX)) : 3
   // Drawing a new block. On a phone the outline waits for the finger to lift, so a scroll shows nothing.
   const [drag, setDrag] = useState<{ col: string; from: number; to: number; touch: boolean } | null>(null)
   // Moving or resizing one of your own entries.
@@ -181,10 +198,10 @@ export function TimeGrid({
           <div className="flex w-14 shrink-0 items-start justify-end pt-1.5 pr-2 text-[10px] text-fg-4">Due</div>
           {columns.map((c) => (
             <div key={c.key} className="flex min-w-0 flex-1 flex-col gap-0.5 border-l border-line p-1">
-              {c.due.slice(0, 3).map((t) => (
+              {c.due.slice(0, DUE_SHOWN).map((t) => (
                 <DueChip key={t.id} task={t} />
               ))}
-              {c.due.length > 3 && <span className="px-1.5 text-[11px] text-fg-3">{c.due.length - 3} more</span>}
+              {c.due.length > DUE_SHOWN && <DueMore tasks={c.due} day={c.day} />}
             </div>
           ))}
         </div>
@@ -200,7 +217,7 @@ export function TimeGrid({
             ))}
           </div>
           {columns.map((c, colIndex) => {
-            const placed = placeEvents(c.events, c.day)
+            const { placed, overflow } = placeEvents(c.events, c.day, maxLanes)
             const mine = c.ownerId === me.id
             return (
               <div
@@ -245,6 +262,9 @@ export function TimeGrid({
                     onBeginMove={(e, mode) => beginMove(e, p, colIndex, mode)}
                     justMovedRef={justMoved}
                   />
+                ))}
+                {overflow.map((o) => (
+                  <OverflowChip key={o.key} overflow={o} onEdit={onEdit} />
                 ))}
 
                 {move?.moved && move.newCol === colIndex && (
@@ -320,24 +340,11 @@ function EventBlock({
   const { event, top, height, lane, lanes, before, after } = placed
   const [detailsOpen, setDetailsOpen] = useState(false)
   const me = useMe()
-  const members = useMemberMap()
-  const tasks = useTasks()
   const now = useNow()
-  const { open } = useTaskPanel()
-  const { update, remove } = useCalendarActions()
   const done = isEventDone(event, now)
   const mine = event.owner_id === me.id
-  const task = event.task_id ? tasks.find((t) => t.id === event.task_id) : null
-  const owner = members.get(event.owner_id)
   const short = height < 36
-  const width = `calc(${100 / lanes}% - 6px)`
-  const left = `calc(${(100 / lanes) * lane}% + 3px)`
-
-  const tone = event.masked
-    ? "border-line-strong border-dashed bg-hover text-fg-3"
-    : event.kind === "meeting"
-      ? "border-status-in-review/70 bg-[color-mix(in_oklab,var(--status-in-review)_16%,var(--surface))] text-fg"
-      : "border-brand/70 bg-[color-mix(in_oklab,var(--brand)_14%,var(--surface))] text-fg"
+  const { width, left } = laneBox(lane, lanes)
 
   const body = (
     <>
@@ -371,7 +378,7 @@ function EventBlock({
         className={cn(
           // overflow-clip, not hidden: hidden would stop the title sticking to the top of the day as you scroll.
           "absolute z-[1] flex flex-col items-stretch justify-start overflow-clip rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
-          tone,
+          toneOf(event),
           // Square where it carries on from the day before or into the next.
           before && "rounded-t-none",
           after && "rounded-b-none",
@@ -392,66 +399,190 @@ function EventBlock({
         )}
       </PopoverTrigger>
       <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
-        <div>
-          <p className="text-sm font-medium text-fg">{event.title}</p>
-          <p className="mt-0.5 text-xs text-fg-3 tabular">
-            {entryTimes(event)} · {durationLabel(entryMinutes(event))}
+        <EventDetails event={event} onEdit={onEdit} />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+/** Where a lane sits across its column. */
+function laneBox(lane: number, lanes: number) {
+  return { width: `calc(${100 / lanes}% - 6px)`, left: `calc(${(100 / lanes) * lane}% + 3px)` }
+}
+
+function toneOf(event: CalEvent) {
+  return event.masked
+    ? "border-line-strong border-dashed bg-hover text-fg-3"
+    : event.kind === "meeting"
+      ? "border-status-in-review/70 bg-[color-mix(in_oklab,var(--status-in-review)_16%,var(--surface))] text-fg"
+      : "border-brand/70 bg-[color-mix(in_oklab,var(--brand)_14%,var(--surface))] text-fg"
+}
+
+/** "Andrei, Christian and 3 others": a meeting's people, however many there are. */
+function namesLine(names: string[], max = 3) {
+  if (names.length <= max) return names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
+  const rest = names.length - max
+  return `${names.slice(0, max).join(", ")} and ${rest} ${rest === 1 ? "other" : "others"}`
+}
+
+/** An entry's details: when, who, the task it's for, notes, and for your own, its buttons. */
+function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent) => void }) {
+  const me = useMe()
+  const members = useMemberMap()
+  const tasks = useTasks()
+  const { open } = useTaskPanel()
+  const { update, remove } = useCalendarActions()
+  const mine = event.owner_id === me.id
+  const task = event.task_id ? tasks.find((t) => t.id === event.task_id) : null
+  const owner = members.get(event.owner_id)
+  const overDays = isoDay(event.starts_at) !== isoDay(event.ends_at)
+  // You first, then everyone else by name.
+  const people = [...event.attendee_ids].sort((a, b) =>
+    a === me.id ? -1 : b === me.id ? 1 : displayName(members.get(a)).localeCompare(displayName(members.get(b))),
+  )
+
+  return (
+    <>
+      <div>
+        <p className="text-sm font-medium text-fg">{event.title}</p>
+        <p className="mt-0.5 text-xs text-fg-3 tabular">
+          {entryTimes(event)} · {durationLabel(entryMinutes(event))}
+        </p>
+        {overDays && (
+          <p className="text-xs text-fg-3">
+            {longDate(isoDay(event.starts_at))} to {longDate(isoDay(event.ends_at))}
           </p>
-          {(before || after) && (
-            <p className="text-xs text-fg-3">
-              {longDate(isoDay(event.starts_at))} to {longDate(isoDay(event.ends_at))}
-            </p>
+        )}
+      </div>
+      {event.masked ? (
+        <p className="text-xs text-fg-3">{displayName(owner)} shares only that they're busy.</p>
+      ) : (
+        <>
+          {event.kind === "meeting" && people.length > 0 && (
+            <div className="flex min-w-0 items-center gap-2">
+              <AvatarStack people={people.map((id) => ({ id, name: displayName(members.get(id)) }))} max={5} size="sm" ringClassName="ring-raised" />
+              <span className="min-w-0 text-xs text-fg-2">
+                {namesLine(people.map((id) => (id === me.id ? "you" : firstName(members.get(id)))))}
+              </span>
+            </div>
           )}
+          {task && (
+            <button type="button" onClick={() => open(task.number)} className="-mx-1.5 flex items-center gap-2 rounded-md px-1.5 py-1 text-left text-xs text-fg-2 hover:bg-hover">
+              <Icon icon={Task01Icon} size={13} className="text-fg-3" />
+              <StatusIcon status={task.status} size={12} />
+              <span className="truncate">{task.title}</span>
+            </button>
+          )}
+          {event.notes && <p className="text-xs leading-5 whitespace-pre-wrap text-fg-2">{event.notes}</p>}
+          <p className="text-xs text-fg-4">
+            {mine ? (event.visibility === "public" ? "The team can see this." : event.visibility === "busy" ? "The team sees only that you're busy." : "Only you can see this.") : `${displayName(owner)}'s ${event.kind === "meeting" ? "meeting" : "plan"}`}
+            {event.auto_complete && " Ticks off by itself."}
+          </p>
+        </>
+      )}
+      {mine && (
+        <div className="flex items-center gap-1 border-t border-line pt-2">
+          {event.kind === "block" && (
+            <button
+              type="button"
+              onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
+              className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
+            >
+              <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
+              {event.completed_at ? "Done" : "Tick off"}
+            </button>
+          )}
+          <button type="button" onClick={() => onEdit(event)} className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg">
+            <Icon icon={Edit02Icon} size={14} />
+            Edit
+          </button>
+          <button type="button" aria-label="Delete" onClick={() => remove.mutate(event.id)} className="pressable ml-auto inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-danger hover:bg-danger-soft">
+            <Icon icon={Delete02Icon} size={14} />
+          </button>
         </div>
-        {event.masked ? (
-          <p className="text-xs text-fg-3">{displayName(owner)} shares only that they're busy.</p>
+      )}
+    </>
+  )
+}
+
+/**
+ * "+3": the entries that didn't fit side by side. It opens a list of them;
+ * choosing one shows its details, with a way back to the list.
+ */
+function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: CalEvent) => void }) {
+  const now = useNow()
+  const [open, setOpen] = useState(false)
+  const [chosen, setChosen] = useState<string | null>(null)
+  const { width, left } = laneBox(overflow.lane, overflow.lanes)
+  const current = overflow.events.find((e) => e.id === chosen)
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (!next) setChosen(null)
+      }}
+    >
+      <PopoverTrigger
+        data-event
+        onPointerDown={(e) => e.stopPropagation()}
+        aria-label={`${overflow.events.length} more entries at this time`}
+        className="absolute z-[1] flex items-start justify-center rounded-md border border-line-strong bg-raised px-1 py-1 text-[11px] leading-4 font-medium text-fg-2 tabular hover:border-fg-4 hover:text-fg data-popup-open:ring-1 data-popup-open:ring-line-strong"
+        style={{ top: overflow.top, height: overflow.height, width, left }}
+      >
+        <span className="sticky top-1">+{overflow.events.length}</span>
+      </PopoverTrigger>
+      <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
+        {current ? (
+          <>
+            <button type="button" onClick={() => setChosen(null)} className="-mx-1 -mt-1 inline-flex h-6 items-center gap-1 self-start rounded-md px-1 text-xs text-fg-3 hover:bg-hover hover:text-fg">
+              <Icon icon={ArrowLeft01Icon} size={13} />
+              {overflow.events.length} at this time
+            </button>
+            <EventDetails event={current} onEdit={onEdit} />
+          </>
         ) : (
           <>
-            {event.kind === "meeting" && (
-              <div className="flex flex-wrap items-center gap-1.5">
-                {event.attendee_ids.map((id) => (
-                  <span key={id} className="flex items-center gap-1 text-xs text-fg-2">
-                    <Avatar id={id} name={displayName(members.get(id))} size="xs" />
-                    {displayName(members.get(id)).split(" ")[0]}
-                  </span>
-                ))}
-              </div>
-            )}
-            {task && (
-              <button type="button" onClick={() => open(task.number)} className="-mx-1.5 flex items-center gap-2 rounded-md px-1.5 py-1 text-left text-xs text-fg-2 hover:bg-hover">
-                <Icon icon={Task01Icon} size={13} className="text-fg-3" />
-                <StatusIcon status={task.status} size={12} />
-                <span className="truncate">{task.title}</span>
-              </button>
-            )}
-            {event.notes && <p className="text-xs leading-5 whitespace-pre-wrap text-fg-2">{event.notes}</p>}
-            <p className="text-xs text-fg-4">
-              {mine ? (event.visibility === "public" ? "The team can see this." : event.visibility === "busy" ? "The team sees only that you're busy." : "Only you can see this.") : `${displayName(owner)}'s ${event.kind === "meeting" ? "meeting" : "plan"}`}
-              {event.auto_complete && " Ticks off by itself."}
-            </p>
+            <p className="text-xs font-medium text-fg-3">{overflow.events.length} at this time</p>
+            <ul className="-mx-1.5 -mt-1.5 flex max-h-72 flex-col overflow-y-auto">
+              {overflow.events.map((e) => {
+                const done = isEventDone(e, now)
+                return (
+                  <li key={e.id}>
+                    <button
+                      type="button"
+                      onClick={() => setChosen(e.id)}
+                      className="flex w-full min-w-0 items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-xs hover:bg-hover"
+                    >
+                      <span className={cn("h-4 w-0.5 shrink-0 rounded-full", e.masked ? "bg-line-strong" : e.kind === "meeting" ? "bg-status-in-review" : "bg-brand", done && "opacity-40")} />
+                      <span className={cn("min-w-0 flex-1 truncate", e.masked ? "text-fg-3" : "text-fg", done && "line-through decoration-fg-4")}>{e.title}</span>
+                      <span className="shrink-0 text-fg-3 tabular">{entryTimes(e, { compact: true })}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
           </>
         )}
-        {mine && (
-          <div className="flex items-center gap-1 border-t border-line pt-2">
-            {event.kind === "block" && (
-              <button
-                type="button"
-                onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
-                className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
-              >
-                <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
-                {event.completed_at ? "Done" : "Tick off"}
-              </button>
-            )}
-            <button type="button" onClick={() => onEdit(event)} className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg">
-              <Icon icon={Edit02Icon} size={14} />
-              Edit
-            </button>
-            <button type="button" onClick={() => remove.mutate(event.id)} className="pressable ml-auto inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-danger hover:bg-danger-soft">
-              <Icon icon={Delete02Icon} size={14} />
-            </button>
-          </div>
-        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+/** "4 more" under a day's due tasks: all of them, a click away. */
+function DueMore({ tasks, day }: { tasks: Task[]; day: string }) {
+  return (
+    <Popover>
+      <PopoverTrigger className="self-start rounded-[5px] px-1.5 text-left text-[11px] text-fg-3 hover:bg-hover hover:text-fg data-popup-open:bg-hover">
+        {tasks.length - DUE_SHOWN} more
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-64 gap-1 p-1.5">
+        <p className="px-1.5 pt-0.5 pb-1 text-xs font-medium text-fg-3">Due {longDate(day)}</p>
+        <div className="flex max-h-72 flex-col overflow-y-auto">
+          {tasks.map((t) => (
+            <DueChip key={t.id} task={t} />
+          ))}
+        </div>
       </PopoverContent>
     </Popover>
   )
