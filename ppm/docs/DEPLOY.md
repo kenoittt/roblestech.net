@@ -188,4 +188,4 @@ A pull request that adds files to `supabase/migrations/` needs them on the live 
 
 If the dry run lists anything else, stop: the live database and the repository disagree, and that needs looking at first.
 
-**Waiting as of 2026-10-04** (branch `kyan/feat/ppm-templates-and-archive`): `20261004000100_project_archive_and_delete.sql` (a function to delete a project, and its tasks if asked, in one step) and `20261004000200_templates.sql` (two tables for task and calendar templates, with their access rules). Both only add. Details: [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md).
+**Nothing waiting as of 2026-10-07.** The two updates from 2026-10-04 (deleting projects, templates) had missed the live database when their branch was merged; they went in on 2026-10-07 with the two from #19 (blocks that follow their task, block colours), and the live database matches the repository.

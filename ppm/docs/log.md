@@ -75,3 +75,9 @@ A message before and after, which parts show, and how finished entries look, sav
 
 ## [2026-10-07] process | Local data shows every option; messages reach their person
 The sample data has the real team, an invented client and data for every option, and every new feature adds its own (the repository's `CLAUDE.md`, rule 7). Anything someone else must do goes on their page in `docs/for-humans/`, which their Claude reads when a session starts (rule 10).
+
+## [2026-10-07] database | The live database caught up
+The four updates from 2026-10-04 and 2026-10-07 (deleting projects, templates, blocks that follow their task, block colours) had never reached the live database, which is why templates didn't work there. Applied with `db push` after #19 was merged; the dry run listed exactly these four. The live database now matches the repository.
+
+## [2026-10-07] decision | Owners delete empty projects; a lost super admin is fixed in Supabase
+Kenneth's calls on backlog items 13 and 12 ([0013](decisions/0013-owners-delete-empty-projects.md), [0014](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)). 0013 is still to build; 0014 needs nothing built, and its steps are in [giving the team accounts](for-humans/giving-the-team-accounts.md#if-nobody-is-a-super-admin).

@@ -71,6 +71,8 @@ Kyan found that templates didn't work after the 2026-10-04 merge. First check it
 
 **Checked 2026-10-07 (Kyan's Claude), as far as possible without the live database:** templates work end to end locally, on a fresh copy of every migration (the smoke test's template checks pass). The only local problem was missing sample templates, because that database was seeded before templates existed. So the code is very likely fine, and the cause is almost certainly the missing database update. Only Kenneth's `db push --dry-run` can confirm it. Until it's applied, the app now says "Templates aren't available yet: the database needs an update first" instead of showing an empty list.
 
+**Done 2026-10-07:** the live database had none of the 2026-10-04 updates. Once they were applied (item 10), Kenneth saved a template on the live PPM, and it worked.
+
 ### 19. A made-up client name in sample data and placeholders
 
 **Done 2026-10-07:** the sample client is now Northline Nutrition, and the hints in the project form and the import dialog use it too. The baseline migration still mentions the old name, since migrations that have run on the live database are never edited.
@@ -83,11 +85,13 @@ The brief and what was done with it: [raw/2026-10-04-kyan-voice-brief.md](raw/20
 
 ### 9. Kenneth: check your role on the live PPM (blocks making Kyan a super admin)
 
+**Done 2026-10-07:** Kenneth is a super admin on the live database, and so are Christian and Kyan.
+
 Role changes were refused because the live database almost certainly doesn't have Kenneth as a super admin; the code is right (report, Task 1). Look at the bottom-left of the sidebar: your role is under your name. If it says Admin: Christian can change it from People, if Christian is a super admin; otherwise it takes one line of SQL, given in the report, run by Kenneth.
 
 ### 10. Kenneth: apply two database updates, then merge
 
-**Not confirmed as of 2026-10-06.** The branch was merged on 2026-10-04; whether the updates went in first hasn't been checked. See item 18 and [`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1.
+**Done 2026-10-07:** they had never been applied. After #19 was merged, the dry run listed exactly these two and the two from 2026-10-07, and `db push` applied all four; the live database now matches the repository. See item 18.
 
 `20261004000100_project_archive_and_delete.sql` and `20261004000200_templates.sql`, before merging the branch: see `DEPLOY.md`, "Database updates after the switch". Then check archive, restore and delete on a test project, and save and use a template.
 
@@ -97,9 +101,13 @@ Its amber border warns before anything is wrong, and amber means time and risk e
 
 ### 12. A decision for Kenneth: a way back if nobody is a super admin
 
+**Decided 2026-10-07 (Kenneth): nothing to build.** Whoever holds the Supabase login fixes it there ([0014](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)); the steps are in [giving the team accounts](for-humans/giving-the-team-accounts.md#if-nobody-is-a-super-admin).
+
 If the live database has no super admin, nobody can make one from the app; it takes SQL. A safe way back (a one-time setup link, say) is a security decision, so it waits for Kenneth.
 
 ### 13. A decision: may a project's owner delete it while it has no tasks?
+
+**Decided 2026-10-07 (Kenneth): yes** ([0013](decisions/0013-owners-delete-empty-projects.md)). To build.
 
 Today owners archive and only admins delete, as the revamp decided. Allowing owners to delete a project that's still empty would cover the "I made a test project" case without an admin. One database rule and one line in the app.
 
@@ -113,6 +121,8 @@ Two short articles for the "Using the PPM" shelf: "Templates for work you repeat
 - A task template that also blocks time for the task. Only works when the task is yours, which is why it waited.
 
 ### 16. Kenneth: the branch-name pattern
+
+**Done 2026-10-07:** adopted for every app; rule 2 in the repository's `CLAUDE.md`.
 
 The repository's [`docs/git-conventions.md`](../../docs/git-conventions.md) proposes `<owner>/<type>/<app>-<topic>`. Adopting it repository-wide is one line in the shared `CLAUDE.md`.
 

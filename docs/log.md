@@ -28,3 +28,6 @@ UI and UX are weighed in every change, in the public site, the PPM and the porta
 
 ## [2026-10-06] process | One page for what only Kenneth can do
 His open items now live in [for-humans/kenneth.md](for-humans/kenneth.md), for every app, since he holds the accounts: GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting.
+
+## [2026-10-07] process | Branch names say what's being built
+`<owner>/<type>/<app>-<topic>`, adopted for every app by Kenneth: rule 2 in `CLAUDE.md`, explained in [git-conventions.md](git-conventions.md#branches).
