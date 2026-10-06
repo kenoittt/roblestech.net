@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import {
   Add01Icon,
   ArrowDown01Icon,
-  Copy01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Calendar03Icon,
@@ -37,7 +36,6 @@ import { cn } from "@/lib/utils"
 import { useIsNarrow } from "@/lib/use-narrow"
 import {
   addDays,
-  clockTime,
   diffDays,
   isoDay,
   longDate,
@@ -55,7 +53,9 @@ import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { TEMPLATES_MISSING, isMissingTable, sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
 import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
-import { DAY_END, durationLabel, formatMinute, minutesOn } from "../layout"
+import { DAY_END, durationLabel, entryTimes, formatMinute, minutesOn } from "../layout"
+import type { PlanEntry } from "../plan-text"
+import { CopyPlan } from "./copy-plan"
 import { EventDialog, type EventDraft } from "./event-dialog"
 import { TimeGrid, type GridColumn } from "./time-grid"
 
@@ -165,36 +165,22 @@ export function CalendarPage() {
     return set.size === 1 ? [...set][0] : "mixed"
   })()
 
-  // The team posts each day's plan in the group chat. This writes it for them:
-  // public entries by name, busy-only ones as "Busy", private ones left out.
-  const copyPlan = async () => {
-    const day = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
-    const mine = events
-      .filter((e) => (e.owner_id === me.id || e.attendee_ids.includes(me.id)) && isoDay(e.starts_at) === day)
-      .filter((e) => e.visibility !== "private" || e.kind === "meeting")
-      .sort((a, b) => (a.starts_at < b.starts_at ? -1 : 1))
-    const linked = new Map(tasks.map((t) => [t.id, t]))
-    const lines = mine.map((e) => {
-      const t = e.task_id ? linked.get(e.task_id) : null
-      const what = e.visibility === "busy" && e.kind !== "meeting" ? "Busy" : `${e.title}${t ? ` (${taskKey(t)})` : ""}`
-      return `${clockTime(e.starts_at)} to ${clockTime(e.ends_at)}: ${what}`
-    })
-    const due = dueBy(day, me.id).map((t) => `${t.title} (${taskKey(t)})`)
-    const text = [
-      `${firstName(me)}'s plan for ${longDate(day)}`,
-      ...(lines.length ? lines : ["Nothing blocked yet"]),
-      ...(due.length ? ["", `Due: ${due.join(", ")}`] : []),
-    ].join("\n")
-    try {
-      await navigator.clipboard.writeText(text)
-      toast("Your plan is copied", { description: "Paste it in the group chat." })
-    } catch {
-      toast.error("Couldn't reach the clipboard. Try again.")
-    }
-  }
-
   // The day "Plan time" means: today when it's on screen, else the first day shown.
   const planDay = mode === "week" ? (days.includes(today) ? today : days[0]) : anchor
+
+  // The team posts each day's plan in the group chat. This writes it for them:
+  // public entries by name, busy-only ones as "Busy", private ones left out.
+  const linked = new Map(tasks.map((t) => [t.id, t]))
+  const planEntries: PlanEntry[] = events
+    .filter((e) => (e.owner_id === me.id || e.attendee_ids.includes(me.id)) && isoDay(e.starts_at) === planDay)
+    .filter((e) => e.visibility !== "private" || e.kind === "meeting")
+    .sort((a, b) => (a.starts_at < b.starts_at ? -1 : 1))
+    .map((e) => {
+      const t = e.task_id ? linked.get(e.task_id) : null
+      const busy = e.visibility === "busy" && e.kind !== "meeting"
+      return { times: entryTimes(e), title: busy ? "Busy" : e.title, code: busy || !t ? null : taskKey(t), done: isEventDone(e, now) }
+    })
+  const planDue = dueBy(planDay, me.id).map((t) => ({ title: t.title, code: taskKey(t) }))
   const planDayLabel = planDay === today ? "today" : `${weekdayName(planDay, true)}, ${monthName(planDay)} ${Number(planDay.slice(8))}`
 
   const newBlock = (taskId?: string) => {
@@ -316,17 +302,12 @@ export function CalendarPage() {
         </div>
         <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular">{label}</h2>
 
-        <button
-          type="button"
-          onClick={copyPlan}
-          className={cn(
-            "pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg",
-            mode === "team" ? "" : "ml-auto",
-          )}
-        >
-          <Icon icon={Copy01Icon} size={14} />
-          <span className="hidden sm:inline">Copy my plan</span>
-        </button>
+        <CopyPlan
+          heading={`${firstName(me)}'s plan for ${longDate(planDay)}`}
+          entries={planEntries}
+          due={planDue}
+          className={mode === "team" ? "" : "ml-auto"}
+        />
         {mode === "week" && (
           <DropdownMenu>
             <DropdownMenuTrigger className="pressable inline-flex h-7 items-center gap-1.5 rounded-md border border-line px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg data-popup-open:bg-hover">

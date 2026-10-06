@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "@/lib/supabase/database.types"
 import { TASK_COLUMNS, type Grouping, type Ordering, type Task, type ViewKind } from "@/domains/tasks/config"
+import type { CopyPlanPrefs } from "@/domains/calendar/plan-text"
 
 type Tables = Database["public"]["Tables"]
 export type Supabase = SupabaseClient<Database>
@@ -38,6 +39,8 @@ export type Prefs = {
   orderings?: Record<string, Ordering>
   showDone?: Record<string, boolean>
   collapsedProjects?: boolean
+  /** How "Copy my plan" reads. */
+  copyPlan?: CopyPlanPrefs
 }
 
 export type Bootstrap = {
