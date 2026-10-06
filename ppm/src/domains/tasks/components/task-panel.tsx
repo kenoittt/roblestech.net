@@ -66,7 +66,8 @@ import { TaskFiles } from "./task-files"
 import { PriorityIcon, ProjectSwatch, StatusIcon } from "./glyphs"
 import { DueDatePicker, PickerMenu, policyOptions, priorityOptions, repeatOptions, statusOptions, usePeopleOptions, useProjectOptions } from "./pickers"
 import { useAdminSignOffNote, useDoneBlock } from "./task-properties"
-import { SaveTaskTemplateDialog } from "@/domains/templates/components/save-task-template"
+import { useUI } from "@/components/app/ui-state"
+import { dueOffset } from "@/domains/templates/data"
 
 export function TaskPanel() {
   return (
@@ -111,7 +112,7 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
   const update = useUpdateTask()
   const del = useDeleteTask()
   const detail = useTaskDetail(task.id)
-  const [savingTemplate, setSavingTemplate] = useState(false)
+  const { openCreateTask } = useUI()
   const block = useDoneBlock(task)
   const { data: notifications } = useNotifications()
   const markRead = useMarkRead()
@@ -218,7 +219,33 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
                 <Icon icon={Link01Icon} className="text-fg-3" />
                 Copy link
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSavingTemplate(true)}>
+              <DropdownMenuItem
+                onClick={() =>
+                  // The new-task dialog, saving a template: everything this task has, to change before saving.
+                  openCreateTask(
+                    {
+                      title: task.title,
+                      description: detail.data?.task.description ?? null,
+                      status: task.status,
+                      priority: task.priority,
+                      project_id: task.project_id,
+                      assignee_id: task.assignee_id,
+                      reviewer_id: task.reviewer_id,
+                      completion_policy: task.completion_policy,
+                      completion_approvers: task.completion_approvers,
+                      is_private: task.is_private,
+                    },
+                    {
+                      asTemplate: {
+                        checklist: (detail.data?.checklist ?? []).map((c) => c.title),
+                        dueInDays: dueOffset(task),
+                        // Your own routine goes to whoever uses it; someone else's stays theirs.
+                        assign: task.assignee_id === me.id ? "user" : task.assignee_id ? "person" : "nobody",
+                      },
+                    },
+                  )
+                }
+              >
                 <Icon icon={LayoutTemplateIcon} className="text-fg-3" />
                 Save as template…
               </DropdownMenuItem>
@@ -238,12 +265,6 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
           <HeaderButton label="Close" shortcut="Esc" icon={Cancel01Icon} onClick={onClose} />
         </div>
       </header>
-      <SaveTaskTemplateDialog
-        task={savingTemplate ? task : null}
-        description={detail.data?.task.description ?? null}
-        checklist={(detail.data?.checklist ?? []).map((c) => c.title)}
-        onClose={() => setSavingTemplate(false)}
-      />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-6 pt-5 pb-4">

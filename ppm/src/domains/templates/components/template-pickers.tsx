@@ -7,7 +7,7 @@ import { useMe, useMemberMap } from "@/domains/workspace/provider"
 import { firstName } from "@/domains/workspace/types"
 import { PickerMenu, type PickerOption } from "@/domains/tasks/components/pickers"
 import { formatMinute } from "@/domains/calendar/layout"
-import { sortTemplates, useEventTemplates, useTaskTemplates, type EventTemplate, type TaskTemplate } from "../data"
+import { TEMPLATES_MISSING, isMissingTable, sortTemplates, useEventTemplates, useTaskTemplates, type EventTemplate, type TaskTemplate } from "../data"
 
 // The "Templates" control in the new-task dialog and the calendar's entry
 // dialog: one more picker, so it looks and works like every other (search,
@@ -54,7 +54,7 @@ export function TaskTemplatePicker({
   onSelect: (template: TaskTemplate | null) => void
   triggerClassName: string
 }) {
-  const { data = [] } = useTaskTemplates()
+  const { data = [], error } = useTaskTemplates()
   const options = useOptions(data, value, taskLine, taskIcon)
   const current = data.find((t) => t.id === value)
   return (
@@ -69,9 +69,11 @@ export function TaskTemplatePicker({
       align="end"
       onSelect={(id) => onSelect(data.find((t) => t.id === id) ?? null)}
       footer={
-        data.length
-          ? "Fills in the task; change anything before you create it. Manage templates in Settings."
-          : "No templates yet. Open any task, then ⋯ and Save as template."
+        isMissingTable(error)
+          ? TEMPLATES_MISSING
+          : data.length
+            ? "Fills in the task; change anything before you create it. Manage templates in Settings."
+            : "No templates yet. To make one, turn on Save as template below."
       }
     />
   )
@@ -92,7 +94,7 @@ export function EventTemplatePicker({
   onSelect: (template: EventTemplate | null) => void
   triggerClassName: string
 }) {
-  const { data = [] } = useEventTemplates()
+  const { data = [], error } = useEventTemplates()
   const options = useOptions(data, value, eventLine, eventIcon)
   const current = data.find((t) => t.id === value)
   return (
@@ -107,9 +109,11 @@ export function EventTemplatePicker({
       align="end"
       onSelect={(id) => onSelect(data.find((t) => t.id === id) ?? null)}
       footer={
-        data.length
-          ? "Fills in the entry. A time you dragged on the calendar stays. Manage templates in Settings."
-          : "No templates yet. Open one of your entries, then Edit and Save as template."
+        isMissingTable(error)
+          ? TEMPLATES_MISSING
+          : data.length
+            ? "Fills in the entry. A time you dragged on the calendar stays. Manage templates in Settings."
+            : "No templates yet. To make one, turn on Save as template below."
       }
     />
   )

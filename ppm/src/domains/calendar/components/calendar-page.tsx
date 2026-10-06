@@ -53,7 +53,7 @@ import { isOpen, taskKey, type Task } from "@/domains/tasks/config"
 import { DueText } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
-import { sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
+import { TEMPLATES_MISSING, isMissingTable, sortTemplates, useEventTemplates, type EventTemplate } from "@/domains/templates/data"
 import { isEventDone, useCalendar, useCalendarActions, usePrivacyRanges, type CalEvent } from "../data"
 import { DAY_END, durationLabel, formatMinute, minutesOn } from "../layout"
 import { EventDialog, type EventDraft } from "./event-dialog"
@@ -78,7 +78,8 @@ export function CalendarPage() {
   const [editing, setEditing] = useState<CalEvent | null>(null)
   const { setRange, create, remove } = useCalendarActions()
   const { data: ranges } = usePrivacyRanges()
-  const { data: templates = [] } = useEventTemplates()
+  const { data: templates = [], error: templatesError } = useEventTemplates()
+  const templatesMissing = isMissingTable(templatesError)
   const split = splitButton("primary")
   const router = useRouter()
 
@@ -263,10 +264,14 @@ export function CalendarPage() {
                 </DropdownMenuGroup>
                 {templates.length === 0 && (
                   <p className="px-1.5 pt-0.5 pb-1.5 text-xs leading-5 text-fg-3">
-                    None yet. Open one of your entries, then Edit and Save as template. A block then lands here in two clicks.
+                    {templatesMissing ? TEMPLATES_MISSING : "None yet. Save the time you plan often as a template, and it lands here in two clicks."}
                   </p>
                 )}
                 <DropdownMenuSeparator />
+                <DropdownMenuItem disabled={templatesMissing} onClick={() => setDraft({ day: planDay, start: 9 * 60, end: 10 * 60, asTemplate: true })}>
+                  <Icon icon={Add01Icon} className="text-fg-3" />
+                  New template…
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/settings#templates")}>
                   <Icon icon={Settings01Icon} className="text-fg-3" />
                   Manage templates

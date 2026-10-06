@@ -18,7 +18,7 @@ import { useCreateTask } from "@/domains/tasks/data"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { PickerMenu, chipClass, type PickerOption } from "@/domains/tasks/components/pickers"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
-import { canEditTemplate, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
+import { TEMPLATES_MISSING, canEditTemplate, isMissingTable, sortTemplates, useEventTemplates, useTemplateActions, type EventTemplate } from "@/domains/templates/data"
 import { EventTemplatePicker } from "@/domains/templates/components/template-pickers"
 import { useCalendarActions, type CalEvent } from "../data"
 import { DAY_END, durationLabel, formatMinute } from "../layout"
@@ -33,6 +33,10 @@ export type EventDraft = {
   explicitTime?: boolean
   /** Start from this template (a meeting from the Plan time menu, to check before inviting). */
   template?: EventTemplate
+  /** Save a template instead of an entry (New template in the Plan time menu). */
+  asTemplate?: boolean
+  /** Change this template (Settings, Edit). */
+  editTemplate?: EventTemplate
 }
 
 const VISIBILITY = [
@@ -76,7 +80,14 @@ export function EventDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="ui-backdrop fixed inset-0 z-50 bg-black/45" />
         <DialogPrimitive.Popup className="ui-dialog fixed top-[8vh] left-1/2 z-50 flex max-h-[86vh] w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 flex-col rounded-xl bg-raised shadow-popover outline-none">
-          {open && <Form key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}-${draft?.template?.id}`} draft={draft} event={event} onClose={onClose} />}
+          {open && (
+            <Form
+              key={event?.id ?? `${draft?.day}-${draft?.start}-${draft?.taskId}-${draft?.template?.id}-${draft?.editTemplate?.id}-${draft?.asTemplate}`}
+              draft={draft}
+              event={event}
+              onClose={onClose}
+            />
+          )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
@@ -92,9 +103,12 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const { open: openTask } = useTaskPanel()
 
   const linked = tasks.find((t) => t.id === (event?.task_id ?? draft?.taskId))
-  const preset = draft?.template
-  // A meeting's people, less whoever is planning it (they own it) and anyone who has left.
-  const invitees = (ids: string[]) => ids.filter((id) => id !== me.id && members.some((m) => m.id === id && !m.deactivated_at))
+  const editing = draft?.editTemplate ?? null
+  const preset = draft?.template ?? editing ?? undefined
+  // A meeting's people, less whoever owns it and anyone who has left. A
+  // template's owner is whoever saved it; a meeting's is whoever plans it.
+  const owner = editing?.created_by ?? me.id
+  const invitees = (ids: string[]) => ids.filter((id) => id !== owner && members.some((m) => m.id === id && !m.deactivated_at))
   const [kind, setKind] = useState<"block" | "meeting">(event?.kind ?? (preset?.kind as "block" | "meeting" | undefined) ?? draft?.kind ?? "block")
   const [title, setTitle] = useState(event?.title ?? preset?.title ?? linked?.title ?? "")
   const [taskId, setTaskId] = useState<string | null>(event?.task_id ?? draft?.taskId ?? null)
@@ -113,8 +127,22 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const [auto, setAuto] = useState(event?.auto_complete ?? preset?.auto_complete ?? false)
   const [notes, setNotes] = useState(event?.notes ?? preset?.notes ?? "")
   const [attendees, setAttendees] = useState<string[]>(event ? event.attendee_ids.filter((a) => a !== me.id) : invitees(preset?.attendee_ids ?? []))
-  const [templateId, setTemplateId] = useState<string | null>(preset?.id ?? null)
+  const [templateId, setTemplateId] = useState<string | null>(draft?.template?.id ?? null)
   const [error, setError] = useState<string | null>(null)
+  // Saving a template instead of an entry: its name and who may use it.
+  const [asTemplate, setAsTemplate] = useState(Boolean(draft?.asTemplate || editing))
+  const [name, setName] = useState(editing?.name ?? "")
+  const [shared, setShared] = useState(editing?.shared ?? false)
+  const { data: templates = [], error: templatesError } = useEventTemplates()
+  const { saveEvent } = useTemplateActions()
+  const missing = isMissingTable(templatesError)
+  const templateName = (name.trim() || title.trim()).slice(0, 120)
+  // Saving under the name of a template you can change replaces it.
+  const same = editing
+    ? null
+    : sortTemplates(templates, me.id).find((t) => templateName && t.name.trim().toLowerCase() === templateName.toLowerCase() && canEditTemplate(t, me))
+  const target = editing ?? same ?? null
+  const othersShared = Boolean(target && target.created_by !== me.id)
 
   // A template fills in what the entry is. A time dragged out on the calendar
   // stays; otherwise the template's time of day is used, on the chosen day.
@@ -150,10 +178,47 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   )
   const linkedTask = tasks.find((t) => t.id === taskId)
 
+  const switchToTemplate = (on: boolean) => {
+    setAsTemplate(on)
+    setError(null)
+    // A template keeps one day's time: an entry that ran past midnight stops there.
+    if (on && endDay !== day) setEndAt(endOf(day, Math.min(start + span, DAY_END)))
+  }
+
+  const saveTemplate = async () => {
+    try {
+      const saved = await saveEvent.mutateAsync({
+        id: target?.id,
+        input: {
+          name: templateName,
+          shared: othersShared ? target!.shared : shared,
+          kind,
+          title: title.trim(),
+          notes: notes.trim() || null,
+          start_minute: start,
+          end_minute: start + span,
+          visibility,
+          auto_complete: kind === "block" && auto,
+          attendee_ids: kind === "meeting" ? [...new Set([owner, ...attendees])] : [],
+        },
+      })
+      toast(target ? `Updated the template "${saved.name}"` : `Saved "${saved.name}" as a template`, {
+        description: "Use it from the arrow beside Plan time, or Templates when you drag out time.",
+      })
+      onClose()
+    } catch {
+      // The mutation shows the reason.
+    }
+  }
+
   const save = async () => {
     setError(null)
     if (!title.trim()) return setError("Give it a title.")
     if (span <= 0) return setError("It has to end after it starts.")
+    if (asTemplate) {
+      if (start + span > DAY_END) return setError("A template keeps one day: make it end by midnight.")
+      return saveTemplate()
+    }
     const row = {
       kind,
       title: title.trim(),
@@ -197,10 +262,10 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
     <>
       <div className="flex items-center justify-between px-5 pt-4">
         <DialogPrimitive.Title className="text-md font-semibold text-fg">
-          {event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
+          {editing ? "Edit template" : asTemplate ? "New template" : event ? (kind === "meeting" ? "Edit meeting" : "Edit block") : "Plan time"}
         </DialogPrimitive.Title>
         <div className="flex items-center gap-1">
-          {!event && (
+          {!event && !asTemplate && (
             <EventTemplatePicker
               value={templateId}
               onSelect={applyTemplate}
@@ -213,6 +278,19 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
         </div>
       </div>
       <div className="flex min-h-0 flex-col gap-4 overflow-y-auto px-5 pt-3 pb-5">
+        {asTemplate && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-fg-2">Template name {same && <span className="font-normal text-fg-3">· replaces {same.created_by === me.id ? "your" : "the team's"} template</span>}</span>
+            <input
+              value={name}
+              maxLength={120}
+              onChange={(e) => setName(e.target.value)}
+              // Left empty, the template takes the title as its name.
+              placeholder={title.trim() || "Outreach block, Monday stand-up…"}
+              className={input}
+            />
+          </label>
+        )}
         <div className="flex gap-1 rounded-md bg-hover p-0.5" role="radiogroup" aria-label="Kind">
           {(["block", "meeting"] as const).map((k) => (
             <button
@@ -233,6 +311,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} placeholder={kind === "meeting" ? "What's the meeting about?" : "What will you work on?"} className={input} />
         </label>
 
+        {!asTemplate && (
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-fg-2">For a task <span className="font-normal text-fg-4">(optional)</span></span>
           <PickerMenu
@@ -277,9 +356,12 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
             )}
           />
         </div>
+        )}
 
         <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
+          {/* A template keeps a time of day; the day is chosen when it's used. */}
+          <div className={cn("grid gap-2", asTemplate ? "grid-cols-2" : "grid-cols-[1.3fr_1fr_1fr]")}>
+            {!asTemplate && (
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-fg-2">Day</span>
               <input
@@ -295,6 +377,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
                 className={input}
               />
             </label>
+            )}
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-fg-2">From</span>
               <select
@@ -315,9 +398,10 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
                 // Later today, or on into the night: past midnight is one choice away.
                 <select value={end} onChange={(e) => setEnd(Number(e.target.value))} className={input}>
                   {steps(start + 15, DAY_END).map((t) => <option key={t} value={t}>{timeLabel(t)}</option>)}
-                  {steps(DAY_END + 15, start + DAY_END).map((t) => (
-                    <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
-                  ))}
+                  {!asTemplate &&
+                    steps(DAY_END + 15, start + DAY_END).map((t) => (
+                      <option key={t} value={t}>{formatMinute(t - DAY_END)} · next day</option>
+                    ))}
                 </select>
               ) : (
                 <select value={end} onChange={(e) => setEndAt({ endDay, end: Number(e.target.value) })} className={input}>
@@ -326,7 +410,7 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
               )}
             </label>
           </div>
-          {endDay !== day && (
+          {endDay !== day && !asTemplate && (
             <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-2">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-fg-2">Ends on</span>
@@ -355,9 +439,11 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
               placeholder="Invite people…"
               value={attendees}
               onChange={setAttendees}
-              exclude={[me.id]}
+              exclude={[owner]}
             />
-            <p className="text-xs text-fg-4">It appears on their calendars, and they get a notification.</p>
+            <p className="text-xs text-fg-4">
+              {asTemplate ? "They're invited each time the template is used, once you've had a look." : "It appears on their calendars, and they get a notification."}
+            </p>
           </div>
         )}
 
@@ -397,6 +483,16 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Agenda, a link, anything useful"
             className="w-full resize-none rounded-md border border-line-strong bg-surface px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-4 focus:border-brand" />
         </label>
+
+        {asTemplate && !othersShared && (
+          <label className="flex items-center justify-between gap-3 text-sm text-fg-2">
+            <span>
+              Share with the team
+              <span className="block text-xs text-fg-3">Everyone can use it; only you, or an admin, can change it.</span>
+            </span>
+            <Switch checked={shared} onCheckedChange={setShared} />
+          </label>
+        )}
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       </div>
       <div className="flex items-center gap-2 border-t border-line px-5 py-3">
@@ -410,9 +506,27 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
             entry={{ kind, title: title.trim(), notes: notes.trim() || null, start, end: start + span, visibility, auto, attendees: [me.id, ...attendees] }}
           />
         )}
+        {!event && !editing && (
+          <label className={cn("flex items-center gap-2 text-xs text-fg-3", missing && "opacity-60")} title={missing ? TEMPLATES_MISSING : "Saves a template for next time, and adds nothing to the calendar"}>
+            <Switch checked={asTemplate} onCheckedChange={switchToTemplate} disabled={missing} />
+            Save as template
+          </label>
+        )}
         <span className="flex-1" />
         <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button onClick={save} disabled={create.isPending || update.isPending}>{event ? "Save" : kind === "meeting" ? "Send invites" : "Add to calendar"}</Button>
+        <Button onClick={save} disabled={create.isPending || update.isPending || saveEvent.isPending}>
+          {asTemplate
+            ? saveEvent.isPending
+              ? "Saving…"
+              : same
+                ? "Replace template"
+                : "Save template"
+            : event
+              ? "Save"
+              : kind === "meeting"
+                ? "Send invites"
+                : "Add to calendar"}
+        </Button>
       </div>
     </>
   )
