@@ -102,7 +102,13 @@ values
   ('20000000-0000-4000-a000-000000000009', 'Old intranet pages', '#7C8CA8', true,
    '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00'),
    'Moving the last intranet pages into the Handbook. Archived once they were moved.',
-   '00000000-0000-4000-a000-000000000003', 'closed', 'internal', null, pg_temp.d(-60), pg_temp.d(-18), 'list');
+   '00000000-0000-4000-a000-000000000003', 'closed', 'internal', null, pg_temp.d(-60), pg_temp.d(-18), 'list'),
+  -- Added 2026-10-13: an empty project owned by someone who isn't an admin. Its
+  -- owner may delete it while it has no tasks, so keep it empty.
+  ('20000000-0000-4000-a000-000000000010', 'Referral programme', '#2BA8A0', false,
+   '00000000-0000-4000-a000-000000000004', pg_temp.at(-1, '16:00'),
+   'An idea for thanking clients who refer someone. Nothing planned yet.',
+   '00000000-0000-4000-a000-000000000004', 'planned', 'internal', null, null, null, 'list');
 
 insert into public.ppm_project_members (project_id, user_id, role, added_by, added_at) values
   ('20000000-0000-4000-a000-000000000001', '00000000-0000-4000-a000-000000000002', 'owner',  '00000000-0000-4000-a000-000000000002', pg_temp.at(-62, '10:00')),
@@ -127,7 +133,8 @@ insert into public.ppm_project_members (project_id, user_id, role, added_by, add
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000004', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000002', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000005', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
-  ('20000000-0000-4000-a000-000000000009', '00000000-0000-4000-a000-000000000003', 'owner',  '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00'));
+  ('20000000-0000-4000-a000-000000000009', '00000000-0000-4000-a000-000000000003', 'owner',  '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00')),
+  ('20000000-0000-4000-a000-000000000010', '00000000-0000-4000-a000-000000000004', 'owner',  '00000000-0000-4000-a000-000000000004', pg_temp.at(-1, '16:00'));
 
 -- -----------------------------------------------------------------------------
 -- Tasks

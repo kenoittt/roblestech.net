@@ -430,6 +430,9 @@ isOneToOne: false
 "ppm_can_complete":
 { Args: { "t": Database["public"]['Tables']["ppm_tasks"]['Row'],"uid": string }; Returns: boolean
                            },
+"ppm_can_delete_project":
+{ Args: { "pid": string }; Returns: boolean
+                           },
 "ppm_can_manage_project":
 { Args: { "pid": string }; Returns: boolean
                            },
