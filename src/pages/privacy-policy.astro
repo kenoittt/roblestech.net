@@ -6,13 +6,14 @@ import LegalLayout from '../layouts/LegalLayout.astro';
  *
  * Written against what this site actually does, not against a template: the
  * data listed is the data the two forms really collect, the processors listed
- * are the ones really loaded (Salesforce, Calendly, Google Fonts, GitHub,
- * Vercel, Supabase), and the browser-storage section names the only two keys
- * the site writes. Anything added to the site that collects or transmits
+ * are the ones really loaded (Salesforce, Apollo, Calendly, Google Fonts,
+ * GitHub, Vercel, Supabase), and the browser-storage section names the only
+ * keys the site writes. Apollo loads only after the cookie choice in
+ * components/CookieConsent.astro says yes. Anything added to the site that collects or transmits
  * personal data — an analytics tag, a chat widget, a new form — needs a
  * matching edit here and a new `updated` date.
  */
-const UPDATED = '2026-09-08';
+const UPDATED = '2026-10-13';
 
 const sections = [
   { id: 'who-we-are', title: 'Who we are' },
@@ -88,20 +89,25 @@ const sections = [
 
     <h3>Information collected automatically</h3>
     <p>This site is served as static files by GitHub Pages, and the client portal by Vercel. Both keep standard server logs — IP address, timestamp, page requested, browser user agent — for security and reliability. We do not use those logs to build a profile of you and we cannot look up an individual visitor in them.</p>
-    <p>We do not run Google Analytics, advertising pixels, session recording, or any other behavioural tracking on this site.</p>
+    <h3>Visitor analytics, if you accept cookies</h3>
+    <p>If you accept cookies, this site loads <strong>Apollo</strong>'s visitor tracker. It records the pages you view and when, and matches your IP address to the company it belongs to, so we can see which companies visit and what they look at. We use it to decide whom to follow up with. Decline and it never loads.</p>
+    <h3>Our emails</h3>
+    <p>Emails we send from Salesforce, including the newsletter and follow-ups to an enquiry, record whether they were opened and which links were clicked. Many email apps let you block this by turning off remote images.</p>
+    <p>We do not run advertising pixels or session recording on this site.</p>
   </div>
 
   <div class="lg-sec" id="cookies">
     <h2><span class="lg-num">03</span>Cookies and browser storage</h2>
     <div class="lg-note">
-      <p><strong>We set no cookies of our own.</strong> No analytics cookies, no advertising cookies, no cross-site tracking — which is why this site has no cookie banner.</p>
+      <p><strong>Analytics cookies only with your OK.</strong> The first time you visit, we ask. Apollo's cookies are set only if you accept, and you can change your answer at any time with <a href="/privacy-policy#cookies" data-consent-open>Cookie settings</a>, also in the footer of every page.</p>
     </div>
-    <p>The site does write two small values into your own browser's local storage. They stay on your device, are readable only by this site, and never reach us:</p>
+    <p>The site also writes small values into your own browser's local storage. They stay on your device and are readable only by this site:</p>
     <ul>
       <li><strong>rtc-nl</strong> — records that you have already seen the newsletter invitation, so you are not asked twice.</li>
+      <li><strong>rtc-consent</strong> — records your cookie choice, so you are asked once.</li>
       <li><strong>rtc-loaded</strong> — records that you have already seen the intro animation this session, so it is skipped as you move between pages.</li>
     </ul>
-    <p>Clearing your browser's site data removes both. Two third parties can set their own cookies when their features load: <strong>Calendly</strong>, if you open the booking widget; and <strong>Salesforce</strong>, when a form is submitted to it. Their own policies govern those.</p>
+    <p>Clearing your browser's site data removes them, and Apollo's cookies with them. Two more third parties can set their own cookies when their features load: <strong>Calendly</strong>, if you open the booking widget; and <strong>Salesforce</strong>, when a form is submitted to it. Their own policies govern those.</p>
     <p>The client portal sets a session cookie once you sign in. It is strictly necessary — it is what keeps you signed in — and it is removed when you sign out.</p>
   </div>
 
@@ -124,6 +130,10 @@ const sections = [
           <tr>
             <td>Sending the newsletter</td>
             <td>Your consent, given when you subscribe and withdrawable at any time</td>
+          </tr>
+          <tr>
+            <td>Seeing which companies visit the site, and whether our emails are opened and their links clicked, to decide whom to follow up with</td>
+            <td>Your consent for the site's analytics cookies; our legitimate interest in following up on business conversations for email tracking</td>
           </tr>
           <tr>
             <td>Keeping the site and portal secure and available</td>
@@ -150,7 +160,8 @@ const sections = [
           <tr><th>Provider</th><th>What it handles</th></tr>
         </thead>
         <tbody>
-          <tr><td>Salesforce</td><td>Our CRM. Contact-form and newsletter submissions go here, and this is where we track our conversation with you.</td></tr>
+          <tr><td>Salesforce</td><td>Our CRM. Contact-form and newsletter submissions go here, and this is where we track our conversation with you. Our emails are sent from here, with open and click tracking.</td></tr>
+          <tr><td>Apollo</td><td>Visitor analytics, if you accept cookies. Records pages viewed and matches IP addresses to companies.</td></tr>
           <tr><td>Calendly</td><td>Scheduling. Handles the details you enter when booking a call.</td></tr>
           <tr><td>Google Workspace</td><td>Our email. Any correspondence with us lives here.</td></tr>
           <tr><td>Supabase</td><td>Database and sign-in for the client portal.</td></tr>
@@ -177,6 +188,7 @@ const sections = [
       <li><strong>Client records</strong> — kept for the engagement and for as long afterwards as tax and accounting rules require.</li>
       <li><strong>Newsletter subscriptions</strong> — kept until you unsubscribe, plus a suppression record so we don't email you again by mistake.</li>
       <li><strong>Portal accounts</strong> — kept while the engagement is active; removed on request, or within a reasonable period after it ends.</li>
+      <li><strong>Visitor analytics</strong> — kept in Apollo for up to two years, then deleted.</li>
       <li><strong>Server logs</strong> — kept for the short retention window our hosting providers apply.</li>
     </ul>
     <p>Ask us to delete something sooner and we will, unless we are required to keep it.</p>
