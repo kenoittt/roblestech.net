@@ -23,7 +23,16 @@ If it's merged first by mistake, nothing breaks: an owner is offered Delete and 
 
 - [ ] **Merge the pull request.** It adds the cookie choice, Apollo's visitor tracker and the updated privacy policy and terms. Apollo starts counting the day it's live.
 - [ ] **Turn on email tracking in Salesforce** (one time). In Setup, search Enhanced Email and turn it on, then Activity Settings and tick Enable Email Tracking. If Starter doesn't offer it, tell Claude. Emails you send from a contact's page then show Read or Unopened, with first and last opened times, on the contact's activity timeline. Send them as HTML (the normal editor), not plain text. Opens are a hint, not proof: many email apps open the tracking image on their own.
-- [ ] **Tag your email links.** Salesforce counts opens on single emails, not clicks, so the click shows up in Apollo instead, as a visit from that campaign, for example `https://roblestech.net/services?utm_source=salesforce&utm_medium=email&utm_campaign=oct-outreach`.
+- [ ] **Tag your email links with the sender.** Salesforce counts opens on single emails, not clicks, so clicks show up in Apollo as visits instead. Each of you uses your own tag (`utm_content`), so a visit says whose email it came from. Change only the page and the month:
+
+  | Sender | Link |
+  |---|---|
+  | Kenneth | `https://roblestech.net/services?utm_source=salesforce&utm_medium=email&utm_campaign=oct-outreach&utm_content=kenneth` |
+  | CJ | `https://roblestech.net/services?utm_source=salesforce&utm_medium=email&utm_campaign=oct-outreach&utm_content=cj` |
+  | Josh | `https://roblestech.net/services?utm_source=salesforce&utm_medium=email&utm_campaign=oct-outreach&utm_content=josh` |
+
+  Save yours in your Salesforce email signature or a template so it's never typed by hand.
+- [ ] **Each sender needs their own Salesforce user** (a Starter seat each), sending from their own contact pages. Opens are then filed under whoever sent the email: filter the contact's activity, or a report on emails, by sender. One shared login would mix all three together.
 - [ ] **Check visitors in Apollo** under Website Visitors, about a day after the merge. The Services and Contact pages are marked as buying signals. Starter can't sync with Apollo (no API access), so move lists between the two by CSV, or move to Pro Suite with the API add-on if that gets old.
 - [ ] **Keep the policy's promises:** delete Apollo visitor data older than two years, and update the privacy policy if the site ever loads another tracker. The policy's email provider still says Google Workspace; tell Claude if that should say Microsoft 365.
 
