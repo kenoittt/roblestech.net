@@ -31,3 +31,6 @@ His open items now live in [for-humans/kenneth.md](for-humans/kenneth.md), for e
 
 ## [2026-10-07] process | Branch names say what's being built
 `<owner>/<type>/<app>-<topic>`, adopted for every app by Kenneth: rule 2 in `CLAUDE.md`, explained in [git-conventions.md](git-conventions.md#branches).
+
+## [2026-10-13] process | Fixing a bug has a page, and its screenshots a folder
+A `fix` branch from a fresh `origin/main`, the bug seen broken on sample data first, and a check that fails before the fix and passes after ([fixing-bugs.md](fixing-bugs.md)). Screenshots of bugs go in a `private/bugs/` folder, which git ignores: they show live data, and the repository is public.

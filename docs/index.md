@@ -10,7 +10,8 @@ What's in `docs/`, the part of the knowledge base that applies to every app. How
 | [for-humans/README.md](for-humans/README.md) | Things only a person can do, for any app | Kyan's Claude, 2026-10-06 |
 | [for-humans/kenneth.md](for-humans/kenneth.md) | Kenneth's open items, in order | Kyan's Claude, 2026-10-06; moved here from `ppm/docs/` the same day |
 | [for-humans/kyan.md](for-humans/kyan.md) | Kyan's open items, in order | Kyan's Claude, 2026-10-07 |
-| [git-conventions.md](git-conventions.md) | Commits (short and warm), pull requests (a walkthrough) and a branch-name proposal | A cloud session, 2026-10-04; moved here and updated by Kyan's Claude, 2026-10-06 |
+| [git-conventions.md](git-conventions.md) | Commits (short and warm), pull requests (a walkthrough) and branch names | A cloud session, 2026-10-04; moved here and updated by Kyan's Claude, 2026-10-06 |
+| [fixing-bugs.md](fixing-bugs.md) | A bug from report to merge: where its screenshots go, which branch, seeing it broken first, proving the fix | Kyan's Claude, 2026-10-13 |
 | [log.md](log.md) | The history of substantial changes across the repository | Kyan's Claude, 2026-10-06 |
 | [references/llm-wiki.md](references/llm-wiki.md) | Andrej Karpathy's LLM wiki: the pattern these docs follow (raw: kept as given) | Added by Kyan's Claude, 2026-10-06 |
 | [references/skills-and-plugins.md](references/skills-and-plugins.md) | Claude Code skills and plugins: what's built in, what we installed, what's worth adding, and what we chose not to use | Kyan's Claude, 2026-10-06 |

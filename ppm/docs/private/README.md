@@ -3,6 +3,7 @@
 This folder is yours. Git ignores everything in it except this README, so the notes you keep here stay on your computer and never reach the public repository.
 
 - **What goes here:** notes meant only for you, like a brief you're working from, research, a plan that isn't ready to share, or reference screenshots.
+- **Screenshots of bugs go in `bugs/`,** named for what's wrong, with the date in front. They show the live PPM, with real tasks and names, so this is the only folder they belong in (the repository's [`docs/fixing-bugs.md`](../../../docs/fixing-bugs.md)).
 - **Keep an `index.md` here** that lists your notes, so your Claude sessions can find them. Sessions read it before starting work that your notes cover.
 - **Something worth sharing?** Write it into the knowledge base (`../`), without the private parts. Never copy a private note into a shared doc as it is.
 - **Never force a file in** with `git add -f`.

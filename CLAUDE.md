@@ -42,6 +42,7 @@ Kenneth (owner; merges to `main`) and Kyan (developer and architecture), each wi
 - **Give goals, not steps:** a task comes with its goal, why, limits and a done you can check. A written checklist only when the work outlasts the session or has many asks (`docs/how-we-work.md`).
 - **Searching:** if `qmd` is installed, ask questions with `qmd query`, writing its intent, lex, vec and hyde lines yourself (the most accurate search, 13 to 27 s), and read the top few results, not only the first; use `qmd search` or `grep` for exact names. Without qmd, the indexes and `grep`. How and why: `docs/references/qmd.md`.
 - **Commits are short and warm** and pull requests a short walkthrough: `docs/git-conventions.md`.
+- **Fixing a bug:** `docs/fixing-bugs.md`. A `fix` branch from a fresh `origin/main`; its screenshots in a `private/bugs/` folder, never `raw/` or `references/`; see it broken first; a check that fails before the fix and passes after.
 - **Log only what's substantial, write a report only for large work or when asked,** and put anything only a person can do in a `for-humans/` page. What needs Kenneth's accounts (Vercel, Supabase, the domain, hosting) goes on `docs/for-humans/kenneth.md`.
 
 ## Rules the history taught
