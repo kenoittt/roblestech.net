@@ -16,7 +16,6 @@ What the PPM doesn't do, or doesn't do well yet, and why. Knowing these saves re
 - **An entry that crosses midnight can't be dragged;** change its times in its details. **A calendar template keeps one day,** so it can't run past midnight.
 - **Templates can't add a block to every weekday at once,** and a task template can't also block time for the task ([backlog](../backlog.md), item 15).
 - **No way back if nobody is a super admin.** Today it takes SQL on the live database ([backlog](../backlog.md), item 12).
-- **Project owners can't delete an empty project;** only admins delete ([backlog](../backlog.md), item 13).
 - **Type errors don't block pull requests yet** ([backlog](../backlog.md), item 8).
 
 ## Known debt

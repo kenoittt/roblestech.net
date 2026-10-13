@@ -188,4 +188,4 @@ A pull request that adds files to `supabase/migrations/` needs them on the live 
 
 If the dry run lists anything else, stop: the live database and the repository disagree, and that needs looking at first.
 
-**Nothing waiting as of 2026-10-07.** The two updates from 2026-10-04 (deleting projects, templates) had missed the live database when their branch was merged; they went in on 2026-10-07 with the two from #19 (blocks that follow their task, block colours), and the live database matches the repository.
+**One waiting as of 2026-10-13:** `20261013000100_owners_delete_empty_projects`, with the pull request for that day's fixes (`kyan/fix/ppm-calendar-blocks-and-plan`). Before that, nothing had been waiting since 2026-10-07: the two updates from 2026-10-04 (deleting projects, templates) had missed the live database when their branch was merged; they went in on 2026-10-07 with the two from #19 (blocks that follow their task, block colours), and the live database matches the repository.

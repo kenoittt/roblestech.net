@@ -23,7 +23,7 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [guides/architecture.md](guides/architecture.md) | The stack, the folders, how data moves, where the rules live, settings | Kyan's Claude, 2026-10-06 |
 | [guides/database.md](guides/database.md) | Changing the database, who may do what (the permissions table), how the rules work | Kyan's Claude, 2026-10-06 |
 | [guides/testing.md](guides/testing.md) | What to run and when, writing a smoke check, lessons the tests taught | Kyan's Claude, 2026-10-06 |
-| [guides/workflow.md](guides/workflow.md) | A piece of work from brief to merge, and which docs to update | Kyan's Claude, 2026-10-06 |
+| [guides/workflow.md](guides/workflow.md) | A piece of work from brief to merge, and which docs to update. For a bug, the repository's [`docs/fixing-bugs.md`](../../docs/fixing-bugs.md) adds the rest | Kyan's Claude, 2026-10-06 |
 | [guides/limitations.md](guides/limitations.md) | What the PPM doesn't do yet, and why | Kyan's Claude, 2026-10-06 |
 | [DEPLOY.md](DEPLOY.md) | How the PPM replaced the Astro PPM on 2026-10-03, and how database updates reach the live database now | Kyan's Claude, 2026-10-03; updated by Kenneth's Claude (2026-10-03) and a cloud session (2026-10-04) |
 
@@ -64,7 +64,8 @@ Every page in `ppm/docs/`, what it's for, and who wrote it. Read this first, the
 | [raw/2026-10-04-kyan-voice-brief.md](raw/2026-10-04-kyan-voice-brief.md) | Kyan's brief to a cloud session, word for word (raw: never edited) | A cloud session, 2026-10-04 |
 | [reports/2026-10-04-session-report.md](reports/2026-10-04-session-report.md) | What that session built (templates, archive and delete, the password eye, role messages) and why, and what it lacked | A cloud session, 2026-10-04 |
 | [reports/2026-10-07-session-report.md](reports/2026-10-07-session-report.md) | What this round built (templates in the dialogs, the all-day calendar, colours, the people picker, Copy my plan your way, shared components, full sample data) and why, and what Kenneth applies first | Kyan's Claude, 2026-10-07 |
-| [private/README.md](private/README.md) | Your own notes, on your computer only: git ignores everything here except this README | Kyan's Claude, 2026-10-06 |
+| [reports/2026-10-13-explanatory-text-audit.md](reports/2026-10-13-explanatory-text-audit.md) | Every sentence in the PPM that explains how something works, where it shows, and a suggestion for each: for Kyan to decide | Kyan's Claude, 2026-10-13 |
+| [private/README.md](private/README.md) | Your own notes, on your computer only, and screenshots of bugs in `private/bugs/`: git ignores everything here except this README | Kyan's Claude, 2026-10-06; updated 2026-10-13 |
 | [handbook-drafts/](handbook-drafts/) | The source of the Handbook's "Using the PPM" shelf. Superseded: the published articles (migration `20261003000100`) are the current version, edited in the app | Kyan's Claude, 2026-10-03 |
 
 ## Outside this folder

@@ -90,12 +90,13 @@ Choosing:
 | Pick several people, as a form field | `PeoplePicker` (`src/domains/people/components/people-picker.tsx`): who's chosen as photos and names in the field, a searchable list behind it, chosen people first when it opens | Meeting guests, project members |
 | More than fits | Show what fits, then "N more" or "+N", which opens the full list | A busy day in the month view, crowded hours, a day's due tasks |
 | Actions on one thing | `DropdownMenu` behind a ⋯ button | A task's or a project's menu |
-| A few fields or details, anchored to something | `Popover` | A calendar entry's details |
+| A few fields or details, anchored to something | `Popover`. What you do most sits at its foot in words, on the left; changing or removing the thing sits at the right, as icons with labels for screen readers and on hover | A calendar entry's details: Tick off and Finish task, then a pencil and a bin |
 | A focused decision, or a short form | `ModalShell` (`src/components/app/modal.tsx`) | Invite, Deactivate, Delete project |
 | Make something in another form, without a second dialog | A switch in the dialog's footer that changes what it saves; the main button says what it will do | Save as template, in the new-task dialog and Plan time |
 | Look at or edit a task | The side panel: no page load | Click any task |
 | Make a task | The create dialog (press C) | |
 | Tell people it worked | A toast (`sonner`), with **Undo** when the action can be undone | "Task deleted. Undo" |
+| Delete something small, for good | `ConfirmDelete`, or `useConfirm()` when the button needs its own shape (`src/components/app/confirm.tsx`): it asks in place | A calendar entry, a comment, a file, a template |
 | A main action with quick variants | A split button: `splitButton()` in `src/components/app/split-button.tsx`, one shape, one hairline, each part lighting up on its own | Plan time, with templates under the arrow; Copy my plan, with how it reads |
 
 Two rules learned the hard way:
@@ -120,7 +121,7 @@ Two rules learned the hard way:
 - **Fill in what you can.** Sensible defaults, the current context (a project page fills in the project), the last choice where it helps.
 - **Validate when someone tries to submit,** or leaves a field, not while they're still choosing. Show the error at the field in `danger`, with one sentence, and move focus there. Toasts are for results, not for field errors.
 - **Buttons say what they do:** "Send invitation", "Add to calendar", "Delete project and 2 tasks".
-- **Things that can't be undone ask first,** in a dialog that says exactly what goes. Small deletes can confirm in place: the button turns red and reads "Delete" for a few seconds.
+- **A delete that can't be undone always asks first** (Kyan, 2026-10-13). Small things ask in place: the first press turns the button red and says what the next will do ("Delete", "Remove", "Yes, delete"), the second does it, and after four seconds it goes back. Use `useConfirm()` or `ConfirmDelete` from `src/components/app/confirm.tsx`, never a delete that acts on its first press. Big things (a project, an article, someone's account) ask in a dialog that says exactly what goes.
 
 ## Copy
 

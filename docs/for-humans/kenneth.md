@@ -1,8 +1,23 @@
 # Kenneth: your open items
 
-Updated 2026-10-07. Tick each one off here, with the date, when it's done. This page is for every app in the repository: anything that needs your accounts (GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting) lands here.
+Updated 2026-10-13. Tick each one off here, with the date, when it's done. This page is for every app in the repository: anything that needs your accounts (GitHub, Vercel, Supabase, Microsoft 365, the domain and hosting) lands here.
 
-Nothing is waiting for you right now.
+## 1. The PPM's fixes of 2026-10-13, when their pull request reaches you
+
+**What it is:** Kyan's branch `kyan/fix/ppm-calendar-blocks-and-plan`: 15-minute calendar blocks that no longer overlap, Finish task in a time block's details, Copy my plan as a list, deletes that ask first, a page on fixing bugs, and your decision 0013: a project's owner can delete it while it's empty ([the backlog](../../ppm/docs/backlog.md), items 13 and 34 to 43).
+
+**Before merging: one database update.** `20261013000100_owners_delete_empty_projects.sql` changes who may delete a project (admins as before, and now its owner while it has no tasks). It only adds a rule, so the live PPM keeps working once it's in. From `ppm/`, on the pull request's branch, as in [`DEPLOY.md`](../../ppm/docs/DEPLOY.md#database-updates-after-the-switch):
+
+```bash
+npx supabase db push --dry-run    # must list this one file and nothing else
+npx supabase db push
+```
+
+If it's merged first by mistake, nothing breaks: an owner is offered Delete and told "Only admins can delete a project" until the update is in.
+
+**One thing that's your call:** it adds one line to the shared `CLAUDE.md`, pointing every session to the new [`docs/fixing-bugs.md`](../fixing-bugs.md). Say so if you'd rather it read differently.
+
+**After merging,** on the live PPM: open the calendar and look at two short blocks in a row; open a block that's for a task and press Finish task (then Reopen the task, if it was only a test); use the arrow beside Copy my plan to turn the list on; and ask someone who isn't an admin to make a project and delete it.
 
 ## Done
 
