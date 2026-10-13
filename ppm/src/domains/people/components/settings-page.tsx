@@ -122,10 +122,7 @@ export function SettingsPage() {
 
           <Block title="Notifications" description="The inbox always collects everything; email is optional.">
             <label className="flex items-center justify-between gap-4 text-sm text-fg-2">
-              <span>
-                Email me when I'm assigned work, asked for a sign-off, or my task is finished
-                <span className="block text-xs text-fg-3">Sent through RTC's Microsoft 365 once this is live.</span>
-              </span>
+              <span>Email me when I'm assigned work, asked for a sign-off, or my task is finished</span>
               <Switch checked={!optOut} onCheckedChange={(on) => saveEmail(!on)} />
             </label>
           </Block>
