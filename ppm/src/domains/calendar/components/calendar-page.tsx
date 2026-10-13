@@ -301,13 +301,13 @@ export function CalendarPage() {
             <Icon icon={ArrowRight01Icon} size={14} />
           </button>
         </div>
-        <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular">{label}</h2>
-
+        {/* The date and what you do with it sit together at the right, in both views. On a phone the date starts its own line. */}
+        <h2 className="text-sm font-medium whitespace-nowrap text-fg tabular sm:ml-auto">{label}</h2>
         <CopyPlan
           heading={`${firstName(me)}'s plan for ${longDate(planDay)}`}
           entries={planEntries}
           due={planDue}
-          className={mode === "team" ? "" : "ml-auto"}
+          className="ml-auto sm:ml-0"
         />
         {mode === "week" && (
           <DropdownMenu>
@@ -335,9 +335,6 @@ export function CalendarPage() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
-        {mode === "team" && (
-          <p className="ml-auto hidden text-xs text-fg-3 md:block">Each person decides what you see. Dashed blocks show only that they're busy.</p>
         )}
       </div>
 
