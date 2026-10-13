@@ -27,9 +27,13 @@ export function canManageProject(project: Project, me: Pick<Member, "id" | "role
   )
 }
 
-/** Deleting is for admins only (the ppm_projects_delete rule); everyone else archives. */
-export function canDeleteProject(me: Pick<Member, "role">) {
-  return isAdminRole(me.role)
+/**
+ * Admins delete any project. Its owner may too, while it has no tasks. Mirrors
+ * ppm_can_delete_project in the database, which has the last word: it also
+ * counts the tasks this person can't see (deleted ones, someone's private one).
+ */
+export function canDeleteProject(project: Project, me: Pick<Member, "id" | "role">, tasks: Pick<Task, "project_id">[]) {
+  return isAdminRole(me.role) || (project.owner_id === me.id && !tasks.some((t) => t.project_id === project.id))
 }
 
 /** RTC's blues first; a few calm alternates for telling projects apart. */

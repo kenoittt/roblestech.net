@@ -9,6 +9,7 @@ From reading the brief to the merge, for anyone working on the PPM. The reposito
 3. The guides that apply: [design system](design-system.md), [UX principles](ux-principles.md), [architecture](architecture.md), [database](database.md), [testing](testing.md).
 4. [`../backlog.md`](../backlog.md) and the last few entries of [`../log.md`](../log.md): what's open, and what changed recently.
 5. If you're working from a brief, re-read it at the start of each task. Private briefs live in `docs/private/` (git ignores it); a brief only goes in [`../raw/`](../raw/) when its author asks for it to be kept in the repository.
+6. **Fixing a bug?** Read the repository's [`docs/fixing-bugs.md`](../../../docs/fixing-bugs.md) too. Its screenshots are in `docs/private/bugs/`.
 
 ## 2. Check for other work
 
@@ -16,7 +17,7 @@ From reading the brief to the merge, for anyone working on the PPM. The reposito
 
 ## 3. Branch
 
-One branch per task, never `main`. Name it as in [`docs/git-conventions.md`](../../../docs/git-conventions.md): `kyan/feat/ppm-templates` or `claude/fix/ppm-sign-in`.
+One branch per task, never `main`, from a fresh `origin/main`. Name it as in [`docs/git-conventions.md`](../../../docs/git-conventions.md): `kyan/feat/ppm-templates` or `claude/fix/ppm-sign-in`.
 
 ## 4. Understand, then plan
 

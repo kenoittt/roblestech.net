@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
+import { ConfirmDelete } from "@/components/app/confirm"
 import { PasswordInput } from "@/components/app/password-input"
 import { PageBody, PageHeader } from "@/components/app/page"
 import { fieldClass } from "@/components/ui/field"
@@ -121,10 +122,7 @@ export function SettingsPage() {
 
           <Block title="Notifications" description="The inbox always collects everything; email is optional.">
             <label className="flex items-center justify-between gap-4 text-sm text-fg-2">
-              <span>
-                Email me when I'm assigned work, asked for a sign-off, or my task is finished
-                <span className="block text-xs text-fg-3">Sent through RTC's Microsoft 365 once this is live.</span>
-              </span>
+              <span>Email me when I'm assigned work, asked for a sign-off, or my task is finished</span>
               <Switch checked={!optOut} onCheckedChange={(on) => saveEmail(!on)} />
             </label>
           </Block>
@@ -232,9 +230,9 @@ function PhotoButtons({ hasPhoto, uid }: { hasPhoto: boolean; uid: string }) {
         {busy ? "Saving…" : hasPhoto ? "Change photo" : "Add a photo"}
       </button>
       {hasPhoto && (
-        <button type="button" disabled={busy} onClick={remove} className="text-fg-3 hover:text-fg disabled:opacity-50">
+        <ConfirmDelete label="Remove your photo" answer="Yes, remove" disabled={busy} onConfirm={remove} className="text-fg-3 hover:text-fg disabled:opacity-50">
           Remove
-        </button>
+        </ConfirmDelete>
       )}
     </div>
   )

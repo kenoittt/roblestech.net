@@ -29,7 +29,7 @@ Every docs folder follows the same shape, so you always know where to look. Not 
 | `for-humans/` | Things only a person can do (an account setting, a database update, a decision), each with what to do, why, and how | Written for that person, in plain words |
 | `reports/` | What a large piece of work did, what it considered and why | Only for large work, or when someone asks for one. Not for every task |
 | `backlog.md` | What's left to do | One list, so nothing is tracked in two places |
-| `private/` | Each person's own briefs and notes, on their own computer | Git ignores what's inside. Never force a file in with `git add -f`, and never run `git clean -x` here: it deletes ignored files |
+| `private/` | Each person's own briefs and notes, on their own computer, and screenshots of bugs in `private/bugs/` ([fixing-bugs.md](fixing-bugs.md)) | Git ignores what's inside. Never force a file in with `git add -f`, and never run `git clean -x` here: it deletes ignored files |
 
 ## What belongs in a log
 

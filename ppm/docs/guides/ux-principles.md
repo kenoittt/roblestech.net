@@ -22,7 +22,7 @@ Clicking a task opens the side panel beside the list, with no page load. The add
 List, board and calendar show the same tasks. The view, filters, grouping and order are remembered per person and per screen, and saved immediately.
 
 ### Edit where it sits
-Status, priority, assignee and due date can be changed right in the row or on the card, with the same pickers as the panel. People shouldn't have to open something to change one thing.
+Status, priority, assignee and due date can be changed right in the row or on the card, with the same pickers as the panel. People shouldn't have to open something to change one thing. A time block for a task finishes the task from its own details, beside Tick off.
 
 ### Fewest clicks, keyboard within reach
 - **C** creates a task; **⌘Enter** saves it. **⌘K** finds anything and runs any command, templates included.
@@ -35,7 +35,7 @@ Changes show at once (optimistic updates). If the database refuses, the change r
 
 ### Undo over "are you sure?"
 - What can be undone **just happens,** with **Undo** in the confirmation: deleting a task, archiving a project, adding a time block from a template.
-- **Ask first** only when it can't be undone (deleting a project) or when it notifies other people (a meeting from a template opens filled in for a look before anyone is invited).
+- **Ask first** when it can't be undone, every time: in place for something small (a calendar entry, a comment, a file), in a dialog for something big (a project). And when it notifies other people (a meeting from a template opens filled in for a look before anyone is invited).
 
 ### Rules explain themselves
 When something isn't allowed, say why and what to do instead: "Only Kenneth can mark it done. Move it to In review instead." Role refusals name the role the database has for you. Never hide the cause: a refusal that looks like a bug costs everyone time.
@@ -67,6 +67,7 @@ The shared rules are in [`docs/ux-principles.md`](../../../docs/ux-principles.md
 
 - **A list of people** uses a searchable multi-select (`PeoplePicker` as a form field, `PickerMenu` with `multiple` as a chip), never a row of chips. Meeting guests and project members moved to it on 2026-10-07.
 - **A view that fills up** shows what fits and folds the rest behind "N more" or "+N", which opens the full list: a month day's tasks, entries that overlap, a day's due tasks. Never slivers, and never one cell running into the next.
+- **A calendar entry takes the space of its time, and no more.** A 15-minute block is one tight line, 12 px tall, with its title and times on hover. Nothing is drawn taller than the room it's laid out in, or it covers what comes next.
 - **A long list gets a search.** The Filter menu's categories show one once they have more than eight options.
 - **Still to do:** Team day shows a column per person, which scrolls sideways for a large team ([limitations](limitations.md)).
 

@@ -19,9 +19,10 @@ import type { Project } from "@/domains/workspace/types"
 import { canDeleteProject, canManageProject, useProjectActions } from "../data"
 
 /**
- * A project's own actions: archive or restore it, and, for admins, delete it.
- * The same menu sits on the project's page and on its row in the portfolio.
- * It renders nothing for someone who can do neither.
+ * A project's own actions: archive or restore it, and delete it, for admins
+ * and for its owner while it's empty. The same menu sits on the project's page
+ * and on its row in the portfolio. It renders nothing for someone who can do
+ * neither.
  */
 export function ProjectMenu({
   project,
@@ -36,10 +37,11 @@ export function ProjectMenu({
   afterDelete?: string
 }) {
   const me = useMe()
+  const tasks = useTasks()
   const { setArchived } = useProjectActions()
   const [deleting, setDeleting] = useState(false)
   const manage = canManageProject(project, me)
-  const del = canDeleteProject(me)
+  const del = canDeleteProject(project, me, tasks)
   if (!manage && !del) return null
 
   return (

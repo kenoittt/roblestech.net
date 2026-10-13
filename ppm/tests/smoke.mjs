@@ -276,7 +276,7 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
       const pid = sql(`insert into ppm_projects (name, owner_id, created_by) values ('E2E throwaway', '${CARL}', '${CARL}') returning id`).split("\n")[0]
       sql(`insert into ppm_tasks (title, project_id, created_by) values ('${title} in a throwaway project', '${pid}', '${CARL}')`)
       const refused = rest(tokenFor("carl@rtc.test"), "POST", "rpc/ppm_delete_project", { pid, delete_tasks: true })
-      check("Staff can't delete a project, even its owner", refused.includes("Only admins can delete") && sql(`select count(*) from ppm_projects where id = '${pid}'`) === "1" && sql(`select count(*) from ppm_tasks where project_id = '${pid}' and deleted_at is null`) === "1")
+      check("A project's owner can't delete it while it has tasks", refused.includes("only an admin can delete it") && sql(`select count(*) from ppm_projects where id = '${pid}'`) === "1" && sql(`select count(*) from ppm_tasks where project_id = '${pid}' and deleted_at is null`) === "1", refused.slice(0, 80))
       const { ctx, page } = await session("carl@rtc.test")
       await page.goto(BASE + "/projects", { waitUntil: "networkidle" })
       const row = page.locator('tr:has-text("E2E throwaway")')
@@ -315,6 +315,9 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
       await page.waitForTimeout(1500)
       const block = sql(`select to_char(starts_at at time zone 'Asia/Manila', 'YYYY-MM-DD HH24:MI') || ' ' || to_char(ends_at at time zone 'Asia/Manila', 'HH24:MI') from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
       check("Plan time from a template puts the block on today", block === `${today} 09:00 11:00`, block)
+      // The template's block ticks itself off, so after 11 AM it already reads Done. Switch that off: this check is about Tick off
+      sql(`update cal_events set auto_complete = false where owner_id = '${CARL}' and title = 'Outreach emails'`)
+      await page.reload({ waitUntil: "networkidle" })
       await page.locator('[data-event]:has-text("Outreach emails")').first().click()
       await page.waitForTimeout(400)
       await page.click('[data-slot="popover-content"] button:has-text("Tick off")')
@@ -395,6 +398,177 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
   } finally {
     sql("delete from ppm_task_templates where name like 'E2E%'")
     sql("delete from cal_event_templates where name like 'E2E%'")
+  }
+}
+
+// ---------------------------------------------------------------- Added 2026-10-13: short blocks, a task finished from its block, deletes that ask first,
+// Copy my plan as a list, and a project's owner deleting it while it's empty
+{
+  const CARL = "00000000-0000-4000-a000-000000000005"
+  const tokenFor = (email) =>
+    JSON.parse(execSync(`curl -s -X POST "http://127.0.0.1:54321/auth/v1/token?grant_type=password" -H "apikey: ${anon}" -H "Content-Type: application/json" -d '{"email":"${email}","password":"rtc-demo-2026"}'`).toString()).access_token
+  const rest = (token, method, path, body) =>
+    execSync(`curl -s -X ${method} "http://127.0.0.1:54321/rest/v1/${path}" -H "apikey: ${anon}" -H "Authorization: Bearer ${token}" -H "Content-Type: application/json" -H "Prefer: return=representation"${body ? ` -d '${JSON.stringify(body)}'` : ""}`).toString()
+  const today = sql("select (now() at time zone 'Asia/Manila')::date")
+  const at = (time) => `${today}T${time}:00+08:00`
+  try {
+    // Carl's early morning, clear of the sample entries: three blocks in a row, then two for tasks
+    const carl = tokenFor("carl@rtc.test")
+    const block = (name, from, to, task) => rest(carl, "POST", "cal_events", { title: name, kind: "block", starts_at: at(from), ends_at: at(to), task_id: task?.id ?? null })
+    const [own] = JSON.parse(rest(carl, "POST", "ppm_tasks", { title: `${title} to finish from its block`, assignee_id: CARL }))
+    const [ruled] = JSON.parse(rest(carl, "POST", "ppm_tasks", { title: `${title} that someone else signs off`, assignee_id: CARL, completion_policy: "not_assignee" }))
+    block("E2E quarter to stretch", "04:00", "04:15")
+    block("E2E quarter one", "05:00", "05:15")
+    block("E2E quarter two", "05:15", "05:30")
+    block("E2E half hour", "05:30", "06:00")
+    block("E2E block to finish", "06:30", "07:00", own)
+    block("E2E block to send for sign-off", "07:00", "07:30", ruled)
+    block("E2E block to delete", "07:30", "08:00")
+    // One that ticks itself off, and whose time has passed (unless this runs in the first minutes after midnight)
+    rest(carl, "POST", "cal_events", { title: "E2E block that ticks itself", kind: "block", starts_at: at("00:00"), ends_at: at("00:05"), auto_complete: true })
+
+    const { ctx, page } = await session("carl@rtc.test")
+    await page.goto(BASE + "/calendar", { waitUntil: "networkidle" })
+    const entry = (name) => page.locator(`[data-event]:has-text("${name}")`).first()
+    await entry("E2E quarter one").waitFor()
+
+    // A 15-minute block is drawn in its own 15 minutes, so the next one never sits on top of it
+    const [one, two, half] = await Promise.all(["E2E quarter one", "E2E quarter two", "E2E half hour"].map((n) => entry(n).boundingBox()))
+    check(
+      "15-minute blocks in a row each keep to their own time",
+      Boolean(one && two && half) && one.y + one.height <= two.y && two.y + two.height <= half.y,
+      one && two && half ? `${one.height}px tall, ${(two.y - one.y - one.height).toFixed(1)}px apart` : "blocks not found",
+    )
+
+    // Every block stretches by its bottom edge, the shortest ones too
+    const stretch = async (name) => {
+      await entry(name).scrollIntoViewIfNeeded()
+      const b = await entry(name).boundingBox()
+      const x = b.x + b.width / 2
+      const edge = b.y + b.height - 2
+      await page.mouse.move(x, edge)
+      await page.mouse.down()
+      await page.mouse.move(x, edge + 6, { steps: 3 })
+      await page.mouse.move(x, edge + 14, { steps: 6 })
+      await page.mouse.up()
+      await page.waitForTimeout(1200)
+    }
+    await stretch("E2E quarter to stretch")
+    await stretch("E2E half hour")
+    const stretched = sql(`select string_agg(to_char(ends_at at time zone 'Asia/Manila', 'HH24:MI'), ' ' order by starts_at) from cal_events where title in ('E2E quarter to stretch', 'E2E half hour')`)
+    check("A 15-minute and a 30-minute block stretch by their bottom edge", stretched === "04:30 06:15", stretched)
+
+    // Finish task, in a block's details: the task is done, and its block ticked off with it
+    const details = page.locator('[data-slot="popover-content"]')
+    await entry("E2E block to finish").click()
+    await details.locator('button:has-text("Finish task")').click()
+    await page.waitForTimeout(1500)
+    const finished = sql(`select t.status || ' ' || (e.completed_at = t.completed_at) from cal_events e join ppm_tasks t on t.id = e.task_id where e.title = 'E2E block to finish'`)
+    check("Finish task in a block's details finishes the task and ticks off its block", finished === "done true", finished || "no block")
+
+    // Edit is the pencil beside the bin
+    await details.locator('button[aria-label="Edit"]').click()
+    await page.waitForTimeout(500)
+    check("The pencil in an entry's details opens it for editing", (await page.locator('[role="dialog"]:has-text("Edit block")').count()) === 1)
+    await page.keyboard.press("Escape")
+    await page.waitForTimeout(300)
+    await page.keyboard.press("Escape")
+
+    // A task whose rule names someone else: Carl is offered its sign-off request instead, and can't finish it from here
+    await entry("E2E block to send for sign-off").click()
+    await page.waitForTimeout(400)
+    const offered = (await details.locator('button:has-text("Finish task")').count()) === 0
+    await details.locator('button:has-text("Request sign-off")').click()
+    await page.waitForTimeout(1500)
+    const sent = sql(`select t.status || ' ' || (e.completed_at is not null) from cal_events e join ppm_tasks t on t.id = e.task_id where e.title = 'E2E block to send for sign-off'`)
+    check("When a task needs someone else's sign-off, its block asks for it: In review, and the block ticked off", offered && sent === "in_review true", `${sent || "no block"}${offered ? "" : ", Finish task was offered"}`)
+    await page.keyboard.press("Escape")
+
+    // Deleting asks first: the bin's first press only asks, its second deletes
+    const left = () => sql("select count(*) from cal_events where title = 'E2E block to delete'")
+    // Its own details: the last entry's may still be fading out
+    const doomed = page.locator('[data-slot="popover-content"]:has-text("E2E block to delete")')
+    await page.waitForTimeout(400)
+    await entry("E2E block to delete").click()
+    await doomed.locator('button[aria-label="Delete"]').click()
+    await page.waitForTimeout(400)
+    const asked = left() === "1" && (await doomed.locator("text=Delete this block?").count()) === 1
+    await doomed.locator('button[aria-label="Confirm: delete"]').click()
+    await page.waitForTimeout(1200)
+    check("Deleting a calendar entry asks first: one press keeps it, a second deletes it", asked && left() === "0", `asked: ${asked}, left: ${left()}`)
+
+    // A block that ticked itself off says Done, like one ticked by hand, and unticking it sticks
+    const selfTicked = page.locator('[data-slot="popover-content"]:has-text("E2E block that ticks itself")')
+    await page.waitForTimeout(400)
+    await entry("E2E block that ticks itself").click()
+    const tick = selfTicked.locator("div.border-t button").first()
+    const read = (await tick.innerText()).trim()
+    await tick.click()
+    await page.waitForTimeout(1200)
+    const unticked = sql("select auto_complete || ' ' || (completed_at is null) from cal_events where title = 'E2E block that ticks itself'")
+    check("A block that ticked itself off says Done, and unticking it sticks", read === "Done" && unticked === "false true" && (await tick.innerText()).trim() === "Tick off", `read "${read}", then ${unticked}`)
+    await page.keyboard.press("Escape")
+
+    // Copy my plan: a numbered list, a bulleted one, or neither, and a hyphen before DONE
+    await page.click('button[aria-label="Choose how your plan reads"]')
+    const choose = async (group, label) => {
+      await details.locator(`[role="radiogroup"][aria-label="${group}"] button:has-text("${label}")`).click()
+      await page.waitForTimeout(600)
+    }
+    // The preview is what gets pasted. Its entries are the lines with a time; the title and "Due" lines aren't listed.
+    const entries = async () => (await details.locator("div.bg-inset p").allInnerTexts()).filter((line) => /\d [AP]M to \d/.test(line))
+    await choose("What's done", "Add DONE")
+    await choose("As a list", "1. Numbers")
+    const numbered = await entries()
+    const saved = sql(`select prefs->'copyPlan'->>'list' from profiles where id = '${CARL}'`)
+    await choose("As a list", "- Bullets")
+    const bulleted = await entries()
+    await choose("As a list", "Off")
+    const plain = await entries()
+    const finishedLine = numbered.find((line) => line.includes("E2E block to finish")) ?? ""
+    check(
+      "Copy my plan reads as a numbered list, a bulleted one, or neither, with a hyphen before DONE",
+      numbered.length > 0 &&
+        numbered.every((line, i) => line.startsWith(`${i + 1}. `)) &&
+        /^\d+\. 6:30 AM to 7:00 AM: E2E block to finish \(RTC-\d+\) - DONE$/.test(finishedLine) &&
+        bulleted.length === numbered.length &&
+        bulleted.every((line) => line.startsWith("- ")) &&
+        plain.every((line) => /^\d+:\d\d [AP]M to /.test(line)) &&
+        saved === "numbers",
+      `${finishedLine || "no entry for the finished block"} | saved: ${saved}`,
+    )
+    await page.screenshot({ path: `${OUT}/e2e-2026-10-13.png` })
+
+    // A project's owner may delete it while it has no tasks at all. Nobody else who isn't an admin may,
+    // and a project that has held a task, even a deleted one, stays an admin's to delete.
+    sql("delete from ppm_projects where name like 'E2E%'")
+    const project = (name) => sql(`insert into ppm_projects (name, owner_id, created_by) values ('${name}', '${CARL}', '${CARL}') returning id`).split("\n")[0]
+    const exists = (id) => sql(`select count(*) from ppm_projects where id = '${id}'`) === "1"
+    const empty = project("E2E empty project")
+    const held = project("E2E project that held a task")
+    sql(`insert into ppm_tasks (title, project_id, created_by, deleted_at) values ('${title} deleted a while ago', '${held}', '${CARL}', now())`)
+    const teammate = rest(tokenFor("joshua@rtc.test"), "POST", "rpc/ppm_delete_project", { pid: empty })
+    const afterWork = rest(carl, "POST", "rpc/ppm_delete_project", { pid: held })
+    check(
+      "An empty project is its owner's to delete, not a teammate's, and not once it has held a task",
+      teammate.includes("Only admins can delete") && afterWork.includes("deleted ones included") && exists(empty) && exists(held),
+      `teammate: ${teammate.slice(0, 60)} | after work: ${afterWork.slice(0, 60)}`,
+    )
+    await page.goto(BASE + "/projects", { waitUntil: "networkidle" })
+    const row = page.locator('tr:has-text("E2E empty project")')
+    await row.hover()
+    await row.locator('button[aria-label^="Actions for"]').click()
+    await page.click('[role="menuitem"]:has-text("Delete project")')
+    await page.click('[role="dialog"] button:has-text("Delete project")')
+    await page.waitForTimeout(1500)
+    check("A project's owner deletes it while it's empty, from its menu", !exists(empty) && (await page.locator('tr:has-text("E2E empty project")').count()) === 0)
+    await ctx.close()
+  } catch (e) {
+    check("the 2026-10-13 checks ran to the end", false, e.message.split("\n")[0])
+  } finally {
+    // Carl John keeps the default plan in the sample data
+    sql(`update profiles set prefs = prefs - 'copyPlan' where id = '${CARL}'`)
+    sql("delete from ppm_projects where name like 'E2E%'")
   }
 }
 

@@ -4,15 +4,18 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { ArrowLeft01Icon, CheckmarkCircle02Icon, Edit02Icon, LockKeyIcon, ViewOffIcon, Delete02Icon, Task01Icon } from "@hugeicons/core-free-icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AvatarStack } from "@/components/app/avatar"
+import { armedClass, useConfirm } from "@/components/app/confirm"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { isoDay, longDate, manilaInstant, minutesOfDay } from "@/lib/dates"
 import { useMe, useMemberMap, useNow, useTasks } from "@/domains/workspace/provider"
 import { displayName, firstName, namesLine } from "@/domains/workspace/types"
-import { taskKey, type Task } from "@/domains/tasks/config"
+import { finishStep, taskKey, type FinishStep, type Status, type Task } from "@/domains/tasks/config"
+import { useUpdateTask } from "@/domains/tasks/data"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
-import { blockColor, isEventDone, useCalendarActions, type CalEvent } from "../data"
+import { useAdminSignOffNote } from "@/domains/tasks/components/task-properties"
+import { blockColor, donePatch, isEventDone, useCalendarActions, type CalEvent } from "../data"
 import {
   DAY_END,
   DAY_START,
@@ -32,6 +35,19 @@ import {
 
 /** Due tasks shown above a day's hours before the rest fold into "N more". */
 const DUE_SHOWN = 3
+
+/**
+ * Below this height an entry has room for one tight line and no padding: a
+ * 15-minute block is 12px tall. It's drawn that size, never taller, so it
+ * can't cover the entry after it.
+ */
+const ONE_LINE_PX = 20
+const TINY = "justify-center rounded-xs py-0 text-[10px] leading-3"
+
+/** An entry's details: wide enough for its longest row of buttons, on one line. */
+const DETAILS = "w-80 gap-3 p-3"
+const detailButton = "pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium whitespace-nowrap text-fg-2 hover:bg-hover hover:text-fg"
+const detailIcon = "pressable inline-flex size-7 shrink-0 items-center justify-center rounded-md"
 
 type MoveState = {
   id: string
@@ -276,7 +292,8 @@ export function TimeGrid({
                         ? "border-status-in-review bg-[color-mix(in_oklab,var(--status-in-review)_22%,var(--surface))]"
                         : blockColor(move.color).tone,
                     )}
-                    style={{ top: minuteToY(move.newStart), height: Math.max(20, minuteToY(move.newEnd) - minuteToY(move.newStart) - 2) }}
+                    // It floats while you drag, so a short block's outline grows to hold its new time.
+                    style={{ top: minuteToY(move.newStart), minHeight: minuteToY(move.newEnd) - minuteToY(move.newStart) - 2 }}
                   >
                     <span className="block truncate font-medium text-fg">{move.title}</span>
                     <span className="block truncate text-fg-2 tabular">
@@ -345,14 +362,15 @@ function EventBlock({
   const done = isEventDone(event, now)
   const mine = event.owner_id === me.id
   const short = height < 36
+  const tiny = height < ONE_LINE_PX
   const { width, left } = laneBox(lane, lanes)
 
   const body = (
     <>
       <span className={cn("flex min-w-0 items-center gap-1 font-medium", done && "line-through decoration-fg-4")}>
-        {done && <Icon icon={CheckmarkCircle02Icon} size={12} className="shrink-0 text-status-done" />}
-        {mine && event.visibility === "private" && <Icon icon={LockKeyIcon} size={11} className="shrink-0 text-fg-3" />}
-        {mine && event.visibility === "busy" && <Icon icon={ViewOffIcon} size={11} className="shrink-0 text-fg-3" />}
+        {done && <Icon icon={CheckmarkCircle02Icon} size={tiny ? 10 : 12} className="shrink-0 text-status-done" />}
+        {mine && event.visibility === "private" && <Icon icon={LockKeyIcon} size={tiny ? 10 : 11} className="shrink-0 text-fg-3" />}
+        {mine && event.visibility === "busy" && <Icon icon={ViewOffIcon} size={tiny ? 10 : 11} className="shrink-0 text-fg-3" />}
         <span className="truncate">{event.title}</span>
       </span>
       {!short && <span className="block truncate text-fg-3 tabular">{entryTimes(event, { compact: true })}</span>}
@@ -376,9 +394,12 @@ function EventBlock({
       <PopoverTrigger
         data-event
         onPointerDown={(e) => (draggable ? onBeginMove(e, "move") : e.stopPropagation())}
+        // A block too short for its times says them on hover, with its whole title.
+        title={short ? `${event.title}, ${entryTimes(event)}` : undefined}
         className={cn(
           // overflow-clip, not hidden: hidden would stop the title sticking to the top of the day as you scroll.
           "absolute z-[1] flex flex-col items-stretch justify-start overflow-clip rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          tiny && TINY,
           toneOf(event),
           // Square where it carries on from the day before or into the next.
           before && "rounded-t-none",
@@ -390,16 +411,17 @@ function EventBlock({
         style={{ top, height, width, left }}
       >
         {/* A long block keeps its title in view while you scroll through it. */}
-        <span className="sticky top-1 flex min-w-0 flex-col">{body}</span>
-        {draggable && height >= 28 && (
+        <span className={cn("sticky flex min-w-0 flex-col", tiny ? "top-0" : "top-1")}>{body}</span>
+        {/* Every block stretches by its bottom edge, the shortest included: a thinner edge there, so the rest still moves it. */}
+        {draggable && (
           <span
             aria-hidden
             onPointerDown={(e) => onBeginMove(e, "resize")}
-            className="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize"
+            className={cn("absolute inset-x-0 bottom-0 cursor-ns-resize", tiny ? "h-1" : "h-1.5")}
           />
         )}
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
+      <PopoverContent side="right" align="start" className={DETAILS}>
         <EventDetails event={event} onEdit={onEdit} />
       </PopoverContent>
     </Popover>
@@ -426,6 +448,10 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
   const tasks = useTasks()
   const { open } = useTaskPanel()
   const { update, remove } = useCalendarActions()
+  const del = useConfirm(() => remove.mutate(event.id))
+  const now = useNow()
+  // Done however it got there: ticked by hand, by its task, or by itself once its time passed.
+  const done = isEventDone(event, now)
   const mine = event.owner_id === me.id
   const task = event.task_id ? tasks.find((t) => t.id === event.task_id) : null
   const owner = members.get(event.owner_id)
@@ -475,27 +501,83 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
         </>
       )}
       {mine && (
+        // What you do most on the left, in words; changing or removing the entry on the right, as icons.
         <div className="flex items-center gap-1 border-t border-line pt-2">
-          {event.kind === "block" && (
-            <button
-              type="button"
-              onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
-              className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg"
-            >
-              <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
-              {event.completed_at ? "Done" : "Tick off"}
-            </button>
+          {del.armed ? (
+            // Deleting asks first: the row becomes the question, and the bin its answer.
+            <span className="px-2 text-xs text-fg-2">{event.kind === "meeting" ? "Delete this meeting for everyone?" : "Delete this block?"}</span>
+          ) : (
+            <>
+              {event.kind === "block" && (
+                <button type="button" onClick={() => update.mutate({ id: event.id, patch: donePatch(event, now) })} className={detailButton}>
+                  <Icon icon={CheckmarkCircle02Icon} size={14} className={done ? "text-status-done" : ""} />
+                  {done ? "Done" : "Tick off"}
+                </button>
+              )}
+              {event.kind === "block" && task && <TaskStep event={event} task={task} />}
+              <button type="button" aria-label="Edit" title="Edit" onClick={() => onEdit(event)} className={cn(detailIcon, "ml-auto text-fg-3 hover:bg-hover hover:text-fg")}>
+                <Icon icon={Edit02Icon} size={14} />
+              </button>
+            </>
           )}
-          <button type="button" onClick={() => onEdit(event)} className="pressable inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-fg-2 hover:bg-hover hover:text-fg">
-            <Icon icon={Edit02Icon} size={14} />
-            Edit
-          </button>
-          <button type="button" aria-label="Delete" onClick={() => remove.mutate(event.id)} className="pressable ml-auto inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-danger hover:bg-danger-soft">
+          <button
+            type="button"
+            aria-label={del.armed ? "Confirm: delete" : "Delete"}
+            title={del.armed ? undefined : "Delete"}
+            onClick={del.press}
+            className={del.armed ? cn(detailButton, armedClass, "ml-auto hover:bg-danger-soft hover:text-danger") : cn(detailIcon, "text-danger hover:bg-danger-soft")}
+          >
             <Icon icon={Delete02Icon} size={14} />
+            {del.armed && "Delete"}
           </button>
         </div>
       )}
     </>
+  )
+}
+
+const TASK_STEP: Record<FinishStep, { label: string; status: Status }> = {
+  done: { label: "Finish task", status: "done" },
+  admin: { label: "Sign off as admin", status: "done" },
+  request: { label: "Request sign-off", status: "in_review" },
+}
+
+/**
+ * For a block that's for a task: finish the task from the block, in one click.
+ * Ticking a block off leaves its task open, since working on a task isn't
+ * finishing it; this is for when it is. Only the task is saved: the database
+ * then ticks off the task's blocks (cal_blocks_follow_task), this one included.
+ * When the task's sign-off rule names someone else, the step is to ask for
+ * that sign-off, and this block is ticked off with it.
+ */
+function TaskStep({ event, task }: { event: CalEvent; task: Task }) {
+  const me = useMe()
+  const updateTask = useUpdateTask()
+  const { update, tickTaskBlocks, refresh } = useCalendarActions()
+  const adminNote = useAdminSignOffNote(task)
+  const step = finishStep(task, me.id, me.role)
+  if (!step) return null
+  const { label, status } = TASK_STEP[step]
+
+  const run = async () => {
+    const ticking = status === "in_review" && !event.completed_at
+    if (status === "done") tickTaskBlocks(task.id)
+    else if (ticking) update.mutate({ id: event.id, patch: { completed_at: new Date().toISOString() } })
+    try {
+      await updateTask.mutateAsync({ id: task.id, patch: { status } })
+    } catch {
+      // The mutation shows the reason. The block goes back to how it was.
+      if (ticking) update.mutate({ id: event.id, patch: { completed_at: null } })
+    } finally {
+      refresh()
+    }
+  }
+
+  return (
+    <button type="button" onClick={run} disabled={updateTask.isPending} title={adminNote ?? undefined} className={detailButton}>
+      <StatusIcon status={status} />
+      {label}
+    </button>
   )
 }
 
@@ -507,6 +589,7 @@ function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: Ca
   const now = useNow()
   const [open, setOpen] = useState(false)
   const [chosen, setChosen] = useState<string | null>(null)
+  const tiny = overflow.height < ONE_LINE_PX
   const { width, left } = laneBox(overflow.lane, overflow.lanes)
   const current = overflow.events.find((e) => e.id === chosen)
   return (
@@ -521,12 +604,15 @@ function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: Ca
         data-event
         onPointerDown={(e) => e.stopPropagation()}
         aria-label={`${overflow.events.length} more entries at this time`}
-        className="absolute z-[1] flex items-start justify-center rounded-md border border-line-strong bg-raised px-1 py-1 text-[11px] leading-4 font-medium text-fg-2 tabular hover:border-fg-4 hover:text-fg data-popup-open:ring-1 data-popup-open:ring-line-strong"
+        className={cn(
+          "absolute z-[1] flex items-start justify-center rounded-md border border-line-strong bg-raised px-1 py-1 text-[11px] leading-4 font-medium text-fg-2 tabular hover:border-fg-4 hover:text-fg data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          tiny && cn(TINY, "items-center leading-none"),
+        )}
         style={{ top: overflow.top, height: overflow.height, width, left }}
       >
-        <span className="sticky top-1">+{overflow.events.length}</span>
+        <span className={cn("sticky", tiny ? "top-0" : "top-1")}>+{overflow.events.length}</span>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
+      <PopoverContent side="right" align="start" className={DETAILS}>
         {current ? (
           <>
             <button type="button" onClick={() => setChosen(null)} className="-mx-1 -mt-1 inline-flex h-6 items-center gap-1 self-start rounded-md px-1 text-xs text-fg-3 hover:bg-hover hover:text-fg">

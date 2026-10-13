@@ -102,7 +102,13 @@ values
   ('20000000-0000-4000-a000-000000000009', 'Old intranet pages', '#7C8CA8', true,
    '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00'),
    'Moving the last intranet pages into the Handbook. Archived once they were moved.',
-   '00000000-0000-4000-a000-000000000003', 'closed', 'internal', null, pg_temp.d(-60), pg_temp.d(-18), 'list');
+   '00000000-0000-4000-a000-000000000003', 'closed', 'internal', null, pg_temp.d(-60), pg_temp.d(-18), 'list'),
+  -- Added 2026-10-13: an empty project owned by someone who isn't an admin. Its
+  -- owner may delete it while it has no tasks, so keep it empty.
+  ('20000000-0000-4000-a000-000000000010', 'Referral programme', '#2BA8A0', false,
+   '00000000-0000-4000-a000-000000000004', pg_temp.at(-1, '16:00'),
+   'An idea for thanking clients who refer someone. Nothing planned yet.',
+   '00000000-0000-4000-a000-000000000004', 'planned', 'internal', null, null, null, 'list');
 
 insert into public.ppm_project_members (project_id, user_id, role, added_by, added_at) values
   ('20000000-0000-4000-a000-000000000001', '00000000-0000-4000-a000-000000000002', 'owner',  '00000000-0000-4000-a000-000000000002', pg_temp.at(-62, '10:00')),
@@ -127,7 +133,8 @@ insert into public.ppm_project_members (project_id, user_id, role, added_by, add
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000004', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000002', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
   ('20000000-0000-4000-a000-000000000008', '00000000-0000-4000-a000-000000000005', 'member', '00000000-0000-4000-a000-000000000001', pg_temp.at(-3, '09:00')),
-  ('20000000-0000-4000-a000-000000000009', '00000000-0000-4000-a000-000000000003', 'owner',  '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00'));
+  ('20000000-0000-4000-a000-000000000009', '00000000-0000-4000-a000-000000000003', 'owner',  '00000000-0000-4000-a000-000000000003', pg_temp.at(-60, '09:00')),
+  ('20000000-0000-4000-a000-000000000010', '00000000-0000-4000-a000-000000000004', 'owner',  '00000000-0000-4000-a000-000000000004', pg_temp.at(-1, '16:00'));
 
 -- -----------------------------------------------------------------------------
 -- Tasks
@@ -421,8 +428,8 @@ from seed_cal c, unnest(c.attendees) x;
 -- Added 2026-10-07: colours, blocks past midnight and over several days, an hour
 -- with five things at once (for "+N"), busy and private entries, finished
 -- coloured blocks, a meeting with notes, and next week. Kyan has nothing between
--- 5 PM and 8 PM, and Carl John nothing more this morning: the smoke test plans
--- time there.
+-- 5 PM and 8 PM, and Carl John nothing before 8 AM or more this morning: the
+-- smoke test plans time there.
 create temp table seed_cal_more (
   id int, owner int, kind text, title text, day int, s text, eday int, e text, task int,
   visibility text, auto boolean, completed boolean, attendees int[], color text, notes text
@@ -451,7 +458,15 @@ insert into seed_cal_more values
   (59, 2, 'block',   'Comment replies',               -1, '15:00', -1, '16:00', null, 'public', false, true,  null, 'pink',   null),
   (60, 2, 'meeting', 'Content planning',               3, '10:00', 3, '11:00', null, 'public', false, false, array[2,3,4], null,
                      'Bring two post ideas each. We pick the next month''s four.'),
-  (61, 3, 'block',   'Write the session report',      -1, '20:00', -1, '22:30', 61, 'public',  false, true,  null, 'teal',   null);
+  (61, 3, 'block',   'Write the session report',      -1, '20:00', -1, '22:30', 61, 'public',  false, true,  null, 'teal',   null),
+  -- Added 2026-10-13: 15-minute blocks back to back, the shortest the calendar
+  -- draws. Kyan's follow a meeting, one of them shown only as busy; Joshua's sit
+  -- between two longer blocks, one for a task that's waiting on Kenneth's
+  -- sign-off, one already ticked off.
+  (62, 3, 'block',   'Write up the meeting notes',     0, '15:00', 0, '15:15', null, 'public', false, false, null, null,     null),
+  (63, 3, 'block',   'Call the bank',                  0, '15:15', 0, '15:30', null, 'busy',   false, false, null, 'slate',  null),
+  (64, 4, 'block',   'Send the one-pager for sign-off', 0, '09:00', 0, '09:15', 33, 'public',  false, false, null, null,     null),
+  (65, 4, 'block',   'Stand-up notes',                 0, '09:15', 0, '09:30', null, 'public', false, true,  null, 'teal',   null);
 
 insert into public.cal_events (id, owner_id, kind, title, notes, starts_at, ends_at, task_id, visibility, auto_complete, completed_at, color, created_at)
 select ('30000000-0000-4000-a000-' || lpad(c.id::text, 12, '0'))::uuid,
@@ -586,9 +601,10 @@ values
   ('Writing', '00000000-0000-4000-a000-000000000002', false, 'block', 'Writing', null, 780, 900, 'public', false, '{}', 'pink');
 
 -- Christian and Joshua have made Copy my plan their own; the others use the defaults.
-update public.profiles set prefs = prefs || '{"copyPlan": {"opening": "Good morning, team!", "done": "check", "codes": false}}'::jsonb
+-- Christian's is a numbered list and Joshua's a bulleted one (added 2026-10-13).
+update public.profiles set prefs = prefs || '{"copyPlan": {"opening": "Good morning, team!", "done": "check", "codes": false, "list": "numbers"}}'::jsonb
 where id = '00000000-0000-4000-a000-000000000002';
-update public.profiles set prefs = prefs || '{"copyPlan": {"done": "strike", "closing": "Shout if you need me."}}'::jsonb
+update public.profiles set prefs = prefs || '{"copyPlan": {"done": "strike", "closing": "Shout if you need me.", "list": "bullets"}}'::jsonb
 where id = '00000000-0000-4000-a000-000000000004';
 
 insert into public.ppm_notifications (user_id, actor_id, type, task_id, event_id, meta, read_at, emailed_at, created_at) values

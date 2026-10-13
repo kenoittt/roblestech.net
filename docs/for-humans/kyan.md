@@ -4,17 +4,23 @@ Started 2026-10-07. Tick each one off here, with the date, when it's done. Thing
 
 ## 1. Move your reference screenshots out of the public folder
 
+**Done 2026-10-13:** the seven in `ppm/docs/references/` and the one in `ppm/docs/raw/` are in `ppm/docs/private/bugs/`, which git ignores. New ones go there too ([fixing bugs](../fixing-bugs.md#2-screenshots-go-in-privatebugs)).
+
 **Why:** the screenshots in `ppm/docs/references/` (`Ugly-Template-UI.png`, `Clipping-Board-View-Entries.png` and the rest) show real task titles and Christian's email. That folder is part of the public repository; the files are untracked today, so one careless `git add` would publish them. That nearly happened on 2026-10-07 and was undone before anything was pushed.
 
 **How:** move them to `ppm/docs/private/` (git ignores it), or delete them if you no longer need them. Your Claude can do it on your word.
 
 ## 2. After this round is merged: load the new sample data
 
+**Done 2026-10-13:** your Claude reset the local database while checking the 2026-10-13 fixes, so it has today's sample data, the new 15-minute blocks included. Reset it again whenever the dates look old: they're set from the day it loads.
+
 **Why:** the local sample data now has the real team, an invented client, and data for every option (colours, blocks over midnight and days, crowded hours, templates of each kind). A local database only gets it when it's reset.
 
 **How:** from `ppm/`, `npx supabase db reset`. It only touches your local database.
 
 ## 3. Build decision 0013: owners delete their empty projects
+
+**Done 2026-10-13,** in the pull request for that day's fixes. It needs one database update on the live database before the merge, which is on [Kenneth's page](kenneth.md). If it looked done already when you tried it: your account is an admin, and admins could always delete a project. Sign in as Joshua or Carl John to see the difference.
 
 **Why:** Kenneth decided on 2026-10-07 that a project's owner may delete it while it has no tasks ([0013](../../ppm/docs/decisions/0013-owners-delete-empty-projects.md), backlog item 13), and he'd like you to build it.
 

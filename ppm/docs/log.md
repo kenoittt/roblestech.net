@@ -81,3 +81,19 @@ The four updates from 2026-10-04 and 2026-10-07 (deleting projects, templates, b
 
 ## [2026-10-07] decision | Owners delete empty projects; a lost super admin is fixed in Supabase
 Kenneth's calls on backlog items 13 and 12 ([0013](decisions/0013-owners-delete-empty-projects.md), [0014](decisions/0014-a-way-back-when-nobody-is-a-super-admin.md)). 0013 is still to build; 0014 needs nothing built, and its steps are in [giving the team accounts](for-humans/giving-the-team-accounts.md#if-nobody-is-a-super-admin).
+
+## [2026-10-13] fix | A calendar entry is drawn in its own time, and no taller
+A 15-minute block had a 20 px minimum in a 14 px space, so it sat under the next one. The lesson: what's drawn must fit in what's laid out. A short entry gets a tighter style, never extra height ([backlog](backlog.md), item 34).
+
+## [2026-10-13] feature | Finish a task from its time block; Copy my plan as a list
+A block for a task offers the task's next step beside Tick off: Finish task, Sign off as admin, or Request sign-off, by the task's rule (`finishStep()`, shared with the panel). Copy my plan can read as a bulleted or numbered list, and ✓ and DONE follow a hyphen ([backlog](backlog.md), items 35 and 36).
+
+## [2026-10-13] design | One standing hint removed; the rest audited
+The Team day toolbar lost its explanation, at Kyan's request: "unnecessary, and it takes up precious space". Every other sentence that explains how something works is listed for his decision, 50 in all ([report](reports/2026-10-13-explanatory-text-audit.md)). Whatever he decides becomes a line in the design system's Copy section.
+
+## [2026-10-13] database | A project's owner deletes it while it's empty
+Decision [0013](decisions/0013-owners-delete-empty-projects.md), built: `ppm_can_delete_project()` decides for the delete rule and for `ppm_delete_project()` alike (migration `20261013000100`). It runs as the database's owner so it can count tasks the person asking can't see; a project that has held any task stays an admin's to delete.
+
+## [2026-10-13] design | A delete that can't be undone asks first
+Kyan's rule, after a calendar entry's bin deleted at once: every permanent delete asks, in place for small things (`useConfirm()` in `src/components/app/confirm.tsx`), in a dialog for big ones. What can be undone still just happens, with Undo: deleting a task doesn't ask, and Kyan confirmed that stays ([backlog](backlog.md), item 40).
+

@@ -30,6 +30,7 @@ The PPM's database: how changes are made, who may do what, and how the rules wor
 | `20261004000200_templates` | Task and calendar templates |
 | `20261007000100_blocks_follow_their_task` | Finishing a task ticks off its time blocks; reopening unticks them. An index on `cal_events.task_id` |
 | `20261007000200_block_colours` | A colour for time blocks and calendar templates; `cal_team_events()` returns it, hidden when an entry is masked |
+| `20261013000100_owners_delete_empty_projects` | A project's owner may delete it while it has no tasks at all: `ppm_can_delete_project()`, used by the delete rule and by `ppm_delete_project()` |
 
 ## Who may do what
 
@@ -51,7 +52,7 @@ The PPM has three roles: **super admin**, **admin** and **staff**. "A PPM user" 
 | **Files on tasks** | Anyone who can see the task adds and opens them; you, or an admin, remove them | `ppm_task_files` and storage policies |
 | **Projects:** create | PPM users | `ppm_projects` policies |
 | **Projects:** edit, archive, restore, manage members | The owner, owner-members and admins | `ppm_can_manage_project` |
-| **Projects:** delete | Admins only, with or without their tasks | `ppm_delete_project` (checks the caller first) |
+| **Projects:** delete | Admins, with or without the project's tasks. Its owner too, while it has no tasks at all: deleted ones count, and so do tasks the owner can't see ([0013](../decisions/0013-owners-delete-empty-projects.md)) | `ppm_can_delete_project`, in the `ppm_projects` delete rule and in `ppm_delete_project` (which checks the caller first, and says why when it refuses) |
 | **Templates** | You see your own and every shared one, and change your own. Admins may also rename or delete a shared one, but not take it over | `ppm_task_templates`, `cal_event_templates` policies, and a trigger |
 | **Calendar:** your entries | You create, change and delete your own; you see your own and those you're invited to; you can leave a meeting | `cal_events`, `cal_event_attendees` policies |
 | **Calendar:** others' entries | As each person chose: everything, only "busy", or nothing, per entry, day or week. A masked entry's colour is hidden too | `cal_team_events()`, which masks entries before they leave the database |
@@ -63,7 +64,8 @@ When you add or change a rule, update this table in the same commit.
 
 ## How the rules work
 
-- **Helpers** used inside rules: `is_ppm_user()`, `is_admin()`, `is_super_admin()`, `ppm_task_visible(task)`, `ppm_can_manage_project(project)`, `cal_is_owner(event)`, `cal_is_attendee(event)`.
+- **Helpers** used inside rules: `is_ppm_user()`, `is_admin()`, `is_super_admin()`, `ppm_task_visible(task)`, `ppm_can_manage_project(project)`, `ppm_can_delete_project(project)`, `cal_is_owner(event)`, `cal_is_attendee(event)`.
+- **`ppm_can_delete_project`** runs as the database's owner, because "empty" has to count every task in the project, including the ones the person asking can't see. It only answers for whoever is asking, with a yes or a no, and nobody who isn't signed in may call it.
 - **`ppm_tasks_before`** (a trigger before every insert and update of a task): takes the creator and assigner from the session, so nobody can write someone else's name; checks the sign-off rule when a task moves to Done; stops anyone but the creator changing privacy; stamps when and by whom a task was finished or deleted.
 - **`ppm_tasks_after`** (after every change): writes the history (`ppm_task_events`) and the notifications: assigned, sent for sign-off (to the people the rule names, through `ppm_sign_off_ids`; when the rule names nobody, to the reviewer, or else whoever assigned it), finished, reopened.
 - **`ppm_tasks_repeat`:** when a repeating task is finished, makes the next one, keeping the series' creator and assigner (set from inside the database only, under an internal flag the app can't set), with the checklist unticked. The series moves to the new task, so finishing the old one again makes no duplicate.

@@ -18,6 +18,8 @@ export type CopyPlanPrefs = {
   due?: boolean
   /** How finished entries show. */
   done?: DoneStyle
+  /** Whether the entries read as a list, with a number or a dash before each. */
+  list?: ListStyle
 }
 
 export type DoneStyle = "plain" | "strike" | "check" | "word"
@@ -29,6 +31,14 @@ export const DONE_STYLES: { value: DoneStyle; label: string }[] = [
   { value: "word", label: "Add DONE" },
 ]
 
+export type ListStyle = "none" | "bullets" | "numbers"
+
+export const LIST_STYLES: { value: ListStyle; label: string }[] = [
+  { value: "none", label: "Off" },
+  { value: "bullets", label: "- Bullets" },
+  { value: "numbers", label: "1. Numbers" },
+]
+
 export const PLAN_DEFAULTS: Required<CopyPlanPrefs> = {
   opening: "",
   closing: "",
@@ -37,6 +47,7 @@ export const PLAN_DEFAULTS: Required<CopyPlanPrefs> = {
   codes: true,
   due: true,
   done: "plain",
+  list: "none",
 }
 
 export type PlanEntry = { times: string; title: string; code: string | null; done: boolean }
@@ -54,15 +65,18 @@ export function planLines(
   if (p.opening.trim()) lines.push(...words(p.opening.trim()))
   if (p.heading) lines.push({ text: input.heading })
   if (!input.entries.length) lines.push({ text: "Nothing blocked yet" })
-  for (const e of input.entries) {
+  input.entries.forEach((e, i) => {
     const what = `${e.title}${p.codes && e.code ? ` (${e.code})` : ""}`
+    // Written out rather than as a real list, so every chat shows the same thing.
+    const marker = p.list === "numbers" ? `${i + 1}. ` : p.list === "bullets" ? "- " : ""
     lines.push({
-      prefix: p.times ? `${e.times}: ` : "",
+      prefix: `${marker}${p.times ? `${e.times}: ` : ""}`,
       what,
       struck: e.done && p.done === "strike",
-      suffix: e.done && p.done === "check" ? " ✓" : e.done && p.done === "word" ? " DONE" : "",
+      // A hyphen sets the mark apart from the entry: "Fix the calendar (RTC-101) - DONE".
+      suffix: e.done && p.done === "check" ? " - ✓" : e.done && p.done === "word" ? " - DONE" : "",
     })
-  }
+  })
   if (p.due && input.due.length) {
     lines.push({ text: "" }, { text: `Due: ${input.due.map((t) => `${t.title}${p.codes ? ` (${t.code})` : ""}`).join(", ")}` })
   }

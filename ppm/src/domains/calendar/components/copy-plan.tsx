@@ -12,6 +12,7 @@ import { usePrefs } from "@/domains/workspace/prefs"
 import { chipClass } from "@/domains/tasks/components/pickers"
 import {
   DONE_STYLES,
+  LIST_STYLES,
   PLAN_DEFAULTS,
   copyPlanLines,
   planLines,
@@ -140,26 +141,8 @@ export function CopyPlan({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-fg-2">What's done</span>
-            <div role="radiogroup" aria-label="What's done" className="flex gap-1 rounded-md bg-hover p-0.5">
-              {DONE_STYLES.map((d) => (
-                <button
-                  key={d.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={options.done === d.value}
-                  onClick={() => update({ done: d.value })}
-                  className={cn(
-                    "pressable h-7 flex-1 rounded-[5px] text-xs font-medium whitespace-nowrap",
-                    options.done === d.value ? "bg-raised text-fg shadow-[0_0_0_1px_var(--line)]" : "text-fg-3 hover:text-fg",
-                  )}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <Choice label="As a list" options={LIST_STYLES} value={options.list} onChange={(list) => update({ list })} />
+          <Choice label="What's done" options={DONE_STYLES} value={options.done} onChange={(done) => update({ done })} />
 
           <label className="flex flex-col gap-1">
             <span className="text-xs font-medium text-fg-2">After the plan</span>
@@ -185,6 +168,42 @@ export function CopyPlan({
           </div>
         </PopoverContent>
       </Popover>
+    </div>
+  )
+}
+
+/** One choice among a few, side by side. */
+function Choice<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string
+  options: { value: T; label: string }[]
+  value: T
+  onChange: (value: T) => void
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-fg-2">{label}</span>
+      <div role="radiogroup" aria-label={label} className="flex gap-1 rounded-md bg-hover p-0.5">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={value === o.value}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "pressable h-7 flex-1 rounded-[5px] text-xs font-medium whitespace-nowrap",
+              value === o.value ? "bg-raised text-fg shadow-[0_0_0_1px_var(--line)]" : "text-fg-3 hover:text-fg",
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

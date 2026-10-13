@@ -64,6 +64,6 @@ The cheat sheet doesn't cover branches. Ours, proposed by Kyan on 2026-10-04 so 
 - **type:** the commit type the branch is mostly about: `feat`, `fix`, `docs`, `chore`, and so on.
 - **app and topic:** the scope, then a few words, lowercase, joined with hyphens.
 
-For example `kyan/feat/ppm-templates-and-archive` or `claude/fix/portal-sign-in-refresh`. No random suffixes: a name should still mean something in a list of twenty branches.
+For example `kyan/feat/ppm-templates-and-archive` or `claude/fix/portal-sign-in-refresh`. No random suffixes: a name should still mean something in a list of twenty branches. When one bug gets its own branch, and when several fixes share one: [fixing-bugs.md](fixing-bugs.md#3-branch).
 
 **Adopted for every app on 2026-10-07** (Kenneth's decision): rule 2 in the repository's `CLAUDE.md`. It keeps the old `claude/` and `kyan/` prefixes and adds the type and the app. Branches made before then keep their names.

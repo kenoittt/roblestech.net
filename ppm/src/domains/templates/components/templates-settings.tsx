@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState, type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { Add01Icon, Delete02Icon, Edit02Icon, LayoutTemplateIcon, UserGroupIcon } from "@hugeicons/core-free-icons"
 import { Switch } from "@/components/ui/switch"
 import { Icon } from "@/components/app/icon"
+import { armedClass, useConfirm } from "@/components/app/confirm"
 import { useUI } from "@/components/app/ui-state"
 import { cn } from "@/lib/utils"
 import { useMe, useMemberMap, useProjectMap, useToday } from "@/domains/workspace/provider"
@@ -141,7 +142,7 @@ function Row({
   const members = useMemberMap()
   const { update, remove } = useTemplateActions()
   const [name, setName] = useState(template.name)
-  const [confirming, setConfirming] = useState(false)
+  const del = useConfirm(() => remove.mutate({ kind, id: template.id, name: template.name }))
   const mine = template.created_by === me.id
   const editable = canEditTemplate(template, me)
 
@@ -151,13 +152,6 @@ function Row({
     setShownFor(template.name)
     setName(template.name)
   }
-
-  // "Delete" asks once more, then forgets after a few seconds.
-  useEffect(() => {
-    if (!confirming) return
-    const t = setTimeout(() => setConfirming(false), 4000)
-    return () => clearTimeout(t)
-  }, [confirming])
 
   const rename = () => {
     const clean = name.trim()
@@ -217,15 +211,15 @@ function Row({
       {editable && (
         <button
           type="button"
-          onClick={() => (confirming ? remove.mutate({ kind, id: template.id, name: template.name }) : setConfirming(true))}
-          aria-label={confirming ? `Confirm: delete ${template.name}` : `Delete ${template.name}`}
+          onClick={del.press}
+          aria-label={del.armed ? `Confirm: delete ${template.name}` : `Delete ${template.name}`}
           className={cn(
             "pressable inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-md text-xs font-medium",
-            confirming ? "bg-danger-soft px-2 text-danger" : "w-7 text-fg-3 hover:bg-hover hover:text-danger",
+            del.armed ? cn(armedClass, "px-2") : "w-7 text-fg-3 hover:bg-hover hover:text-danger",
           )}
         >
           <Icon icon={Delete02Icon} size={14} />
-          {confirming && "Delete"}
+          {del.armed && "Delete"}
         </button>
       )}
     </li>

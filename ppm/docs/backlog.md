@@ -2,6 +2,59 @@
 
 What's left to do on the PPM, newest decisions first within each part. Tick items off with the date, and keep the detail: the next person or Claude session starts from here.
 
+## From Kyan's brief of 2026-10-13
+
+Built 2026-10-13 by Kyan's local Claude, on the branch `kyan/fix/ppm-calendar-blocks-and-plan`. **One database update to apply before the merge:** `20261013000100_owners_delete_empty_projects` (item 13; [`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1). Smoke test 44/44.
+
+### 34. A 15-minute block sat under the next one
+
+**Done 2026-10-13.** A block was drawn at least 20 px tall, but 15 minutes is 14 px of the day, so it ran 6 px under whatever came next. An entry is now drawn in the time it has and no taller: a block under 20 px tall (up to about 20 minutes) is one tight line with no padding, and says its whole title and times on hover. The "+3" marker had the same minimum, and the same fix. While you drag, a short block's outline grows to hold its new time, where the times used to spill out under it.
+
+### 35. Finish a task from its time block
+
+**Done 2026-10-13.** A block for a task has **Finish task** beside Tick off, in its details: two clicks where it took four (open the block, open the task, Mark done, close the panel). Only the task is saved; the database then ticks off the task's blocks, this one included, so reopening the task unticks it again ([database.md](guides/database.md#how-the-rules-work)). Tick off still leaves the task open, since working on a task isn't finishing it.
+
+- **The button follows the task's sign-off rule,** like the panel's: Finish task, **Sign off as admin** for an admin in someone's place, or **Request sign-off** when the rule names someone else. That last one moves the task to In review and ticks this block off. A task already waiting on someone shows only Tick off. One rule decides for both places: `finishStep()` in `src/domains/tasks/config.ts`.
+- **Edit is a pencil** beside the bin, at the right, as Kyan asked. The details are 32 px wider (320 px), so the longest row of buttons fits on one line.
+- **Ruled out:** ticking the block off from the app as well. The task's own finishing time on the block is what lets a reopened task untick it.
+
+### 36. Copy my plan as a list
+
+**Done 2026-10-13.** "As a list" in its options: Off, bullets ("- ") or numbers ("1. "), before each entry and nothing else, saved in each person's preferences like the rest. ✓ and DONE now follow a hyphen: "Part-time developer job - DONE". The marks are written out, not made into a real list, so every chat shows the same thing, and "- " stays a hyphen.
+
+### 37. The hint in the Team day toolbar
+
+**Done 2026-10-13.** "Each person decides what you see. Dashed blocks show only that they're busy." is gone, and the date and Copy my plan sit at the right, in both views. A dashed block still says why when it's opened. On a phone the toolbar is as it was.
+
+### 38. Text that explains how things work, everywhere else
+
+**Audited 2026-10-13; the decisions are Kyan's.** 50 listed one by one, each with a suggestion: 20 always on screen, 18 in dialogs and menus, 12 in empty lists ([report](reports/2026-10-13-explanatory-text-audit.md)). Nothing else was removed, except the one that was out of date (item 42).
+
+### 39. What to do when something's broken
+
+**Done 2026-10-13.** The repository's [`docs/fixing-bugs.md`](../../docs/fixing-bugs.md): the report, a `fix` branch from a fresh `origin/main`, seeing it broken first, a check that fails before and passes after. Screenshots of bugs go in `docs/private/bugs/`, which git ignores; the eight that sat untracked in `references/` and `raw/` were moved there.
+
+### 40. A delete that can't be undone asks first
+
+**Done 2026-10-13.** Kyan's rule: "Delete buttons should always ask for confirmation." It began with the bin in a calendar entry's details, which deleted at once with no way back, and now sat beside the pencil. Every delete that's for good now asks, in place: the first press turns it red and says what the next will do, the second does it, and left alone for four seconds it goes back.
+
+- **Where:** a calendar entry (its details, where the row becomes "Delete this block?" or "Delete this meeting for everyone?", and the Edit dialog's Delete), a comment, a file on a task, a checklist item, a Handbook shelf, your photo. Templates in Settings already did; they now use the same piece.
+- **One piece for all of them:** `useConfirm()` and `ConfirmDelete` in `src/components/app/confirm.tsx` ([design system](guides/design-system.md#forms)).
+- **Already asking, in a dialog that says what goes:** deleting a project, deleting a Handbook article, deactivating someone.
+- **Deleting a task still doesn't ask** (Kyan, 2026-10-13): it can be undone, since the task is only hidden and the message has Undo. That's "Undo over are you sure?" in the [UX guide](guides/ux-principles.md#undo-over-are-you-sure), which stands.
+
+### 41. Short blocks couldn't be stretched
+
+**Done 2026-10-13.** A block only had a bottom edge to drag from 28 px tall, and a 30-minute block is 26 px, a 15-minute one 12 px. Kyan confirmed neither could be resized, at any zoom. Every block has the edge now; on a block under 20 px it's 4 px, so the rest of the block still moves it.
+
+### 42. Settings said emails start "once this is live"
+
+**Done 2026-10-13.** The line under the email switch was written before 2026-10-03 and never removed. It's gone. It was row 17 of the audit (item 38).
+
+### 43. A block that ticked itself off still offered Tick off
+
+**Done 2026-10-13.** A block set to tick itself off counts as done once its time has passed, and looked it on the calendar, but its details read the tick nobody had made, so the button said Tick off. Kyan saw the same on the live PPM. The details now go by whether the block counts as done, however it got there: by hand, by its task, or by itself. Unticking one that ticked itself also turns off its automatic tick, since it would count as done again otherwise and the button would seem to do nothing (`donePatch()` in `src/domains/calendar/data.ts`).
+
 ## From Kyan's brief of 2026-10-06, evening
 
 Built 2026-10-07 by Kyan's local Claude, on the branch `kyan/feat/ppm-templates-and-calendar`, which also carries the docs from the closed pull request #18. Two of the changes need database updates applied before the merge ([`for-humans/kenneth.md`](../../docs/for-humans/kenneth.md), item 1). Smoke test 35/35.
@@ -107,7 +160,9 @@ If the live database has no super admin, nobody can make one from the app; it ta
 
 ### 13. A decision: may a project's owner delete it while it has no tasks?
 
-**Decided 2026-10-07 (Kenneth): yes** ([0013](decisions/0013-owners-delete-empty-projects.md)). To build.
+**Decided 2026-10-07 (Kenneth): yes** ([0013](decisions/0013-owners-delete-empty-projects.md)). **Built 2026-10-13; needs migration `20261013000100` on the live database before the merge.** The owner's ⋯ menu offers Delete while the project is empty, and the same dialog asks first. "Empty" is decided by the database and means no tasks at all: deleted ones count, and so do tasks the owner can't see, so a project that has held work is still an admin's to delete, and says so ("This project has tasks, deleted ones included, so only an admin can delete it. You can archive it instead."). The owner is the person in the project's Owner field.
+
+It looked built already to an admin trying it: admins could always delete any project. The gap was for staff who own one.
 
 Today owners archive and only admins delete, as the revamp decided. Allowing owners to delete a project that's still empty would cover the "I made a test project" case without an admin. One database rule and one line in the app.
 

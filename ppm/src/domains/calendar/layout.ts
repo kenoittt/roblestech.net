@@ -9,6 +9,10 @@ export const DAY_END = 24 * 60
 export const HOUR_PX = 56
 export const PX_PER_MIN = HOUR_PX / 60
 export const SNAP = 15
+/** The shortest piece the calendar draws: a shorter entry still gets a block you can see and click. */
+const MIN_MINUTES = SNAP
+/** The space left under each entry, so two in a row read as two. */
+const GAP_PX = 2
 const MS_DAY = 86_400_000
 
 export function minuteToY(minute: number) {
@@ -91,12 +95,21 @@ export type Overflow = {
 /** The narrowest an entry gets before the rest of its group folds into "+N". */
 export const MIN_LANE_PX = 60
 
+/** How tall a piece is drawn: exactly its time, less the gap. Never more, or it would cover the next one. */
+function pieceHeight(start: number, end: number) {
+  return minuteToY(end) - minuteToY(start) - GAP_PX
+}
+
 /**
  * Lays out one column's entries. Overlapping entries share the width in
  * lanes, like any calendar; entries that don't overlap get the full width.
  * At most `maxLanes` sit side by side, so a column never turns into slivers:
  * past that, the last lane holds a "+N" for the entries that didn't fit
  * (an entry on its own there is simply shown).
+ *
+ * An entry is drawn in the time it's laid out in, and no taller: 15 minutes
+ * is 12px, enough for one line. A floor above that once drew a 15-minute
+ * block over the top of the next one.
  */
 export function placeEvents(events: CalEvent[], day: string, maxLanes = Infinity): { placed: Placed[]; overflow: Overflow[] } {
   const items = events
@@ -104,8 +117,9 @@ export function placeEvents(events: CalEvent[], day: string, maxLanes = Infinity
     .flatMap((event) => {
       const span = spanOn(event, day)
       if (!span) return []
-      // Very short entries still get a block you can see and click.
-      return [{ event, ...span, end: Math.min(DAY_END, Math.max(span.start + 15, span.end)) }]
+      // Shorter than 15 minutes still takes 15, kept inside the day at its very end.
+      const end = Math.min(DAY_END, Math.max(span.start + MIN_MINUTES, span.end))
+      return [{ event, ...span, start: Math.min(span.start, end - MIN_MINUTES), end }]
     })
     .sort((a, b) => a.start - b.start || b.end - a.end)
 
@@ -116,15 +130,14 @@ export function placeEvents(events: CalEvent[], day: string, maxLanes = Infinity
   let clusterEnd = -1
 
   const place = (c: Item, lane: number, lanes: number) => {
-    const top = minuteToY(c.start)
     placed.push({
       event: c.event,
       start: c.start,
       end: c.end,
       before: c.before,
       after: c.after,
-      top,
-      height: Math.max(20, minuteToY(c.end) - top - 2),
+      top: minuteToY(c.start),
+      height: pieceHeight(c.start, c.end),
       lane,
       lanes,
     })
@@ -148,12 +161,11 @@ export function placeEvents(events: CalEvent[], day: string, maxLanes = Infinity
         else if (group.length > 1) {
           const start = Math.min(...group.map((g) => g.start))
           const end = Math.max(...group.map((g) => g.end))
-          const top = minuteToY(start)
           overflow.push({
             key: group.map((g) => g.event.id).join(","),
             events: group.map((g) => g.event),
-            top,
-            height: Math.max(20, minuteToY(end) - top - 2),
+            top: minuteToY(start),
+            height: pieceHeight(start, end),
             lane: last,
             lanes: cap,
           })

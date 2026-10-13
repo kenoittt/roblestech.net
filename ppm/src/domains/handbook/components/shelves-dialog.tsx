@@ -7,6 +7,7 @@ import { ArrowDown01Icon, ArrowUp01Icon, Cancel01Icon, Delete02Icon } from "@hug
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/app/icon"
+import { ConfirmDelete } from "@/components/app/confirm"
 import { getSupabase } from "@/lib/supabase/client"
 import { slugify } from "./markdown"
 import type { KbArticleLite, KbCategory } from "../server"
@@ -97,16 +98,17 @@ export function ShelvesDialog({
                 </div>
                 <div className="flex w-24 shrink-0 flex-col items-end gap-1.5 pt-1.5">
                   <span className="text-xs text-fg-3 tabular">{count(c.id)} {count(c.id) === 1 ? "article" : "articles"}</span>
-                  <button
-                    type="button"
+                  <ConfirmDelete
+                    label={`Delete the shelf ${c.title}`}
+                    answer="Yes, delete"
                     disabled={pending || count(c.id) > 0}
                     title={count(c.id) > 0 ? "Move or delete its articles first" : "Delete this shelf"}
-                    onClick={() => run(() => getSupabase().from("kb_categories").delete().eq("id", c.id), "Shelf deleted")}
+                    onConfirm={() => run(() => getSupabase().from("kb_categories").delete().eq("id", c.id), "Shelf deleted")}
                     className="inline-flex items-center gap-1 text-xs text-fg-4 hover:text-danger disabled:pointer-events-none disabled:opacity-40"
                   >
                     <Icon icon={Delete02Icon} size={13} />
                     Delete
-                  </button>
+                  </ConfirmDelete>
                 </div>
               </li>
             ))}
