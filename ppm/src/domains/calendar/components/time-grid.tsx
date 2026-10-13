@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { ArrowLeft01Icon, CheckmarkCircle02Icon, Edit02Icon, LockKeyIcon, ViewOffIcon, Delete02Icon, Task01Icon } from "@hugeicons/core-free-icons"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AvatarStack } from "@/components/app/avatar"
+import { armedClass, useConfirm } from "@/components/app/confirm"
 import { Icon } from "@/components/app/icon"
 import { cn } from "@/lib/utils"
 import { isoDay, longDate, manilaInstant, minutesOfDay } from "@/lib/dates"
@@ -447,6 +448,7 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
   const tasks = useTasks()
   const { open } = useTaskPanel()
   const { update, remove } = useCalendarActions()
+  const del = useConfirm(() => remove.mutate(event.id))
   const mine = event.owner_id === me.id
   const task = event.task_id ? tasks.find((t) => t.id === event.task_id) : null
   const owner = members.get(event.owner_id)
@@ -498,22 +500,36 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
       {mine && (
         // What you do most on the left, in words; changing or removing the entry on the right, as icons.
         <div className="flex items-center gap-1 border-t border-line pt-2">
-          {event.kind === "block" && (
-            <button
-              type="button"
-              onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
-              className={detailButton}
-            >
-              <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
-              {event.completed_at ? "Done" : "Tick off"}
-            </button>
+          {del.armed ? (
+            // Deleting asks first: the row becomes the question, and the bin its answer.
+            <span className="px-2 text-xs text-fg-2">{event.kind === "meeting" ? "Delete this meeting for everyone?" : "Delete this block?"}</span>
+          ) : (
+            <>
+              {event.kind === "block" && (
+                <button
+                  type="button"
+                  onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
+                  className={detailButton}
+                >
+                  <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
+                  {event.completed_at ? "Done" : "Tick off"}
+                </button>
+              )}
+              {event.kind === "block" && task && <TaskStep event={event} task={task} />}
+              <button type="button" aria-label="Edit" title="Edit" onClick={() => onEdit(event)} className={cn(detailIcon, "ml-auto text-fg-3 hover:bg-hover hover:text-fg")}>
+                <Icon icon={Edit02Icon} size={14} />
+              </button>
+            </>
           )}
-          {event.kind === "block" && task && <TaskStep event={event} task={task} />}
-          <button type="button" aria-label="Edit" title="Edit" onClick={() => onEdit(event)} className={cn(detailIcon, "ml-auto text-fg-3 hover:bg-hover hover:text-fg")}>
-            <Icon icon={Edit02Icon} size={14} />
-          </button>
-          <button type="button" aria-label="Delete" title="Delete" onClick={() => remove.mutate(event.id)} className={cn(detailIcon, "text-danger hover:bg-danger-soft")}>
+          <button
+            type="button"
+            aria-label={del.armed ? "Confirm: delete" : "Delete"}
+            title={del.armed ? undefined : "Delete"}
+            onClick={del.press}
+            className={del.armed ? cn(detailButton, armedClass, "ml-auto hover:bg-danger-soft hover:text-danger") : cn(detailIcon, "text-danger hover:bg-danger-soft")}
+          >
             <Icon icon={Delete02Icon} size={14} />
+            {del.armed && "Delete"}
           </button>
         </div>
       )}

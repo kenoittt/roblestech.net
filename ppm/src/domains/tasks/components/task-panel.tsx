@@ -27,6 +27,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Avatar } from "@/components/app/avatar"
 import { Icon } from "@/components/app/icon"
+import { ConfirmDelete } from "@/components/app/confirm"
 import { Kbd } from "@/components/app/page"
 import { cn } from "@/lib/utils"
 import { ago, dueLabel, shortDate } from "@/lib/dates"
@@ -722,14 +723,14 @@ function Checklist({ taskId, items }: { taskId: string; items: { id: string; tit
             <span className={cn("min-w-0 flex-1 truncate text-sm", item.done ? "text-fg-3 line-through decoration-fg-4" : "text-fg")}>
               {item.title}
             </span>
-            <button
-              type="button"
-              aria-label={`Remove ${item.title}`}
-              onClick={() => remove.mutate(item)}
-              className="text-fg-4 opacity-0 group-hover/item:opacity-100 hover:text-fg focus-visible:opacity-100"
+            <ConfirmDelete
+              label={`Remove ${item.title}`}
+              answer="Remove"
+              onConfirm={() => remove.mutate(item)}
+              className="shrink-0 text-fg-4 opacity-0 group-hover/item:opacity-100 hover:text-fg focus-visible:opacity-100"
             >
               <Icon icon={Cancel01Icon} size={12} />
-            </button>
+            </ConfirmDelete>
           </li>
         ))}
       </ul>
@@ -807,13 +808,14 @@ function Activity({
                   <span className="font-medium text-fg">{displayName(members.get(item.c.author_id ?? ""))}</span>
                   <span className="text-fg-4">{ago(item.c.created_at, now)}</span>
                   {item.c.author_id === me.id && (
-                    <button
-                      type="button"
-                      onClick={() => remove.mutate({ id: item.c.id, taskId: task.id })}
-                      className="ml-auto text-fg-4 opacity-0 group-hover/comment:opacity-100 hover:text-danger"
+                    <ConfirmDelete
+                      label="Delete your comment"
+                      answer="Yes, delete"
+                      onConfirm={() => remove.mutate({ id: item.c.id, taskId: task.id })}
+                      className="ml-auto text-fg-4 opacity-0 group-hover/comment:opacity-100 hover:text-danger focus-visible:opacity-100"
                     >
                       Delete
-                    </button>
+                    </ConfirmDelete>
                   )}
                 </div>
                 <div className="prose-app mt-0.5">

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { Icon } from "@/components/app/icon"
+import { useConfirm } from "@/components/app/confirm"
 import { NativeSelect, fieldClass } from "@/components/ui/field"
 import { SwatchPicker } from "@/components/app/swatch-picker"
 import { Kbd } from "@/components/app/page"
@@ -103,6 +104,11 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
   const { create, update, remove } = useCalendarActions()
   const createTask = useCreateTask()
   const { open: openTask } = useTaskPanel()
+  const del = useConfirm(() => {
+    if (!event) return
+    remove.mutate(event.id)
+    onClose()
+  })
 
   const linked = tasks.find((t) => t.id === (event?.task_id ?? draft?.taskId))
   const editing = draft?.editTemplate ?? null
@@ -538,8 +544,8 @@ function Form({ draft, event, onClose }: { draft: EventDraft | null; event: CalE
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-3 border-t border-line px-5 py-3">
         {event && (
-          <Button variant="destructive" onClick={() => { remove.mutate(event.id); onClose() }}>
-            Delete
+          <Button variant="destructive" onClick={del.press} className={cn(del.armed && "ring-1 ring-danger/60")}>
+            {del.armed ? "Yes, delete" : "Delete"}
           </Button>
         )}
         {event && event.owner_id === me.id && (

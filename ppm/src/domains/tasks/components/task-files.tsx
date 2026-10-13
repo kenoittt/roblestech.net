@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Attachment01Icon, Cancel01Icon, File01Icon, Image01Icon } from "@hugeicons/core-free-icons"
 import { toast } from "sonner"
 import { Icon } from "@/components/app/icon"
+import { ConfirmDelete } from "@/components/app/confirm"
 import { cn } from "@/lib/utils"
 import { ago } from "@/lib/dates"
 import { getSupabase } from "@/lib/supabase/client"
@@ -151,14 +152,14 @@ export function TaskFiles({ taskId }: { taskId: string }) {
                   {size(f.size)} · {firstName(members.get(f.uploaded_by ?? ""))} · {ago(f.created_at, now)}
                 </span>
                 {canRemove && (
-                  <button
-                    type="button"
-                    aria-label={`Remove ${f.name}`}
-                    onClick={() => remove.mutate(f)}
-                    className="text-fg-4 opacity-0 group-hover/file:opacity-100 hover:text-danger focus-visible:opacity-100"
+                  <ConfirmDelete
+                    label={`Remove ${f.name}`}
+                    answer="Remove"
+                    onConfirm={() => remove.mutate(f)}
+                    className="shrink-0 text-fg-4 opacity-0 group-hover/file:opacity-100 hover:text-danger focus-visible:opacity-100"
                   >
                     <Icon icon={Cancel01Icon} size={12} />
-                  </button>
+                  </ConfirmDelete>
                 )}
               </li>
             )

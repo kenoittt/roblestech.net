@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Avatar } from "@/components/app/avatar"
+import { ConfirmDelete } from "@/components/app/confirm"
 import { PasswordInput } from "@/components/app/password-input"
 import { PageBody, PageHeader } from "@/components/app/page"
 import { fieldClass } from "@/components/ui/field"
@@ -232,9 +233,9 @@ function PhotoButtons({ hasPhoto, uid }: { hasPhoto: boolean; uid: string }) {
         {busy ? "Saving…" : hasPhoto ? "Change photo" : "Add a photo"}
       </button>
       {hasPhoto && (
-        <button type="button" disabled={busy} onClick={remove} className="text-fg-3 hover:text-fg disabled:opacity-50">
+        <ConfirmDelete label="Remove your photo" answer="Yes, remove" disabled={busy} onConfirm={remove} className="text-fg-3 hover:text-fg disabled:opacity-50">
           Remove
-        </button>
+        </ConfirmDelete>
       )}
     </div>
   )
