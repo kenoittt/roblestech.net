@@ -38,9 +38,8 @@ import {
   PRIORITY_META,
   REPEAT_META,
   STATUS_META,
-  canComplete,
+  finishStep,
   isOpen,
-  signsOffAsAdmin,
   taskKey,
   upcomingDue,
   type Policy,
@@ -151,14 +150,13 @@ function PanelBody({ task, onClose }: { task: Task; onClose: () => void }) {
   }
 
   const closed = !isOpen(task.status)
-  const canDone = canComplete(task, me.id, me.role)
-  const asAdmin = signsOffAsAdmin(task, me.id, me.role)
   const adminNote = useAdminSignOffNote(task)
+  const finish = finishStep(task, me.id, me.role)
   const primary = (() => {
     if (task.status === "done") return { label: "Reopen", patch: { status: "todo" }, done: false }
     if (task.status === "cancelled") return { label: "Restore", patch: { status: "todo" }, done: false }
-    if (canDone) return { label: asAdmin ? "Sign off as admin" : "Mark done", patch: { status: "done" }, done: true }
-    if (task.status !== "in_review") return { label: "Request sign-off", patch: { status: "in_review" }, done: false }
+    if (finish === "request") return { label: "Request sign-off", patch: { status: "in_review" }, done: false }
+    if (finish) return { label: finish === "admin" ? "Sign off as admin" : "Mark done", patch: { status: "done" }, done: true }
     return null
   })()
 

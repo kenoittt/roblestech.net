@@ -206,5 +206,20 @@ export function useCalendarActions() {
     onError: (e) => toast.error(explain(e)),
   })
 
-  return { create, update, remove, setRange }
+  /**
+   * Shows at once what the database does when a task is finished: its blocks
+   * that aren't ticked off are. Mirrors cal_blocks_follow_task. Only the
+   * screen changes here; refresh() brings the saved rows once the task is.
+   */
+  const tickTaskBlocks = (taskId: string) => {
+    void qc.cancelQueries({ queryKey: ["calendar"] })
+    const at = new Date().toISOString()
+    qc.setQueriesData<CalEvent[]>({ queryKey: ["calendar"] }, (old) =>
+      Array.isArray(old)
+        ? old.map((e) => (e.task_id === taskId && e.kind === "block" && !e.completed_at ? { ...e, completed_at: at } : e))
+        : old,
+    )
+  }
+
+  return { create, update, remove, setRange, tickTaskBlocks, refresh }
 }

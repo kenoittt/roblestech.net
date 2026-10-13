@@ -134,6 +134,21 @@ export function signsOffAsAdmin(task: Task, uid: string, role: string): boolean 
   return (role === "admin" || role === "super_admin") && !ruleAllows(task, uid)
 }
 
+/**
+ * What this person can do to finish a task: mark it done, sign it off as an
+ * admin in someone's place, or ask for its sign-off when the rule names
+ * someone else. Null when there's nothing for them to do: it's closed, or in
+ * review and waiting on someone else. The panel and a time block's details
+ * both offer this step.
+ */
+export type FinishStep = "done" | "admin" | "request"
+
+export function finishStep(task: Task, uid: string, role: string): FinishStep | null {
+  if (!isOpen(task.status)) return null
+  if (canComplete(task, uid, role)) return signsOffAsAdmin(task, uid, role) ? "admin" : "done"
+  return task.status === "in_review" ? null : "request"
+}
+
 /** Who the UI should name when someone can't sign a task off. */
 export function signOffPeople(task: Task): string[] {
   switch (task.completion_policy as Policy) {
