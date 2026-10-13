@@ -421,8 +421,8 @@ from seed_cal c, unnest(c.attendees) x;
 -- Added 2026-10-07: colours, blocks past midnight and over several days, an hour
 -- with five things at once (for "+N"), busy and private entries, finished
 -- coloured blocks, a meeting with notes, and next week. Kyan has nothing between
--- 5 PM and 8 PM, and Carl John nothing more this morning: the smoke test plans
--- time there.
+-- 5 PM and 8 PM, and Carl John nothing before 8 AM or more this morning: the
+-- smoke test plans time there.
 create temp table seed_cal_more (
   id int, owner int, kind text, title text, day int, s text, eday int, e text, task int,
   visibility text, auto boolean, completed boolean, attendees int[], color text, notes text
@@ -451,7 +451,15 @@ insert into seed_cal_more values
   (59, 2, 'block',   'Comment replies',               -1, '15:00', -1, '16:00', null, 'public', false, true,  null, 'pink',   null),
   (60, 2, 'meeting', 'Content planning',               3, '10:00', 3, '11:00', null, 'public', false, false, array[2,3,4], null,
                      'Bring two post ideas each. We pick the next month''s four.'),
-  (61, 3, 'block',   'Write the session report',      -1, '20:00', -1, '22:30', 61, 'public',  false, true,  null, 'teal',   null);
+  (61, 3, 'block',   'Write the session report',      -1, '20:00', -1, '22:30', 61, 'public',  false, true,  null, 'teal',   null),
+  -- Added 2026-10-13: 15-minute blocks back to back, the shortest the calendar
+  -- draws. Kyan's follow a meeting, one of them shown only as busy; Joshua's sit
+  -- between two longer blocks, one for a task that's waiting on Kenneth's
+  -- sign-off, one already ticked off.
+  (62, 3, 'block',   'Write up the meeting notes',     0, '15:00', 0, '15:15', null, 'public', false, false, null, null,     null),
+  (63, 3, 'block',   'Call the bank',                  0, '15:15', 0, '15:30', null, 'busy',   false, false, null, 'slate',  null),
+  (64, 4, 'block',   'Send the one-pager for sign-off', 0, '09:00', 0, '09:15', 33, 'public',  false, false, null, null,     null),
+  (65, 4, 'block',   'Stand-up notes',                 0, '09:15', 0, '09:30', null, 'public', false, true,  null, 'teal',   null);
 
 insert into public.cal_events (id, owner_id, kind, title, notes, starts_at, ends_at, task_id, visibility, auto_complete, completed_at, color, created_at)
 select ('30000000-0000-4000-a000-' || lpad(c.id::text, 12, '0'))::uuid,

@@ -33,6 +33,14 @@ import {
 /** Due tasks shown above a day's hours before the rest fold into "N more". */
 const DUE_SHOWN = 3
 
+/**
+ * Below this height an entry has room for one tight line and no padding: a
+ * 15-minute block is 12px tall. It's drawn that size, never taller, so it
+ * can't cover the entry after it.
+ */
+const ONE_LINE_PX = 20
+const TINY = "justify-center rounded-xs py-0 text-[10px] leading-3"
+
 type MoveState = {
   id: string
   mode: "move" | "resize"
@@ -276,7 +284,8 @@ export function TimeGrid({
                         ? "border-status-in-review bg-[color-mix(in_oklab,var(--status-in-review)_22%,var(--surface))]"
                         : blockColor(move.color).tone,
                     )}
-                    style={{ top: minuteToY(move.newStart), height: Math.max(20, minuteToY(move.newEnd) - minuteToY(move.newStart) - 2) }}
+                    // It floats while you drag, so a short block's outline grows to hold its new time.
+                    style={{ top: minuteToY(move.newStart), minHeight: minuteToY(move.newEnd) - minuteToY(move.newStart) - 2 }}
                   >
                     <span className="block truncate font-medium text-fg">{move.title}</span>
                     <span className="block truncate text-fg-2 tabular">
@@ -345,14 +354,15 @@ function EventBlock({
   const done = isEventDone(event, now)
   const mine = event.owner_id === me.id
   const short = height < 36
+  const tiny = height < ONE_LINE_PX
   const { width, left } = laneBox(lane, lanes)
 
   const body = (
     <>
       <span className={cn("flex min-w-0 items-center gap-1 font-medium", done && "line-through decoration-fg-4")}>
-        {done && <Icon icon={CheckmarkCircle02Icon} size={12} className="shrink-0 text-status-done" />}
-        {mine && event.visibility === "private" && <Icon icon={LockKeyIcon} size={11} className="shrink-0 text-fg-3" />}
-        {mine && event.visibility === "busy" && <Icon icon={ViewOffIcon} size={11} className="shrink-0 text-fg-3" />}
+        {done && <Icon icon={CheckmarkCircle02Icon} size={tiny ? 10 : 12} className="shrink-0 text-status-done" />}
+        {mine && event.visibility === "private" && <Icon icon={LockKeyIcon} size={tiny ? 10 : 11} className="shrink-0 text-fg-3" />}
+        {mine && event.visibility === "busy" && <Icon icon={ViewOffIcon} size={tiny ? 10 : 11} className="shrink-0 text-fg-3" />}
         <span className="truncate">{event.title}</span>
       </span>
       {!short && <span className="block truncate text-fg-3 tabular">{entryTimes(event, { compact: true })}</span>}
@@ -376,9 +386,12 @@ function EventBlock({
       <PopoverTrigger
         data-event
         onPointerDown={(e) => (draggable ? onBeginMove(e, "move") : e.stopPropagation())}
+        // A block too short for its times says them on hover, with its whole title.
+        title={short ? `${event.title}, ${entryTimes(event)}` : undefined}
         className={cn(
           // overflow-clip, not hidden: hidden would stop the title sticking to the top of the day as you scroll.
           "absolute z-[1] flex flex-col items-stretch justify-start overflow-clip rounded-md border-l-2 px-1.5 py-1 text-left text-[11px] leading-4 transition-[filter,opacity] select-none hover:brightness-110 data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          tiny && TINY,
           toneOf(event),
           // Square where it carries on from the day before or into the next.
           before && "rounded-t-none",
@@ -390,7 +403,7 @@ function EventBlock({
         style={{ top, height, width, left }}
       >
         {/* A long block keeps its title in view while you scroll through it. */}
-        <span className="sticky top-1 flex min-w-0 flex-col">{body}</span>
+        <span className={cn("sticky flex min-w-0 flex-col", tiny ? "top-0" : "top-1")}>{body}</span>
         {draggable && height >= 28 && (
           <span
             aria-hidden
@@ -507,6 +520,7 @@ function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: Ca
   const now = useNow()
   const [open, setOpen] = useState(false)
   const [chosen, setChosen] = useState<string | null>(null)
+  const tiny = overflow.height < ONE_LINE_PX
   const { width, left } = laneBox(overflow.lane, overflow.lanes)
   const current = overflow.events.find((e) => e.id === chosen)
   return (
@@ -521,10 +535,13 @@ function OverflowChip({ overflow, onEdit }: { overflow: Overflow; onEdit: (e: Ca
         data-event
         onPointerDown={(e) => e.stopPropagation()}
         aria-label={`${overflow.events.length} more entries at this time`}
-        className="absolute z-[1] flex items-start justify-center rounded-md border border-line-strong bg-raised px-1 py-1 text-[11px] leading-4 font-medium text-fg-2 tabular hover:border-fg-4 hover:text-fg data-popup-open:ring-1 data-popup-open:ring-line-strong"
+        className={cn(
+          "absolute z-[1] flex items-start justify-center rounded-md border border-line-strong bg-raised px-1 py-1 text-[11px] leading-4 font-medium text-fg-2 tabular hover:border-fg-4 hover:text-fg data-popup-open:ring-1 data-popup-open:ring-line-strong",
+          tiny && cn(TINY, "items-center leading-none"),
+        )}
         style={{ top: overflow.top, height: overflow.height, width, left }}
       >
-        <span className="sticky top-1">+{overflow.events.length}</span>
+        <span className={cn("sticky", tiny ? "top-0" : "top-1")}>+{overflow.events.length}</span>
       </PopoverTrigger>
       <PopoverContent side="right" align="start" className="w-72 gap-3 p-3">
         {current ? (
