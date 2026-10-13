@@ -19,6 +19,14 @@ If it's merged first by mistake, nothing breaks: an owner is offered Delete and 
 
 **After merging,** on the live PPM: open the calendar and look at two short blocks in a row; open a block that's for a task and press Finish task (then Reopen the task, if it was only a test); use the arrow beside Copy my plan to turn the list on; and ask someone who isn't an admin to make a project and delete it.
 
+## 2. Visitor and email tracking ([#22](https://github.com/kenoittt/roblestech.net/pull/22))
+
+- [ ] **Merge the pull request.** It adds the cookie choice, Apollo's visitor tracker and the updated privacy policy and terms. Apollo starts counting the day it's live.
+- [ ] **Turn on email tracking in Salesforce** (one time). In Setup, search Enhanced Email and turn it on, then Activity Settings and tick Enable Email Tracking. If Starter doesn't offer it, tell Claude. Emails you send from a contact's page then show Read or Unopened, with first and last opened times, on the contact's activity timeline. Send them as HTML (the normal editor), not plain text. Opens are a hint, not proof: many email apps open the tracking image on their own.
+- [ ] **Tag your email links.** Salesforce counts opens on single emails, not clicks, so the click shows up in Apollo instead, as a visit from that campaign, for example `https://roblestech.net/services?utm_source=salesforce&utm_medium=email&utm_campaign=oct-outreach`.
+- [ ] **Check visitors in Apollo** under Website Visitors, about a day after the merge. The Services and Contact pages are marked as buying signals. Starter can't sync with Apollo (no API access), so move lists between the two by CSV, or move to Pro Suite with the API add-on if that gets old.
+- [ ] **Keep the policy's promises:** delete Apollo visitor data older than two years, and update the privacy policy if the site ever loads another tracker. The policy's email provider still says Google Workspace; tell Claude if that should say Microsoft 365.
+
 ## Done
 
 - **2026-10-07: templates work on the live PPM.** You saved one once the database updates were in (backlog item 18).

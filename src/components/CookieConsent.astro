@@ -1,0 +1,104 @@
+---
+/*
+ * Cookie choice, and the Apollo visitor tracker it gates.
+ *
+ * Apollo's tracker sets cookies and tells us which companies visit, so it
+ * loads only after a visitor says yes. The choice lives in localStorage as
+ * `rtc-consent` ('yes' | 'no'); the bar shows until there is one, and any
+ * element with `data-consent-open` (the footer's "Cookie settings") brings it
+ * back so the choice can be changed. The privacy policy names this key and
+ * Apollo; change one, change the other.
+ *
+ * The snippet is Apollo's own (from its tracker settings); the app id is the
+ * team's tracker, not a secret.
+ */
+const APOLLO_APP_ID = '6a033e50ccc54c0011c4cd15';
+---
+
+<div class="ck" id="ckBar" hidden role="region" aria-label="Cookie choice">
+  <p class="ck-p">We use cookies from Apollo to see which companies visit this site, so we can follow up with the right people. <a href="/privacy-policy#cookies">Privacy Policy</a></p>
+  <div class="ck-btns">
+    <button type="button" class="ck-btn ck-no" data-ck="no">Decline</button>
+    <button type="button" class="ck-btn ck-yes" data-ck="yes">Accept</button>
+  </div>
+</div>
+
+<script is:inline define:vars={{ APOLLO_APP_ID }}>
+  (function () {
+    var KEY = 'rtc-consent';
+    var bar = document.getElementById('ckBar');
+    function get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } }
+    function set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+
+    var loaded = false;
+    function loadApollo() {
+      if (loaded) return;
+      loaded = true;
+      var n = Math.random().toString(36).substring(7), o = document.createElement('script');
+      o.src = 'https://assets.apollo.io/micro/website-tracker/tracker.iife.js?nocache=' + n;
+      o.async = true; o.defer = true;
+      o.onload = function () { window.trackingFunctions.onLoad({ appId: APOLLO_APP_ID }); };
+      document.head.appendChild(o);
+    }
+
+    function show() { bar.hidden = false; requestAnimationFrame(function () { bar.classList.add('ck-in'); }); }
+    function hide() { bar.classList.remove('ck-in'); setTimeout(function () { bar.hidden = true; }, 200); }
+
+    var choice = get();
+    if (choice === 'yes') loadApollo();
+    else if (!choice) show();
+
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ck]');
+      if (!b) return;
+      var v = b.getAttribute('data-ck');
+      set(v);
+      hide();
+      // Declining after accepting takes effect from the next page: a loaded
+      // script can't be unloaded, and its cookies are cleared with site data.
+      if (v === 'yes') loadApollo();
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-consent-open]')) { e.preventDefault(); show(); }
+    });
+  })();
+</script>
+
+<style>
+  .ck {
+    position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9990;
+    max-width: 640px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px;
+    background: var(--rtc-navy-900); color: #fff;
+    border: 1px solid var(--rtc-glass-border-dark); border-radius: var(--rtc-radius-lg);
+    box-shadow: var(--rtc-glass-shadow-dark), var(--rtc-glass-highlight-dark);
+    padding: 14px 16px 14px 20px;
+    opacity: 0; transform: translateY(10px);
+    transition: opacity 200ms var(--ease-standard), transform 200ms var(--ease-standard);
+  }
+  /* A class rule beats the UA's [hidden]{display:none}; restore it. */
+  .ck[hidden] { display: none; }
+  .ck.ck-in { opacity: 1; transform: none; }
+  .ck-p { margin: 0; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.8); }
+  .ck-p a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+  .ck-btns { display: flex; gap: 8px; flex: none; }
+  .ck-btn {
+    height: 38px; padding: 0 16px; border-radius: var(--rtc-radius-md); cursor: pointer;
+    font-family: 'Montserrat', system-ui, sans-serif; font-weight: 700; font-size: 13px;
+    transition: background 200ms var(--ease-standard);
+  }
+  .ck-btn:focus-visible { outline: none; box-shadow: var(--rtc-focus-ring); }
+  .ck-no { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); color: #fff; }
+  .ck-no:hover { background: rgba(255,255,255,.14); }
+  .ck-yes { background: var(--core-blue); border: none; color: #fff; }
+  .ck-yes:hover { background: #0356bd; }
+
+  @media (max-width: 560px) {
+    .ck { flex-direction: column; align-items: stretch; gap: 12px; padding: 16px; }
+    .ck-btns > * { flex: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ck, .ck-btn { transition: none; }
+    .ck { transform: none; }
+  }
+</style>
