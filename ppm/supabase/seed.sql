@@ -594,9 +594,10 @@ values
   ('Writing', '00000000-0000-4000-a000-000000000002', false, 'block', 'Writing', null, 780, 900, 'public', false, '{}', 'pink');
 
 -- Christian and Joshua have made Copy my plan their own; the others use the defaults.
-update public.profiles set prefs = prefs || '{"copyPlan": {"opening": "Good morning, team!", "done": "check", "codes": false}}'::jsonb
+-- Christian's is a numbered list and Joshua's a bulleted one (added 2026-10-13).
+update public.profiles set prefs = prefs || '{"copyPlan": {"opening": "Good morning, team!", "done": "check", "codes": false, "list": "numbers"}}'::jsonb
 where id = '00000000-0000-4000-a000-000000000002';
-update public.profiles set prefs = prefs || '{"copyPlan": {"done": "strike", "closing": "Shout if you need me."}}'::jsonb
+update public.profiles set prefs = prefs || '{"copyPlan": {"done": "strike", "closing": "Shout if you need me.", "list": "bullets"}}'::jsonb
 where id = '00000000-0000-4000-a000-000000000004';
 
 insert into public.ppm_notifications (user_id, actor_id, type, task_id, event_id, meta, read_at, emailed_at, created_at) values
