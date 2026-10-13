@@ -411,11 +411,12 @@ function EventBlock({
       >
         {/* A long block keeps its title in view while you scroll through it. */}
         <span className={cn("sticky flex min-w-0 flex-col", tiny ? "top-0" : "top-1")}>{body}</span>
-        {draggable && height >= 28 && (
+        {/* Every block stretches by its bottom edge, the shortest included: a thinner edge there, so the rest still moves it. */}
+        {draggable && (
           <span
             aria-hidden
             onPointerDown={(e) => onBeginMove(e, "resize")}
-            className="absolute inset-x-0 bottom-0 h-1.5 cursor-ns-resize"
+            className={cn("absolute inset-x-0 bottom-0 cursor-ns-resize", tiny ? "h-1" : "h-1.5")}
           />
         )}
       </PopoverTrigger>
