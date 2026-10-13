@@ -75,6 +75,17 @@ export function isEventDone(e: CalEvent, now: number) {
   return Boolean(e.completed_at) || (e.auto_complete && new Date(e.ends_at).getTime() <= now)
 }
 
+/**
+ * What ticking or unticking a block saves. Unticking has to leave it not done,
+ * so a block that ticked itself off (its time has passed) stops doing that:
+ * otherwise it would still count as done, and the button would seem broken.
+ */
+export function donePatch(e: CalEvent, now: number) {
+  if (!isEventDone(e, now)) return { completed_at: new Date().toISOString() }
+  const tickedItself = e.auto_complete && new Date(e.ends_at).getTime() <= now
+  return { completed_at: null, ...(tickedItself ? { auto_complete: false } : {}) }
+}
+
 export function useCalendar(rangeStart: string, rangeEnd: string) {
   return useQuery({
     queryKey: ["calendar", rangeStart, rangeEnd],

@@ -51,9 +51,9 @@ Built 2026-10-13 by Kyan's local Claude, on the branch `kyan/fix/ppm-calendar-bl
 
 **Done 2026-10-13.** The line under the email switch was written before 2026-10-03 and never removed. It's gone. It was row 17 of the audit (item 38).
 
-### 43. Found on the way, not changed
+### 43. A block that ticked itself off still offered Tick off
 
-- **A block that ticks itself off looks done, but its details still offer Tick off,** because nobody ticked it.
+**Done 2026-10-13.** A block set to tick itself off counts as done once its time has passed, and looked it on the calendar, but its details read the tick nobody had made, so the button said Tick off. Kyan saw the same on the live PPM. The details now go by whether the block counts as done, however it got there: by hand, by its task, or by itself. Unticking one that ticked itself also turns off its automatic tick, since it would count as done again otherwise and the button would seem to do nothing (`donePatch()` in `src/domains/calendar/data.ts`).
 
 ## From Kyan's brief of 2026-10-06, evening
 

@@ -15,7 +15,7 @@ import { useUpdateTask } from "@/domains/tasks/data"
 import { useTaskPanel } from "@/domains/tasks/panel-state"
 import { StatusIcon } from "@/domains/tasks/components/glyphs"
 import { useAdminSignOffNote } from "@/domains/tasks/components/task-properties"
-import { blockColor, isEventDone, useCalendarActions, type CalEvent } from "../data"
+import { blockColor, donePatch, isEventDone, useCalendarActions, type CalEvent } from "../data"
 import {
   DAY_END,
   DAY_START,
@@ -449,6 +449,9 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
   const { open } = useTaskPanel()
   const { update, remove } = useCalendarActions()
   const del = useConfirm(() => remove.mutate(event.id))
+  const now = useNow()
+  // Done however it got there: ticked by hand, by its task, or by itself once its time passed.
+  const done = isEventDone(event, now)
   const mine = event.owner_id === me.id
   const task = event.task_id ? tasks.find((t) => t.id === event.task_id) : null
   const owner = members.get(event.owner_id)
@@ -506,13 +509,9 @@ function EventDetails({ event, onEdit }: { event: CalEvent; onEdit: (e: CalEvent
           ) : (
             <>
               {event.kind === "block" && (
-                <button
-                  type="button"
-                  onClick={() => update.mutate({ id: event.id, patch: { completed_at: event.completed_at ? null : new Date().toISOString() } })}
-                  className={detailButton}
-                >
-                  <Icon icon={CheckmarkCircle02Icon} size={14} className={event.completed_at ? "text-status-done" : ""} />
-                  {event.completed_at ? "Done" : "Tick off"}
+                <button type="button" onClick={() => update.mutate({ id: event.id, patch: donePatch(event, now) })} className={detailButton}>
+                  <Icon icon={CheckmarkCircle02Icon} size={14} className={done ? "text-status-done" : ""} />
+                  {done ? "Done" : "Tick off"}
                 </button>
               )}
               {event.kind === "block" && task && <TaskStep event={event} task={task} />}

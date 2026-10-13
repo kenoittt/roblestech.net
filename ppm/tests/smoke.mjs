@@ -315,6 +315,9 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
       await page.waitForTimeout(1500)
       const block = sql(`select to_char(starts_at at time zone 'Asia/Manila', 'YYYY-MM-DD HH24:MI') || ' ' || to_char(ends_at at time zone 'Asia/Manila', 'HH24:MI') from cal_events where owner_id = '${CARL}' and title = 'Outreach emails'`)
       check("Plan time from a template puts the block on today", block === `${today} 09:00 11:00`, block)
+      // The template's block ticks itself off, so after 11 AM it already reads Done. Switch that off: this check is about Tick off
+      sql(`update cal_events set auto_complete = false where owner_id = '${CARL}' and title = 'Outreach emails'`)
+      await page.reload({ waitUntil: "networkidle" })
       await page.locator('[data-event]:has-text("Outreach emails")').first().click()
       await page.waitForTimeout(400)
       await page.click('[data-slot="popover-content"] button:has-text("Tick off")')
@@ -421,6 +424,8 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
     block("E2E block to finish", "06:30", "07:00", own)
     block("E2E block to send for sign-off", "07:00", "07:30", ruled)
     block("E2E block to delete", "07:30", "08:00")
+    // One that ticks itself off, and whose time has passed (unless this runs in the first minutes after midnight)
+    rest(carl, "POST", "cal_events", { title: "E2E block that ticks itself", kind: "block", starts_at: at("00:00"), ends_at: at("00:05"), auto_complete: true })
 
     const { ctx, page } = await session("carl@rtc.test")
     await page.goto(BASE + "/calendar", { waitUntil: "networkidle" })
@@ -491,6 +496,18 @@ check("Staff can't promote themselves", sql(`select role from profiles where id 
     await doomed.locator('button[aria-label="Confirm: delete"]').click()
     await page.waitForTimeout(1200)
     check("Deleting a calendar entry asks first: one press keeps it, a second deletes it", asked && left() === "0", `asked: ${asked}, left: ${left()}`)
+
+    // A block that ticked itself off says Done, like one ticked by hand, and unticking it sticks
+    const selfTicked = page.locator('[data-slot="popover-content"]:has-text("E2E block that ticks itself")')
+    await page.waitForTimeout(400)
+    await entry("E2E block that ticks itself").click()
+    const tick = selfTicked.locator("div.border-t button").first()
+    const read = (await tick.innerText()).trim()
+    await tick.click()
+    await page.waitForTimeout(1200)
+    const unticked = sql("select auto_complete || ' ' || (completed_at is null) from cal_events where title = 'E2E block that ticks itself'")
+    check("A block that ticked itself off says Done, and unticking it sticks", read === "Done" && unticked === "false true" && (await tick.innerText()).trim() === "Tick off", `read "${read}", then ${unticked}`)
+    await page.keyboard.press("Escape")
 
     // Copy my plan: a numbered list, a bulleted one, or neither, and a hyphen before DONE
     await page.click('button[aria-label="Choose how your plan reads"]')
