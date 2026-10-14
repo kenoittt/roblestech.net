@@ -1,0 +1,54 @@
+---
+/*
+ * Where a lead came from, carried onto their Salesforce Lead.
+ *
+ * Outreach links carry UTM tags (utm_content names the sender: kenneth, cj,
+ * josh). On arrival the tags and landing page are kept in localStorage as
+ * `rtc-src` for 30 days; when any Web-to-Lead form is sent, one line is added
+ * to its description, e.g. "Came from: salesforce email · oct-outreach · cj ·
+ * first page /services (14 Oct)". Nothing leaves the browser unless the
+ * visitor submits a form. The privacy policy names this key.
+ *
+ * The listener sits on document, so it runs after each form's own submit
+ * handler (the gap report builds its description there) and skips submits
+ * those handlers stopped.
+ */
+---
+
+<script is:inline>
+  (function () {
+    var KEY = 'rtc-src', DAYS = 30;
+    var q = new URLSearchParams(location.search);
+    try {
+      if (q.get('utm_source') || q.get('utm_campaign')) {
+        localStorage.setItem(KEY, JSON.stringify({
+          source: q.get('utm_source'), medium: q.get('utm_medium'), campaign: q.get('utm_campaign'),
+          sender: q.get('utm_content'), page: location.pathname, at: Date.now(),
+        }));
+      }
+    } catch (e) {}
+
+    function line() {
+      var s;
+      try { s = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return ''; }
+      if (!s || Date.now() - s.at > DAYS * 864e5) return '';
+      var when = new Date(s.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      var parts = [[s.source, s.medium].filter(Boolean).join(' '), s.campaign, s.sender, 'first page ' + s.page].filter(Boolean);
+      return 'Came from: ' + parts.join(' · ') + ' (' + when + ')';
+    }
+
+    document.addEventListener('submit', function (e) {
+      var f = e.target;
+      if (e.defaultPrevented || !/WebToLead/i.test(f.action || '')) return;
+      var l = line();
+      if (!l) return;
+      var d = f.querySelector('[name="description"]');
+      if (!d) {
+        d = document.createElement('input');
+        d.type = 'hidden'; d.name = 'description';
+        f.appendChild(d);
+      }
+      if (d.value.indexOf('Came from: ') === -1) d.value = d.value ? d.value + '\n\n' + l : l;
+    });
+  })();
+</script>
