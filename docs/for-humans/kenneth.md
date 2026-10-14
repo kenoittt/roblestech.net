@@ -27,6 +27,13 @@ If it's merged first by mistake, nothing breaks: an owner is offered Delete and 
 - [ ] **Check visitors in Apollo** under Website Visitors, about a day after the merge. The Services and Contact pages are marked as buying signals. Starter can't sync with Apollo (no API access), so move lists between the two by CSV, or move to Pro Suite with the API add-on if that gets old.
 - [ ] **Keep the policy's promises:** delete Apollo visitor data older than two years, and update the privacy policy if the site ever loads another tracker. The policy's email provider still says Google Workspace; tell Claude if that should say Microsoft 365.
 
+## 3. Apollo visitors and outreach leads in Salesforce ([#23](https://github.com/kenoittt/roblestech.net/pull/23))
+
+- [ ] **Merge #23.** A lead who arrives through a tagged outreach link and then fills in a form gets "Came from: … · cj · first page /services" in its Description.
+- [ ] **Add the Lead Source value.** Setup → Object Manager → Lead → Fields & Relationships → Lead Source → New: `Website Visitor`. The nightly task tags Apollo's companies with it.
+- [ ] **Approve the nightly task** (9:30 PM): it copies each day's new visiting companies from Apollo into Salesforce as Leads through Web-to-Lead (last name "Website visitor", pages and sender in the Description).
+- [ ] **Build the view:** Reports → New Report → Leads, filter Lead Source = Website Visitor, group by Created Date; add it to a dashboard. A company already in Salesforce arrives as a duplicate Lead: merge it, or add a matching rule on Company (Setup → Duplicate Management).
+
 ## Done
 
 - **2026-10-07: templates work on the live PPM.** You saved one once the database updates were in (backlog item 18).
