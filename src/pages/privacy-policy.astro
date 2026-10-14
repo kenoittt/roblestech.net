@@ -13,7 +13,7 @@ import LegalLayout from '../layouts/LegalLayout.astro';
  * personal data — an analytics tag, a chat widget, a new form — needs a
  * matching edit here and a new `updated` date.
  */
-const UPDATED = '2026-10-13';
+const UPDATED = '2026-10-14';
 
 const sections = [
   { id: 'who-we-are', title: 'Who we are' },
@@ -104,6 +104,7 @@ const sections = [
     <p>The site also writes small values into your own browser's local storage. They stay on your device and are readable only by this site:</p>
     <ul>
       <li><strong>rtc-nl</strong> — records that you have already seen the newsletter invitation, so you are not asked twice.</li>
+      <li><strong>rtc-src</strong> — if you arrived through a link in one of our emails, which campaign and page it was, kept for 30 days. It's sent to us only if you then fill in one of our forms, so we know which conversation your message belongs to.</li>
       <li><strong>rtc-consent</strong> — records your cookie choice, so you are asked once.</li>
       <li><strong>rtc-loaded</strong> — records that you have already seen the intro animation this session, so it is skipped as you move between pages.</li>
     </ul>
@@ -161,7 +162,7 @@ const sections = [
         </thead>
         <tbody>
           <tr><td>Salesforce</td><td>Our CRM. Contact-form and newsletter submissions go here, and this is where we track our conversation with you. Our emails are sent from here, with open and click tracking.</td></tr>
-          <tr><td>Apollo</td><td>Visitor analytics, if you accept cookies. Records pages viewed and matches IP addresses to companies.</td></tr>
+          <tr><td>Apollo</td><td>Visitor analytics, if you accept cookies. Records pages viewed and matches IP addresses to companies. The names of visiting companies and the pages they viewed are copied into Salesforce.</td></tr>
           <tr><td>Calendly</td><td>Scheduling. Handles the details you enter when booking a call.</td></tr>
           <tr><td>Google Workspace</td><td>Our email. Any correspondence with us lives here.</td></tr>
           <tr><td>Supabase</td><td>Database and sign-in for the client portal.</td></tr>
